@@ -1,0 +1,24 @@
+{
+  "name": "cardano-hw-cli",
+  "version": "1.0.0",
+  "description": "Cardano CLI tool for hardware wallets",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vacuumlabs/cardano-hw-cli.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/vacuumlabs/cardano-hw-cli/issues"
+  },
+  "homepage": "https://github.com/vacuumlabs/cardano-hw-cli#readme",
+  "dependencies": {
+    "borc": "^2.1.2",
+    "cardano-crypto.js": "^5.3.6-rc.6"
+  }
+}
