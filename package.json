@@ -4,6 +4,7 @@
   "description": "Cardano CLI tool for hardware wallets",
   "main": "index.js",
   "scripts": {
+    "start": "tsc && node dist/index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -20,5 +21,8 @@
   "dependencies": {
     "borc": "^2.1.2",
     "cardano-crypto.js": "^5.3.6-rc.6"
+  },
+  "devDependencies": {
+    "typescript": "^4.0.3"
   }
 }
