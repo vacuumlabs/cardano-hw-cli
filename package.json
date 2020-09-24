@@ -1,12 +1,18 @@
 {
   "name": "cardano-hw-cli",
   "version": "1.0.0",
+  "engines": {
+    "node": "12.16.2"
+  },
   "description": "Cardano CLI tool for hardware wallets",
   "main": "index.js",
   "scripts": {
-    "start": "tsc && node dist/index.js",
+    "build-js": "tsc",
+    "dev": "yarn build-js && node dist/index.js",
     "eslint": "eslint . --max-warnings=0 --ext .ts",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "yarn build-js && nexe dist/index.js -o ./build/cardano-hw-cli",
+    "test-node": "echo \"No tests specified\" && exit 0",
+    "test-bin": "echo \"No tests specified\" && exit 0"
   },
   "repository": {
     "type": "git",

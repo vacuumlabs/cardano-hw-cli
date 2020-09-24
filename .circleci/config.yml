@@ -2,12 +2,14 @@ version: 2.1
 jobs:
   build:
     docker:
-      - image: cimg/node:14.11.0
+      - image: cimg/node:12.16.2
     steps:
       - checkout
       - run: node --version
       - run: yarn install
       - run: yarn eslint
+      - run: yarn build-js
+      - run: yarn test-node
 
 workflows:
   node-tests:
