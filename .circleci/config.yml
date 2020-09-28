@@ -10,6 +10,7 @@ jobs:
       - run: yarn eslint
       - run: yarn build-js
       - run: yarn test-unit
+      - run: yarn build
 
 workflows:
   node-tests:
