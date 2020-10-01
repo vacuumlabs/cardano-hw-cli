@@ -5,7 +5,7 @@
     "node": "12.16.2"
   },
   "description": "Cardano CLI tool for hardware wallets",
-  "main": "index.js",
+  "main": "src/index.ts",
   "scripts": {
     "build-js": "tsc",
     "dev": "yarn build-js && node dist/index.js",
@@ -26,6 +26,7 @@
   },
   "homepage": "https://github.com/vacuumlabs/cardano-hw-cli#readme",
   "dependencies": {
+    "argparse": "^2.0.1",
     "borc": "^2.1.2",
     "cardano-crypto.js": "^5.3.6-rc.6"
   },
