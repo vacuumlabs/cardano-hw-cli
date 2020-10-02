@@ -1,15 +1,8 @@
-export enum CommandType {
-  SHELLEY = 'shelley',
-
-  ADDRESS = 'shelley.address',
+enum CommandType {
   KEY_GEN = 'shelley.address.key-gen',
-
-  KEY = 'shelley.key',
-  GET_VERIFICATION_KEY = 'shelley.key.verification-key',
-
-  TRANSACTION = 'shelley.transcation',
-  SIGN_TRANSACTION = 'shelley.transcation.sign',
-  WITNESS_TRANSACTION = 'shelley.transcation.witness',
+  VERIFICATION_KEY = 'shelley.key.verification-key',
+  SIGN_TRANSACTION = 'shelley.transaction.sign',
+  WITNESS_TRANSACTION = 'shelley.transaction.witness',
 }
 
-export const enum ArgType { Default, FileInput, FileOutput}
+export default CommandType

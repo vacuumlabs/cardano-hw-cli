@@ -1,39 +1,37 @@
-import { ArgType } from './types'
-
-const flag = { action: 'store_true', argType: ArgType.Default }
-const required = (argType: ArgType) => ({ required: true, argType })
-const requiredOneOrMore = (argType: ArgType) => ({ required: true, action: 'append', argType })
-const optional = (argType: ArgType) => ({ argType })
+const flag = { action: 'store_true' }
+const required = { required: true }
+const requiredOneOrMore = { required: true, action: 'append' }
+const optional = {}
 
 export default {
   shelley: {
     address: {
       'key-gen': {
-        '--path': required(ArgType.Default),
-        '--hw-signing-file': required(ArgType.FileOutput),
-        '--verification-key-file': required(ArgType.FileOutput),
+        '--path': required,
+        '--hw-signing-file': required,
+        '--verification-key-file': required,
       },
     },
     key: {
       'verification-key': {
-        '--hw-signing-file': required(ArgType.FileInput),
-        '--verification-key-file': required(ArgType.FileOutput),
+        '--hw-signing-file': required,
+        '--verification-key-file': required,
       },
     },
     transaction: {
       sign: {
         '--mainnet': flag,
-        '--tx-body-file': required(ArgType.FileInput),
-        '--hw-signing-file': requiredOneOrMore(ArgType.FileInput),
-        '--change-output-key-file': optional(ArgType.FileInput),
-        '--out-file': required(ArgType.FileOutput),
+        '--tx-body-file': required,
+        '--hw-signing-file': requiredOneOrMore,
+        '--change-output-key-file': optional,
+        '--out-file': required,
       },
       witness: {
         '--mainnet': flag,
-        '--tx-body-file': required(ArgType.FileInput),
-        '--hw-signing-file': requiredOneOrMore(ArgType.FileInput),
-        '--change-output-key-file': optional(ArgType.FileInput),
-        '--out-file': required(ArgType.FileOutput),
+        '--tx-body-file': required,
+        '--hw-signing-file': requiredOneOrMore,
+        '--change-output-key-file': optional,
+        '--out-file': required,
       },
     },
   },

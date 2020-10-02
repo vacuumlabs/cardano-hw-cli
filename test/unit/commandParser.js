@@ -1,12 +1,12 @@
 const assert = require('assert')
 const parse = require('../../src/command-parser/commandParser').default
-const { CommandType } = require('../../src/command-parser/types')
+const CommandType = require('../../src/command-parser/types').default
 
 const resFolder = './test/res/'
 const prefix = (filename) => `${resFolder}${filename}`
 
 describe('Command parser', () => {
-  it('Should parse key-gen command', async () => {
+  it('Should parse key-gen command', () => {
     const args = [
       'shelley',
       'address',
@@ -21,16 +21,14 @@ describe('Command parser', () => {
     const command = parse(args)
     const expectedResult = {
       command: CommandType.KEY_GEN,
-      args: {
-        '--path': '1815/1852/0/2/1',
-        '--hw-signing-file': './test/res/payment.hwsfile',
-        '--verification-key-file': './test/res/payment.vkey',
-      },
+      path: '1815/1852/0/2/1',
+      hw_signing_file: './test/res/payment.hwsfile',
+      verification_key_file: './test/res/payment.vkey',
     }
-    assert.deepStrictEqual(command, expectedResult)
+    assert.deepEqual(command, expectedResult)
   })
 
-  it('Should parse key-verification', async () => {
+  it('Should parse key-verification', () => {
     const args = [
       'shelley',
       'key',
@@ -42,17 +40,10 @@ describe('Command parser', () => {
     ]
     const command = parse(args)
     const expectedResult = {
-      command: CommandType.GET_VERIFICATION_KEY,
-      args: {
-        '--hw-signing-file': {
-          type: 'PaymentHWSigningFileShelley_ed25519',
-          description: 'Hardware wallet extended payment ',
-          path: '1815/1852/0/2/1',
-          cborXPubKeyHex: '5880e0d9c2e5b...7277e7db',
-        },
-        '--verification-key-file': './test/res/payment.vkey',
-      },
+      command: CommandType.VERIFICATION_KEY,
+      hw_signing_file: './test/res/payment.hwsfile',
+      verification_key_file: './test/res/payment.vkey',
     }
-    assert.deepStrictEqual(command, expectedResult)
+    assert.deepEqual(command, expectedResult)
   })
 })
