@@ -1,28 +1,32 @@
 import {
-  txInput,
-  txOutput,
-  txDelegationCert,
-  txStakingKeyRegistrationCert,
-  txStakepoolRegistrationCert,
-  txWithdrawal,
+  Input,
+  Output,
+  DelegationCert,
+  StakingKeyRegistrationCert,
+  StakepoolRegistrationCert,
+  Withdrawal,
+  SignedTxDecoded,
+  UnsignedTxDecoded,
+  TxShelleyWitness,
+  TxByronWitness,
 } from './types'
 
 function parseTxInputs(txInputs: any[]) {
-  return txInputs.map(([txHash, outputIndex]):txInput => (
+  return txInputs.map(([txHash, outputIndex]):Input => (
     { txHash, outputIndex }
   ))
 }
 
 function parseTxOutputs(txOutputs: any[]) {
-  return txOutputs.map(([address, coins]): txOutput => (
+  return txOutputs.map(([address, coins]): Output => (
     { address, coins }
   ))
 }
 
 function parseTxCerts(txCertificates: any[] = []) {
-  const stakingKeyRegistrationCerts: txStakingKeyRegistrationCert[] = []
-  const delegationCerts: txDelegationCert[] = []
-  const stakepoolRegistrationCerts: txStakepoolRegistrationCert[] = []
+  const stakingKeyRegistrationCerts: StakingKeyRegistrationCert[] = []
+  const delegationCerts: DelegationCert[] = []
+  const stakepoolRegistrationCerts: StakepoolRegistrationCert[] = []
 
   const stakeKeyRegistrationCertParser = (
     [type, [, pubKey]]: any,
@@ -73,9 +77,9 @@ function parseTxCerts(txCertificates: any[] = []) {
     3: stakepoolRegistrationCertParser,
   }
 
-  txCertificates.forEach((certificate) => {
-    const type:number = certificate[0]
-    certificateParsers[type](certificate)
+  txCertificates.forEach((txCertificate) => {
+    const type:number = txCertificate[0]
+    certificateParsers[type](txCertificate)
   })
   return {
     stakingKeyRegistrationCerts,
@@ -85,12 +89,12 @@ function parseTxCerts(txCertificates: any[] = []) {
 }
 
 function parseTxWithdrawals(withdrawals: Map<any, any> = new Map()) {
-  return Array.from(withdrawals).map(([address, coins]): txWithdrawal => (
+  return Array.from(withdrawals).map(([address, coins]): Withdrawal => (
     { address, coins }
   ))
 }
 
-export default function parseTxBody(txBody: Map<number, any>) {
+function parseUnsignedTx([txBody, meta]: UnsignedTxDecoded) {
   const inputs = parseTxInputs(txBody.get(0))
   const outputs = parseTxOutputs(txBody.get(1))
   const fee = `${txBody.get(2)}`
@@ -104,5 +108,18 @@ export default function parseTxBody(txBody: Map<number, any>) {
     ttl,
     certificates,
     withdrawals,
+    meta,
   }
+}
+
+function parseTxWitnesses([, witnesses]:SignedTxDecoded) {
+  return {
+    shelleyWitnesses: witnesses.get(0) as TxShelleyWitness[],
+    byronWitnesses: witnesses.get(2) as TxByronWitness[],
+  }
+}
+
+export {
+  parseUnsignedTx,
+  parseTxWitnesses,
 }

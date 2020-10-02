@@ -1,25 +1,25 @@
-export type txInput = {
+export type Input = {
   txHash: Buffer,
   outputIndex: number,
 }
 
-export type txOutput = {
+export type Output = {
   address: Buffer,
   coins: number,
 }
 
-export type txDelegationCert = {
+export type DelegationCert = {
   type: 2,
   pubKey: Buffer,
   poolHash: Buffer,
 }
 
-export type txStakingKeyRegistrationCert = {
+export type StakingKeyRegistrationCert = {
   type: 0 | 1,
   pubKey: Buffer,
 }
 
-export type txStakepoolRegistrationCert = {
+export type StakepoolRegistrationCert = {
   type: 3,
   poolPubKey: Buffer,
   operatorPubKey: Buffer,
@@ -32,10 +32,30 @@ export type txStakepoolRegistrationCert = {
   s2: any,
 }
 
-export type txCertificate =
-  txDelegationCert | txStakingKeyRegistrationCert | txStakepoolRegistrationCert
-
-export type txWithdrawal = {
+export type Withdrawal = {
   address: Buffer,
   coins: number,
 }
+
+export type TxByronWitness = [
+  Buffer,
+  Buffer,
+  Buffer,
+  Buffer,
+]
+
+export type TxShelleyWitness = [
+  Buffer,
+  Buffer,
+]
+
+export type SignedTxDecoded = [
+  Map<number, any>,
+  Map<number, Array<TxByronWitness | TxShelleyWitness>>,
+  Buffer | null,
+]
+
+export type UnsignedTxDecoded = [
+  Map<number, any>,
+  Buffer | null,
+]

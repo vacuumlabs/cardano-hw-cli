@@ -1,80 +1,72 @@
-import parseTxBody from './txBodyParser'
+import { parseUnsignedTx, parseTxWitnesses } from './txParser'
+import { TxByronWitness, TxShelleyWitness, UnsignedTxDecoded } from './types'
 
 const cbor = require('borc')
 const { blake2b } = require('cardano-crypto.js')
 
 function TxWitnessByron(
-  publicKey: Buffer, signature: Buffer, chaincode: Buffer, addressAttributes: Buffer,
-) {
-  function encodeCBOR(encoder: any) {
-    return encoder.pushAny([publicKey, signature, chaincode, addressAttributes])
-  }
-
-  return {
-    publicKey,
-    signature,
-    chaincode,
-    addressAttributes,
-    encodeCBOR,
-  }
+  publicKey: Buffer, signature: Buffer, chaincode: Buffer, addressAttributes: object,
+): TxByronWitness {
+  return [publicKey, signature, chaincode, cbor.encode(addressAttributes)]
 }
 
-function TxWitnessShelley(publicKey: Buffer, signature: Buffer) {
-  function encodeCBOR(encoder: any) {
-    return encoder.pushAny([publicKey, signature])
-  }
-
-  return {
-    publicKey,
-    signature,
-    encodeCBOR,
-  }
+function TxWitnessShelley(publicKey: Buffer, signature: Buffer): TxShelleyWitness {
+  return [publicKey, signature]
 }
 
-function TxAux(txBody: string) {
-  const decodedTxBody = cbor.decode(txBody)
-  const parsedTxBody = parseTxBody(decodedTxBody)
+function TxAux(unsignedTxCborHex: string) {
+  const unsignedTxDecoded:UnsignedTxDecoded = cbor.decode(unsignedTxCborHex)
+  const parsedTx = parseUnsignedTx(unsignedTxDecoded)
 
   function getId(): string {
+    const [txBody] = unsignedTxDecoded
+    const encodedTxBody = cbor.encode([txBody])
     return blake2b(
-      Buffer.from(txBody, 'hex'),
+      encodedTxBody,
       32,
     ).toString('hex')
   }
 
-  function encodeCBOR(encoder: any) {
-    return encoder.pushAny(decodedTxBody)
-  }
-
   return {
     getId,
-    ...parsedTxBody,
-    encodeCBOR,
+    unsignedTxDecoded,
+    ...parsedTx,
   }
 }
 
 function SignedTransaction(
-  txAux: ReturnType<typeof TxAux>,
-  witnesses: ReturnType<typeof TxWitnessShelley | typeof TxWitnessShelley> [],
-  meta: Buffer | null,
+  unsignedTxDecoded: UnsignedTxDecoded,
+  byronWitnesses: TxByronWitness[],
+  shelleyWitnesses: TxShelleyWitness[],
 ) {
-  function getId(): string {
-    return txAux.getId()
+  const [txBody, meta] = unsignedTxDecoded
+  const witnesses = new Map()
+  if (shelleyWitnesses.length > 0) {
+    witnesses.set(0, shelleyWitnesses)
   }
+  if (byronWitnesses.length > 0) {
+    witnesses.set(2, byronWitnesses)
+  }
+  return cbor.encode([txBody, witnesses, meta])
+}
 
-  function encodeCBOR(encoder: any): string {
-    return encoder.pushAny([txAux, witnesses, meta])
-  }
+function TxWitnesses(signedTxCborHex: string) {
+  const signedTxDecoded = cbor.decode(signedTxCborHex)
+  const {
+    byronWitnesses,
+    shelleyWitnesses,
+  } = parseTxWitnesses(signedTxDecoded)
 
   return {
-    getId,
-    encodeCBOR,
+    byronWitnesses: byronWitnesses.map((witness: TxByronWitness) => cbor.encode(witness)),
+    shelleyWitnesses: shelleyWitnesses.map((witness: TxShelleyWitness) => cbor.encode(witness)),
   }
 }
 
 export {
-  SignedTransaction,
-  TxWitnessShelley,
   TxWitnessByron,
+  TxWitnessShelley,
   TxAux,
+  SignedTransaction,
+  TxWitnesses,
 }
