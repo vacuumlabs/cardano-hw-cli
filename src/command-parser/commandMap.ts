@@ -2,7 +2,7 @@ import { ArgType } from './types'
 
 const flag = { action: 'store_true', argType: ArgType.Default }
 const required = (argType: ArgType) => ({ required: true, argType })
-const requiredMultiple = (argType: ArgType) => ({ required: true, action: 'append', argType })
+const requiredOneOrMore = (argType: ArgType) => ({ required: true, action: 'append', argType })
 const optional = (argType: ArgType) => ({ argType })
 
 export default {
@@ -24,14 +24,14 @@ export default {
       sign: {
         '--mainnet': flag,
         '--tx-body-file': required(ArgType.FileInput),
-        '--hw-signing-file': requiredMultiple(ArgType.FileInput),
+        '--hw-signing-file': requiredOneOrMore(ArgType.FileInput),
         '--change-output-key-file': optional(ArgType.FileInput),
         '--out-file': required(ArgType.FileOutput),
       },
       witness: {
         '--mainnet': flag,
         '--tx-body-file': required(ArgType.FileInput),
-        '--hw-signing-file': requiredMultiple(ArgType.FileInput),
+        '--hw-signing-file': requiredOneOrMore(ArgType.FileInput),
         '--change-output-key-file': optional(ArgType.FileInput),
         '--out-file': required(ArgType.FileOutput),
       },

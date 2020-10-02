@@ -1,3 +1,3 @@
-import { promises as fs } from 'fs'
+const fs = require('fs')
 
-export default async (data: string, path: string) => fs.writeFile(path, data, 'utf8')
+export default (data: string, path: string) => fs.writeFileSync(path, data, 'utf8')

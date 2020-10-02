@@ -18,7 +18,7 @@ describe('Command parser', () => {
       '--hw-signing-file',
       prefix('payment.hwsfile'),
     ]
-    const command = await parse(args)
+    const command = parse(args)
     const expectedResult = {
       command: CommandType.KEY_GEN,
       args: {
@@ -40,7 +40,7 @@ describe('Command parser', () => {
       '--verification-key-file',
       prefix('payment.vkey'),
     ]
-    const command = await parse(args)
+    const command = parse(args)
     const expectedResult = {
       command: CommandType.GET_VERIFICATION_KEY,
       args: {
