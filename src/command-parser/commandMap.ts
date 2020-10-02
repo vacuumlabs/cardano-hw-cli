@@ -3,7 +3,7 @@ const required = { required: true }
 const requiredOneOrMore = { required: true, action: 'append' }
 const optional = {}
 
-export default {
+export const commandMap = {
   shelley: {
     address: {
       'key-gen': {
@@ -35,4 +35,4 @@ export default {
       },
     },
   },
-} as { [key: string]: any }
+}

@@ -1,4 +1,4 @@
-import commandMap from './commandMap'
+import { commandMap } from './commandMap'
 
 const { ArgumentParser } = require('argparse')
 
@@ -25,6 +25,4 @@ const makeParser = () => {
   return initParser(new ArgumentParser({ description: 'Lorem Ipsum (TODO)' }), commandMap)
 }
 
-const parse = (inputArgs: string[]) => makeParser().parse_args(inputArgs)
-
-export default parse
+export const parse = (inputArgs: string[]) => makeParser().parse_args(inputArgs)

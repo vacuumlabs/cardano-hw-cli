@@ -1,3 +1,3 @@
 const fs = require('fs')
 
-export default (path: string, data: string) => fs.writeFileSync(path, data, 'utf8')
+export const write = (path: string, data: string) => fs.writeFileSync(path, data, 'utf8')

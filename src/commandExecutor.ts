@@ -1,7 +1,7 @@
 /* eslint-disable no-console */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { read, readMultiple, readOptional } from './fileReader'
-import write from './fileWriter'
+import { write } from './fileWriter'
 
 export const keyGen = (args: any) => {
   // TODO

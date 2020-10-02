@@ -4,7 +4,6 @@ import {
 
 const cbor = require('borc')
 
-// eslint-disable-next-line import/prefer-default-export
 export const isCborHex = (test: any): test is CborHex => {
   try {
     cbor.decode(test)

@@ -1,10 +1,10 @@
-import parseArgs from './command-parser/commandParser'
-import CommandType from './command-parser/types'
+import { parse } from './command-parser/commandParser'
+import { CommandType } from './command-parser/types'
 import {
   keyGen, transactionSign, transactionWitness, verificationKey,
 } from './commandExecutor'
 
-const parsedArgs = parseArgs(process.argv.slice(2))
+const parsedArgs = parse(process.argv.slice(2))
 
 switch (parsedArgs.command) {
   case (CommandType.KEY_GEN):

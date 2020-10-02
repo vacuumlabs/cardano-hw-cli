@@ -1,6 +1,6 @@
 const assert = require('assert')
-const parse = require('../../src/command-parser/commandParser').default
-const CommandType = require('../../src/command-parser/types').default
+const { parse } = require('../../src/command-parser/commandParser')
+const { CommandType } = require('../../src/command-parser/types')
 
 const resFolder = './test/res/'
 const prefix = (filename) => `${resFolder}${filename}`
