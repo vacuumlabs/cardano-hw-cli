@@ -1,12 +1,15 @@
-export const enum TxKeys {
+export const enum TxBodyKeys {
   INPUTS = 0,
   OUTPUTS = 1,
   FEE = 2,
   TTL = 3,
   CERTIFICATES = 4,
   WITHDRAWALS = 5,
-  SHELLEY_WITNESSESS = 0,
-  BYRON_WITNESSES = 2
+}
+
+export const enum TxWitnessKeys {
+  SHELLEY = 0,
+  BYRON = 2,
 }
 
 export type Input = {

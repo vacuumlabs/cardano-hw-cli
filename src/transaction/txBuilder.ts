@@ -6,7 +6,7 @@ import {
   UnsignedTxCborHex,
   SignedTxCborHex,
   SignedTxDecoded,
-  TxKeys,
+  TxWitnessKeys,
 } from './types'
 
 const cbor = require('borc')
@@ -50,10 +50,10 @@ function TxSigned(
   const [txBody, meta] = unsignedTxDecoded
   const witnesses = new Map()
   if (shelleyWitnesses.length > 0) {
-    witnesses.set(TxKeys.SHELLEY_WITNESSESS, shelleyWitnesses)
+    witnesses.set(TxWitnessKeys.SHELLEY, shelleyWitnesses)
   }
   if (byronWitnesses.length > 0) {
-    witnesses.set(TxKeys.BYRON_WITNESSES, byronWitnesses)
+    witnesses.set(TxWitnessKeys.BYRON, byronWitnesses)
   }
   return cbor.encode([txBody, witnesses, meta]).toString('hex')
 }
@@ -66,8 +66,8 @@ function TxWitnesses(signedTxCborHex: SignedTxCborHex) {
   } = parseTxWitnesses(signedTxDecoded)
 
   return {
-    shelley: shelleyWitnesses,
-    byron: byronWitnesses,
+    shelleyWitnesses,
+    byronWitnesses,
   }
 }
 

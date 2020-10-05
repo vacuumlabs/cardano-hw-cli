@@ -12,7 +12,8 @@ import {
   InternalTxRepresentation,
   ShelleyWitness,
   ByronWitness,
-  TxKeys,
+  TxBodyKeys,
+  TxWitnessKeys,
 } from './types'
 
 function parseTxInputs(txInputs: any[]) {
@@ -99,12 +100,12 @@ function parseTxWithdrawals(withdrawals: Map<any, any> = new Map()) {
 }
 
 function parseUnsignedTx([txBody, meta]: UnsignedTxDecoded): InternalTxRepresentation {
-  const inputs = parseTxInputs(txBody.get(TxKeys.INPUTS))
-  const outputs = parseTxOutputs(txBody.get(TxKeys.OUTPUTS))
-  const fee = `${txBody.get(TxKeys.FEE)}`
-  const ttl = `${txBody.get(TxKeys.TTL)}`
-  const certificates = parseTxCerts(txBody.get(TxKeys.CERTIFICATES))
-  const withdrawals = parseTxWithdrawals(txBody.get(TxKeys.WITHDRAWALS))
+  const inputs = parseTxInputs(txBody.get(TxBodyKeys.INPUTS))
+  const outputs = parseTxOutputs(txBody.get(TxBodyKeys.OUTPUTS))
+  const fee = `${txBody.get(TxBodyKeys.FEE)}`
+  const ttl = `${txBody.get(TxBodyKeys.TTL)}`
+  const certificates = parseTxCerts(txBody.get(TxBodyKeys.CERTIFICATES))
+  const withdrawals = parseTxWithdrawals(txBody.get(TxBodyKeys.WITHDRAWALS))
   return {
     inputs,
     outputs,
@@ -125,10 +126,10 @@ function parseTxWitnesses([, witnesses]: SignedTxDecoded) {
     ([pubKey, chainCode, signature]): ByronWitness => ({ pubKey, chainCode, signature }),
   )
   const shelleyWitnesses = parseShelleyWitnesses(
-    witnesses.get(TxKeys.SHELLEY_WITNESSESS) as TxWitnessShelley[],
+    witnesses.get(TxWitnessKeys.SHELLEY) as TxWitnessShelley[],
   )
   const byronWitnesses = parseByronWitnesses(
-    witnesses.get(TxKeys.BYRON_WITNESSES) as TxWitnessByron[],
+    witnesses.get(TxWitnessKeys.BYRON) as TxWitnessByron[],
   )
 
   return {
