@@ -15,11 +15,8 @@ export const isCborHex = (test: any): test is CborHex => {
 
 const isString = (test: any): test is string => test && typeof test === 'string'
 
-export const isTxBodyFileType = (test: any): test is FileType => true // TODO
-
-export const isHwSigningFileType = (
-  test: any,
-): test is FileType => test === 'PaymentHWSigningFileShelley_ed25519'
+export const isTxBodyFileType = (test: any): test is FileType => test === FileType.TxBodyFileType
+export const isHwSigningFileType = (test: any): test is FileType => test === FileType.HwSigningFileType
 
 export const isHwSigning = (test: any): test is HwSigning => [
   isHwSigningFileType(test.type),
