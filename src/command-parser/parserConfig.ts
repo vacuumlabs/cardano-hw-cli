@@ -3,7 +3,7 @@ import { read } from '../fileReader'
 const flag = { action: 'store_true' }
 const loadFile = (arg: string) => ((path: string) => read(arg, path))
 
-export const commandMap = {
+export const parserConfig = {
   shelley: {
     address: {
       'key-gen': {
