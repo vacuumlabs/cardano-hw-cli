@@ -1,3 +1,14 @@
+export const enum TxKeys {
+  INPUTS = 0,
+  OUTPUTS = 1,
+  FEE = 2,
+  TTL = 3,
+  CERTIFICATES = 4,
+  WITHDRAWALS = 5,
+  SHELLEY_WITNESSESS = 0,
+  BYRON_WITNESSES = 2
+}
+
 export type Input = {
   txHash: Buffer,
   outputIndex: number,
@@ -37,21 +48,46 @@ export type Withdrawal = {
   coins: number,
 }
 
-export type TxByronWitness = [
+export type ShelleyWitness = {
+  pubKey: Buffer,
+  signature: Buffer,
+}
+
+export type ByronWitness = {
+  pubKey: Buffer,
+  chainCode: Buffer,
+  signature: Buffer,
+}
+
+export type InternalTxRepresentation = {
+  inputs: Input[],
+  outputs: Output[],
+  fee: string,
+  ttl: string,
+  certificates: {
+    stakingKeyRegistrationCerts: StakingKeyRegistrationCert[],
+    delegationCerts: DelegationCert[],
+    stakepoolRegistrationCerts: StakepoolRegistrationCert[],
+  },
+  withdrawals: Withdrawal[],
+  meta: Buffer | null
+}
+
+export type TxWitnessByron = [
   Buffer,
   Buffer,
   Buffer,
   Buffer,
 ]
 
-export type TxShelleyWitness = [
+export type TxWitnessShelley = [
   Buffer,
   Buffer,
 ]
 
 export type SignedTxDecoded = [
   Map<number, any>,
-  Map<number, Array<TxByronWitness | TxShelleyWitness>>,
+  Map<number, Array<TxWitnessByron | TxWitnessShelley>>,
   Buffer | null,
 ]
 
@@ -59,3 +95,7 @@ export type UnsignedTxDecoded = [
   Map<number, any>,
   Buffer | null,
 ]
+
+export type SignedTxCborHex = string
+
+export type UnsignedTxCborHex = string

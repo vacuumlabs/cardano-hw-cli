@@ -7,8 +7,12 @@ import {
   Withdrawal,
   SignedTxDecoded,
   UnsignedTxDecoded,
-  TxShelleyWitness,
-  TxByronWitness,
+  TxWitnessShelley,
+  TxWitnessByron,
+  InternalTxRepresentation,
+  ShelleyWitness,
+  ByronWitness,
+  TxKeys,
 } from './types'
 
 function parseTxInputs(txInputs: any[]) {
@@ -65,12 +69,12 @@ function parseTxCerts(txCertificates: any[] = []) {
     },
   )
 
-  type certificateParserType =
+  type CertificateParserType =
     typeof stakeKeyRegistrationCertParser |
     typeof delegationCertParser |
     typeof stakepoolRegistrationCertParser
 
-  const certificateParsers:{[key: number]: certificateParserType} = {
+  const certificateParsers:{[key: number]: CertificateParserType} = {
     0: stakeKeyRegistrationCertParser,
     1: stakeKeyRegistrationCertParser,
     2: delegationCertParser,
@@ -94,13 +98,13 @@ function parseTxWithdrawals(withdrawals: Map<any, any> = new Map()) {
   ))
 }
 
-function parseUnsignedTx([txBody, meta]: UnsignedTxDecoded) {
-  const inputs = parseTxInputs(txBody.get(0))
-  const outputs = parseTxOutputs(txBody.get(1))
-  const fee = `${txBody.get(2)}`
-  const ttl = `${txBody.get(3)}`
-  const certificates = parseTxCerts(txBody.get(4))
-  const withdrawals = parseTxWithdrawals(txBody.get(5))
+function parseUnsignedTx([txBody, meta]: UnsignedTxDecoded): InternalTxRepresentation {
+  const inputs = parseTxInputs(txBody.get(TxKeys.INPUTS))
+  const outputs = parseTxOutputs(txBody.get(TxKeys.OUTPUTS))
+  const fee = `${txBody.get(TxKeys.FEE)}`
+  const ttl = `${txBody.get(TxKeys.TTL)}`
+  const certificates = parseTxCerts(txBody.get(TxKeys.CERTIFICATES))
+  const withdrawals = parseTxWithdrawals(txBody.get(TxKeys.WITHDRAWALS))
   return {
     inputs,
     outputs,
@@ -112,10 +116,24 @@ function parseUnsignedTx([txBody, meta]: UnsignedTxDecoded) {
   }
 }
 
-function parseTxWitnesses([, witnesses]:SignedTxDecoded) {
+function parseTxWitnesses([, witnesses]: SignedTxDecoded) {
+  const parseShelleyWitnesses = (shelleyTxWitnesses: TxWitnessShelley[]) => shelleyTxWitnesses.map(
+    ([pubKey, signature]): ShelleyWitness => ({ pubKey, signature }),
+  )
+
+  const parseByronWitnesses = (byronTxWitnesses: TxWitnessByron[]) => byronTxWitnesses.map(
+    ([pubKey, chainCode, signature]): ByronWitness => ({ pubKey, chainCode, signature }),
+  )
+  const shelleyWitnesses = parseShelleyWitnesses(
+    witnesses.get(TxKeys.SHELLEY_WITNESSESS) as TxWitnessShelley[],
+  )
+  const byronWitnesses = parseByronWitnesses(
+    witnesses.get(TxKeys.BYRON_WITNESSES) as TxWitnessByron[],
+  )
+
   return {
-    shelleyWitnesses: witnesses.get(0) as TxShelleyWitness[],
-    byronWitnesses: witnesses.get(2) as TxByronWitness[],
+    shelleyWitnesses,
+    byronWitnesses,
   }
 }
 
