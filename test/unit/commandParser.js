@@ -41,7 +41,12 @@ describe('Command parser', () => {
     const command = parse(args)
     const expectedResult = {
       command: CommandType.VERIFICATION_KEY,
-      hw_signing_file: './test/res/payment.hwsfile',
+      hw_signing_file: {
+        type: 'PaymentHWSigningFileShelley_ed25519',
+        description: 'Hardware wallet extended payment ',
+        path: '1815/1852/0/2/1',
+        cborXPubKeyHex: '5880e0d9c2e5b...7277e7db',
+      },
       verification_key_file: './test/res/payment.vkey',
     }
     assert.deepEqual(command, expectedResult)
