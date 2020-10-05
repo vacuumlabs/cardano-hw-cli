@@ -1,7 +1,6 @@
-import { read } from '../fileReader'
+import { readHwSigningFile, readTxBodyFile } from '../fileReader'
 
 const flag = { action: 'store_true' }
-const loadFile = (arg: string) => ((path: string) => read(arg, path))
 
 export const parserConfig = {
   shelley: {
@@ -14,23 +13,27 @@ export const parserConfig = {
     },
     key: {
       'verification-key': {
-        '--hw-signing-file': { required: true, type: loadFile('--hw-signing-file') },
+        '--hw-signing-file': { required: true, type: (path: string) => readHwSigningFile(path) },
         '--verification-key-file': { required: true },
       },
     },
     transaction: {
       sign: {
         '--mainnet': flag,
-        '--tx-body-file': { required: true, type: loadFile('--tx-body-file') },
-        '--hw-signing-file': { required: true, action: 'append', type: loadFile('--hw-signing-file') },
-        '--change-output-key-file': { type: loadFile('--change-output-key-file') },
+        '--tx-body-file': { required: true, type: (path: string) => readTxBodyFile(path) },
+        '--hw-signing-file': {
+          required: true, action: 'append', type: (path: string) => readHwSigningFile(path),
+        },
+        '--change-output-key-file': { type: (path: string) => readHwSigningFile(path) },
         '--out-file': { required: true },
       },
       witness: {
         '--mainnet': flag,
-        '--tx-body-file': { required: true, type: loadFile('--tx-body-file') },
-        '--hw-signing-file': { required: true, action: 'append', type: loadFile('--hw-signing-file') },
-        '--change-output-key-file': { type: loadFile('--change-output-key-file') },
+        '--tx-body-file': { required: true, type: (path: string) => readTxBodyFile(path) },
+        '--hw-signing-file': {
+          required: true, action: 'append', type: (path: string) => readHwSigningFile(path),
+        },
+        '--change-output-key-file': { type: (path: string) => readHwSigningFile(path) },
         '--out-file': { required: true },
       },
     },

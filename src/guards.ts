@@ -30,9 +30,3 @@ export const isTxBody = (test: any): test is TxBody => [
   isString(test.description),
   isCborHex(test.cborHex),
 ].every(Boolean)
-
-export const argKeyToGuard: { [key: string]: (test:any) => boolean; } = {
-  '--hw-signing-file': isHwSigning,
-  '--tx-body-file': isTxBody,
-  '--change-output-key-file': isHwSigning,
-}
