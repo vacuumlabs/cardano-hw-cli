@@ -1,3 +1,4 @@
+import { ParsedArguments } from '../types'
 import { parserConfig } from './parserConfig'
 
 const { ArgumentParser } = require('argparse')
@@ -25,4 +26,4 @@ const makeParser = () => {
   return initParser(new ArgumentParser({ description: 'Lorem Ipsum (TODO)' }), parserConfig)
 }
 
-export const parse = (inputArgs: string[]) => makeParser().parse_args(inputArgs)
+export const parse = (inputArgs: string[]): ParsedArguments => makeParser().parse_args(inputArgs)

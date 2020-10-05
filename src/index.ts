@@ -1,8 +1,8 @@
 import { parse } from './command-parser/commandParser'
-import { CommandType } from './command-parser/types'
 import {
   keyGen, transactionSign, transactionWitness, verificationKey,
 } from './commandExecutor'
+import { CommandType } from './types'
 
 const parsedArgs = parse(process.argv.slice(2))
 

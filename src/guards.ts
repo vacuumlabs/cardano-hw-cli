@@ -1,5 +1,5 @@
 import {
-  CborHex, FileType, HwSigning, TxBody,
+  CborHex, HwSigningFileFormat, Path, TxBodyFileFormat,
 } from './types'
 
 const cbor = require('borc')
@@ -15,18 +15,16 @@ export const isCborHex = (test: any): test is CborHex => {
 
 const isString = (test: any): test is string => test && typeof test === 'string'
 
-export const isTxBodyFileType = (test: any): test is FileType => test === FileType.TxBodyFileType
-export const isHwSigningFileType = (test: any): test is FileType => test === FileType.HwSigningFileType
+export const isPath = (
+  test:any,
+): test is Path => Array.isArray(test)
+  && test.length === 5
+  && test.every((element) => typeof element === 'number')
 
-export const isHwSigning = (test: any): test is HwSigning => [
-  isHwSigningFileType(test.type),
-  isString(test.description),
-  isString(test.path),
-  isString(test.cborXPubKeyHex),
-].every(Boolean)
+export const isHwSigningFileFormat = (
+  test: any,
+): test is HwSigningFileFormat => isPath(test.path) && isString(test.cborXPubKeyHex)
 
-export const isTxBody = (test: any): test is TxBody => [
-  isTxBodyFileType(test.type),
-  isString(test.description),
-  isCborHex(test.cborHex),
-].every(Boolean)
+export const isTxBodyFileFormat = (
+  test: any,
+): test is TxBodyFileFormat => isCborHex(test.cborHex)
