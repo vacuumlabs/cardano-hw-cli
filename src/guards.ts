@@ -1,5 +1,5 @@
 import {
-  CborHex, HwSigningFileFormat, Path, TxBodyFileFormat,
+  CborHex, HwSigningData, Path, TxBodyData,
 } from './types'
 
 const cbor = require('borc')
@@ -21,10 +21,10 @@ export const isPath = (
   && test.length === 5
   && test.every((element) => typeof element === 'number')
 
-export const isHwSigningFileFormat = (
+export const isHwSigningData = (
   test: any,
-): test is HwSigningFileFormat => isPath(test.path) && isString(test.cborXPubKeyHex)
+): test is HwSigningData => isPath(test.path) && isString(test.cborXPubKeyHex)
 
-export const isTxBodyFileFormat = (
+export const isTxBodyData = (
   test: any,
-): test is TxBodyFileFormat => isCborHex(test.cborHex)
+): test is TxBodyData => isCborHex(test.cborHex)

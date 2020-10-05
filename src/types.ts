@@ -13,13 +13,13 @@ export enum HwSigningType {
   Payment, Stake
 }
 
-export type HwSigningFileFormat = {
+export type HwSigningData = {
   type: HwSigningType
   path: string
   cborXPubKeyHex: string
 }
 
-export type TxBodyFileFormat = {
+export type TxBodyData = {
   cborHex: CborHex
 }
 
@@ -32,26 +32,26 @@ export type ParsedKeyGenArguments = {
 
 export type ParsedVerificationKeyArguments = {
   command: CommandType.VERIFICATION_KEY,
-  hwSigningFileData: HwSigningFileFormat,
+  hwSigningFileData: HwSigningData,
   verificationKeyFile: string,
 }
 
 export type ParsedTransactionSignArguments = {
   command: CommandType.SIGN_TRANSACTION,
   mainnet: boolean,
-  txBodyFileData: TxBodyFileFormat,
-  hwSigningFileData: HwSigningFileFormat,
+  txBodyFileData: TxBodyData,
+  hwSigningFileData: HwSigningData,
   outFile: string,
-  changeOutputKeyFileData?: HwSigningFileFormat,
+  changeOutputKeyFileData?: HwSigningData,
 }
 
 export type ParsedTransactionWitnessArguments = {
   command: CommandType.WITNESS_TRANSACTION,
   mainnet: boolean,
-  txBodyFileData: TxBodyFileFormat,
-  hwSigningFileData: HwSigningFileFormat,
+  txBodyFileData: TxBodyData,
+  hwSigningFileData: HwSigningData,
   outFile: string,
-  changeOutputKeyFileData?: HwSigningFileFormat,
+  changeOutputKeyFileData?: HwSigningData,
 }
 
 export type ParsedArguments =

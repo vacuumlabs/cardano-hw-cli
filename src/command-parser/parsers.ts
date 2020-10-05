@@ -1,6 +1,6 @@
-import { isHwSigningFileFormat, isTxBodyFileFormat } from '../guards'
+import { isHwSigningData, isTxBodyData } from '../guards'
 import {
-  HwSigningFileFormat, HwSigningType, Path, TxBodyFileFormat,
+  HwSigningData, HwSigningType, Path, TxBodyData,
 } from '../types'
 
 const fs = require('fs')
@@ -25,24 +25,24 @@ export const parseFileTypeMagic = (fileTypeMagic: string, path: string) => {
   throw new Error(`Invalid file type of hw-signing-file at ${path}`)
 }
 
-export const parseHwSigningFile = (path: string): HwSigningFileFormat => {
+export const parseHwSigningFile = (path: string): HwSigningData => {
   const data = JSON.parse(fs.readFileSync(path, 'utf8'))
   data.path = parsePath(data.path)
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { type: fileTypeMagic, description, ...parsedData } = data
 
   const result = { type: parseFileTypeMagic(fileTypeMagic, path), ...parsedData }
-  if (isHwSigningFileFormat(result)) {
+  if (isHwSigningData(result)) {
     return result
   }
   throw new Error(`Invalid file contents of hw-signing-file at ${path}'`)
 }
 
-export const parseTxBodyFile = (path: string): TxBodyFileFormat => {
+export const parseTxBodyFile = (path: string): TxBodyData => {
   const data = JSON.parse(fs.readFileSync(path, 'utf8'))
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { type, description, ...parsedData } = data
-  if (isTxBodyFileFormat(parsedData)) {
+  if (isTxBodyData(parsedData)) {
     return parsedData
   }
   throw new Error(`Invalid file contents of tx-body-file at ${path}'`)
