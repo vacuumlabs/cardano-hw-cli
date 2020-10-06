@@ -26,4 +26,5 @@ const makeParser = () => {
   return initParser(new ArgumentParser({ description: 'Lorem Ipsum (TODO)' }), parserConfig)
 }
 
-export const parse = (inputArgs: string[]): ParsedArguments => makeParser().parse_args(inputArgs)
+// First 2 args are node version and script name
+export const parse = (inputArgs: string[]): ParsedArguments => makeParser().parse_args(inputArgs.slice(2))

@@ -4,7 +4,7 @@ import {
 } from './commandExecutor'
 import { CommandType } from './types'
 
-const parsedArgs = parse(process.argv.slice(2))
+const parsedArgs = parse(process.argv)
 
 switch (parsedArgs.command) {
   case (CommandType.KEY_GEN):

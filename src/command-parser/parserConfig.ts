@@ -2,7 +2,7 @@ import { parseHwSigningFile, parsePath, parseTxBodyFile } from './parsers'
 
 const flag = { action: 'store_true' }
 
-const signOrWitness = {
+const txSigningArgs = {
   '--mainnet': flag,
   '--tx-body-file': {
     required: true, dest: 'txBodyFileData', type: (path: string) => parseTxBodyFile(path),
@@ -37,8 +37,8 @@ export const parserConfig = {
       },
     },
     transaction: {
-      sign: signOrWitness,
-      witness: signOrWitness,
+      sign: txSigningArgs,
+      witness: txSigningArgs,
     },
   },
 }

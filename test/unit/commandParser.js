@@ -4,10 +4,11 @@ const { CommandType, HwSigningType } = require('../../src/types')
 
 const resFolder = './test/res/'
 const prefix = (filename) => `${resFolder}${filename}`
+const pad = (args) => [undefined, undefined, ...args]
 
 describe('Command parser', () => {
   it('Should parse key-gen command', () => {
-    const args = [
+    const args = pad([
       'shelley',
       'address',
       'key-gen',
@@ -17,7 +18,7 @@ describe('Command parser', () => {
       prefix('payment.vkey'),
       '--hw-signing-file',
       prefix('payment.hwsfile'),
-    ]
+    ])
     const command = parse(args)
     const expectedResult = {
       command: CommandType.KEY_GEN,
@@ -29,7 +30,7 @@ describe('Command parser', () => {
   })
 
   it('Should parse key-verification', () => {
-    const args = [
+    const args = pad([
       'shelley',
       'key',
       'verification-key',
@@ -37,7 +38,7 @@ describe('Command parser', () => {
       prefix('payment.hwsfile'),
       '--verification-key-file',
       prefix('payment.vkey'),
-    ]
+    ])
     const command = parse(args)
     const expectedResult = {
       command: CommandType.VERIFICATION_KEY,
