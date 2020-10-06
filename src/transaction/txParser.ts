@@ -100,6 +100,7 @@ function parseUnsignedTx([txBody, meta]: UnsignedTxDecoded): InternalTxRepresent
   const ttl = `${txBody.get(TxBodyKeys.TTL)}`
   const certificates = parseTxCerts(txBody.get(TxBodyKeys.CERTIFICATES))
   const withdrawals = parseTxWithdrawals(txBody.get(TxBodyKeys.WITHDRAWALS))
+  const metaDataHash = txBody.get(TxBodyKeys.META_DATA_HASH) as Buffer
   return {
     inputs,
     outputs,
@@ -107,6 +108,7 @@ function parseUnsignedTx([txBody, meta]: UnsignedTxDecoded): InternalTxRepresent
     ttl,
     certificates,
     withdrawals,
+    metaDataHash,
     meta,
   }
 }

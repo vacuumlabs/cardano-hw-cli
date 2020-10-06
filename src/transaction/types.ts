@@ -5,6 +5,7 @@ export const enum TxBodyKeys {
   TTL = 3,
   CERTIFICATES = 4,
   WITHDRAWALS = 5,
+  META_DATA_HASH = 7,
 }
 
 export const enum TxWitnessKeys {
@@ -62,6 +63,7 @@ export type InternalTxRepresentation = {
     stakepoolRegistrationCerts: StakepoolRegistrationCert[],
   },
   withdrawals: Withdrawal[],
+  metaDataHash?: Buffer
   meta: Buffer | null
 }
 

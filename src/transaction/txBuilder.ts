@@ -28,7 +28,7 @@ function TxAux(unsignedTxCborHex: UnsignedTxCborHex) {
 
   function getId(): string {
     const [txBody] = unsignedTxDecoded
-    const encodedTxBody = cbor.encode([txBody])
+    const encodedTxBody = cbor.encode(txBody)
     return blake2b(
       encodedTxBody,
       32,
