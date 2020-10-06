@@ -5,15 +5,9 @@ import {
   StakingKeyRegistrationCert,
   StakepoolRegistrationCert,
   Withdrawal,
-  SignedTxDecoded,
   UnsignedTxDecoded,
-  TxWitnessShelley,
-  TxWitnessByron,
   InternalTxRepresentation,
-  ShelleyWitness,
-  ByronWitness,
   TxBodyKeys,
-  TxWitnessKeys,
 } from './types'
 
 function parseTxInputs(txInputs: any[]) {
@@ -117,28 +111,6 @@ function parseUnsignedTx([txBody, meta]: UnsignedTxDecoded): InternalTxRepresent
   }
 }
 
-function parseTxWitnesses([, witnesses]: SignedTxDecoded) {
-  const parseShelleyWitnesses = (shelleyTxWitnesses: TxWitnessShelley[]) => shelleyTxWitnesses.map(
-    ([pubKey, signature]): ShelleyWitness => ({ pubKey, signature }),
-  )
-
-  const parseByronWitnesses = (byronTxWitnesses: TxWitnessByron[]) => byronTxWitnesses.map(
-    ([pubKey, chainCode, signature]): ByronWitness => ({ pubKey, chainCode, signature }),
-  )
-  const shelleyWitnesses = parseShelleyWitnesses(
-    witnesses.get(TxWitnessKeys.SHELLEY) as TxWitnessShelley[],
-  )
-  const byronWitnesses = parseByronWitnesses(
-    witnesses.get(TxWitnessKeys.BYRON) as TxWitnessByron[],
-  )
-
-  return {
-    shelleyWitnesses,
-    byronWitnesses,
-  }
-}
-
 export {
   parseUnsignedTx,
-  parseTxWitnesses,
 }

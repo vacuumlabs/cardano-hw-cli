@@ -51,17 +51,6 @@ export type Withdrawal = {
   coins: number,
 }
 
-export type ShelleyWitness = {
-  pubKey: Buffer,
-  signature: Buffer,
-}
-
-export type ByronWitness = {
-  pubKey: Buffer,
-  chainCode: Buffer,
-  signature: Buffer,
-}
-
 export type InternalTxRepresentation = {
   inputs: Input[],
   outputs: Output[],
@@ -90,7 +79,7 @@ export type TxWitnessShelley = [
 
 export type SignedTxDecoded = [
   Map<number, any>,
-  Map<number, Array<TxWitnessByron | TxWitnessShelley>>,
+  Map<TxWitnessKeys, Array<TxWitnessByron | TxWitnessShelley>>,
   Buffer | null,
 ]
 
@@ -102,3 +91,8 @@ export type UnsignedTxDecoded = [
 export type SignedTxCborHex = string
 
 export type UnsignedTxCborHex = string
+
+export type TxAux = InternalTxRepresentation & {
+  getId: () => string,
+  unsignedTxDecoded: UnsignedTxDecoded,
+}

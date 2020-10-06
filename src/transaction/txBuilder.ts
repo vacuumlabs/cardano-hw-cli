@@ -1,4 +1,4 @@
-import { parseUnsignedTx, parseTxWitnesses } from './txParser'
+import { parseUnsignedTx } from './txParser'
 import {
   TxWitnessByron,
   TxWitnessShelley,
@@ -58,16 +58,13 @@ function TxSigned(
   return cbor.encode([txBody, witnesses, meta]).toString('hex')
 }
 
-function TxWitnesses(signedTxCborHex: SignedTxCborHex) {
-  const signedTxDecoded: SignedTxDecoded = cbor.decode(signedTxCborHex)
-  const {
-    shelleyWitnesses,
-    byronWitnesses,
-  } = parseTxWitnesses(signedTxDecoded)
-
+function TxWitness(signedTxCborHex: SignedTxCborHex) {
+  const [, witnesses]: SignedTxDecoded = cbor.decode(signedTxCborHex)
+  // there can be only one witness since only one signing file was passed
+  const [type, [witness]] = Array.from(witnesses)[0]
   return {
-    shelleyWitnesses,
-    byronWitnesses,
+    type,
+    witness,
   }
 }
 
@@ -76,5 +73,5 @@ export {
   TxShelleyWitness,
   TxAux,
   TxSigned,
-  TxWitnesses,
+  TxWitness,
 }
