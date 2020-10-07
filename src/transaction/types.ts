@@ -115,6 +115,13 @@ export type UnsignedTxCborHex = string
 
 export type TxWitnessCborHex = string
 
+export type XPubKeyCborHex = string
+
+export type _XPubKey = {
+  pubKey: Buffer,
+  chainCode: Buffer,
+}
+
 export type _TxAux = _UnsignedTxParsed & {
   getId: () => string,
   unsignedTxDecoded: _UnsignedTxDecoded,

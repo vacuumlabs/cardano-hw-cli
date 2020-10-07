@@ -10,6 +10,8 @@ import {
   _TxAux,
   _ShelleyWitness,
   _ByronWitness,
+  XPubKeyCborHex,
+  _XPubKey,
 } from './types'
 
 const cbor = require('borc')
@@ -71,10 +73,18 @@ function Witness(signedTxCborHex: SignedTxCborHex): _ShelleyWitness | _ByronWitn
   } as _ShelleyWitness | _ByronWitness
 }
 
+function XPubKey(xPubKeyCborHex: XPubKeyCborHex): _XPubKey {
+  const xPubKeyDecoded = cbor.decode(xPubKeyCborHex)
+  const pubKey = xPubKeyDecoded.slice(0, 32)
+  const chainCode = xPubKeyDecoded.slice(32, 64)
+  return { pubKey, chainCode }
+}
+
 export {
   TxByronWitness,
   TxShelleyWitness,
   TxAux,
   TxSigned,
   Witness,
+  XPubKey,
 }

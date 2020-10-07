@@ -1,5 +1,5 @@
 const assert = require('assert')
-const { TxAux } = require('../../../src/transaction/txBuilder')
+const { TxAux } = require('../../../src/transaction/transaction')
 const { transactions } = require('./txs')
 
 function testTxHashAndParsing(tx) {
