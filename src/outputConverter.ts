@@ -1,10 +1,16 @@
 import {
-  SignedTxCborHex, TxWitnessByron, TxWitnessShelley, TxWitnessKeys,
+  SignedTxCborHex,
+  SignedTxOutput,
+  TxWitnessKeys,
+  WitnessOutput,
+  WitnessOutputTypes,
+  _ByronWitness,
+  _ShelleyWitness,
 } from './transaction/types'
 
 const cbor = require('borc')
 
-function TxSignedOutput(signedTxCborHex: SignedTxCborHex) {
+function TxSignedOutput(signedTxCborHex: SignedTxCborHex): SignedTxOutput {
   return {
     type: 'TxSignedShelley',
     description: '',
@@ -12,12 +18,16 @@ function TxSignedOutput(signedTxCborHex: SignedTxCborHex) {
   }
 }
 
-function TxWitnessOutput(txWitness: TxWitnessByron | TxWitnessShelley, witnessType: TxWitnessKeys) {
-  const type = witnessType === TxWitnessKeys.SHELLEY ? 'TxWitnessShelley' : 'TxWitnessByron'
+function TxWitnessOutput(
+  { key, data }: _ByronWitness | _ShelleyWitness,
+): WitnessOutput {
+  const type = key === TxWitnessKeys.SHELLEY
+    ? WitnessOutputTypes.SHELLEY
+    : WitnessOutputTypes.BYRON
   return {
     type,
     description: '',
-    cborHex: cbor.encode([type, txWitness]).toString('hex'),
+    cborHex: cbor.encode([key, data]).toString('hex'),
   }
 }
 

@@ -2,11 +2,14 @@ import { parseUnsignedTx } from './txParser'
 import {
   TxWitnessByron,
   TxWitnessShelley,
-  UnsignedTxDecoded,
+  _UnsignedTxDecoded,
   UnsignedTxCborHex,
   SignedTxCborHex,
-  SignedTxDecoded,
+  _SignedTxDecoded,
   TxWitnessKeys,
+  _TxAux,
+  _ShelleyWitness,
+  _ByronWitness,
 } from './types'
 
 const cbor = require('borc')
@@ -22,8 +25,8 @@ function TxShelleyWitness(publicKey: Buffer, signature: Buffer): TxWitnessShelle
   return [publicKey, signature]
 }
 
-function TxAux(unsignedTxCborHex: UnsignedTxCborHex) {
-  const unsignedTxDecoded:UnsignedTxDecoded = cbor.decode(unsignedTxCborHex)
+function TxAux(unsignedTxCborHex: UnsignedTxCborHex): _TxAux {
+  const unsignedTxDecoded:_UnsignedTxDecoded = cbor.decode(unsignedTxCborHex)
   const parsedTx = parseUnsignedTx(unsignedTxDecoded)
 
   function getId(): string {
@@ -43,7 +46,7 @@ function TxAux(unsignedTxCborHex: UnsignedTxCborHex) {
 }
 
 function TxSigned(
-  unsignedTxDecoded: UnsignedTxDecoded,
+  unsignedTxDecoded: _UnsignedTxDecoded,
   byronWitnesses: TxWitnessByron[],
   shelleyWitnesses: TxWitnessShelley[],
 ): SignedTxCborHex {
@@ -58,14 +61,14 @@ function TxSigned(
   return cbor.encode([txBody, witnesses, meta]).toString('hex')
 }
 
-function TxWitness(signedTxCborHex: SignedTxCborHex) {
-  const [, witnesses]: SignedTxDecoded = cbor.decode(signedTxCborHex)
+function Witness(signedTxCborHex: SignedTxCborHex): _ShelleyWitness | _ByronWitness {
+  const [, witnesses]: _SignedTxDecoded = cbor.decode(signedTxCborHex)
   // there can be only one witness since only one signing file was passed
-  const [type, [witness]] = Array.from(witnesses)[0]
+  const [key, [data]] = Array.from(witnesses)[0]
   return {
-    type,
-    witness,
-  }
+    key,
+    data,
+  } as _ShelleyWitness | _ByronWitness
 }
 
 export {
@@ -73,5 +76,5 @@ export {
   TxShelleyWitness,
   TxAux,
   TxSigned,
-  TxWitness,
+  Witness,
 }

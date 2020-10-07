@@ -1,39 +1,42 @@
 import {
-  Input,
-  Output,
-  DelegationCert,
-  StakingKeyRegistrationCert,
-  StakepoolRegistrationCert,
-  Withdrawal,
-  UnsignedTxDecoded,
-  InternalTxRepresentation,
+  _Input,
+  _Output,
+  _DelegationCert,
+  _StakingKeyRegistrationCert,
+  _StakingKeyDeregistrationCert,
+  _StakepoolRegistrationCert,
+  _Withdrawal,
+  _UnsignedTxDecoded,
+  _UnsignedTxParsed,
   TxBodyKeys,
+  TxCertificateKeys,
+  _Certificates,
 } from './types'
 
-function parseTxInputs(txInputs: any[]) {
-  return txInputs.map(([txHash, outputIndex]):Input => (
+function parseTxInputs(txInputs: any[]): _Input[] {
+  return txInputs.map(([txHash, outputIndex]): _Input => (
     { txHash, outputIndex }
   ))
 }
 
-function parseTxOutputs(txOutputs: any[]) {
-  return txOutputs.map(([address, coins]): Output => (
+function parseTxOutputs(txOutputs: any[]): _Output[] {
+  return txOutputs.map(([address, coins]): _Output => (
     { address, coins }
   ))
 }
 
-function parseTxCerts(txCertificates: any[] = []) {
-  const stakingKeyRegistrationCerts: StakingKeyRegistrationCert[] = []
-  const delegationCerts: DelegationCert[] = []
-  const stakepoolRegistrationCerts: StakepoolRegistrationCert[] = []
-
+function parseTxCerts(txCertificates: any[]): _Certificates {
   const stakeKeyRegistrationCertParser = (
     [type, [, pubKey]]: any,
-  ) => stakingKeyRegistrationCerts.push({ type, pubKey })
+  ): _StakingKeyRegistrationCert => ({ type, pubKey })
+
+  const stakeKeyDeregistrationCertParser = (
+    [type, [, pubKey]]: any,
+  ): _StakingKeyDeregistrationCert => ({ type, pubKey })
 
   const delegationCertParser = (
     [type, [, pubKey], poolHash]: any,
-  ) => delegationCerts.push({ type, pubKey, poolHash })
+  ): _DelegationCert => ({ type, pubKey, poolHash })
 
   const stakepoolRegistrationCertParser = (
     [
@@ -48,58 +51,65 @@ function parseTxCerts(txCertificates: any[] = []) {
       s1,
       s2,
     ]: any,
-  ) => stakepoolRegistrationCerts.push(
-    // TODO: check whether this is accurate and which of these we actually need
-    {
-      type,
-      poolPubKey,
-      operatorPubKey,
-      fixedCost,
-      margin,
-      tagged,
-      rewardAddressBuff,
-      ownerPubKeys,
-      s1,
-      s2,
-    },
+  ): _StakepoolRegistrationCert => ({
+    // TODO: check whether this is accurate and which of these we actually need{
+    type,
+    poolPubKey,
+    operatorPubKey,
+    fixedCost,
+    margin,
+    tagged,
+    rewardAddressBuff,
+    ownerPubKeys,
+    s1,
+    s2,
+  })
+
+  const filterCertificates = (key: TxCertificateKeys) => txCertificates.filter(
+    ([type]) => type === key,
   )
 
-  type CertificateParserType =
-    typeof stakeKeyRegistrationCertParser |
-    typeof delegationCertParser |
-    typeof stakepoolRegistrationCertParser
+  const stakingKeyRegistrationCerts = filterCertificates(
+    TxCertificateKeys.STAKING_KEY_REGISTRATION,
+  ).map(stakeKeyRegistrationCertParser)
 
-  const certificateParsers:{[key: number]: CertificateParserType} = {
-    0: stakeKeyRegistrationCertParser,
-    1: stakeKeyRegistrationCertParser,
-    2: delegationCertParser,
-    3: stakepoolRegistrationCertParser,
-  }
+  const stakingKeyDeregistrationCerts = filterCertificates(
+    TxCertificateKeys.STAKING_KEY_DEREGISTRATION,
+  ).map(stakeKeyDeregistrationCertParser)
 
-  txCertificates.forEach((txCertificate) => {
-    const type:number = txCertificate[0]
-    certificateParsers[type](txCertificate)
-  })
+  const delegationCerts = filterCertificates(
+    TxCertificateKeys.DELEGATION,
+  ).map(delegationCertParser)
+
+  const stakepoolRegistrationCerts = filterCertificates(
+    TxCertificateKeys.STAKEPOOL_REGISTRATION,
+  ).map(stakepoolRegistrationCertParser)
+
   return {
     stakingKeyRegistrationCerts,
+    stakingKeyDeregistrationCerts,
     delegationCerts,
     stakepoolRegistrationCerts,
   }
 }
 
-function parseTxWithdrawals(withdrawals: Map<any, any> = new Map()) {
-  return Array.from(withdrawals).map(([address, coins]): Withdrawal => (
+function parseTxWithdrawals(withdrawals: Map<Buffer, number>): _Withdrawal[] {
+  return Array.from(withdrawals).map(([address, coins]): _Withdrawal => (
     { address, coins }
   ))
 }
 
-function parseUnsignedTx([txBody, meta]: UnsignedTxDecoded): InternalTxRepresentation {
+function parseUnsignedTx([txBody, meta]: _UnsignedTxDecoded): _UnsignedTxParsed {
   const inputs = parseTxInputs(txBody.get(TxBodyKeys.INPUTS))
   const outputs = parseTxOutputs(txBody.get(TxBodyKeys.OUTPUTS))
   const fee = `${txBody.get(TxBodyKeys.FEE)}`
   const ttl = `${txBody.get(TxBodyKeys.TTL)}`
-  const certificates = parseTxCerts(txBody.get(TxBodyKeys.CERTIFICATES))
-  const withdrawals = parseTxWithdrawals(txBody.get(TxBodyKeys.WITHDRAWALS))
+  const certificates = parseTxCerts(
+    txBody.get(TxBodyKeys.CERTIFICATES) || [],
+  )
+  const withdrawals = parseTxWithdrawals(
+    txBody.get(TxBodyKeys.WITHDRAWALS) || new Map(),
+  )
   const metaDataHash = txBody.get(TxBodyKeys.META_DATA_HASH) as Buffer
   return {
     inputs,

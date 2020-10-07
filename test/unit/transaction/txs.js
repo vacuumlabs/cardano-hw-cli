@@ -29,6 +29,7 @@ const transactions = {
       ttl: '10',
       certificates: {
         stakingKeyRegistrationCerts: [],
+        stakingKeyDeregistrationCerts: [],
         delegationCerts: [],
         stakepoolRegistrationCerts: [],
       },
@@ -85,6 +86,7 @@ const transactions = {
             pubKey: Buffer.from('1d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c', 'hex'),
           },
         ],
+        stakingKeyDeregistrationCerts: [],
         delegationCerts: [],
         stakepoolRegistrationCerts: [],
       },
@@ -132,6 +134,7 @@ const transactions = {
       ttl: '10',
       certificates: {
         stakingKeyRegistrationCerts: [],
+        stakingKeyDeregistrationCerts: [],
         delegationCerts: [
           {
             type: 2,
@@ -183,7 +186,8 @@ const transactions = {
       fee: '42',
       ttl: '10',
       certificates: {
-        stakingKeyRegistrationCerts: [
+        stakingKeyRegistrationCerts: [],
+        stakingKeyDeregistrationCerts: [
           {
             type: 1,
             pubKey: Buffer.from('1d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c', 'hex'),
@@ -235,6 +239,7 @@ const transactions = {
       ttl: '10',
       certificates: {
         stakingKeyRegistrationCerts: [],
+        stakingKeyDeregistrationCerts: [],
         delegationCerts: [],
         stakepoolRegistrationCerts: [],
       },

@@ -13,29 +13,41 @@ export const enum TxWitnessKeys {
   BYRON = 2,
 }
 
-export type Input = {
+export const enum TxCertificateKeys {
+  STAKING_KEY_REGISTRATION = 0,
+  STAKING_KEY_DEREGISTRATION = 1,
+  DELEGATION = 2,
+  STAKEPOOL_REGISTRATION = 3,
+}
+
+export type _Input = {
   txHash: Buffer,
   outputIndex: number,
 }
 
-export type Output = {
+export type _Output = {
   address: Buffer,
   coins: number,
 }
 
-export type DelegationCert = {
-  type: 2,
+export type _DelegationCert = {
+  type: TxCertificateKeys.DELEGATION,
   pubKey: Buffer,
   poolHash: Buffer,
 }
 
-export type StakingKeyRegistrationCert = {
-  type: 0 | 1,
+export type _StakingKeyRegistrationCert = {
+  type: TxCertificateKeys.STAKING_KEY_REGISTRATION,
   pubKey: Buffer,
 }
 
-export type StakepoolRegistrationCert = {
-  type: 3,
+export type _StakingKeyDeregistrationCert = {
+  type: TxCertificateKeys.STAKING_KEY_DEREGISTRATION,
+  pubKey: Buffer,
+}
+
+export type _StakepoolRegistrationCert = {
+  type: TxCertificateKeys.STAKEPOOL_REGISTRATION,
   poolPubKey: Buffer,
   operatorPubKey: Buffer,
   fixedCost: any,
@@ -47,22 +59,29 @@ export type StakepoolRegistrationCert = {
   s2: any,
 }
 
-export type Withdrawal = {
+export type _Certificates = {
+  stakingKeyRegistrationCerts: _StakingKeyRegistrationCert[],
+  stakingKeyDeregistrationCerts: _StakingKeyDeregistrationCert[],
+  delegationCerts: _DelegationCert[],
+  stakepoolRegistrationCerts: _StakepoolRegistrationCert[],
+}
+
+export type _Withdrawal = {
   address: Buffer,
   coins: number,
 }
 
-export type InternalTxRepresentation = {
-  inputs: Input[],
-  outputs: Output[],
+export type _UnsignedTxParsed = {
+  inputs: _Input[],
+  outputs: _Output[],
   fee: string,
   ttl: string,
   certificates: {
-    stakingKeyRegistrationCerts: StakingKeyRegistrationCert[],
-    delegationCerts: DelegationCert[],
-    stakepoolRegistrationCerts: StakepoolRegistrationCert[],
+    stakingKeyRegistrationCerts: _StakingKeyRegistrationCert[],
+    delegationCerts: _DelegationCert[],
+    stakepoolRegistrationCerts: _StakepoolRegistrationCert[],
   },
-  withdrawals: Withdrawal[],
+  withdrawals: _Withdrawal[],
   metaDataHash?: Buffer
   meta: Buffer | null
 }
@@ -79,14 +98,14 @@ export type TxWitnessShelley = [
   Buffer,
 ]
 
-export type SignedTxDecoded = [
-  Map<number, any>,
+export type _SignedTxDecoded = [
+  Map<TxBodyKeys, any>,
   Map<TxWitnessKeys, Array<TxWitnessByron | TxWitnessShelley>>,
   Buffer | null,
 ]
 
-export type UnsignedTxDecoded = [
-  Map<number, any>,
+export type _UnsignedTxDecoded = [
+  Map<TxBodyKeys, any>,
   Buffer | null,
 ]
 
@@ -94,7 +113,36 @@ export type SignedTxCborHex = string
 
 export type UnsignedTxCborHex = string
 
-export type TxAux = InternalTxRepresentation & {
+export type TxWitnessCborHex = string
+
+export type _TxAux = _UnsignedTxParsed & {
   getId: () => string,
-  unsignedTxDecoded: UnsignedTxDecoded,
+  unsignedTxDecoded: _UnsignedTxDecoded,
+}
+
+export type _ByronWitness = {
+  key: TxWitnessKeys.BYRON,
+  data: TxWitnessByron
+}
+
+export type _ShelleyWitness = {
+  key: TxWitnessKeys.SHELLEY,
+  data: TxWitnessShelley,
+}
+
+export const enum WitnessOutputTypes {
+  SHELLEY = 'TxWitnessByron',
+  BYRON = 'TxWitnessShelley',
+}
+
+export type WitnessOutput = {
+  type: WitnessOutputTypes
+  description: '',
+  cborHex: TxWitnessCborHex,
+}
+
+export type SignedTxOutput = {
+  type: 'TxSignedShelley',
+  description: '',
+  cborHex: SignedTxCborHex,
 }
