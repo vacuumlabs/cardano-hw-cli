@@ -1,3 +1,5 @@
+import { SignedTxOutput, WitnessOutput } from './transaction/types'
+
 export enum CommandType {
   KEY_GEN = 'shelley.address.key-gen',
   VERIFICATION_KEY = 'shelley.key.verification-key',
@@ -55,7 +57,11 @@ export type ParsedTransactionWitnessArguments = {
 }
 
 export type ParsedArguments =
-| ParsedKeyGenArguments
-| ParsedVerificationKeyArguments
-| ParsedTransactionSignArguments
-| ParsedTransactionWitnessArguments
+  | ParsedKeyGenArguments
+  | ParsedVerificationKeyArguments
+  | ParsedTransactionSignArguments
+  | ParsedTransactionWitnessArguments
+
+export type OutputData =
+  | SignedTxOutput
+  | WitnessOutput
