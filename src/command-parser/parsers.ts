@@ -1,6 +1,7 @@
-import { isHwSigningData, isTxBodyData } from '../guards'
+import { isBIP32Path, isHwSigningData, isTxBodyData } from '../guards'
 import {
-  HwSigningData, HwSigningType, Path, TxBodyData,
+  BIP32Path,
+  HwSigningData, HwSigningType, TxBodyData,
 } from '../types'
 
 const fs = require('fs')
@@ -9,9 +10,15 @@ export const HARDENED_THRESHOLD = 0x80000000
 
 export const parsePath = (
   path: string,
-): Path => path
-  .split('/')
-  .map((arg) => (arg.endsWith('H') ? parseInt(arg.slice(0, -1), 10) + HARDENED_THRESHOLD : parseInt(arg, 10)))
+): BIP32Path => {
+  const parsedPath = path
+    .split('/')
+    .map((arg) => (arg.endsWith('H')
+      ? parseInt(arg.slice(0, -1), 10) + HARDENED_THRESHOLD
+      : parseInt(arg, 10)))
+  if (isBIP32Path(parsedPath)) return parsedPath
+  throw new Error('Invalid path')
+}
 
 export const parseFileTypeMagic = (fileTypeMagic: string, path: string) => {
   if (fileTypeMagic.startsWith('Payment')) {
@@ -21,7 +28,6 @@ export const parseFileTypeMagic = (fileTypeMagic: string, path: string) => {
   if (fileTypeMagic.startsWith('Stake')) {
     return HwSigningType.Stake
   }
-
   throw new Error(`Invalid file type of hw-signing-file at ${path}`)
 }
 

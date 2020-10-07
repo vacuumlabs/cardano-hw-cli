@@ -9,7 +9,13 @@ export enum CommandType {
 
 export type CborHex = string
 
-export type Path = number[]
+export type BIP32Path = [
+  number,
+  number,
+  number,
+  number,
+  number,
+]
 
 export enum HwSigningType {
   Payment, Stake
@@ -17,7 +23,7 @@ export enum HwSigningType {
 
 export type HwSigningData = {
   type: HwSigningType
-  path: string
+  path: BIP32Path,
   cborXPubKeyHex: string
 }
 
@@ -27,7 +33,7 @@ export type TxBodyData = {
 
 export type ParsedKeyGenArguments = {
   command: CommandType.KEY_GEN,
-  path: Path,
+  path: BIP32Path,
   hwSigningFile: string,
   verificationKeyFile: string,
 }
