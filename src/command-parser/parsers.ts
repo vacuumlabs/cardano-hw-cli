@@ -1,3 +1,4 @@
+import { HARDENED_THRESHOLD } from '../constants'
 import { isBIP32Path, isHwSigningData, isTxBodyData } from '../guards'
 import {
   BIP32Path,
@@ -5,8 +6,6 @@ import {
 } from '../types'
 
 const fs = require('fs')
-
-export const HARDENED_THRESHOLD = 0x80000000
 
 export const parsePath = (
   path: string,

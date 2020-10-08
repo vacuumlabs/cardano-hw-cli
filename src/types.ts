@@ -68,6 +68,14 @@ export type ParsedArguments =
   | ParsedTransactionSignArguments
   | ParsedTransactionWitnessArguments
 
+export type HwSigningOutput = {
+  type: string,
+  description: string,
+  path: string,
+  cborXPubKeyHex: string,
+}
+
 export type OutputData =
   | SignedTxOutput
   | WitnessOutput
+  | HwSigningOutput

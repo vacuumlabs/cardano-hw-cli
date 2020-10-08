@@ -1,3 +1,4 @@
+import { HARDENED_THRESHOLD } from './constants'
 import {
   SignedTxCborHex,
   SignedTxOutput,
@@ -6,8 +7,9 @@ import {
   WitnessOutputTypes,
   _ByronWitness,
   _ShelleyWitness,
+  _XPubKey,
 } from './transaction/types'
-import { OutputData } from './types'
+import { BIP32Path, HwSigningOutput, OutputData } from './types'
 
 const fs = require('fs')
 const cbor = require('borc')
@@ -39,12 +41,18 @@ function TxWitnessOutput(
   }
 }
 
-function HwSigningKeyOutput(xpub: Buffer, path: any) {
+function PathOutput(path: BIP32Path): string {
+  return path
+    .map((value) => (value >= HARDENED_THRESHOLD ? `${value - HARDENED_THRESHOLD}H` : `${value}`))
+    .join('/')
+}
+
+function HwSigningKeyOutput(xPubKey: _XPubKey, path: BIP32Path): HwSigningOutput {
   return {
-    type: 'PaymentHWSigningFileShelley_ed25519',
+    type: `${path[3] === 0 ? 'Stake' : 'Payment'}HWSigningFileShelley_ed25519`, // TODO
     description: '',
-    path,
-    cborXPubKeyHex: cbor.encode(xpub).toString('hex'),
+    path: PathOutput(path),
+    cborXPubKeyHex: cbor.encode(Buffer.concat([xPubKey.pubKey, xPubKey.chainCode])).toString('hex'),
   }
 }
 

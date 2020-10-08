@@ -13,7 +13,7 @@ describe('Command parser', () => {
       'address',
       'key-gen',
       '--path',
-      '1815H/1852H/0H/2/1',
+      '1852H/1815H/0H/2/1',
       '--verification-key-file',
       prefix('payment.vkey'),
       '--hw-signing-file',
@@ -22,7 +22,7 @@ describe('Command parser', () => {
     const command = parse(args)
     const expectedResult = {
       command: CommandType.KEY_GEN,
-      path: [2147485463, 2147485500, 2147483648, 2, 1],
+      path: [2147485500, 2147485463, 2147483648, 2, 1],
       hwSigningFile: './test/res/payment.hwsfile',
       verificationKeyFile: './test/res/payment.vkey',
     }
