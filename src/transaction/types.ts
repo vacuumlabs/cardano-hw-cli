@@ -117,6 +117,10 @@ export type TxWitnessCborHex = string
 
 export type XPubKeyCborHex = string
 
+export type pubKeyHex = string
+
+export type XPubKeyHex = string
+
 export type _XPubKey = {
   pubKey: Buffer,
   chainCode: Buffer,
@@ -138,8 +142,8 @@ export type _ShelleyWitness = {
 }
 
 export const enum WitnessOutputTypes {
-  SHELLEY = 'TxWitnessByron',
-  BYRON = 'TxWitnessShelley',
+  SHELLEY = 'TxWitnessShelley',
+  BYRON = 'TxWitnessByron',
 }
 
 export type WitnessOutput = {

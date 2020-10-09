@@ -48,7 +48,7 @@ export type ParsedTransactionSignArguments = {
   command: CommandType.SIGN_TRANSACTION,
   mainnet: boolean,
   txBodyFileData: TxBodyData,
-  hwSigningFileData: HwSigningData,
+  hwSigningFileData: HwSigningData[],
   outFile: string,
   changeOutputKeyFileData?: HwSigningData,
 }
@@ -75,7 +75,14 @@ export type HwSigningOutput = {
   cborXPubKeyHex: string,
 }
 
+export type VerificationKeyOutput = {
+  type: string,
+  description: string,
+  cborHex: string, // TODO
+}
+
 export type OutputData =
   | SignedTxOutput
   | WitnessOutput
   | HwSigningOutput
+  | VerificationKeyOutput

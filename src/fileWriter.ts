@@ -5,11 +5,17 @@ import {
   TxWitnessKeys,
   WitnessOutput,
   WitnessOutputTypes,
+  XPubKeyHex,
   _ByronWitness,
   _ShelleyWitness,
-  _XPubKey,
+  // _XPubKey,
 } from './transaction/types'
-import { BIP32Path, HwSigningOutput, OutputData } from './types'
+import {
+  BIP32Path,
+  HwSigningOutput,
+  OutputData,
+  VerificationKeyOutput,
+} from './types'
 
 const fs = require('fs')
 const cbor = require('borc')
@@ -47,12 +53,21 @@ function PathOutput(path: BIP32Path): string {
     .join('/')
 }
 
-function HwSigningKeyOutput(xPubKey: _XPubKey, path: BIP32Path): HwSigningOutput {
+function HwSigningKeyOutput(xPubKey: XPubKeyHex, path: BIP32Path): HwSigningOutput {
   return {
     type: `${path[3] === 0 ? 'Stake' : 'Payment'}HWSigningFileShelley_ed25519`, // TODO
     description: '',
     path: PathOutput(path),
-    cborXPubKeyHex: cbor.encode(Buffer.concat([xPubKey.pubKey, xPubKey.chainCode])).toString('hex'),
+    cborXPubKeyHex: cbor.encode(Buffer.from(xPubKey, 'hex')).toString('hex'),
+  }
+}
+
+function HwVerificationKeyOutput(xPubKey: XPubKeyHex, path: BIP32Path): VerificationKeyOutput {
+  const pubKey = Buffer.from(xPubKey, 'hex').slice(64).slice(0, 32) // todo
+  return {
+    type: `${path[3] === 0 ? 'Stake' : 'Payment'}VerificationKeyShelley_ed25519`, // TODO
+    description: 'Payment Verification Key',
+    cborHex: cbor.encode(pubKey).toString('hex'),
   }
 }
 
@@ -61,4 +76,5 @@ export {
   TxSignedOutput,
   TxWitnessOutput,
   HwSigningKeyOutput,
+  HwVerificationKeyOutput,
 }

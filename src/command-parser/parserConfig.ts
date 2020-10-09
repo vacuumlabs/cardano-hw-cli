@@ -38,7 +38,14 @@ export const parserConfig = {
     },
     transaction: {
       sign: txSigningArgs,
-      witness: txSigningArgs,
+      witness: {
+        ...txSigningArgs,
+        '--hw-signing-file': {
+          dest: 'hwSigningFileData',
+          required: true,
+          type: (path: string) => parseHwSigningFile(path),
+        },
+      },
     },
   },
 }

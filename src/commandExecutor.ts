@@ -1,7 +1,15 @@
+// import { TrezorCryptoProvider } from './crypto-providers/trezorCryptoProvider'
 import { CryptoProvider } from './crypto-providers/types'
+import { NETWORKS } from './constants'
 /* eslint-disable no-console */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { TxSignedOutput, write } from './fileWriter'
+import {
+  TxSignedOutput,
+  write,
+  HwSigningKeyOutput,
+  HwVerificationKeyOutput,
+  TxWitnessOutput,
+} from './fileWriter'
 import { TxAux } from './transaction/transaction'
 import {
   ParsedKeyGenArguments,
@@ -10,44 +18,39 @@ import {
   ParsedVerificationKeyArguments,
 } from './types'
 
-const getCryptoProvider = async () => {
-  // await
-  // this will return instance of cryptoProvider
-}
+const getCryptoProvider = async () => null as any // TODO
 
 const CommandExecutor = async () => {
-  let cryptoProvider: CryptoProvider // await getCryptoProvider()
-  const createSigningKeyFile = (args: ParsedKeyGenArguments) => {
-    // TODO
-    console.dir(args)
-    // const hwSigningFileContents = ''
-    // const verificationKeyFileContents = ''
+  const cryptoProvider: CryptoProvider = await getCryptoProvider()
 
-    // write(args.hwSigningFile, hwSigningFileContents)
-    // write(args.verificationKeyFile, verificationKeyFileContents)
+  const createSigningKeyFile = async (
+    { path, hwSigningFile, verificationKeyFile }: ParsedKeyGenArguments,
+  ) => {
+    const xPubKey = await cryptoProvider.getXPubKey(path)
+    write(hwSigningFile, HwSigningKeyOutput(xPubKey, path))
+    write(verificationKeyFile, HwVerificationKeyOutput(xPubKey, path))
+  }
+  const createVerificationKeyFile = (
+    { verificationKeyFile, hwSigningFileData }: ParsedVerificationKeyArguments,
+  ) => {
+    write(verificationKeyFile, HwVerificationKeyOutput(
+      hwSigningFileData.cborXPubKeyHex,
+      hwSigningFileData.path,
+    ))
   }
 
-  const createVerificationKeyFile = (args: ParsedVerificationKeyArguments) => {
-    // TODO
-    // console.dir(args)
-    // const verificationKeyFileContents = ''
-
-    // write(args.verificationKeyFile, verificationKeyFileContents)
+  const createSignedTx = async (args: ParsedTransactionSignArguments) => {
+    const network = NETWORKS.MAINNET // get this from args
+    const txAux = TxAux(args.txBodyFileData.cborHex)
+    const signedTx = await cryptoProvider.signTx(txAux, args.hwSigningFileData, network)
+    write(args.outFile, TxSignedOutput(signedTx))
   }
 
-  const createSignedTx = (args: ParsedTransactionSignArguments) => {
-    // const network = null // get this from args
-    // const txAux = TxAux(args.txBodyFileData.cborHex)
-    // const signedTx = cryptoProvider.signTx(txAux, args.hwSigningFileData, network)
-    // write(args.outFile, TxSignedOutput(signedTx))
-  }
-
-  const createTxWitness = (args: ParsedTransactionWitnessArguments) => {
-    // // TODO
-    // console.dir(args)
-    // const outFileContents = ''
-
-    // write(args.outFile, outFileContents)
+  const createTxWitness = async (args: ParsedTransactionWitnessArguments) => {
+    const network = NETWORKS.MAINNET // get this from args
+    const txAux = TxAux(args.txBodyFileData.cborHex)
+    const txWitness = await cryptoProvider.witnessTx(txAux, args.hwSigningFileData, network)
+    write(args.outFile, TxWitnessOutput(txWitness))
   }
 
   return {

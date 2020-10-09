@@ -3,7 +3,7 @@ import { CommandExecutor } from './commandExecutor'
 import { CommandType } from './types'
 
 const parsedArgs = parse(process.argv)
-CommandExecutor().then((commandExecutor) => {
+CommandExecutor().then((commandExecutor: any) => {
   switch (parsedArgs.command) {
     case (CommandType.KEY_GEN):
       commandExecutor.createSigningKeyFile(parsedArgs)
@@ -20,4 +20,4 @@ CommandExecutor().then((commandExecutor) => {
     default:
       break
   }
-}).catch((e) => console.log(e))
+})

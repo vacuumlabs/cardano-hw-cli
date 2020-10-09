@@ -90,38 +90,29 @@ describe('Command parser', () => {
     const args = pad([
       'shelley',
       'transaction',
-      'sign',
+      'witness',
       '--tx-body-file',
       prefix('tx.raw'),
       '--hw-signing-file',
       prefix('payment.hwsfile'),
-      '--hw-signing-file',
-      prefix('payment2.hwsfile'),
       '--mainnet',
       '--out-file',
-      prefix('tx.signed'),
+      prefix('witness.out'),
     ])
     const command = parse(args)
     const expectedResult = {
-      command: CommandType.SIGN_TRANSACTION,
+      command: CommandType.WITNESS_TRANSACTION,
       mainnet: true,
       txBodyFileData: {
         // eslint-disable-next-line max-len
         cborHex: '839f8200d81858248258206ca5fde47f4ff7f256a7464dbf0cb9b4fb6bce9049eee1067eed65cf5d6e2765008200d81858248258206ca5fde47f4ff7f256a7464dbf0cb9b4fb6bce9049eee1067eed65cf5d6e276501ff9f8282d818584283581c13f3997560a5b81f5ac680b3322a2339433424e4e589ab3d752afdb6a101581e581c2eab4601bfe583febc23a04fb0abc21557adb47cea49c68d7b2f40a5001ac63884bf182f8282d818584283581cf9a5257f805a1d378c87b0bfb09232c10d9098bc56fd21d9a6a4072aa101581e581c140539c64edded60a7f2c4692c460a154cbdd06088333fd7f75ea7e7001a0ff80ab91a002a81c7ffa0',
       },
-      hwSigningFileData: [
-        {
-          type: 0,
-          path: [2147485463, 2147485500, 2147483648, 2, 1],
-          cborXPubKeyHex: '5880e0d9c2e5b...7277e7db',
-        },
-        {
-          type: 0,
-          path: [2147485463, 2147485500, 2147483648, 2, 1],
-          cborXPubKeyHex: 'placeholder',
-        },
-      ],
-      outFile: './test/res/tx.signed',
+      hwSigningFileData: {
+        type: 0,
+        path: [2147485463, 2147485500, 2147483648, 2, 1],
+        cborXPubKeyHex: '5880e0d9c2e5b...7277e7db',
+      },
+      outFile: './test/res/witness.out',
       changeOutputKeyFileData: undefined,
     }
     assert.deepEqual(command, expectedResult)
