@@ -11,7 +11,7 @@ jobs:
       - run: yarn build-js
       - run: yarn test-unit
       - run: yarn build
-
+      - run: yarn test-bin
 workflows:
   node-tests:
     jobs:
