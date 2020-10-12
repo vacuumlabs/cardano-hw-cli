@@ -22,7 +22,7 @@ const cbor = require('borc')
 
 const write = (path: string, data: OutputData) => fs.writeFileSync(
   path,
-  JSON.stringify(data),
+  JSON.stringify(data, null, 4),
   'utf8',
 )
 
