@@ -12,8 +12,9 @@
     "eslint": "eslint src/ test/ --max-warnings=0 --ext .ts,.js",
     "build": "yarn install && yarn build-js && pkg . -o ./build/cardano-hw-cli",
     "test-unit": "mocha -r ts-node/register 'test/unit/**/*.js'",
+    "test-bin": "yarn build && ./build/cardano-hw-cli --help",
     "test-integration-ledger": "mocha -r ts-node/register 'test/integration/ledger/**/*.js'",
-    "test-bin": "yarn build && ./build/cardano-hw-cli --help"
+    "test-integration-trezor": "mocha -r ts-node/register 'test/integration/trezor/**/*.js'"
   },
   "repository": {
     "type": "git",
