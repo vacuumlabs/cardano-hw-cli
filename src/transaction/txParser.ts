@@ -27,16 +27,16 @@ function parseTxOutputs(txOutputs: any[]): _Output[] {
 
 function parseTxCerts(txCertificates: any[]): _Certificates {
   const stakeKeyRegistrationCertParser = (
-    [type, [, pubKey]]: any,
-  ): _StakingKeyRegistrationCert => ({ type, pubKey })
+    [type, [, pubKeyHash]]: any,
+  ): _StakingKeyRegistrationCert => ({ type, pubKeyHash })
 
   const stakeKeyDeregistrationCertParser = (
-    [type, [, pubKey]]: any,
-  ): _StakingKeyDeregistrationCert => ({ type, pubKey })
+    [type, [, pubKeyHash]]: any,
+  ): _StakingKeyDeregistrationCert => ({ type, pubKeyHash })
 
   const delegationCertParser = (
-    [type, [, pubKey], poolHash]: any,
-  ): _DelegationCert => ({ type, pubKey, poolHash })
+    [type, [, pubKeyHash], poolHash]: any,
+  ): _DelegationCert => ({ type, pubKeyHash, poolHash })
 
   const stakepoolRegistrationCertParser = (
     [
@@ -65,32 +65,22 @@ function parseTxCerts(txCertificates: any[]): _Certificates {
     s2,
   })
 
-  const filterCertificates = (key: TxCertificateKeys) => txCertificates.filter(
-    ([type]) => type === key,
-  )
+  type certficateParser =
+    | typeof stakeKeyRegistrationCertParser
+    | typeof stakeKeyDeregistrationCertParser
+    | typeof delegationCertParser
+    | typeof stakepoolRegistrationCertParser
 
-  const stakingKeyRegistrationCerts = filterCertificates(
-    TxCertificateKeys.STAKING_KEY_REGISTRATION,
-  ).map(stakeKeyRegistrationCertParser)
-
-  const stakingKeyDeregistrationCerts = filterCertificates(
-    TxCertificateKeys.STAKING_KEY_DEREGISTRATION,
-  ).map(stakeKeyDeregistrationCertParser)
-
-  const delegationCerts = filterCertificates(
-    TxCertificateKeys.DELEGATION,
-  ).map(delegationCertParser)
-
-  const stakepoolRegistrationCerts = filterCertificates(
-    TxCertificateKeys.STAKEPOOL_REGISTRATION,
-  ).map(stakepoolRegistrationCertParser)
-
-  return {
-    stakingKeyRegistrationCerts,
-    stakingKeyDeregistrationCerts,
-    delegationCerts,
-    stakepoolRegistrationCerts,
+  const txCertificateParsers: {[key: number]: certficateParser} = {
+    [TxCertificateKeys.STAKING_KEY_REGISTRATION]: stakeKeyRegistrationCertParser,
+    [TxCertificateKeys.STAKING_KEY_DEREGISTRATION]: stakeKeyDeregistrationCertParser,
+    [TxCertificateKeys.DELEGATION]: delegationCertParser,
+    [TxCertificateKeys.STAKEPOOL_REGISTRATION]: stakepoolRegistrationCertParser,
   }
+
+  return txCertificates.map(
+    (certificate) => txCertificateParsers[certificate[0]](certificate),
+  )
 }
 
 function parseTxWithdrawals(withdrawals: Map<Buffer, number>): _Withdrawal[] {

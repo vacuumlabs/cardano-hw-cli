@@ -32,18 +32,18 @@ export type _Output = {
 
 export type _DelegationCert = {
   type: TxCertificateKeys.DELEGATION,
-  pubKey: Buffer,
+  pubKeyHash: Buffer,
   poolHash: Buffer,
 }
 
 export type _StakingKeyRegistrationCert = {
   type: TxCertificateKeys.STAKING_KEY_REGISTRATION,
-  pubKey: Buffer,
+  pubKeyHash: Buffer,
 }
 
 export type _StakingKeyDeregistrationCert = {
   type: TxCertificateKeys.STAKING_KEY_DEREGISTRATION,
-  pubKey: Buffer,
+  pubKeyHash: Buffer,
 }
 
 export type _StakepoolRegistrationCert = {
@@ -59,12 +59,12 @@ export type _StakepoolRegistrationCert = {
   s2: any,
 }
 
-export type _Certificates = {
-  stakingKeyRegistrationCerts: _StakingKeyRegistrationCert[],
-  stakingKeyDeregistrationCerts: _StakingKeyDeregistrationCert[],
-  delegationCerts: _DelegationCert[],
-  stakepoolRegistrationCerts: _StakepoolRegistrationCert[],
-}
+export type _Certificates = Array<
+  | _StakingKeyRegistrationCert
+  | _StakingKeyDeregistrationCert
+  | _DelegationCert
+  | _StakepoolRegistrationCert
+>
 
 export type _Withdrawal = {
   address: Buffer,
@@ -76,11 +76,7 @@ export type _UnsignedTxParsed = {
   outputs: _Output[],
   fee: string,
   ttl: string,
-  certificates: {
-    stakingKeyRegistrationCerts: _StakingKeyRegistrationCert[],
-    delegationCerts: _DelegationCert[],
-    stakepoolRegistrationCerts: _StakepoolRegistrationCert[],
-  },
+  certificates: _Certificates,
   withdrawals: _Withdrawal[],
   metaDataHash?: Buffer
   meta: Buffer | null

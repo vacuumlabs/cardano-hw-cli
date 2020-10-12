@@ -54,8 +54,9 @@ function PathOutput(path: BIP32Path): string {
 }
 
 function HwSigningKeyOutput(xPubKey: XPubKeyHex, path: BIP32Path): HwSigningOutput {
+  const type = path[3] === 0 ? 'Payment' : 'Stake'
   return {
-    type: `${path[3] === 0 ? 'Stake' : 'Payment'}HWSigningFileShelley_ed25519`, // TODO
+    type: `${type}HWSigningFileShelley_ed25519`, // TODO
     description: '',
     path: PathOutput(path),
     cborXPubKeyHex: cbor.encode(Buffer.from(xPubKey, 'hex')).toString('hex'),
@@ -63,10 +64,11 @@ function HwSigningKeyOutput(xPubKey: XPubKeyHex, path: BIP32Path): HwSigningOutp
 }
 
 function HwVerificationKeyOutput(xPubKey: XPubKeyHex, path: BIP32Path): VerificationKeyOutput {
-  const pubKey = Buffer.from(xPubKey, 'hex').slice(64).slice(0, 32) // todo
+  const pubKey = Buffer.from(xPubKey, 'hex').slice(-64).slice(0, 32) // TODO
+  const type = path[3] === 0 ? 'Payment' : 'Stake'
   return {
-    type: `${path[3] === 0 ? 'Stake' : 'Payment'}VerificationKeyShelley_ed25519`, // TODO
-    description: 'Payment Verification Key',
+    type: `${type}VerificationKeyShelley_ed25519`, // TODO
+    description: `${type} Verification Key`,
     cborHex: cbor.encode(pubKey).toString('hex'),
   }
 }
