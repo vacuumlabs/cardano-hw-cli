@@ -1,16 +1,16 @@
 import { parse } from './command-parser/commandParser'
 import { CommandExecutor } from './commandExecutor'
-import { CommandType } from './types'
+import { getErrorTranslation } from './errors'
+import { CommandType, ParsedArguments } from './types'
 
-const parsedArgs = parse(process.argv)
-
-if (
-  parsedArgs.command === CommandType.KEY_GEN
-  || parsedArgs.command === CommandType.VERIFICATION_KEY
-  || parsedArgs.command === CommandType.SIGN_TRANSACTION
-  || parsedArgs.command === CommandType.WITNESS_TRANSACTION
-) {
-  CommandExecutor().then(async (commandExecutor: any) => {
+const executeCommand = async (parsedArgs: ParsedArguments) => {
+  if (
+    parsedArgs.command === CommandType.KEY_GEN
+    || parsedArgs.command === CommandType.VERIFICATION_KEY
+    || parsedArgs.command === CommandType.SIGN_TRANSACTION
+    || parsedArgs.command === CommandType.WITNESS_TRANSACTION
+  ) {
+    const commandExecutor = await CommandExecutor()
     switch (parsedArgs.command) {
       case (CommandType.KEY_GEN):
         await commandExecutor.createSigningKeyFile(parsedArgs)
@@ -25,8 +25,17 @@ if (
         await commandExecutor.createTxWitness(parsedArgs)
         break
       default:
-        break
+        throw Error('UndefinedCommand')
     }
-    process.exit()
-  })
+  }
 }
+
+const parsedArgs = parse(process.argv)
+
+executeCommand(parsedArgs).catch((e) => {
+  // eslint-disable-next-line no-console
+  console.log(getErrorTranslation(e))
+  // get help for command
+}).finally(() => {
+  process.exit()
+})
