@@ -17,7 +17,7 @@ import {
 import { LedgerCryptoProvider } from './crypto-providers/ledgerCryptoProvider'
 import { TrezorCryptoProvider } from './crypto-providers/trezorCryptoProvider'
 
-const promiseTimeout = <T> (ms: number, promise: Promise<T>): Promise<T> => {
+const promiseTimeout = <T> (promise: Promise<T>, ms: number): Promise<T> => {
   const timeout: Promise<T> = new Promise((resolve, reject) => {
     const id = setTimeout(() => {
       clearTimeout(id)
@@ -33,11 +33,11 @@ const promiseTimeout = <T> (ms: number, promise: Promise<T>): Promise<T> => {
 
 // const getCryptoProvider = async (): Promise<CryptoProvider> => {
 //   try {
-//     const ledgerCryptoProvider = await promiseTimeout(5000, LedgerCryptoProvider())
+//     const ledgerCryptoProvider = await promiseTimeout(LedgerCryptoProvider(), 5000)
 //     return ledgerCryptoProvider
 //   } catch (ledgerError) {
 //     try {
-//       const trezorCryptoProvider = await promiseTimeout(5000, TrezorCryptoProvider())
+//       const trezorCryptoProvider = await promiseTimeout(TrezorCryptoProvider(), 5000)
 //       return trezorCryptoProvider
 //     } catch (trezorError) {
 //       console.log(ledgerError)
@@ -47,7 +47,7 @@ const promiseTimeout = <T> (ms: number, promise: Promise<T>): Promise<T> => {
 //   throw new Error('Hardware wallet transport not found')
 // }
 
-const getCryptoProvider = async (): Promise<CryptoProvider> => LedgerCryptoProvider()
+const getCryptoProvider = async (): Promise<CryptoProvider> => TrezorCryptoProvider()
 
 const CommandExecutor = async () => {
   const cryptoProvider: CryptoProvider = await getCryptoProvider()
