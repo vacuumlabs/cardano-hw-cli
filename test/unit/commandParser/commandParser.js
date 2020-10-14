@@ -1,8 +1,8 @@
 const assert = require('assert')
-const { parse } = require('../../src/command-parser/commandParser')
-const { CommandType, HwSigningType } = require('../../src/types')
+const { parse } = require('../../../src/command-parser/commandParser')
+const { CommandType, HwSigningType } = require('../../../src/types')
 
-const resFolder = './test/res/'
+const resFolder = 'test/unit/commandParser/res/'
 const prefix = (filename) => `${resFolder}${filename}`
 const pad = (args) => [undefined, undefined, ...args]
 
@@ -23,8 +23,8 @@ describe('Command parser', () => {
     const expectedResult = {
       command: CommandType.KEY_GEN,
       path: [2147485500, 2147485463, 2147483648, 2, 1],
-      hwSigningFile: './test/res/payment.hwsfile',
-      verificationKeyFile: './test/res/payment.vkey',
+      hwSigningFile: 'test/unit/commandParser/res/payment.hwsfile',
+      verificationKeyFile: 'test/unit/commandParser/res/payment.vkey',
     }
     assert.deepEqual(command, expectedResult)
   })
@@ -47,7 +47,7 @@ describe('Command parser', () => {
         path: [2147485463, 2147485500, 2147483648, 2, 1],
         cborXPubKeyHex: '5880e0d9c2e5b...7277e7db',
       },
-      verificationKeyFile: './test/res/payment.vkey',
+      verificationKeyFile: 'test/unit/commandParser/res/payment.vkey',
     }
     assert.deepEqual(command, expectedResult)
   })
@@ -80,7 +80,7 @@ describe('Command parser', () => {
           cborXPubKeyHex: '5880e0d9c2e5b...7277e7db',
         },
       ],
-      outFile: './test/res/tx.signed',
+      outFile: 'test/unit/commandParser/res/tx.signed',
       changeOutputKeyFileData: undefined,
     }
     assert.deepEqual(command, expectedResult)
@@ -112,7 +112,7 @@ describe('Command parser', () => {
         path: [2147485463, 2147485500, 2147483648, 2, 1],
         cborXPubKeyHex: '5880e0d9c2e5b...7277e7db',
       },
-      outFile: './test/res/witness.out',
+      outFile: 'test/unit/commandParser/res/witness.out',
       changeOutputKeyFileData: undefined,
     }
     assert.deepEqual(command, expectedResult)
