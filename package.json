@@ -26,6 +26,9 @@
   },
   "homepage": "https://github.com/vacuumlabs/cardano-hw-cli#readme",
   "dependencies": {
+    "@babel/runtime": "^7.11.2",
+    "@cardano-foundation/ledgerjs-hw-app-cardano": "^2.0.1",
+    "@ledgerhq/hw-transport-node-hid": "^5.25.0",
     "argparse": "^2.0.1",
     "borc": "^2.1.2",
     "cardano-crypto.js": "^5.3.6-rc.6"
