@@ -10,7 +10,7 @@ import {
   _UnsignedTxParsed,
   TxBodyKeys,
   TxCertificateKeys,
-  _Certificates,
+  _Certificate,
 } from './types'
 
 function parseTxInputs(txInputs: any[]): _Input[] {
@@ -25,7 +25,7 @@ function parseTxOutputs(txOutputs: any[]): _Output[] {
   ))
 }
 
-function parseTxCerts(txCertificates: any[]): _Certificates {
+function parseTxCerts(txCertificates: any[]): _Certificate[] {
   const stakeKeyRegistrationCertParser = (
     [type, [, pubKeyHash]]: any,
   ): _StakingKeyRegistrationCert => ({ type, pubKeyHash })

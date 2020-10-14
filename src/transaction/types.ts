@@ -59,12 +59,11 @@ export type _StakepoolRegistrationCert = {
   s2: any,
 }
 
-export type _Certificates = Array<
+export type _Certificate =
   | _StakingKeyRegistrationCert
   | _StakingKeyDeregistrationCert
   | _DelegationCert
   | _StakepoolRegistrationCert
->
 
 export type _Withdrawal = {
   address: Buffer,
@@ -76,7 +75,7 @@ export type _UnsignedTxParsed = {
   outputs: _Output[],
   fee: string,
   ttl: string,
-  certificates: _Certificates,
+  certificates: _Certificate[],
   withdrawals: _Withdrawal[],
   metaDataHash?: Buffer
   meta: Buffer | null
