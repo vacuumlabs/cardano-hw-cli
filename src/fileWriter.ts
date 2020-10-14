@@ -8,7 +8,6 @@ import {
   XPubKeyHex,
   _ByronWitness,
   _ShelleyWitness,
-  // _XPubKey,
 } from './transaction/types'
 import {
   BIP32Path,

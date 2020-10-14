@@ -3,7 +3,6 @@ import {
   _TxAux,
   _ShelleyWitness,
   _ByronWitness,
-  // _XPubKey,
   XPubKeyHex,
 } from '../transaction/types'
 import { HwSigningData, BIP32Path } from '../types'

@@ -1,8 +1,5 @@
-// import { TrezorCryptoProvider } from './crypto-providers/trezorCryptoProvider'
 import { CryptoProvider } from './crypto-providers/types'
 import { NETWORKS } from './constants'
-/* eslint-disable no-console */
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import {
   TxSignedOutput,
   write,
@@ -17,8 +14,40 @@ import {
   ParsedTransactionWitnessArguments,
   ParsedVerificationKeyArguments,
 } from './types'
+import { LedgerCryptoProvider } from './crypto-providers/ledgerCryptoProvider'
+// import { TrezorCryptoProvider } from './crypto-providers/trezorCryptoProvider'
 
-const getCryptoProvider = async () => null as any // TODO
+const promiseTimeout = <T> (ms: number, promise: Promise<T>): Promise<T> => {
+  const timeout: Promise<T> = new Promise((resolve, reject) => {
+    const id = setTimeout(() => {
+      clearTimeout(id)
+      reject(new Error(`Promise timed out in ${ms} ms`))
+    }, ms)
+  })
+
+  return Promise.race([
+    promise,
+    timeout,
+  ])
+}
+
+// const getCryptoProvider = async (): Promise<CryptoProvider> => {
+//   try {
+//     const ledgerCryptoProvider = await promiseTimeout(5000, LedgerCryptoProvider())
+//     return ledgerCryptoProvider
+//   } catch (ledgerError) {
+//     try {
+//       const trezorCryptoProvider = await promiseTimeout(5000, TrezorCryptoProvider())
+//       return trezorCryptoProvider
+//     } catch (trezorError) {
+//       console.log(ledgerError)
+//       console.log(trezorError)
+//     }
+//   }
+//   throw new Error('Hardware wallet transport not found')
+// }
+
+const getCryptoProvider = async (): Promise<CryptoProvider> => LedgerCryptoProvider()
 
 const CommandExecutor = async () => {
   const cryptoProvider: CryptoProvider = await getCryptoProvider()
@@ -30,6 +59,7 @@ const CommandExecutor = async () => {
     write(hwSigningFile, HwSigningKeyOutput(xPubKey, path))
     write(verificationKeyFile, HwVerificationKeyOutput(xPubKey, path))
   }
+
   const createVerificationKeyFile = (
     { verificationKeyFile, hwSigningFileData }: ParsedVerificationKeyArguments,
   ) => {
