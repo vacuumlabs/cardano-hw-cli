@@ -14,7 +14,8 @@
     "test-unit": "mocha -r ts-node/register 'test/unit/**/*.js'",
     "test-bin": "yarn build && ./build/cardano-hw-cli --help",
     "test-integration-ledger": "mocha -r ts-node/register 'test/integration/ledger/**/*.js'",
-    "test-integration-trezor": "mocha -r ts-node/register 'test/integration/trezor/**/*.js'"
+    "test-integration-trezor": "mocha -r ts-node/register 'test/integration/trezor/node/**/*.js'",
+    "test-cli-trezor": "mocha -r ts-node/register 'test/integration/trezor/cli/**/*.js'"
   },
   "repository": {
     "type": "git",
