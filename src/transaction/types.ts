@@ -30,23 +30,25 @@ export type _Output = {
   coins: number,
 }
 
-export type _DelegationCert = {
+export type X = {}
+
+export type _DelegationCert = X & {
   type: TxCertificateKeys.DELEGATION,
   pubKeyHash: Buffer,
   poolHash: Buffer,
 }
 
-export type _StakingKeyRegistrationCert = {
+export type _StakingKeyRegistrationCert = X & {
   type: TxCertificateKeys.STAKING_KEY_REGISTRATION,
   pubKeyHash: Buffer,
 }
 
-export type _StakingKeyDeregistrationCert = {
+export type _StakingKeyDeregistrationCert = X & {
   type: TxCertificateKeys.STAKING_KEY_DEREGISTRATION,
   pubKeyHash: Buffer,
 }
 
-export type _StakepoolRegistrationCert = {
+export type _StakepoolRegistrationCert = X & {
   type: TxCertificateKeys.STAKEPOOL_REGISTRATION,
   poolPubKey: Buffer,
   operatorPubKey: Buffer,

@@ -15,7 +15,7 @@ import {
   ParsedVerificationKeyArguments,
 } from './types'
 import { LedgerCryptoProvider } from './crypto-providers/ledgerCryptoProvider'
-// import { TrezorCryptoProvider } from './crypto-providers/trezorCryptoProvider'
+import { TrezorCryptoProvider } from './crypto-providers/trezorCryptoProvider'
 
 const promiseTimeout = <T> (ms: number, promise: Promise<T>): Promise<T> => {
   const timeout: Promise<T> = new Promise((resolve, reject) => {
