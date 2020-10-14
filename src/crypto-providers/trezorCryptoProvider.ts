@@ -7,6 +7,7 @@ import {
   _ShelleyWitness,
   TxCertificateKeys,
   _Certificate,
+  _Withdrawal,
 } from '../transaction/types'
 import { CryptoProvider } from './types'
 import {
@@ -148,12 +149,16 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     return certificatePreparerers[certificate.type](certificate, stakingSigningFiles)
   }
 
-  // function prepareWithdrawal(withdrawal: Withdrawal): CardanoWithdrawal {
-  //   return {
-  //     path: withdrawal.address,
-  //     amount: `${withdrawal.coins}`,
-  //   }
-  // }
+  function prepareWithdrawal(
+    withdrawal: _Withdrawal, stakingSigningFiles: HwSigningData[],
+  ): TrezorWithdrawal {
+    const pubKeyHash = withdrawal.address.slice(1)
+    const path = findSigningPath(pubKeyHash, stakingSigningFiles)
+    return {
+      path,
+      amount: `${withdrawal.coins}`,
+    }
+  }
 
   async function signTx(
     txAux: _TxAux, signingFiles: HwSigningData[], network: any,
@@ -175,7 +180,9 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     )
     const { fee } = txAux
     const { ttl } = txAux
-    const withdrawals = [] as TrezorWithdrawal[]
+    const withdrawals = txAux.withdrawals.map(
+      (withdrawal) => prepareWithdrawal(withdrawal, stakingSigningFiles),
+    )
 
     const response = await TrezorConnect.cardanoSignTransaction({
       inputs,
