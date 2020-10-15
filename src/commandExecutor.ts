@@ -14,8 +14,8 @@ import {
   ParsedTransactionWitnessArguments,
   ParsedVerificationKeyArguments,
 } from './types'
-// import { LedgerCryptoProvider } from './crypto-providers/ledgerCryptoProvider'
-import { TrezorCryptoProvider } from './crypto-providers/trezorCryptoProvider'
+import { LedgerCryptoProvider } from './crypto-providers/ledgerCryptoProvider'
+// import { TrezorCryptoProvider } from './crypto-providers/trezorCryptoProvider'
 import { validateUnsignedTx } from './crypto-providers/util'
 
 // const promiseTimeout = <T> (promise: Promise<T>, ms: number): Promise<T> => {
@@ -48,7 +48,7 @@ import { validateUnsignedTx } from './crypto-providers/util'
 //   throw new Error('Hardware wallet transport not found')
 // }
 
-const getCryptoProvider = async (): Promise<CryptoProvider> => TrezorCryptoProvider()
+const getCryptoProvider = async (): Promise<CryptoProvider> => LedgerCryptoProvider()
 
 const CommandExecutor = async () => {
   const cryptoProvider: CryptoProvider = await getCryptoProvider()

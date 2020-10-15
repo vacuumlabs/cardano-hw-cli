@@ -1,7 +1,7 @@
 import { BIP32Path } from '../types'
 
 export type LedgerInput = {
-  path: BIP32Path,
+  path?: BIP32Path,
   txHashHex: string,
   outputIndex: number,
 }
@@ -14,4 +14,10 @@ export type LedgerOutput = {
 export type LedgerWitness = {
   path: BIP32Path
   signature: Buffer
+}
+
+export type LedgerCertificate = {
+  type: number
+  path: any // BIP32Path,
+  poolKeyHashHex?: string
 }

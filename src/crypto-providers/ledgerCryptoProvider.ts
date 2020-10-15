@@ -15,14 +15,24 @@ import {
   TxWitnessByron,
   TxWitnessShelley,
   XPubKeyHex,
+  _Certificate,
+  TxCertificateKeys,
 } from '../transaction/types'
 import { BIP32Path, HwSigningData } from '../types'
 import {
+  isDelegationCertificate,
+  isStakepoolRegistrationCertificate,
+  isStakingKeyDeregistrationCertificate,
+  isStakingKeyRegistrationCertificate,
+} from './guards'
+import {
+  LedgerCertificate,
   LedgerInput,
   LedgerOutput,
   LedgerWitness,
 } from './ledgerTypes'
 import { CryptoProvider } from './types'
+import { filterSigningFiles, findSigningPath, getSigningPath } from './util'
 
 const TransportNodeHid = require('@ledgerhq/hw-transport-node-hid').default
 const Ledger = require('@cardano-foundation/ledgerjs-hw-app-cardano').default
@@ -31,7 +41,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
   const transport = await TransportNodeHid.create()
   const ledger = new Ledger(transport)
 
-  function prepareInput(input: _Input, path: BIP32Path): LedgerInput {
+  function prepareInput(input: _Input, path?: BIP32Path): LedgerInput {
     return {
       path,
       txHashHex: input.txHash.toString('hex'),
@@ -56,13 +66,73 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
 
   const isShelleyPath = (path: number[]) => path[0] - HARDENED_THRESHOLD === 1852
 
+  function prepareStakingKeyRegistrationCert(
+    cert: _Certificate, stakeSigningFiles: HwSigningData[],
+  ): LedgerCertificate {
+    if (
+      !isStakingKeyRegistrationCertificate(cert) && !isStakingKeyDeregistrationCertificate(cert)
+    ) throw Error()
+    const path = findSigningPath(cert.pubKeyHash, stakeSigningFiles)
+    return {
+      type: cert.type,
+      path,
+    }
+  }
+
+  function prepareDelegationCert(
+    cert: _Certificate, stakeSigningFiles: HwSigningData[],
+  ): LedgerCertificate {
+    if (!isDelegationCertificate(cert)) throw Error()
+    const path = findSigningPath(cert.pubKeyHash, stakeSigningFiles)
+    return {
+      type: cert.type,
+      path,
+      poolKeyHashHex: cert.poolHash.toString('hex'),
+    }
+  }
+
+  function prepareStakePoolRegistrationCert(
+    cert: _Certificate, stakeSigningFiles: HwSigningData[],
+  ): LedgerCertificate {
+    if (!isStakepoolRegistrationCertificate(cert)) throw Error()
+    const path = findSigningPath(cert.ownerPubKeys[0], stakeSigningFiles)
+    // TODO: we need to iterate through the owner pubkeys
+    return { // TODO: proper pool reg cert
+      type: cert.type,
+      path,
+    }
+  }
+
+  function prepareCertificate(
+    certificate: _Certificate, stakeSigningFiles: HwSigningData[],
+  ): LedgerCertificate {
+    switch (certificate.type) {
+      case TxCertificateKeys.STAKING_KEY_REGISTRATION:
+        return prepareStakingKeyRegistrationCert(certificate, stakeSigningFiles)
+      case TxCertificateKeys.STAKING_KEY_DEREGISTRATION:
+        return prepareStakingKeyRegistrationCert(certificate, stakeSigningFiles)
+      case TxCertificateKeys.DELEGATION:
+        return prepareDelegationCert(certificate, stakeSigningFiles)
+      case TxCertificateKeys.STAKEPOOL_REGISTRATION:
+        return prepareStakePoolRegistrationCert(certificate, stakeSigningFiles)
+      default:
+        throw Error('UnknownCertificateError')
+    }
+  }
+
   const ledgerSignTx = async (
     txAux: _TxAux, signingFiles: HwSigningData[], network: any,
   ): Promise<LedgerWitness[]> => {
-    const inputs = txAux.inputs.map((input, i) => prepareInput(input, signingFiles[i].path))
+    const {
+      paymentSigningFiles,
+      stakeSigningFiles,
+    } = filterSigningFiles(signingFiles)
+    const inputs = txAux.inputs.map((input, i) => prepareInput(input, getSigningPath(paymentSigningFiles, i)))
     const outputs = txAux.outputs.map((output) => prepareOutput(output))
     // const certificates = txAux.certs.map((cert) => _prepareCert(cert, addressToAbsPathMapper))
-    const certificates = [] as any
+    const certificates = txAux.certificates.map(
+      (certificate) => prepareCertificate(certificate, stakeSigningFiles),
+    )
     const { fee } = txAux
     const { ttl } = txAux
     const withdrawals = [] as any
