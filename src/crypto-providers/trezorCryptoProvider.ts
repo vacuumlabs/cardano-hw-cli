@@ -30,7 +30,7 @@ import {
   encodeAddress,
   filterSigningFiles,
   findSigningPath,
-  getSigningPath
+  getSigningPath,
 } from './util'
 
 const TrezorConnect = require('trezor-connect').default

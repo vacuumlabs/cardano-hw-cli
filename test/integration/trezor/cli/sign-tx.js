@@ -16,7 +16,7 @@ const transactions = {
 async function testCommand(folderName, tx) {
   const path = `test/integration/trezor/cli/txsFiles/${folderName}/tx.signed`
   const command = tx.command(folderName)
-  console.log(command)
+  // console.log(command)
   exec(command, async (error, stdout, stderr) => {
     if (error || stderr) {
       throw Error(stderr)

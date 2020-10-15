@@ -14,23 +14,23 @@ import {
   ParsedTransactionWitnessArguments,
   ParsedVerificationKeyArguments,
 } from './types'
-import { LedgerCryptoProvider } from './crypto-providers/ledgerCryptoProvider'
+// import { LedgerCryptoProvider } from './crypto-providers/ledgerCryptoProvider'
 import { TrezorCryptoProvider } from './crypto-providers/trezorCryptoProvider'
 import { validateUnsignedTx } from './crypto-providers/util'
 
-const promiseTimeout = <T> (promise: Promise<T>, ms: number): Promise<T> => {
-  const timeout: Promise<T> = new Promise((resolve, reject) => {
-    const id = setTimeout(() => {
-      clearTimeout(id)
-      reject(new Error(`Promise timed out in ${ms} ms`))
-    }, ms)
-  })
+// const promiseTimeout = <T> (promise: Promise<T>, ms: number): Promise<T> => {
+//   const timeout: Promise<T> = new Promise((resolve, reject) => {
+//     const id = setTimeout(() => {
+//       clearTimeout(id)
+//       reject(new Error(`Promise timed out in ${ms} ms`))
+//     }, ms)
+//   })
 
-  return Promise.race([
-    promise,
-    timeout,
-  ])
-}
+//   return Promise.race([
+//     promise,
+//     timeout,
+//   ])
+// }
 
 // const getCryptoProvider = async (): Promise<CryptoProvider> => {
 //   try {

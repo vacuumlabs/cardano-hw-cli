@@ -1,6 +1,6 @@
-import { XPubKey } from "../transaction/transaction"
-import { TxCertificateKeys, _TxAux } from "../transaction/types"
-import { BIP32Path, HwSigningData } from "../types"
+import { XPubKey } from '../transaction/transaction'
+import { TxCertificateKeys, _TxAux } from '../transaction/types'
+import { BIP32Path, HwSigningData } from '../types'
 
 const {
   getPubKeyBlake2b224Hash,
@@ -10,10 +10,11 @@ const {
   getAddressType,
 } = require('cardano-crypto.js')
 
-const encodeAddress = (address: Buffer): string =>
+const encodeAddress = (address: Buffer): string => (
   getAddressType(address) === AddressTypes.ENTERPRISE
     ? base58.encode(address)
     : bech32.encode('addr', address)
+)
 
 const getSigningPath = (
   signingFiles: HwSigningData[], i: number,
@@ -23,7 +24,7 @@ const getSigningPath = (
 }
 
 const filterSigningFiles = (
-  signingFiles: HwSigningData[]
+  signingFiles: HwSigningData[],
 ): {paymentSigningFiles: HwSigningData[], stakeSigningFiles: HwSigningData[]} => {
   const paymentSigningFiles = signingFiles.filter(
     (signingFile) => signingFile.type === 0,
@@ -48,7 +49,7 @@ const findSigningPath = (certPubKeyHash: Buffer, stakingSigningFiles: HwSigningD
 }
 
 const validateTxWithStakePoolCert = (
-  txAux: _TxAux, paymentSigningFiles: HwSigningData[], stakeSigningFiles: HwSigningData[]
+  txAux: _TxAux, paymentSigningFiles: HwSigningData[], stakeSigningFiles: HwSigningData[],
 ): void => {
   if (txAux.certificates.length !== 1) throw Error('MultipleCertificatesWithPoolReg')
   if (txAux.withdrawals.length) throw Error('WithdrawalIncludedWithPoolReg')
@@ -57,7 +58,7 @@ const validateTxWithStakePoolCert = (
 }
 
 const validateTxWithoutStakePoolCert = (
-  txAux: _TxAux, paymentSigningFiles: HwSigningData[], stakeSigningFiles: HwSigningData[]
+  txAux: _TxAux, paymentSigningFiles: HwSigningData[], stakeSigningFiles: HwSigningData[],
 ): void => {
   if (!paymentSigningFiles.length) throw Error('MissingPaymentSigningFile')
   if (paymentSigningFiles.length > txAux.inputs.length) {
@@ -76,7 +77,7 @@ const validateUnsignedTx = (txAux: _TxAux, signingFiles: HwSigningData[]): void 
     stakeSigningFiles,
   } = filterSigningFiles(signingFiles)
   const hasStakePoolRegCert = txAux.certificates.some(
-    ({type})=> {type === TxCertificateKeys.STAKEPOOL_REGISTRATION}
+    ({ type }) => type === TxCertificateKeys.STAKEPOOL_REGISTRATION,
   )
   if (hasStakePoolRegCert) {
     validateTxWithStakePoolCert(txAux, paymentSigningFiles, stakeSigningFiles)
