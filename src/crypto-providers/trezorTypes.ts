@@ -7,7 +7,7 @@ export type TrezorCertificatePointer = {
 }
 
 export type TrezorInput = {
-  path: string | BIP32Path
+  path?: string | BIP32Path
   // eslint-disable-next-line camelcase
   prev_hash: string
   // eslint-disable-next-line camelcase

@@ -17,7 +17,7 @@ import {
   TrezorCertificate,
 } from './trezorTypes'
 import {
-  Witness, XPubKey,
+  Witness,
 } from '../transaction/transaction'
 import { BIP32Path, HwSigningData } from '../types'
 import {
@@ -26,14 +26,12 @@ import {
   isStakingKeyDeregistrationCertificate,
   isStakingKeyRegistrationCertificate,
 } from './guards'
-
-const {
-  getAddressType,
-  AddressTypes,
-  base58,
-  bech32,
-  getPubKeyBlake2b224Hash,
-} = require('cardano-crypto.js')
+import {
+  encodeAddress,
+  filterSigningFiles,
+  findSigningPath,
+  getSigningPath
+} from './util'
 
 const TrezorConnect = require('trezor-connect').default
 
@@ -57,7 +55,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     return payload.publicKey
   }
 
-  function prepareInput(input: _Input, path: BIP32Path): TrezorInput {
+  function prepareInput(input: _Input, path?: BIP32Path): TrezorInput {
     return {
       path,
       prev_hash: input.txHash.toString('hex'),
@@ -66,9 +64,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
   }
 
   function prepareOutput(output: _Output): TrezorOutput {
-    const address = getAddressType(output.address) === AddressTypes.ENTERPRISE
-      ? base58.encode(output.address)
-      : bech32.encode('addr', output.address)
+    const address = encodeAddress(output.address)
     // if (output.isChange) {
     //   return {
     //     amount: `${output.coins}`,
@@ -85,23 +81,13 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     }
   }
 
-  function findSigningPath(certPubKeyHash: Buffer, stakingSigningFiles: HwSigningData[]) {
-    const signingFile = stakingSigningFiles.find((file) => {
-      const { pubKey } = XPubKey(file.cborXPubKeyHex)
-      const pubKeyHash = getPubKeyBlake2b224Hash(pubKey)
-      return !Buffer.compare(pubKeyHash, certPubKeyHash)
-    })
-    if (!signingFile) throw Error('Missing signing file')
-    return signingFile.path
-  }
-
   function prepareStakingKeyRegistrationCert(
-    cert: _Certificate, stakingSigningFiles: HwSigningData[],
+    cert: _Certificate, stakeSigningFiles: HwSigningData[],
   ): TrezorCertificate {
     if (
       !isStakingKeyRegistrationCertificate(cert) && !isStakingKeyDeregistrationCertificate(cert)
     ) throw Error()
-    const path = findSigningPath(cert.pubKeyHash, stakingSigningFiles)
+    const path = findSigningPath(cert.pubKeyHash, stakeSigningFiles)
     return {
       type: cert.type,
       path,
@@ -109,10 +95,10 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
   }
 
   function prepareDelegationCert(
-    cert: _Certificate, stakingSigningFiles: HwSigningData[],
+    cert: _Certificate, stakeSigningFiles: HwSigningData[],
   ): TrezorCertificate {
     if (!isDelegationCertificate(cert)) throw Error()
-    const path = findSigningPath(cert.pubKeyHash, stakingSigningFiles)
+    const path = findSigningPath(cert.pubKeyHash, stakeSigningFiles)
     return {
       type: cert.type,
       path,
@@ -121,10 +107,10 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
   }
 
   function prepareStakePoolRegistrationCert(
-    cert: _Certificate, stakingSigningFiles: HwSigningData[],
+    cert: _Certificate, stakeSigningFiles: HwSigningData[],
   ): TrezorCertificate {
     if (!isStakepoolRegistrationCertificate(cert)) throw Error()
-    const path = findSigningPath(cert.ownerPubKeys[0], stakingSigningFiles)
+    const path = findSigningPath(cert.ownerPubKeys[0], stakeSigningFiles)
     // TODO: we need to iterate through the owner pubkeys
     return { // TODO: proper pool reg cert
       type: cert.type,
@@ -133,7 +119,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
   }
 
   function prepareCertificate(
-    certificate: _Certificate, stakingSigningFiles: HwSigningData[],
+    certificate: _Certificate, stakeSigningFiles: HwSigningData[],
   ): TrezorCertificate {
     type certificatePreparer =
     | typeof prepareStakingKeyRegistrationCert
@@ -146,14 +132,14 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
       [TxCertificateKeys.DELEGATION]: prepareDelegationCert,
       [TxCertificateKeys.STAKEPOOL_REGISTRATION]: prepareStakePoolRegistrationCert,
     }
-    return certificatePreparerers[certificate.type](certificate, stakingSigningFiles)
+    return certificatePreparerers[certificate.type](certificate, stakeSigningFiles)
   }
 
   function prepareWithdrawal(
-    withdrawal: _Withdrawal, stakingSigningFiles: HwSigningData[],
+    withdrawal: _Withdrawal, stakeSigningFiles: HwSigningData[],
   ): TrezorWithdrawal {
     const pubKeyHash = withdrawal.address.slice(1)
-    const path = findSigningPath(pubKeyHash, stakingSigningFiles)
+    const path = findSigningPath(pubKeyHash, stakeSigningFiles)
     return {
       path,
       amount: `${withdrawal.coins}`,
@@ -163,25 +149,23 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
   async function signTx(
     txAux: _TxAux, signingFiles: HwSigningData[], network: any,
   ): Promise<SignedTxCborHex> {
-    const paymentSigningFiles = signingFiles.filter(
-      (signingFile) => signingFile.type === 0,
-    )
-    const stakingSigningFiles = signingFiles.filter(
-      (signingFile) => signingFile.type === 1,
-    )
+    const {
+      paymentSigningFiles,
+      stakeSigningFiles,
+    } = filterSigningFiles(signingFiles)
     const inputs = txAux.inputs.map(
-      (input, i) => prepareInput(input, paymentSigningFiles[i].path),
+      (input, i) => prepareInput(input, getSigningPath(paymentSigningFiles, i)),
     )
     const outputs = txAux.outputs.map(
       (output) => prepareOutput(output),
     )
     const certificates = txAux.certificates.map(
-      (certificate) => prepareCertificate(certificate, stakingSigningFiles),
+      (certificate) => prepareCertificate(certificate, stakeSigningFiles),
     )
     const { fee } = txAux
     const { ttl } = txAux
     const withdrawals = txAux.withdrawals.map(
-      (withdrawal) => prepareWithdrawal(withdrawal, stakingSigningFiles),
+      (withdrawal) => prepareWithdrawal(withdrawal, stakeSigningFiles),
     )
 
     const response = await TrezorConnect.cardanoSignTransaction({
