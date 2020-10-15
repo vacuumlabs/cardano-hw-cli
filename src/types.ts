@@ -61,7 +61,7 @@ export type ParsedTransactionSignArguments = {
   txBodyFileData: TxBodyData,
   hwSigningFileData: HwSigningData[],
   outFile: string,
-  changeOutputKeyFileData?: HwSigningData,
+  changeOutputKeyFileData?: HwSigningData[],
 }
 
 export type ParsedTransactionWitnessArguments = {
@@ -70,7 +70,7 @@ export type ParsedTransactionWitnessArguments = {
   txBodyFileData: TxBodyData,
   hwSigningFileData: HwSigningData,
   outFile: string,
-  changeOutputKeyFileData?: HwSigningData,
+  changeOutputKeyFileData?: HwSigningData[],
 }
 
 export type ParsedArguments =

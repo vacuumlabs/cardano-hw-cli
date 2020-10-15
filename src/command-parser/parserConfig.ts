@@ -14,7 +14,10 @@ const txSigningArgs = {
     type: (path: string) => parseHwSigningFile(path),
   },
   '--change-output-key-file': {
-    dest: 'changeOutputKeyFileData', type: (path: string) => parseHwSigningFile(path),
+    dest: 'changeOutputKeyFileData',
+    action: 'append',
+    default: [],
+    type: (path: string) => parseHwSigningFile(path),
   },
   '--out-file': { required: true, dest: 'outFile' },
 }

@@ -1,5 +1,5 @@
 import { XPubKey } from '../transaction/transaction'
-import { TxCertificateKeys, _TxAux } from '../transaction/types'
+import { TxCertificateKeys, _Output, _TxAux } from '../transaction/types'
 import { BIP32Path, HwSigningData } from '../types'
 
 const {
@@ -84,6 +84,17 @@ const validateUnsignedTx = (txAux: _TxAux, signingFiles: HwSigningData[]): void 
   } else {
     validateTxWithoutStakePoolCert(txAux, paymentSigningFiles, stakeSigningFiles)
   }
+}
+
+const getChangeOutput = (
+  output: _Output,
+  changeOutputFiles: HwSigningData[],
+) => {
+  const pubKeyHash = getPubKeyBlake2b224Hash(pubKey)
+  const pubKeys = changeOutputFiles.map(
+    ({ cborXPubKeyHex }) => XPubKey(cborXPubKeyHex).pubKey,
+  )
+  const addressType = getAddressType(output.address)
 }
 
 export {

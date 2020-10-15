@@ -8,9 +8,18 @@ import {
 import { HwSigningData, BIP32Path, Network } from '../types'
 
 export type CryptoProvider = {
-  signTx: (txAux: _TxAux, signingFiles: HwSigningData[], network: Network) => Promise<SignedTxCborHex>,
+  signTx: (
+    txAux: _TxAux,
+    signingFiles:
+    HwSigningData[],
+    network: Network,
+    changeOutputFiles: HwSigningData[],
+  ) => Promise<SignedTxCborHex>,
   witnessTx: (
-    txAux: _TxAux, signingFile: HwSigningData, network: Network
+    txAux: _TxAux,
+    signingFile: HwSigningData,
+    network: Network,
+    changeOutputFiles: HwSigningData[],
   ) => Promise<_ShelleyWitness | _ByronWitness>
   getXPubKey: (path: BIP32Path) => Promise<XPubKeyHex>,
 }

@@ -19,7 +19,7 @@ import {
 import {
   Witness,
 } from '../transaction/transaction'
-import { BIP32Path, HwSigningData } from '../types'
+import { BIP32Path, HwSigningData, Network } from '../types'
 import {
   isDelegationCertificate,
   isStakepoolRegistrationCertificate,
@@ -63,7 +63,10 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     }
   }
 
-  function prepareOutput(output: _Output): TrezorOutput {
+  function prepareOutput(
+    output: _Output,
+    changeOutputFiles: HwSigningData[],
+  ): TrezorOutput {
     const address = encodeAddress(output.address)
     // if (output.isChange) {
     //   return {
@@ -147,7 +150,10 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
   }
 
   async function signTx(
-    txAux: _TxAux, signingFiles: HwSigningData[], network: any,
+    txAux: _TxAux,
+    signingFiles: HwSigningData[],
+    network: Network,
+    changeOutputFiles: HwSigningData[],
   ): Promise<SignedTxCborHex> {
     const {
       paymentSigningFiles,
@@ -157,7 +163,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
       (input, i) => prepareInput(input, getSigningPath(paymentSigningFiles, i)),
     )
     const outputs = txAux.outputs.map(
-      (output) => prepareOutput(output),
+      (output) => prepareOutput(output, changeOutputFiles),
     )
     const certificates = txAux.certificates.map(
       (certificate) => prepareCertificate(certificate, stakeSigningFiles),
@@ -187,9 +193,12 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
   }
 
   async function witnessTx(
-    txAux: _TxAux, signingFile: HwSigningData, network: any,
+    txAux: _TxAux,
+    signingFile: HwSigningData,
+    network: Network,
+    changeOutputFiles: HwSigningData[],
   ): Promise<_ByronWitness | _ShelleyWitness> {
-    const signedTx = await signTx(txAux, [signingFile], network)
+    const signedTx = await signTx(txAux, [signingFile], network, changeOutputFiles)
     return Witness(signedTx)
   }
 
