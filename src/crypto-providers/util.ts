@@ -1,6 +1,8 @@
+// import { HARDENED_THRESHOLD } from '../constants'
 import { XPubKey } from '../transaction/transaction'
-import { TxCertificateKeys, _Output, _TxAux } from '../transaction/types'
-import { BIP32Path, HwSigningData } from '../types'
+import { TxCertificateKeys, _TxAux } from '../transaction/types'
+import { BIP32Path, HwSigningData, Network } from '../types'
+import { _AddressParameters } from './types'
 
 const {
   getPubKeyBlake2b224Hash,
@@ -8,7 +10,13 @@ const {
   base58,
   bech32,
   getAddressType,
+  packBootstrapAddress,
+  packBaseAddress,
 } = require('cardano-crypto.js')
+
+// const isShelleyPath = (path: number[]) => path[0] - HARDENED_THRESHOLD === 1852
+
+const isStakingPath = (path: number[]) => path[3] === 2
 
 const encodeAddress = (address: Buffer): string => (
   getAddressType(address) === AddressTypes.ENTERPRISE
@@ -86,15 +94,57 @@ const validateUnsignedTx = (txAux: _TxAux, signingFiles: HwSigningData[]): void 
   }
 }
 
-const getChangeOutput = (
-  output: _Output,
-  changeOutputFiles: HwSigningData[],
+const _packBootStrapAddress = (
+  file: HwSigningData, network: Network,
 ) => {
-  const pubKeyHash = getPubKeyBlake2b224Hash(pubKey)
-  const pubKeys = changeOutputFiles.map(
-    ({ cborXPubKeyHex }) => XPubKey(cborXPubKeyHex).pubKey,
+  const { pubKey, chainCode } = XPubKey(file.cborXPubKeyHex)
+  const xPubKey = Buffer.concat([pubKey, chainCode])
+  const address: Buffer = packBootstrapAddress(
+    file.path,
+    xPubKey,
+    undefined,
+    2,
+    network.protocolMagic,
   )
-  const addressType = getAddressType(output.address)
+  return {
+    address,
+    addressType: getAddressType(address),
+    paymentPath: file.path,
+  }
+}
+
+const _packBaseAddress = (
+  changeOutputFiles: HwSigningData[], network: Network,
+) => {
+  const stakePathFile = changeOutputFiles.find(({ path }) => isStakingPath(path))
+  const paymentPathFile = changeOutputFiles.find(({ path }) => !isStakingPath(path))
+  if (!stakePathFile || !paymentPathFile) return undefined
+  const { pubKey: stakePubKey } = XPubKey(stakePathFile.cborXPubKeyHex)
+  const { pubKey: paymentPubKey } = XPubKey(paymentPathFile.cborXPubKeyHex)
+  const address: Buffer = packBaseAddress(
+    getPubKeyBlake2b224Hash(paymentPubKey),
+    getPubKeyBlake2b224Hash(stakePubKey),
+    network.networkId,
+  )
+  return {
+    address,
+    addressType: getAddressType(address),
+    paymentPath: paymentPathFile.path,
+    stakePath: stakePathFile.path,
+  }
+}
+
+const getChangeAddress = (
+  changeOutputFiles: HwSigningData[],
+  network: Network,
+): _AddressParameters | undefined => {
+  if (changeOutputFiles.length === 1) {
+    return _packBootStrapAddress(changeOutputFiles[0], network)
+  }
+  if (changeOutputFiles.length === 2) {
+    return _packBaseAddress(changeOutputFiles, network)
+  }
+  return undefined
 }
 
 export {
@@ -103,4 +153,5 @@ export {
   filterSigningFiles,
   findSigningPath,
   encodeAddress,
+  getChangeAddress,
 }

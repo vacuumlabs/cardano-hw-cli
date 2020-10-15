@@ -74,7 +74,9 @@ const CommandExecutor = async () => {
     const network = NETWORKS[args.network]
     const txAux = TxAux(args.txBodyFileData.cborHex)
     validateUnsignedTx(txAux, args.hwSigningFileData)
-    const signedTx = await cryptoProvider.signTx(txAux, args.hwSigningFileData, network)
+    const signedTx = await cryptoProvider.signTx(
+      txAux, args.hwSigningFileData, network, args.changeOutputKeyFileData,
+    )
     write(args.outFile, TxSignedOutput(signedTx))
   }
 
@@ -82,7 +84,9 @@ const CommandExecutor = async () => {
     const network = NETWORKS[args.network]
     const txAux = TxAux(args.txBodyFileData.cborHex)
     validateUnsignedTx(txAux, [args.hwSigningFileData])
-    const txWitness = await cryptoProvider.witnessTx(txAux, args.hwSigningFileData, network)
+    const txWitness = await cryptoProvider.witnessTx(
+      txAux, args.hwSigningFileData, network, args.changeOutputKeyFileData,
+    )
     write(args.outFile, TxWitnessOutput(txWitness))
   }
 

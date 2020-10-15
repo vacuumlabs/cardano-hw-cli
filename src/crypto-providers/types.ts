@@ -23,3 +23,10 @@ export type CryptoProvider = {
   ) => Promise<_ShelleyWitness | _ByronWitness>
   getXPubKey: (path: BIP32Path) => Promise<XPubKeyHex>,
 }
+
+export type _AddressParameters = {
+  address: Buffer,
+  addressType: number,
+  paymentPath: BIP32Path,
+  stakePath?: BIP32Path,
+}

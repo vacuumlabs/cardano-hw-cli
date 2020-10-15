@@ -74,6 +74,7 @@ async function testTxSigning(cryptoProvider, transaction) {
     txAux,
     transaction.hwSigningFiles,
     NETWORKS.MAINNET,
+    [],
   )
   assert.deepStrictEqual(signedTxCborHex, transaction.signedTxCborHex)
 }

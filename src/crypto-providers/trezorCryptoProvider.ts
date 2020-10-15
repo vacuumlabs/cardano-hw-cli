@@ -9,7 +9,7 @@ import {
   _Certificate,
   _Withdrawal,
 } from '../transaction/types'
-import { CryptoProvider } from './types'
+import { CryptoProvider, _AddressParameters } from './types'
 import {
   TrezorInput,
   TrezorOutput,
@@ -30,6 +30,7 @@ import {
   encodeAddress,
   filterSigningFiles,
   findSigningPath,
+  getChangeAddress,
   getSigningPath,
 } from './util'
 
@@ -63,21 +64,28 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     }
   }
 
+  function prepareChangeOutput(
+    coins: number,
+    changeAddress: _AddressParameters,
+  ) {
+    return {
+      amount: `${coins}`,
+      addressParameters: {
+        addressType: changeAddress.addressType,
+        path: changeAddress.paymentPath,
+        stakingPath: changeAddress.stakePath,
+      },
+    }
+  }
+
   function prepareOutput(
     output: _Output,
-    changeOutputFiles: HwSigningData[],
+    changeAddress?: _AddressParameters,
   ): TrezorOutput {
     const address = encodeAddress(output.address)
-    // if (output.isChange) {
-    //   return {
-    //     amount: `${output.coins}`,
-    //     addressParameters: {
-    //       addressType: 0, // TODO: 0 for base address
-    //       path: output.spendingPath,
-    //       stakingPath: output.stakingPath,
-    //     },
-    //   }
-    // } else {
+    if (changeAddress && !changeAddress.address.compare(output.address)) {
+      return prepareChangeOutput(output.coins, changeAddress)
+    }
     return {
       address,
       amount: `${output.coins}`,
@@ -141,7 +149,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
   function prepareWithdrawal(
     withdrawal: _Withdrawal, stakeSigningFiles: HwSigningData[],
   ): TrezorWithdrawal {
-    const pubKeyHash = withdrawal.address.slice(1)
+    const pubKeyHash = withdrawal.address.slice(1) // TODO: helper
     const path = findSigningPath(pubKeyHash, stakeSigningFiles)
     return {
       path,
@@ -162,8 +170,9 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     const inputs = txAux.inputs.map(
       (input, i) => prepareInput(input, getSigningPath(paymentSigningFiles, i)),
     )
+    const changeAddress = getChangeAddress(changeOutputFiles, network)
     const outputs = txAux.outputs.map(
-      (output) => prepareOutput(output, changeOutputFiles),
+      (output) => prepareOutput(output, changeAddress),
     )
     const certificates = txAux.certificates.map(
       (certificate) => prepareCertificate(certificate, stakeSigningFiles),
