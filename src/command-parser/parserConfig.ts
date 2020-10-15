@@ -1,9 +1,9 @@
 import { parseHwSigningFile, parsePath, parseTxBodyFile } from './parsers'
 
-const flag = { action: 'store_true' }
-
 const txSigningArgs = {
-  '--mainnet': flag,
+  '--network': { nargs: '?', dest: 'network', default: 'MAINNET' },
+  '--mainnet': { nargs: '?', dest: 'network', const: 'MAINNET' },
+  '--testnet': { nargs: '?', dest: 'network', const: 'TESTNET' },
   '--tx-body-file': {
     required: true, dest: 'txBodyFileData', type: (path: string) => parseTxBodyFile(path),
   },

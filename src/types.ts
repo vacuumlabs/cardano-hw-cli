@@ -44,9 +44,20 @@ export type ParsedVerificationKeyArguments = {
   verificationKeyFile: string,
 }
 
+const enum Networks {
+  'MAINNET',
+  'TESTNET',
+}
+
+export type Network = {
+  name: string,
+  networkId: number,
+  protocolMagic: number,
+}
+
 export type ParsedTransactionSignArguments = {
   command: CommandType.SIGN_TRANSACTION,
-  mainnet: boolean,
+  network: Networks,
   txBodyFileData: TxBodyData,
   hwSigningFileData: HwSigningData[],
   outFile: string,
@@ -55,7 +66,7 @@ export type ParsedTransactionSignArguments = {
 
 export type ParsedTransactionWitnessArguments = {
   command: CommandType.WITNESS_TRANSACTION,
-  mainnet: boolean,
+  network: Networks,
   txBodyFileData: TxBodyData,
   hwSigningFileData: HwSigningData,
   outFile: string,
