@@ -1,9 +1,18 @@
-import { parseHwSigningFile, parsePath, parseTxBodyFile } from './parsers'
+import {
+  parseHwSigningFile,
+  parseNetwork,
+  parsePath,
+  parseTxBodyFile,
+} from './parsers'
 
 const txSigningArgs = {
-  '--network': { nargs: '?', dest: 'network', default: 'MAINNET' },
-  '--mainnet': { nargs: '?', dest: 'network', const: 'MAINNET' },
-  '--testnet': { nargs: '?', dest: 'network', const: 'TESTNET' },
+  '--mainnet': {
+    nargs: '?',
+    dest: 'network',
+    const: parseNetwork('MAINNET'),
+    default: parseNetwork('MAINNET'),
+  },
+  '--testnet-magic': { nargs: '?', dest: 'network', type: (magic: string) => parseNetwork('TESTNET', magic) },
   '--tx-body-file': {
     required: true, dest: 'txBodyFileData', type: (path: string) => parseTxBodyFile(path),
   },

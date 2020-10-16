@@ -1,14 +1,14 @@
-import { Network } from './types'
+import { Network, NetworkIds } from './types'
 
 export const NETWORKS: {[key: string]: Network} = {
   MAINNET: {
     name: 'mainnet',
-    networkId: 1,
+    networkId: NetworkIds.MAINNET,
     protocolMagic: 764824073,
   },
   TESTNET: {
     name: 'testnet',
-    networkId: 0,
+    networkId: NetworkIds.TESTNET,
     protocolMagic: 42,
   },
 }

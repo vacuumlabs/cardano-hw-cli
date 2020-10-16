@@ -1,7 +1,7 @@
 // import { HARDENED_THRESHOLD } from '../constants'
 import { XPubKey } from '../transaction/transaction'
 import { TxCertificateKeys, _TxAux } from '../transaction/types'
-import { BIP32Path, HwSigningData, Network } from '../types'
+import { BIP32Path, HwSigningData, Network, NetworkIds } from '../types'
 import { _AddressParameters } from './types'
 
 const {
@@ -12,17 +12,24 @@ const {
   getAddressType,
   packBootstrapAddress,
   packBaseAddress,
+  getShelleyAddressNetworkId,
 } = require('cardano-crypto.js')
 
 // const isShelleyPath = (path: number[]) => path[0] - HARDENED_THRESHOLD === 1852
 
 const isStakingPath = (path: number[]) => path[3] === 2
 
-const encodeAddress = (address: Buffer): string => (
-  getAddressType(address) === AddressTypes.ENTERPRISE
-    ? base58.encode(address)
-    : bech32.encode('addr', address)
-)
+const encodeAddress = (address: Buffer): string => {
+  if (getAddressType(address) === AddressTypes.ENTERPRISE) {
+    return base58.encode(address)
+  }
+  const prefixes: {[key: number]: string} = {
+    [NetworkIds.MAINNET]: 'addr',
+    [NetworkIds.TESTNET]: 'addr_test',
+  }
+  const networkId = getShelleyAddressNetworkId(address)
+  return bech32.encode(prefixes[networkId], address)
+}
 
 const getSigningPath = (
   signingFiles: HwSigningData[], i: number,

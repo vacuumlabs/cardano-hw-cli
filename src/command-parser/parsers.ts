@@ -1,4 +1,4 @@
-import { HARDENED_THRESHOLD } from '../constants'
+import { HARDENED_THRESHOLD, NETWORKS} from '../constants'
 import { isBIP32Path, isHwSigningData, isTxBodyData } from '../guards'
 import {
   BIP32Path,
@@ -6,6 +6,14 @@ import {
 } from '../types'
 
 const fs = require('fs')
+
+export const parseNetwork = (name: string, protocolMagic?: string) => {
+  if (!protocolMagic) return NETWORKS[name]
+  return {
+    networkId: NETWORKS[name].networkId,
+    protocolMagic: parseInt(protocolMagic, 10),
+  }
+}
 
 export const parsePath = (
   path: string,
