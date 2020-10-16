@@ -18,6 +18,7 @@ const {
   packBootstrapAddress,
   packBaseAddress,
   getShelleyAddressNetworkId,
+  packEnterpriseAddress,
 } = require('cardano-crypto.js')
 
 const isShelleyPath = (path: number[]) => path[0] - HARDENED_THRESHOLD === 1852
@@ -25,7 +26,7 @@ const isShelleyPath = (path: number[]) => path[0] - HARDENED_THRESHOLD === 1852
 const isStakingPath = (path: number[]) => path[3] === 2
 
 const encodeAddress = (address: Buffer): string => {
-  if (getAddressType(address) === AddressTypes.ENTERPRISE) {
+  if (getAddressType(address) === AddressTypes.BOOTSTRAP) {
     return base58.encode(address)
   }
   const prefixes: {[key: number]: string} = {
@@ -114,8 +115,8 @@ const _packBootStrapAddress = (
   const address: Buffer = packBootstrapAddress(
     file.path,
     xPubKey,
-    undefined,
-    2,
+    undefined, // passphrase is undefined for derivation scheme v2
+    2, // derivation scheme is always 2 for hw wallets
     network.protocolMagic,
   )
   return {
@@ -146,17 +147,43 @@ const _packBaseAddress = (
   }
 }
 
+const _packEnterpriseAddress = (
+  changeOutputFile: HwSigningData, network: Network,
+) => {
+  const { pubKey: paymentPubKey } = XPubKey(changeOutputFile.cborXPubKeyHex)
+  const address: Buffer = packEnterpriseAddress(
+    getPubKeyBlake2b224Hash(paymentPubKey),
+    network.networkId,
+  )
+  return {
+    address,
+    addressType: getAddressType(address),
+    paymentPath: changeOutputFile.path,
+  }
+}
+
 const getChangeAddress = (
   changeOutputFiles: HwSigningData[],
+  outputAddress: Buffer,
   network: Network,
 ): _AddressParameters | undefined => {
-  if (changeOutputFiles.length === 1) {
-    return _packBootStrapAddress(changeOutputFiles[0], network)
+  const addressType = getAddressType(outputAddress)
+  try {
+    switch (addressType) {
+      case AddressTypes.BOOTSTRAP: return _packBootStrapAddress(
+        changeOutputFiles[0], network,
+      )
+      case AddressTypes.BASE: return _packBaseAddress(
+        changeOutputFiles, network,
+      )
+      case AddressTypes.ENTERPRISE: return _packEnterpriseAddress(
+        changeOutputFiles[0], network,
+      )
+      default: return undefined
+    }
+  } catch (e) {
+    return undefined
   }
-  if (changeOutputFiles.length === 2) {
-    return _packBaseAddress(changeOutputFiles, network)
-  }
-  return undefined
 }
 
 export {

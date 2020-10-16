@@ -80,8 +80,10 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
 
   function prepareOutput(
     output: _Output,
-    changeAddress?: _AddressParameters,
+    network: Network,
+    changeOutputFiles: HwSigningData[],
   ): TrezorOutput {
+    const changeAddress = getChangeAddress(changeOutputFiles, output.address, network)
     const address = encodeAddress(output.address)
     if (changeAddress && !changeAddress.address.compare(output.address)) {
       return prepareChangeOutput(output.coins, changeAddress)
@@ -142,7 +144,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
       case TxCertificateKeys.STAKEPOOL_REGISTRATION:
         return prepareStakePoolRegistrationCert(certificate, stakeSigningFiles)
       default:
-        throw Error('UnknownCertificateError')
+        throw Error('UnknownCertificateTypeError')
     }
   }
 
@@ -170,9 +172,8 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     const inputs = txAux.inputs.map(
       (input, i) => prepareInput(input, getSigningPath(paymentSigningFiles, i)),
     )
-    const changeAddress = getChangeAddress(changeOutputFiles, network)
     const outputs = txAux.outputs.map(
-      (output) => prepareOutput(output, changeAddress),
+      (output) => prepareOutput(output, network, changeOutputFiles),
     )
     const certificates = txAux.certificates.map(
       (certificate) => prepareCertificate(certificate, stakeSigningFiles),
