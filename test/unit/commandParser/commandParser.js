@@ -1,6 +1,7 @@
 const assert = require('assert')
 const { parse } = require('../../../src/command-parser/commandParser')
 const { CommandType, HwSigningType } = require('../../../src/types')
+const { NETWORKS } = require('../../../src/constants')
 
 const resFolder = 'test/unit/commandParser/res/'
 const prefix = (filename) => `${resFolder}${filename}`
@@ -68,7 +69,7 @@ describe('Command parser', () => {
     const command = parse(args)
     const expectedResult = {
       command: CommandType.SIGN_TRANSACTION,
-      mainnet: true,
+      network: NETWORKS.MAINNET,
       txBodyFileData: {
         // eslint-disable-next-line max-len
         cborHex: '839f8200d81858248258206ca5fde47f4ff7f256a7464dbf0cb9b4fb6bce9049eee1067eed65cf5d6e2765008200d81858248258206ca5fde47f4ff7f256a7464dbf0cb9b4fb6bce9049eee1067eed65cf5d6e276501ff9f8282d818584283581c13f3997560a5b81f5ac680b3322a2339433424e4e589ab3d752afdb6a101581e581c2eab4601bfe583febc23a04fb0abc21557adb47cea49c68d7b2f40a5001ac63884bf182f8282d818584283581cf9a5257f805a1d378c87b0bfb09232c10d9098bc56fd21d9a6a4072aa101581e581c140539c64edded60a7f2c4692c460a154cbdd06088333fd7f75ea7e7001a0ff80ab91a002a81c7ffa0',
@@ -81,7 +82,7 @@ describe('Command parser', () => {
         },
       ],
       outFile: 'test/unit/commandParser/res/tx.signed',
-      changeOutputKeyFileData: undefined,
+      changeOutputKeyFileData: [],
     }
     assert.deepEqual(command, expectedResult)
   })
@@ -95,14 +96,15 @@ describe('Command parser', () => {
       prefix('tx.raw'),
       '--hw-signing-file',
       prefix('payment.hwsfile'),
-      '--mainnet',
+      '--testnet-magic',
+      42,
       '--out-file',
       prefix('witness.out'),
     ])
     const command = parse(args)
     const expectedResult = {
       command: CommandType.WITNESS_TRANSACTION,
-      mainnet: true,
+      network: NETWORKS.TESTNET,
       txBodyFileData: {
         // eslint-disable-next-line max-len
         cborHex: '839f8200d81858248258206ca5fde47f4ff7f256a7464dbf0cb9b4fb6bce9049eee1067eed65cf5d6e2765008200d81858248258206ca5fde47f4ff7f256a7464dbf0cb9b4fb6bce9049eee1067eed65cf5d6e276501ff9f8282d818584283581c13f3997560a5b81f5ac680b3322a2339433424e4e589ab3d752afdb6a101581e581c2eab4601bfe583febc23a04fb0abc21557adb47cea49c68d7b2f40a5001ac63884bf182f8282d818584283581cf9a5257f805a1d378c87b0bfb09232c10d9098bc56fd21d9a6a4072aa101581e581c140539c64edded60a7f2c4692c460a154cbdd06088333fd7f75ea7e7001a0ff80ab91a002a81c7ffa0',
@@ -113,7 +115,44 @@ describe('Command parser', () => {
         cborXPubKeyHex: '5880e0d9c2e5b...7277e7db',
       },
       outFile: 'test/unit/commandParser/res/witness.out',
-      changeOutputKeyFileData: undefined,
+      changeOutputKeyFileData: [],
+    }
+    assert.deepEqual(command, expectedResult)
+  })
+  it('Should parse sign transaction with change', () => {
+    const args = pad([
+      'shelley',
+      'transaction',
+      'sign',
+      '--tx-body-file',
+      prefix('tx.raw'),
+      '--hw-signing-file',
+      prefix('payment.hwsfile'),
+      '--mainnet',
+      '--change-output-key-file',
+      prefix('payment.hwsfile'),
+      '--out-file',
+      prefix('tx.signed'),
+    ])
+    const command = parse(args)
+    const expectedResult = {
+      command: CommandType.SIGN_TRANSACTION,
+      network: NETWORKS.MAINNET,
+      txBodyFileData: {
+        // eslint-disable-next-line max-len
+        cborHex: '839f8200d81858248258206ca5fde47f4ff7f256a7464dbf0cb9b4fb6bce9049eee1067eed65cf5d6e2765008200d81858248258206ca5fde47f4ff7f256a7464dbf0cb9b4fb6bce9049eee1067eed65cf5d6e276501ff9f8282d818584283581c13f3997560a5b81f5ac680b3322a2339433424e4e589ab3d752afdb6a101581e581c2eab4601bfe583febc23a04fb0abc21557adb47cea49c68d7b2f40a5001ac63884bf182f8282d818584283581cf9a5257f805a1d378c87b0bfb09232c10d9098bc56fd21d9a6a4072aa101581e581c140539c64edded60a7f2c4692c460a154cbdd06088333fd7f75ea7e7001a0ff80ab91a002a81c7ffa0',
+      },
+      hwSigningFileData: [{
+        type: 0,
+        path: [2147485463, 2147485500, 2147483648, 2, 1],
+        cborXPubKeyHex: '5880e0d9c2e5b...7277e7db',
+      }],
+      outFile: 'test/unit/commandParser/res/tx.signed',
+      changeOutputKeyFileData: [{
+        type: 0,
+        path: [2147485463, 2147485500, 2147483648, 2, 1],
+        cborXPubKeyHex: '5880e0d9c2e5b...7277e7db',
+      }],
     }
     assert.deepEqual(command, expectedResult)
   })

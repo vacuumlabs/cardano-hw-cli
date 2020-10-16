@@ -1,5 +1,4 @@
 import { CryptoProvider } from './crypto-providers/types'
-import { NETWORKS } from './constants'
 import {
   TxSignedOutput,
   write,

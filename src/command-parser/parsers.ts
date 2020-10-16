@@ -1,4 +1,4 @@
-import { HARDENED_THRESHOLD, NETWORKS} from '../constants'
+import { HARDENED_THRESHOLD, NETWORKS } from '../constants'
 import { isBIP32Path, isHwSigningData, isTxBodyData } from '../guards'
 import {
   BIP32Path,

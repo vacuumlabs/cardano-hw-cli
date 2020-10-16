@@ -50,7 +50,6 @@ export enum NetworkIds {
 }
 
 export type Network = {
-  name: string,
   networkId: number,
   protocolMagic: number,
 }

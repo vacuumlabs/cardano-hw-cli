@@ -34,7 +34,6 @@ const parsedArgs = parse(process.argv)
 
 executeCommand(parsedArgs).catch((e) => {
   // eslint-disable-next-line no-console
-  console.log(e)
   console.log(getErrorTranslation(e))
   // get help for command
 }).finally(() => {
