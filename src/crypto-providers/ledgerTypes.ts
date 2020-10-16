@@ -21,3 +21,8 @@ export type LedgerCertificate = {
   path: any // BIP32Path,
   poolKeyHashHex?: string
 }
+
+export type LedgerWithdrawal = {
+  path: string | BIP32Path
+  amountStr: string
+}

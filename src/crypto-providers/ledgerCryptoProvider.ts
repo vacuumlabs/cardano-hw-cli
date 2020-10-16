@@ -17,6 +17,7 @@ import {
   XPubKeyHex,
   _Certificate,
   TxCertificateKeys,
+  _Withdrawal,
 } from '../transaction/types'
 import { BIP32Path, HwSigningData } from '../types'
 import {
@@ -29,6 +30,7 @@ import {
   LedgerCertificate,
   LedgerInput,
   LedgerOutput,
+  LedgerWithdrawal,
   LedgerWitness,
 } from './ledgerTypes'
 import { CryptoProvider } from './types'
@@ -120,25 +122,31 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     }
   }
 
+  function prepareWithdrawal(
+    withdrawal: _Withdrawal, stakeSigningFiles: HwSigningData[],
+  ): LedgerWithdrawal {
+    const pubKeyHash = withdrawal.address.slice(1)
+    const path = findSigningPath(pubKeyHash, stakeSigningFiles)
+    return {
+      path,
+      amountStr: `${withdrawal.coins}`,
+    }
+  }
+
   const ledgerSignTx = async (
     txAux: _TxAux, signingFiles: HwSigningData[], network: any,
   ): Promise<LedgerWitness[]> => {
-    const {
-      paymentSigningFiles,
-      stakeSigningFiles,
-    } = filterSigningFiles(signingFiles)
+    const { paymentSigningFiles, stakeSigningFiles } = filterSigningFiles(signingFiles)
     const inputs = txAux.inputs.map((input, i) => prepareInput(input, getSigningPath(paymentSigningFiles, i)))
     const outputs = txAux.outputs.map((output) => prepareOutput(output))
-    // const certificates = txAux.certs.map((cert) => _prepareCert(cert, addressToAbsPathMapper))
     const certificates = txAux.certificates.map(
       (certificate) => prepareCertificate(certificate, stakeSigningFiles),
     )
     const { fee } = txAux
     const { ttl } = txAux
-    const withdrawals = [] as any
-    // const withdrawals = txAux.withdrawals
-    //   ? [_prepareWithdrawal(txAux.withdrawals, addressToAbsPathMapper)]
-    //   : []
+    const withdrawals = txAux.withdrawals.map(
+      (withdrawal) => prepareWithdrawal(withdrawal, stakeSigningFiles),
+    )
 
     const response = await ledger.signTransaction(
       network.networkId,
