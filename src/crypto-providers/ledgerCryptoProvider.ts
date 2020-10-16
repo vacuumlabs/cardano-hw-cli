@@ -32,10 +32,11 @@ import {
   LedgerWithdrawal,
   LedgerWitness,
 } from './ledgerTypes'
-import { CryptoProvider } from './types'
+import { CryptoProvider, _AddressParameters } from './types'
 import {
   filterSigningFiles,
   findSigningPath,
+  getChangeAddress,
   getSigningPath,
   isShelleyPath,
 } from './util'
@@ -55,15 +56,27 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     }
   }
 
-  function prepareOutput(output: _Output): LedgerOutput {
-    //  return output.isChange
-    //   ? {
-    //     addressTypeNibble: 0, // TODO: get from address
-    //     spendingPath: output.spendingPath,
-    //     amountStr: `${output.coins}`,
-    //     stakingPath: output.stakingPath,
-    //   }
-    //   : {
+  function prepareChangeOutput(
+    coins: number,
+    changeOutput: _AddressParameters,
+  ): LedgerOutput {
+    return {
+      addressTypeNibble: changeOutput.addressType, // TODO: get from address
+      spendingPath: changeOutput.paymentPath,
+      amountStr: `${coins}`,
+      stakingPath: changeOutput.stakePath,
+    }
+  }
+
+  function prepareOutput(
+    output: _Output,
+    changeOutputFiles: HwSigningData[],
+    network: Network,
+  ): LedgerOutput {
+    const changeAddress = getChangeAddress(changeOutputFiles, output.address, network)
+    if (changeAddress && !changeAddress.address.compare(output.address)) {
+      return prepareChangeOutput(output.coins, changeAddress)
+    }
     return {
       amountStr: `${output.coins}`,
       addressHex: output.address.toString('hex'),
@@ -136,11 +149,13 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
   }
 
   const ledgerSignTx = async (
-    txAux: _TxAux, signingFiles: HwSigningData[], network: Network,
+    txAux: _TxAux, signingFiles: HwSigningData[], network: Network, changeOutputFiles: HwSigningData[],
   ): Promise<LedgerWitness[]> => {
     const { paymentSigningFiles, stakeSigningFiles } = filterSigningFiles(signingFiles)
     const inputs = txAux.inputs.map((input, i) => prepareInput(input, getSigningPath(paymentSigningFiles, i)))
-    const outputs = txAux.outputs.map((output) => prepareOutput(output))
+    const outputs = txAux.outputs.map(
+      (output) => prepareOutput(output, changeOutputFiles, network),
+    )
     const certificates = txAux.certificates.map(
       (certificate) => prepareCertificate(certificate, stakeSigningFiles),
     )
@@ -171,7 +186,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     }))
   }
 
-  const createWitnesses = async (txAux: _TxAux, signingFiles: HwSigningData[], network: Network): Promise<{
+  const createWitnesses = async (ledgerWitnesses: LedgerWitness[], signingFiles: HwSigningData[]): Promise<{
     byronWitnesses: TxWitnessByron[]
     shelleyWitnesses: TxWitnessShelley[]
   }> => {
@@ -186,8 +201,6 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
       if (hwSigningData) return hwSigningData
       throw new Error(`Can not find hw signing data with path ${path}`)
     }
-
-    const ledgerWitnesses = await ledgerSignTx(txAux, signingFiles, network)
 
     const byronWitnesses = ledgerWitnesses
       .filter((witness) => !isShelleyPath(witness.path))
@@ -211,21 +224,22 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
   const signTx = async (
     txAux: _TxAux, signingFiles: HwSigningData[], network: Network, changeOutputFiles: HwSigningData[],
   ): Promise<SignedTxCborHex> => {
-    const { byronWitnesses, shelleyWitnesses } = await createWitnesses(txAux, signingFiles, network)
+    const ledgerWitnesses = await ledgerSignTx(txAux, signingFiles, network, changeOutputFiles)
+    const { byronWitnesses, shelleyWitnesses } = await createWitnesses(ledgerWitnesses, signingFiles)
     return TxSigned(txAux.unsignedTxDecoded, byronWitnesses, shelleyWitnesses)
   }
 
   const witnessTx = async (
     txAux: _TxAux, signingFiles: HwSigningData, network: Network, changeOutputFiles: HwSigningData[],
   ): Promise<_ShelleyWitness | _ByronWitness> => {
-    const { byronWitnesses, shelleyWitnesses } = await createWitnesses(txAux, [signingFiles], network)
+    const ledgerWitnesses = await ledgerSignTx(txAux, [signingFiles], network, changeOutputFiles)
+    const { byronWitnesses, shelleyWitnesses } = await createWitnesses(ledgerWitnesses, [signingFiles])
     const _byronWitnesses = byronWitnesses.map((byronWitness) => ({ data: byronWitness }) as _ByronWitness)
     const _shelleyWitnesses = shelleyWitnesses.map((shelleyWitness) => (
       { data: shelleyWitness }
     ) as _ShelleyWitness)
 
     if (_byronWitnesses.length + _shelleyWitnesses.length !== 1) throw new Error('Multiple witnesses found')
-
     return _shelleyWitnesses.length === 1 ? _shelleyWitnesses[0] : _byronWitnesses[0]
   }
 

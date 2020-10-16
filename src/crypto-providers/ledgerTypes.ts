@@ -9,6 +9,12 @@ export type LedgerInput = {
 export type LedgerOutput = {
   amountStr: string
   addressHex: string
+} | {
+  addressTypeNibble: number
+  spendingPath: BIP32Path,
+  amountStr: string
+  stakingPath?: BIP32Path,
+  stakingKeyHashHex?: string
 }
 
 export type LedgerWitness = {
@@ -18,7 +24,7 @@ export type LedgerWitness = {
 
 export type LedgerCertificate = {
   type: number
-  path: any // BIP32Path,
+  path: BIP32Path,
   poolKeyHashHex?: string
 }
 
