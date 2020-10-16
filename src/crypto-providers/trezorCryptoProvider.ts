@@ -132,18 +132,18 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
   function prepareCertificate(
     certificate: _Certificate, stakeSigningFiles: HwSigningData[],
   ): TrezorCertificate {
-    type certificatePreparer =
-    | typeof prepareStakingKeyRegistrationCert
-    | typeof prepareDelegationCert
-    | typeof prepareStakePoolRegistrationCert
-
-    const certificatePreparerers: {[key: number]: certificatePreparer} = {
-      [TxCertificateKeys.STAKING_KEY_REGISTRATION]: prepareStakingKeyRegistrationCert,
-      [TxCertificateKeys.STAKING_KEY_DEREGISTRATION]: prepareStakingKeyRegistrationCert,
-      [TxCertificateKeys.DELEGATION]: prepareDelegationCert,
-      [TxCertificateKeys.STAKEPOOL_REGISTRATION]: prepareStakePoolRegistrationCert,
+    switch (certificate.type) {
+      case TxCertificateKeys.STAKING_KEY_REGISTRATION:
+        return prepareStakingKeyRegistrationCert(certificate, stakeSigningFiles)
+      case TxCertificateKeys.STAKING_KEY_DEREGISTRATION:
+        return prepareStakingKeyRegistrationCert(certificate, stakeSigningFiles)
+      case TxCertificateKeys.DELEGATION:
+        return prepareDelegationCert(certificate, stakeSigningFiles)
+      case TxCertificateKeys.STAKEPOOL_REGISTRATION:
+        return prepareStakePoolRegistrationCert(certificate, stakeSigningFiles)
+      default:
+        throw Error('UnknownCertificateError')
     }
-    return certificatePreparerers[certificate.type](certificate, stakeSigningFiles)
   }
 
   function prepareWithdrawal(

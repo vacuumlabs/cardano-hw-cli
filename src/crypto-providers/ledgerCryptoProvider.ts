@@ -1,4 +1,3 @@
-import { HARDENED_THRESHOLD } from '../constants'
 import {
   TxByronWitness,
   TxShelleyWitness,
@@ -19,7 +18,7 @@ import {
   TxCertificateKeys,
   _Withdrawal,
 } from '../transaction/types'
-import { BIP32Path, HwSigningData } from '../types'
+import { BIP32Path, HwSigningData, Network } from '../types'
 import {
   isDelegationCertificate,
   isStakepoolRegistrationCertificate,
@@ -34,7 +33,12 @@ import {
   LedgerWitness,
 } from './ledgerTypes'
 import { CryptoProvider } from './types'
-import { filterSigningFiles, findSigningPath, getSigningPath } from './util'
+import {
+  filterSigningFiles,
+  findSigningPath,
+  getSigningPath,
+  isShelleyPath,
+} from './util'
 
 const TransportNodeHid = require('@ledgerhq/hw-transport-node-hid').default
 const Ledger = require('@cardano-foundation/ledgerjs-hw-app-cardano').default
@@ -65,8 +69,6 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
       addressHex: output.address.toString('hex'),
     }
   }
-
-  const isShelleyPath = (path: number[]) => path[0] - HARDENED_THRESHOLD === 1852
 
   function prepareStakingKeyRegistrationCert(
     cert: _Certificate, stakeSigningFiles: HwSigningData[],
@@ -134,7 +136,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
   }
 
   const ledgerSignTx = async (
-    txAux: _TxAux, signingFiles: HwSigningData[], network: any,
+    txAux: _TxAux, signingFiles: HwSigningData[], network: Network,
   ): Promise<LedgerWitness[]> => {
     const { paymentSigningFiles, stakeSigningFiles } = filterSigningFiles(signingFiles)
     const inputs = txAux.inputs.map((input, i) => prepareInput(input, getSigningPath(paymentSigningFiles, i)))
@@ -169,7 +171,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     }))
   }
 
-  const createWitnesses = async (txAux: _TxAux, signingFiles: HwSigningData[], network: any): Promise<{
+  const createWitnesses = async (txAux: _TxAux, signingFiles: HwSigningData[], network: Network): Promise<{
     byronWitnesses: TxWitnessByron[]
     shelleyWitnesses: TxWitnessShelley[]
   }> => {
@@ -207,14 +209,14 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
   }
 
   const signTx = async (
-    txAux: _TxAux, signingFiles: HwSigningData[], network: any,
+    txAux: _TxAux, signingFiles: HwSigningData[], network: Network, changeOutputFiles: HwSigningData[],
   ): Promise<SignedTxCborHex> => {
     const { byronWitnesses, shelleyWitnesses } = await createWitnesses(txAux, signingFiles, network)
     return TxSigned(txAux.unsignedTxDecoded, byronWitnesses, shelleyWitnesses)
   }
 
   const witnessTx = async (
-    txAux: _TxAux, signingFiles: HwSigningData, network: any,
+    txAux: _TxAux, signingFiles: HwSigningData, network: Network, changeOutputFiles: HwSigningData[],
   ): Promise<_ShelleyWitness | _ByronWitness> => {
     const { byronWitnesses, shelleyWitnesses } = await createWitnesses(txAux, [signingFiles], network)
     const _byronWitnesses = byronWitnesses.map((byronWitness) => ({ data: byronWitness }) as _ByronWitness)

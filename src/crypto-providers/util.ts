@@ -1,7 +1,12 @@
-// import { HARDENED_THRESHOLD } from '../constants'
+import { HARDENED_THRESHOLD } from '../constants'
 import { XPubKey } from '../transaction/transaction'
 import { TxCertificateKeys, _TxAux } from '../transaction/types'
-import { BIP32Path, HwSigningData, Network, NetworkIds } from '../types'
+import {
+  BIP32Path,
+  HwSigningData,
+  Network,
+  NetworkIds,
+} from '../types'
 import { _AddressParameters } from './types'
 
 const {
@@ -15,7 +20,7 @@ const {
   getShelleyAddressNetworkId,
 } = require('cardano-crypto.js')
 
-// const isShelleyPath = (path: number[]) => path[0] - HARDENED_THRESHOLD === 1852
+const isShelleyPath = (path: number[]) => path[0] - HARDENED_THRESHOLD === 1852
 
 const isStakingPath = (path: number[]) => path[3] === 2
 
@@ -155,6 +160,7 @@ const getChangeAddress = (
 }
 
 export {
+  isShelleyPath,
   validateUnsignedTx,
   getSigningPath,
   filterSigningFiles,

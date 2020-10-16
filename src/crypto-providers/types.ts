@@ -10,8 +10,7 @@ import { HwSigningData, BIP32Path, Network } from '../types'
 export type CryptoProvider = {
   signTx: (
     txAux: _TxAux,
-    signingFiles:
-    HwSigningData[],
+    signingFiles: HwSigningData[],
     network: Network,
     changeOutputFiles: HwSigningData[],
   ) => Promise<SignedTxCborHex>,
