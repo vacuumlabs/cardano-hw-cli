@@ -1,4 +1,6 @@
 /node_modules
 /dist
-/build
+/build/*
+!/build/Release
 .vscode
+trezor-extended
