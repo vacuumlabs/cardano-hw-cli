@@ -1,14 +1,13 @@
 import { HARDENED_THRESHOLD } from './constants'
+import { isStakingPath } from './crypto-providers/util'
 import {
   SignedTxCborHex,
   SignedTxOutput,
   TxWitnessKeys,
   WitnessOutput,
-  WitnessOutputTypes,
   XPubKeyHex,
   _ByronWitness,
   _ShelleyWitness,
-  // _XPubKey,
 } from './transaction/types'
 import {
   BIP32Path,
@@ -26,48 +25,46 @@ const write = (path: string, data: OutputData) => fs.writeFileSync(
   'utf8',
 )
 
-function TxSignedOutput(signedTxCborHex: SignedTxCborHex): SignedTxOutput {
-  return {
-    type: 'TxSignedShelley',
-    description: '',
-    cborHex: signedTxCborHex,
-  }
-}
+const TxSignedOutput = (signedTxCborHex: SignedTxCborHex): SignedTxOutput => ({
+  type: 'TxSignedShelley',
+  description: '',
+  cborHex: signedTxCborHex,
+})
 
-function TxWitnessOutput(
+const TxWitnessOutput = (
   { key, data }: _ByronWitness | _ShelleyWitness,
-): WitnessOutput {
-  const type = key === TxWitnessKeys.SHELLEY
-    ? WitnessOutputTypes.SHELLEY
-    : WitnessOutputTypes.BYRON
+): WitnessOutput => {
+  const witnessTypes: {[key: number]: string} = {
+    [TxWitnessKeys.SHELLEY]: 'TxWitnessShelley',
+    [TxWitnessKeys.BYRON]: 'TxWitnessByron',
+  }
   return {
-    type,
+    type: witnessTypes[key],
     description: '',
     cborHex: cbor.encode([key, data]).toString('hex'),
   }
 }
 
-function PathOutput(path: BIP32Path): string {
-  return path
-    .map((value) => (value >= HARDENED_THRESHOLD ? `${value - HARDENED_THRESHOLD}H` : `${value}`))
-    .join('/')
-}
+const PathOutput = (path: BIP32Path): string => path
+  .map((value) => (value >= HARDENED_THRESHOLD ? `${value - HARDENED_THRESHOLD}H` : `${value}`))
+  .join('/')
 
-function HwSigningKeyOutput(xPubKey: XPubKeyHex, path: BIP32Path): HwSigningOutput {
-  const type = path[3] === 0 ? 'Payment' : 'Stake'
+const HwSigningKeyOutput = (xPubKey: XPubKeyHex, path: BIP32Path): HwSigningOutput => {
+  const type = isStakingPath(path) ? 'Stake' : 'Payment'
   return {
-    type: `${type}HWSigningFileShelley_ed25519`, // TODO
-    description: '',
+    type: `${type}HWSigningFileShelley_ed25519`,
+    description: `${type} Hardware Signing File`,
     path: PathOutput(path),
     cborXPubKeyHex: cbor.encode(Buffer.from(xPubKey, 'hex')).toString('hex'),
   }
 }
 
-function HwVerificationKeyOutput(xPubKey: XPubKeyHex, path: BIP32Path): VerificationKeyOutput {
-  const pubKey = Buffer.from(xPubKey, 'hex').slice(-64).slice(0, 32) // TODO
-  const type = path[3] === 0 ? 'Payment' : 'Stake'
+const HwVerificationKeyOutput = (xPubKey: XPubKeyHex, path: BIP32Path): VerificationKeyOutput => {
+  // to get pub key also from cbor encoded xpub
+  const pubKey = Buffer.from(xPubKey, 'hex').slice(-64).slice(0, 32)
+  const type = isStakingPath(path) ? 'Stake' : 'Payment'
   return {
-    type: `${type}VerificationKeyShelley_ed25519`, // TODO
+    type: `${type}VerificationKeyShelley_ed25519`,
     description: `${type} Verification Key`,
     cborHex: cbor.encode(pubKey).toString('hex'),
   }
