@@ -1,6 +1,8 @@
 import {
   BIP32Path,
-  CborHex, HwSigningData, TxBodyData,
+  CborHex,
+  HwSigningData,
+  TxBodyData,
 } from './types'
 
 const cbor = require('borc')
@@ -19,8 +21,7 @@ const isString = (test: any): test is string => test && typeof test === 'string'
 export const isBIP32Path = (
   test: any,
 ): test is BIP32Path => Array.isArray(test)
-  && test.length === 5
-  && test.every((element) => typeof element === 'number')
+  && test.every((element) => Number.isInteger(element))
 
 export const isHwSigningData = (
   test: any,
@@ -29,3 +30,9 @@ export const isHwSigningData = (
 export const isTxBodyData = (
   test: any,
 ): test is TxBodyData => isCborHex(test.cborHex)
+
+export const isArrayOfType = <T>(
+  test: any,
+  valueGuard: (test: any) => boolean,
+): test is T[] => Array.isArray(test)
+  && (test as any[]).every((value) => valueGuard(value))

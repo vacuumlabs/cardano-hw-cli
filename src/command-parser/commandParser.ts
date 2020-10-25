@@ -7,6 +7,7 @@ const makeParser = () => {
   const initParser = (parser: any, config: any) => {
     const isCommand = (str: string) => !str.startsWith('--')
     const commandType = (parent: string, current: string) => (parent ? `${parent}.${current}` : current)
+    parser.set_defaults({ parser })
     const subparsers = parser.add_subparsers()
 
     Object.keys(config).reduce((acc, key) => {
@@ -23,8 +24,16 @@ const makeParser = () => {
     return parser
   }
 
-  return initParser(new ArgumentParser({ description: 'Lorem Ipsum (TODO)' }), parserConfig)
+  return initParser(new ArgumentParser(
+    {
+      description: 'Command line tool for ledger/trezor transaction signing',
+      prog: 'cardano-hw-cli',
+    },
+  ), parserConfig)
 }
 
 // First 2 args are node version and script name
-export const parse = (inputArgs: string[]): ParsedArguments => makeParser().parse_args(inputArgs.slice(2))
+export const parse = (inputArgs: string[]): { parser: any, parsedArgs: ParsedArguments } => {
+  const { parser, ...parsedArgs } = makeParser().parse_args(inputArgs.slice(2))
+  return { parser, parsedArgs }
+}
