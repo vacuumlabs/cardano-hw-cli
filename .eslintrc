@@ -35,6 +35,7 @@
         "@typescript-eslint/no-shadow": "error",
         "import/extensions": 0,
         "max-len": [1, { "code": 110 }],
-        "import/prefer-default-export": "off"
+        "import/prefer-default-export": "off",
+        "no-underscore-dangle": "off"
     }
 }

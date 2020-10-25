@@ -10,9 +10,13 @@
     "build-js": "tsc",
     "dev": "yarn build-js && node dist/index.js",
     "eslint": "eslint src/ test/ --max-warnings=0 --ext .ts,.js",
-    "build": "yarn install && yarn build-js && pkg . -o ./build/cardano-hw-cli",
+    "build": "yarn clean && yarn install && yarn build-js && nexe dist/index.js -o ./build/cardano-hw-cli -r trezor-extended && cp package.json ./build/package.json",
+    "build-linux": "./scripts/build-linux-deb-package.sh",
     "test-unit": "mocha -r ts-node/register 'test/unit/**/*.js'",
-    "test-bin": "yarn build && ./build/cardano-hw-cli --help"
+    "test-bin": "yarn build && ./build/cardano-hw-cli --help",
+    "test-integration-ledger": "mocha -r ts-node/register 'test/integration/ledger/node/**/*.js'",
+    "test-integration-trezor": "mocha -r ts-node/register 'test/integration/trezor/node/**/*.js'",
+    "clean": "sudo rm -rf ./build/cardano-hw-cli && sudo rm -rf ./build/linux && sudo rm -rf  ./build/package.json && sudo rm -rf ./dist && sudo rm -rf ./node_modules"
   },
   "repository": {
     "type": "git",
@@ -26,9 +30,13 @@
   },
   "homepage": "https://github.com/vacuumlabs/cardano-hw-cli#readme",
   "dependencies": {
+    "@babel/runtime": "^7.11.2",
+    "@cardano-foundation/ledgerjs-hw-app-cardano": "https://github.com/vacuumlabs/ledgerjs-cardano-shelley/releases/download/v2.0.2-rc.0/cardano-foundation-ledgerjs-hw-app-cardano-2.0.1.tgz",
+    "@ledgerhq/hw-transport-node-hid": "^5.25.0",
     "argparse": "^2.0.1",
     "borc": "^2.1.2",
-    "cardano-crypto.js": "^5.3.6-rc.6"
+    "cardano-crypto.js": "^5.3.6-rc.6",
+    "trezor-connect": "^8.1.16-extended"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^4.2.0",
@@ -37,16 +45,9 @@
     "eslint-config-airbnb-base": "^14.2.0",
     "eslint-plugin-import": "^2.21.2",
     "mocha": "^8.1.3",
+    "nexe": "^3.3.7",
     "pkg": "^4.4.9",
     "ts-node": "^9.0.0",
     "typescript": "^4.0.3"
-  },
-  "bin": {
-    "index": "dist/index.js"
-  },
-  "pkg": {
-    "scripts": [
-      "dist/**/*.js"
-    ]
   }
 }
