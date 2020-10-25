@@ -1,6 +1,8 @@
 import { SignedTxOutput, WitnessOutput } from './transaction/types'
 
 export enum CommandType {
+  DEVICE_VERSION = 'device.version',
+  SHOW_ADDRESS = 'shelley.address.show',
   KEY_GEN = 'shelley.address.key-gen',
   VERIFICATION_KEY = 'shelley.key.verification-key',
   SIGN_TRANSACTION = 'shelley.transaction.sign',
@@ -31,6 +33,19 @@ export type TxBodyData = {
   cborHex: CborHex
 }
 
+export type Address = string
+
+export type ParsedDeviceVersionArguments = {
+  command: CommandType.DEVICE_VERSION,
+}
+
+export type ParsedShowAddressArguments = {
+  command: CommandType.SHOW_ADDRESS,
+  paymentPath: BIP32Path,
+  stakingPath: BIP32Path,
+  address: Address,
+}
+
 export type ParsedKeyGenArguments = {
   command: CommandType.KEY_GEN,
   path: BIP32Path,
@@ -44,25 +59,37 @@ export type ParsedVerificationKeyArguments = {
   verificationKeyFile: string,
 }
 
+export enum NetworkIds {
+  MAINNET = 1,
+  TESTNET = 0,
+}
+
+export type Network = {
+  networkId: number,
+  protocolMagic: number,
+}
+
 export type ParsedTransactionSignArguments = {
   command: CommandType.SIGN_TRANSACTION,
-  mainnet: boolean,
+  network: Network,
   txBodyFileData: TxBodyData,
   hwSigningFileData: HwSigningData[],
   outFile: string,
-  changeOutputKeyFileData?: HwSigningData,
+  changeOutputKeyFileData: HwSigningData[],
 }
 
 export type ParsedTransactionWitnessArguments = {
   command: CommandType.WITNESS_TRANSACTION,
-  mainnet: boolean,
+  network: Network,
   txBodyFileData: TxBodyData,
   hwSigningFileData: HwSigningData,
   outFile: string,
-  changeOutputKeyFileData?: HwSigningData,
+  changeOutputKeyFileData: HwSigningData[],
 }
 
 export type ParsedArguments =
+  | ParsedDeviceVersionArguments
+  | ParsedShowAddressArguments
   | ParsedKeyGenArguments
   | ParsedVerificationKeyArguments
   | ParsedTransactionSignArguments

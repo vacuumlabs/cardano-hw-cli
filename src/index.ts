@@ -1,10 +1,24 @@
+/* eslint-disable no-console */
 import { parse } from './command-parser/commandParser'
 import { CommandExecutor } from './commandExecutor'
+import { getErrorTranslation } from './errors'
+import NamedError from './namedError'
 import { CommandType } from './types'
 
-const parsedArgs = parse(process.argv)
-CommandExecutor().then(async (commandExecutor: any) => {
+const executeCommand = async (): Promise<void> => {
+  const { parser, parsedArgs } = parse(process.argv)
+  if (!Object.values(CommandType).includes(parsedArgs.command)) {
+    parser.print_help()
+    return
+  }
+  const commandExecutor = await CommandExecutor()
   switch (parsedArgs.command) {
+    case (CommandType.DEVICE_VERSION):
+      await commandExecutor.printVersion()
+      break
+    case (CommandType.SHOW_ADDRESS):
+      await commandExecutor.showAddress(parsedArgs)
+      break
     case (CommandType.KEY_GEN):
       await commandExecutor.createSigningKeyFile(parsedArgs)
       break
@@ -18,7 +32,11 @@ CommandExecutor().then(async (commandExecutor: any) => {
       await commandExecutor.createTxWitness(parsedArgs)
       break
     default:
-      break
+      throw NamedError('UndefinedCommandError')
   }
-  process.exit()
-})
+}
+
+executeCommand().catch((e) => {
+  console.log(getErrorTranslation(e))
+  console.log(e.stack)
+}).finally(() => process.exit())
