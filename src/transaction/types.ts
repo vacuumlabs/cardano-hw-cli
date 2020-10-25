@@ -29,7 +29,6 @@ export type _Output = {
   address: Buffer,
   coins: number,
 }
-
 export type _DelegationCert = {
   type: TxCertificateKeys.DELEGATION,
   pubKeyHash: Buffer,
@@ -46,17 +45,59 @@ export type _StakingKeyDeregistrationCert = {
   pubKeyHash: Buffer,
 }
 
+export const enum TxRelayTypes {
+  SINGLE_HOST_IP = 0,
+  SINGLE_HOST_NAME = 1,
+  MULTI_HOST_NAME = 2,
+}
+
+export type _SingleHostIPRelay = {
+  type: TxRelayTypes.SINGLE_HOST_IP,
+  portNumber?: number,
+  ipv4?: Buffer,
+  ipv6?: Buffer,
+}
+
+export type _SingleHostNameRelay = {
+  type: TxRelayTypes.SINGLE_HOST_NAME,
+  portNumber?: number,
+  dnsName: string,
+}
+
+export type _MultiHostNameRelay = {
+  type: TxRelayTypes.MULTI_HOST_NAME,
+  dnsName: string,
+}
+
+export type _PoolRelay = {
+  type: TxRelayTypes,
+  portNumber?: number,
+  ipv4?: Buffer,
+  ipv6?: Buffer,
+  dnsName?: string,
+}
+
+export type _PoolMetadataParams = {
+  metadataUrl: string,
+  metadataHash: Buffer,
+}
+
+export type _Margin = {
+  numerator: number,
+  denominator: number,
+}
+
 export type _StakepoolRegistrationCert = {
   type: TxCertificateKeys.STAKEPOOL_REGISTRATION,
-  poolPubKey: Buffer,
-  operatorPubKey: Buffer,
-  fixedCost: any,
-  margin: any,
-  tagged: any,
-  rewardAddressBuff: Buffer,
-  ownerPubKeys: Array<any>,
-  s1: any,
-  s2: any,
+  poolKeyHash: Buffer,
+  vrfPubKeyHash: Buffer,
+  pledge: number,
+  cost: number,
+  margin: _Margin, // tagged
+  rewardAddress: Buffer,
+  poolOwnersPubKeyHashes: Array<Buffer>,
+  relays: Array<_PoolRelay>,
+  metadata: _PoolMetadataParams,
 }
 
 export type _Certificate =
@@ -73,12 +114,12 @@ export type _Withdrawal = {
 export type _UnsignedTxParsed = {
   inputs: _Input[],
   outputs: _Output[],
-  fee: string,
-  ttl: string,
+  fee: number,
+  ttl: number,
   certificates: _Certificate[],
   withdrawals: _Withdrawal[],
-  metaDataHash?: Buffer
-  meta: Buffer | null
+  metaDataHash?: Buffer,
+  meta: Buffer | null,
 }
 
 export type TxWitnessByron = [
@@ -136,13 +177,8 @@ export type _ShelleyWitness = {
   data: TxWitnessShelley,
 }
 
-export const enum WitnessOutputTypes {
-  SHELLEY = 'TxWitnessShelley',
-  BYRON = 'TxWitnessByron',
-}
-
 export type WitnessOutput = {
-  type: WitnessOutputTypes
+  type: string
   description: '',
   cborHex: TxWitnessCborHex,
 }
@@ -152,3 +188,65 @@ export type SignedTxOutput = {
   description: '',
   cborHex: SignedTxCborHex,
 }
+
+export type TxInput = [
+  Buffer,
+  number
+]
+
+export type TxOutput = [
+  Buffer,
+  number
+]
+
+export type TxStakingKeyRegistrationCert = [
+  TxCertificateKeys.STAKING_KEY_REGISTRATION,
+  [number, Buffer],
+]
+
+export type TxStakingKeyDeregistrationCert = [
+  TxCertificateKeys.STAKING_KEY_DEREGISTRATION,
+  [number, Buffer],
+]
+
+export type TxDelegationCert = [
+  TxCertificateKeys.DELEGATION,
+  [number, Buffer],
+  Buffer,
+]
+
+export type TxSingleHostIPRelay = [
+  TxRelayTypes.SINGLE_HOST_IP,
+  number?,
+  Buffer?,
+  Buffer?,
+]
+
+export type TxSingleHostNameRelay = [
+  TxRelayTypes.SINGLE_HOST_NAME,
+  number,
+  string,
+]
+
+export type TxMultiHostNameRelay = [
+  TxRelayTypes.MULTI_HOST_NAME,
+  string,
+]
+
+export type TxStakepoolRegistrationCert = [
+  TxCertificateKeys.STAKEPOOL_REGISTRATION,
+  Buffer,
+  Buffer,
+  number,
+  number,
+  {
+    value: {
+      0: number,
+      1: number,
+    },
+  },
+  Buffer,
+  Array<Buffer>,
+  any,
+  [string, Buffer],
+]

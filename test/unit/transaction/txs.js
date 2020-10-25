@@ -25,8 +25,8 @@ const transactions = {
           coins: 3003112,
         },
       ],
-      fee: '42',
-      ttl: '10',
+      fee: 42,
+      ttl: 10,
       certificates: [],
       withdrawals: [
         {
@@ -72,8 +72,8 @@ const transactions = {
           coins: 3003112,
         },
       ],
-      fee: '42',
-      ttl: '10',
+      fee: 42,
+      ttl: 10,
       certificates: [{
         type: 0,
         pubKeyHash: Buffer.from('1d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c', 'hex'),
@@ -118,8 +118,8 @@ const transactions = {
           coins: 3003112,
         },
       ],
-      fee: '42',
-      ttl: '10',
+      fee: 42,
+      ttl: 10,
       certificates: [{
         type: 2,
         pubKeyHash: Buffer.from('1d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c', 'hex'),
@@ -164,8 +164,8 @@ const transactions = {
           coins: 3003112,
         },
       ],
-      fee: '42',
-      ttl: '10',
+      fee: 42,
+      ttl: 10,
       certificates: [{
         type: 1,
         pubKeyHash: Buffer.from('1d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c', 'hex'),
@@ -209,8 +209,8 @@ const transactions = {
           coins: 3003112,
         },
       ],
-      fee: '42',
-      ttl: '10',
+      fee: 42,
+      ttl: 10,
       certificates: [],
       withdrawals: [],
       metaDataHash: Buffer.from('deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef', 'hex'),
@@ -223,6 +223,74 @@ const transactions = {
     //       "953c5243ba09570dd4e52642236834c138ad4abbbb21796a90540a11e8dc96e47043401d370cdaed70ebc332dd4db80c9b167fd7f20971c4f142875cea57200c"
     //   }
     // ]
+  },
+  TxWithPoolRegistrationCertficate: {
+    /*
+    * txBody: a500818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7000181825839017cb05fce110fb999f01abb4f62bc455e217d4a51fde909fa9aea545443ac53c046cf6a42095e3c60310fa802771d0672f8fe2d1861138b090102182a030a04818a03581c13381d918ec0283ceeff60f7f4fc21e1540e053ccf8a77307a7a32ad582007821cd344d7fd7e3ae5f2ed863218cb979ff1d59e50c4276bdc479b0d0844501b0000000ba43b74001a1443fd00d81e82031864581de1794d9b3408c9fb67b950a48a0690f070f117e9978f7fc1d120fc58ad82581c1d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c581c794d9b3408c9fb67b950a48a0690f070f117e9978f7fc1d120fc58ad848400190bb84436e44b9af68400190bb84436e44b9b500178ff2483e3a2330a34c4a5e576c2078301190bb86d616161612e626262622e636f6d82026d616161612e626262632e636f6d82782968747470733a2f2f7777772e76616375756d6c6162732e636f6d2f73616d706c6555726c2e6a736f6e5820cdb714fd722c24aeb10c93dbb0ff03bd4783441cd5ba2a8b6f373390520535bb
+    */
+    unsignedCborHex: '82a500818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7000181825839017cb05fce110fb999f01abb4f62bc455e217d4a51fde909fa9aea545443ac53c046cf6a42095e3c60310fa802771d0672f8fe2d1861138b090102182a030a04818a03581c13381d918ec0283ceeff60f7f4fc21e1540e053ccf8a77307a7a32ad582007821cd344d7fd7e3ae5f2ed863218cb979ff1d59e50c4276bdc479b0d0844501b0000000ba43b74001a1443fd00d81e82031864581de1794d9b3408c9fb67b950a48a0690f070f117e9978f7fc1d120fc58ad82581c1d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c581c794d9b3408c9fb67b950a48a0690f070f117e9978f7fc1d120fc58ad848400190bb84436e44b9af68400190bb84436e44b9b500178ff2483e3a2330a34c4a5e576c2078301190bb86d616161612e626262622e636f6d82026d616161612e626262632e636f6d82782968747470733a2f2f7777772e76616375756d6c6162732e636f6d2f73616d706c6555726c2e6a736f6e5820cdb714fd722c24aeb10c93dbb0ff03bd4783441cd5ba2a8b6f373390520535bbf6',
+    hashHex: 'bc678441767b195382f00f9f4c4bddc046f73e6116fa789035105ecddfdee949',
+    parsed: {
+      inputs: [
+        {
+          txHash: Buffer.from('3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7', 'hex'),
+          outputIndex: 0,
+        },
+      ],
+      outputs: [
+        {
+          address: Buffer.from('017cb05fce110fb999f01abb4f62bc455e217d4a51fde909fa9aea545443ac53c046cf6a42095e3c60310fa802771d0672f8fe2d1861138b09', 'hex'),
+          coins: 1,
+        },
+      ],
+      fee: 42,
+      ttl: 10,
+      certificates: [
+        {
+          type: 3,
+          poolKeyHash: Buffer.from('13381d918ec0283ceeff60f7f4fc21e1540e053ccf8a77307a7a32ad', 'hex'),
+          vrfPubKeyHash: Buffer.from('07821cd344d7fd7e3ae5f2ed863218cb979ff1d59e50c4276bdc479b0d084450', 'hex'),
+          pledge: 50000000000,
+          cost: 340000000,
+          margin: { numerator: 3, denominator: 100 },
+          rewardAddress: Buffer.from('e1794d9b3408c9fb67b950a48a0690f070f117e9978f7fc1d120fc58ad', 'hex'),
+          poolOwnersPubKeyHashes: [
+            Buffer.from('1d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c', 'hex'),
+            Buffer.from('794d9b3408c9fb67b950a48a0690f070f117e9978f7fc1d120fc58ad', 'hex'),
+          ],
+          relays: [
+            {
+              ipv4: Buffer.from('36e44b9a', 'hex'),
+              ipv6: null,
+              portNumber: 3000,
+              type: 0,
+            },
+            {
+              ipv4: Buffer.from('36e44b9b', 'hex'),
+              ipv6: Buffer.from('0178ff2483e3a2330a34c4a5e576c207', 'hex'),
+              portNumber: 3000,
+              type: 0,
+            },
+            {
+              dnsName: 'aaaa.bbbb.com',
+              portNumber: 3000,
+              type: 1,
+            },
+            {
+              dnsName: 'aaaa.bbbc.com',
+              type: 2,
+            },
+          ],
+          metadata: {
+            metadataUrl: 'https://www.vacuumlabs.com/sampleUrl.json',
+            metadataHash: Buffer.from('cdb714fd722c24aeb10c93dbb0ff03bd4783441cd5ba2a8b6f373390520535bb', 'hex'),
+          },
+        },
+      ],
+      withdrawals: [],
+      metaDataHash: undefined,
+      meta: null,
+    },
   },
 }
 

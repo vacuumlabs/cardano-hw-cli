@@ -17,21 +17,17 @@ import {
 const cbor = require('borc')
 const { blake2b } = require('cardano-crypto.js')
 
-function TxByronWitness(
+const TxByronWitness = (
   publicKey: Buffer, signature: Buffer, chaincode: Buffer, addressAttributes: object,
-): TxWitnessByron {
-  return [publicKey, signature, chaincode, cbor.encode(addressAttributes)]
-}
+): TxWitnessByron => [publicKey, signature, chaincode, cbor.encode(addressAttributes)]
 
-function TxShelleyWitness(publicKey: Buffer, signature: Buffer): TxWitnessShelley {
-  return [publicKey, signature]
-}
+const TxShelleyWitness = (publicKey: Buffer, signature: Buffer): TxWitnessShelley => [publicKey, signature]
 
-function TxAux(unsignedTxCborHex: UnsignedTxCborHex): _TxAux {
+const TxAux = (unsignedTxCborHex: UnsignedTxCborHex): _TxAux => {
   const unsignedTxDecoded:_UnsignedTxDecoded = cbor.decode(unsignedTxCborHex)
   const parsedTx = parseUnsignedTx(unsignedTxDecoded)
 
-  function getId(): string {
+  const getId = (): string => {
     const [txBody] = unsignedTxDecoded
     const encodedTxBody = cbor.encode(txBody)
     return blake2b(
@@ -47,11 +43,11 @@ function TxAux(unsignedTxCborHex: UnsignedTxCborHex): _TxAux {
   }
 }
 
-function TxSigned(
+const TxSigned = (
   unsignedTxDecoded: _UnsignedTxDecoded,
   byronWitnesses: TxWitnessByron[],
   shelleyWitnesses: TxWitnessShelley[],
-): SignedTxCborHex {
+): SignedTxCborHex => {
   const [txBody, meta] = unsignedTxDecoded
   const witnesses = new Map()
   if (shelleyWitnesses.length > 0) {
@@ -63,7 +59,7 @@ function TxSigned(
   return cbor.encode([txBody, witnesses, meta]).toString('hex')
 }
 
-function Witness(signedTxCborHex: SignedTxCborHex): _ShelleyWitness | _ByronWitness {
+const Witness = (signedTxCborHex: SignedTxCborHex): _ShelleyWitness | _ByronWitness => {
   const [, witnesses]: _SignedTxDecoded = cbor.decode(signedTxCborHex)
   // there can be only one witness since only one signing file was passed
   const [key, [data]] = Array.from(witnesses)[0]
@@ -73,7 +69,7 @@ function Witness(signedTxCborHex: SignedTxCborHex): _ShelleyWitness | _ByronWitn
   } as _ShelleyWitness | _ByronWitness
 }
 
-function XPubKey(xPubKeyCborHex: XPubKeyCborHex): _XPubKey {
+const XPubKey = (xPubKeyCborHex: XPubKeyCborHex): _XPubKey => {
   const xPubKeyDecoded = cbor.decode(xPubKeyCborHex)
   const pubKey = xPubKeyDecoded.slice(0, 32)
   const chainCode = xPubKeyDecoded.slice(32, 64)
