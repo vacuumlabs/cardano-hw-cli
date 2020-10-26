@@ -11,13 +11,7 @@ export enum CommandType {
 
 export type CborHex = string
 
-export type BIP32Path = [
-  number,
-  number,
-  number,
-  number,
-  number,
-]
+export type BIP32Path = number[]
 
 export enum HwSigningType {
   Payment, Stake
@@ -26,7 +20,7 @@ export enum HwSigningType {
 export type HwSigningData = {
   type: HwSigningType
   path: BIP32Path,
-  cborXPubKeyHex: string
+  cborXPubKeyHex: CborHex
 }
 
 export type TxBodyData = {
@@ -64,6 +58,11 @@ export enum NetworkIds {
   TESTNET = 0,
 }
 
+export enum ProtocolMagics {
+  MAINNET = 764824073,
+  TESTNET = 42,
+}
+
 export type Network = {
   networkId: number,
   protocolMagic: number,
@@ -99,13 +98,13 @@ export type HwSigningOutput = {
   type: string,
   description: string,
   path: string,
-  cborXPubKeyHex: string,
+  cborXPubKeyHex: CborHex,
 }
 
 export type VerificationKeyOutput = {
   type: string,
   description: string,
-  cborHex: string, // TODO
+  cborHex: CborHex,
 }
 
 export type OutputData =

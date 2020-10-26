@@ -1,4 +1,4 @@
-import { HARDENED_THRESHOLD, NETWORKS } from '../constants'
+import { HARDENED_THRESHOLD } from '../constants'
 import { Errors } from '../errors'
 import { XPubKey } from '../transaction/transaction'
 import { TxCertificateKeys, _Certificate, _TxAux } from '../transaction/types'
@@ -6,8 +6,10 @@ import {
   Address,
   BIP32Path,
   HwSigningData,
+  HwSigningType,
   Network,
   NetworkIds,
+  ProtocolMagics,
 } from '../types'
 import { _AddressParameters } from './types'
 
@@ -51,6 +53,9 @@ const getSigningPath = (
   signingFiles: HwSigningData[], i: number,
 ): BIP32Path | undefined => {
   if (!signingFiles.length) return undefined
+  // in case signingFiles.length < input.length
+  // we return the first path since all we need is to pass all the paths
+  // disregarding their order
   return signingFiles[i] ? signingFiles[i].path : signingFiles[0].path
 }
 
@@ -58,10 +63,10 @@ const filterSigningFiles = (
   signingFiles: HwSigningData[],
 ): {paymentSigningFiles: HwSigningData[], stakeSigningFiles: HwSigningData[]} => {
   const paymentSigningFiles = signingFiles.filter(
-    (signingFile) => signingFile.type === 0,
+    (signingFile) => signingFile.type === HwSigningType.Payment,
   )
   const stakeSigningFiles = signingFiles.filter(
-    (signingFile) => signingFile.type === 1,
+    (signingFile) => signingFile.type === HwSigningType.Stake,
   )
   return {
     paymentSigningFiles,
@@ -130,7 +135,7 @@ const validateSigning = (
 
 const _packBootStrapAddress = (
   file: HwSigningData, network: Network,
-) => {
+): _AddressParameters => {
   const { pubKey, chainCode } = XPubKey(file.cborXPubKeyHex)
   const xPubKey = Buffer.concat([pubKey, chainCode])
   const address: Buffer = packBootstrapAddress(
@@ -149,10 +154,10 @@ const _packBootStrapAddress = (
 
 const _packBaseAddress = (
   changeOutputFiles: HwSigningData[], network: Network,
-) => {
+): _AddressParameters | null => {
   const stakePathFile = changeOutputFiles.find(({ path }) => isStakingPath(path))
   const paymentPathFile = changeOutputFiles.find(({ path }) => !isStakingPath(path))
-  if (!stakePathFile || !paymentPathFile) return undefined
+  if (!stakePathFile || !paymentPathFile) return null
   const { pubKey: stakePubKey } = XPubKey(stakePathFile.cborXPubKeyHex)
   const { pubKey: paymentPubKey } = XPubKey(paymentPathFile.cborXPubKeyHex)
   const address: Buffer = packBaseAddress(
@@ -170,7 +175,7 @@ const _packBaseAddress = (
 
 const _packEnterpriseAddress = (
   changeOutputFile: HwSigningData, network: Network,
-) => {
+): _AddressParameters => {
   const { pubKey: paymentPubKey } = XPubKey(changeOutputFile.cborXPubKeyHex)
   const address: Buffer = packEnterpriseAddress(
     getPubKeyBlake2b224Hash(paymentPubKey),
@@ -187,42 +192,39 @@ const getChangeAddress = (
   changeOutputFiles: HwSigningData[],
   outputAddress: Buffer,
   network: Network,
-): _AddressParameters | undefined => {
+): _AddressParameters | null => {
   const addressType = getAddressType(outputAddress)
   try {
     switch (addressType) {
-      case AddressTypes.BOOTSTRAP: return _packBootStrapAddress(
-        changeOutputFiles[0], network,
-      )
-      case AddressTypes.BASE: return _packBaseAddress(
-        changeOutputFiles, network,
-      )
-      case AddressTypes.ENTERPRISE: return _packEnterpriseAddress(
-        changeOutputFiles[0], network,
-      )
-      default: return undefined
+      case AddressTypes.BOOTSTRAP:
+        return _packBootStrapAddress(changeOutputFiles[0], network)
+      case AddressTypes.BASE:
+        return _packBaseAddress(changeOutputFiles, network)
+      case AddressTypes.ENTERPRISE:
+        return _packEnterpriseAddress(changeOutputFiles[0], network)
+      default: return null
     }
   } catch (e) {
-    return undefined
+    return null
   }
 }
 
 const getAddressAttributes = (address: Address) => {
   const addressBuffer = addressToBuffer(address)
   const addressType = getAddressType(addressBuffer)
-  let protocolMagic
-  let networkId
+  let protocolMagic: ProtocolMagics
+  let networkId: NetworkIds
 
   if (isValidBootstrapAddress(address)) {
     protocolMagic = getBootstrapAddressProtocolMagic(addressBuffer)
-    networkId = NETWORKS.MAINNET.protocolMagic === protocolMagic
-      ? NETWORKS.MAINNET.networkId
-      : NETWORKS.TESTNET.networkId
+    networkId = ProtocolMagics.MAINNET === protocolMagic
+      ? NetworkIds.MAINNET
+      : NetworkIds.TESTNET
   } else if (isValidShelleyAddress(address)) {
     networkId = getShelleyAddressNetworkId(addressBuffer)
-    protocolMagic = NETWORKS.MAINNET.networkId === networkId
-      ? NETWORKS.MAINNET.protocolMagic
-      : NETWORKS.TESTNET.protocolMagic
+    protocolMagic = NetworkIds.MAINNET === networkId
+      ? ProtocolMagics.MAINNET
+      : ProtocolMagics.TESTNET
   } else throw Error(Errors.InvalidAddressError)
 
   return { addressType, networkId, protocolMagic }
