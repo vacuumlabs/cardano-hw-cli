@@ -1,13 +1,13 @@
-import { Network, NetworkIds } from './types'
+import { Network, NetworkIds, ProtocolMagics } from './types'
 
 export const NETWORKS: {[key: string]: Network} = {
   MAINNET: {
     networkId: NetworkIds.MAINNET,
-    protocolMagic: 764824073,
+    protocolMagic: ProtocolMagics.MAINNET,
   },
   TESTNET: {
     networkId: NetworkIds.TESTNET,
-    protocolMagic: 42,
+    protocolMagic: ProtocolMagics.TESTNET,
   },
 }
 
