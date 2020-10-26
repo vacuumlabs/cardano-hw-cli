@@ -17,7 +17,7 @@ import {
 import { LedgerCryptoProvider } from './crypto-providers/ledgerCryptoProvider'
 import { TrezorCryptoProvider } from './crypto-providers/trezorCryptoProvider'
 import { validateSigning, validateWitnessing } from './crypto-providers/util'
-import NamedError from './namedError'
+import { Errors } from './errors'
 
 const promiseTimeout = <T> (promise: Promise<T>, ms: number): Promise<T> => {
   const timeout: Promise<T> = new Promise((resolve, reject) => {
@@ -42,7 +42,7 @@ const getCryptoProvider = async (): Promise<CryptoProvider> => {
   try {
     return await promiseTimeout(cryptoProviderPromise, 5000)
   } catch (e) {
-    throw NamedError('HwTransportNotFoundError')
+    throw Error(Errors.HwTransportNotFoundError)
   }
 }
 

@@ -46,7 +46,7 @@ import {
   ipv6ToString,
   rewardAddressToPubKeyHash,
 } from './util'
-import NamedError from '../namedError'
+import { Errors } from '../errors'
 
 import TrezorConnect from '../../trezor-extended/lib'
 
@@ -83,7 +83,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
       showOnTrezor: true,
     })
 
-    if (response.error || !response.success) throw NamedError('TrezorError')
+    if (response.error || !response.success) throw Error(Errors.TrezorError)
   }
 
   const getXPubKey = async (path: BIP32Path): Promise<string> => {
@@ -133,7 +133,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     stakeSigningFiles: HwSigningData[],
   ): TrezorTxCertificate => {
     const path = findSigningPath(cert.pubKeyHash, stakeSigningFiles)
-    if (!path) throw NamedError('MissingSigningFileForCertificateError')
+    if (!path) throw Error(Errors.MissingSigningFileForCertificateError)
     return {
       type: cert.type,
       path,
@@ -144,7 +144,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     cert: _DelegationCert, stakeSigningFiles: HwSigningData[],
   ): TrezorTxCertificate => {
     const path = findSigningPath(cert.pubKeyHash, stakeSigningFiles)
-    if (!path) throw NamedError('MissingSigningFileForCertificateError')
+    if (!path) throw Error(Errors.MissingSigningFileForCertificateError)
     return {
       type: cert.type,
       path,
@@ -162,8 +162,8 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
         : { stakingKeyHash: owner.toString('hex') }
     })
     const ownersWithPath = poolOwners.filter((owner) => owner.stakingKeyPath)
-    if (!ownersWithPath.length) throw NamedError('MissingSigningFileForCertificateError')
-    if (ownersWithPath.length > 1) throw NamedError('OwnerMultipleTimesInTxError')
+    if (!ownersWithPath.length) throw Error(Errors.MissingSigningFileForCertificateError)
+    if (ownersWithPath.length > 1) throw Error(Errors.OwnerMultipleTimesInTxError)
     return poolOwners
   }
 
@@ -220,7 +220,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
       case TxCertificateKeys.STAKEPOOL_REGISTRATION:
         return prepareStakePoolRegistrationCert(certificate, stakeSigningFiles)
       default:
-        throw NamedError('UnknownCertificateTypeError')
+        throw Error(Errors.UnknownCertificateTypeError)
     }
   }
 
@@ -229,7 +229,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
   ): TrezorWithdrawal => {
     const pubKeyHash = rewardAddressToPubKeyHash(withdrawal.address)
     const path = findSigningPath(pubKeyHash, stakeSigningFiles)
-    if (!path) throw NamedError('MissingSigningFileForWithdrawalError')
+    if (!path) throw Error(Errors.MissingSigningFileForWithdrawalError)
     return {
       path,
       amount: `${withdrawal.coins}`,
@@ -272,10 +272,10 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
       withdrawals,
     })
     if (response.error || !response.success) {
-      throw NamedError('TrezorSignTxError')
+      throw Error(Errors.TrezorSignTxError)
     }
     if (response.payload.hash !== txAux.getId()) {
-      throw NamedError('TxSerializationMismatchError')
+      throw Error(Errors.TxSerializationMismatchError)
     }
 
     return response.payload.serializedTx as SignedTxCborHex

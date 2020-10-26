@@ -1,4 +1,4 @@
-import NamedError from '../namedError'
+import { Errors } from '../errors'
 import {
   TxByronWitness,
   TxShelleyWitness,
@@ -78,7 +78,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
       const { addressType, networkId } = getAddressAttributes(address)
       await ledger.showAddress(addressType, networkId, paymentPath, stakingPath)
     } catch (err) {
-      throw NamedError('LedgerOperationError', { message: `${err.name}: ${err.message}` })
+      throw Error(Errors.LedgerOperationError)
     }
   }
 
@@ -118,7 +118,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     stakeSigningFiles: HwSigningData[],
   ): LedgerCertificate => {
     const path = findSigningPath(cert.pubKeyHash, stakeSigningFiles)
-    if (!path) throw NamedError('MissingSigningFileForCertficateError')
+    if (!path) throw Error(Errors.MissingSigningFileForCertificateError)
     return {
       type: cert.type,
       path,
@@ -129,7 +129,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     cert: _DelegationCert, stakeSigningFiles: HwSigningData[],
   ): LedgerCertificate => {
     const path = findSigningPath(cert.pubKeyHash, stakeSigningFiles)
-    if (!path) throw NamedError('MissingSigningFileForCertficateError')
+    if (!path) throw Error(Errors.MissingSigningFileForCertificateError)
     return {
       type: cert.type,
       path,
@@ -147,7 +147,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
         : { stakingKeyHashHex: owner.toString('hex') }
     })
     const ownersWithPath = poolOwners.filter((owner) => owner.stakingPath)
-    if (ownersWithPath.length > 1) throw NamedError('OwnerMultipleTimesInTxError')
+    if (ownersWithPath.length > 1) throw Error(Errors.OwnerMultipleTimesInTxError)
     return poolOwners
   }
 
@@ -179,7 +179,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
         case TxRelayTypes.MULTI_HOST_NAME:
           return MultiNameRelay(relay as _MultiHostNameRelay)
         default:
-          throw NamedError('UnsupportedRelayTypeError')
+          throw Error(Errors.UnsupportedRelayTypeError)
       }
     }
 
@@ -230,7 +230,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
       case TxCertificateKeys.STAKEPOOL_REGISTRATION:
         return prepareStakePoolRegistrationCert(certificate, stakeSigningFiles)
       default:
-        throw NamedError('UnknownCertificateError')
+        throw Error(Errors.UnknownCertificateError)
     }
   }
 
@@ -239,7 +239,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
   ): LedgerWithdrawal => {
     const pubKeyHash = rewardAddressToPubKeyHash(withdrawal.address)
     const path = findSigningPath(pubKeyHash, stakeSigningFiles)
-    if (!path) throw NamedError('MissingSigningFileForWithdrawalError')
+    if (!path) throw Error(Errors.MissingSigningFileForWithdrawalError)
     return {
       path,
       amountStr: `${withdrawal.coins}`,
@@ -275,7 +275,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     )
 
     if (response.txHashHex !== txAux.getId()) {
-      throw NamedError('TxSerializationMismatchError')
+      throw Error(Errors.TxSerializationMismatchError)
     }
 
     return response.witnesses.map((witness: any) => ({
@@ -297,7 +297,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     ): HwSigningData => {
       const hwSigningData = signingFiles.find((signingFile) => pathEquals(signingFile.path, path))
       if (hwSigningData) return hwSigningData
-      throw NamedError('MissingHwSigningDataAtPathError', { message: path.toString() })
+      throw Error(Errors.MissingHwSigningDataAtPathError)
     }
 
     const byronWitnesses = ledgerWitnesses
@@ -339,7 +339,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
       { key: TxWitnessKeys.SHELLEY, data: shelleyWitness }
     ) as _ShelleyWitness)
 
-    if (_byronWitnesses.length + _shelleyWitnesses.length !== 1) throw NamedError('MultipleWitnessesError')
+    if (_byronWitnesses.length + _shelleyWitnesses.length !== 1) throw Error(Errors.MultipleWitnessesError)
     return _shelleyWitnesses.length === 1 ? _shelleyWitnesses[0] : _byronWitnesses[0]
   }
 
