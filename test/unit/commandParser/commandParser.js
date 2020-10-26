@@ -20,14 +20,14 @@ describe('Command parser', () => {
       '--hw-signing-file',
       prefix('payment.hwsfile'),
     ])
-    const command = parse(args)
+    const { parsedArgs } = parse(args)
     const expectedResult = {
       command: CommandType.KEY_GEN,
       path: [2147485500, 2147485463, 2147483648, 2, 1],
       hwSigningFile: 'test/unit/commandParser/res/payment.hwsfile',
       verificationKeyFile: 'test/unit/commandParser/res/payment.vkey',
     }
-    assert.deepEqual(command, expectedResult)
+    assert.deepEqual(parsedArgs, expectedResult)
   })
 
   it('Should parse key-verification', () => {
@@ -40,7 +40,7 @@ describe('Command parser', () => {
       '--verification-key-file',
       prefix('payment.vkey'),
     ])
-    const command = parse(args)
+    const { parsedArgs } = parse(args)
     const expectedResult = {
       command: CommandType.VERIFICATION_KEY,
       hwSigningFileData: {
@@ -50,7 +50,7 @@ describe('Command parser', () => {
       },
       verificationKeyFile: 'test/unit/commandParser/res/payment.vkey',
     }
-    assert.deepEqual(command, expectedResult)
+    assert.deepEqual(parsedArgs, expectedResult)
   })
 
   it('Should parse sign transaction', () => {
@@ -66,7 +66,7 @@ describe('Command parser', () => {
       '--out-file',
       prefix('tx.signed'),
     ])
-    const command = parse(args)
+    const { parsedArgs } = parse(args)
     const expectedResult = {
       command: CommandType.SIGN_TRANSACTION,
       network: NETWORKS.MAINNET,
@@ -84,7 +84,7 @@ describe('Command parser', () => {
       outFile: 'test/unit/commandParser/res/tx.signed',
       changeOutputKeyFileData: [],
     }
-    assert.deepEqual(command, expectedResult)
+    assert.deepEqual(parsedArgs, expectedResult)
   })
 
   it('Should parse witness transaction', () => {
@@ -101,7 +101,7 @@ describe('Command parser', () => {
       '--out-file',
       prefix('witness.out'),
     ])
-    const command = parse(args)
+    const { parsedArgs } = parse(args)
     const expectedResult = {
       command: CommandType.WITNESS_TRANSACTION,
       network: NETWORKS.TESTNET,
@@ -117,7 +117,7 @@ describe('Command parser', () => {
       outFile: 'test/unit/commandParser/res/witness.out',
       changeOutputKeyFileData: [],
     }
-    assert.deepEqual(command, expectedResult)
+    assert.deepEqual(parsedArgs, expectedResult)
   })
   it('Should parse sign transaction with change', () => {
     const args = pad([
@@ -134,7 +134,7 @@ describe('Command parser', () => {
       '--out-file',
       prefix('tx.signed'),
     ])
-    const command = parse(args)
+    const { parsedArgs } = parse(args)
     const expectedResult = {
       command: CommandType.SIGN_TRANSACTION,
       network: NETWORKS.MAINNET,
@@ -154,6 +154,6 @@ describe('Command parser', () => {
         cborXPubKeyHex: '5880e0d9c2e5b...7277e7db',
       }],
     }
-    assert.deepEqual(command, expectedResult)
+    assert.deepEqual(parsedArgs, expectedResult)
   })
 })
