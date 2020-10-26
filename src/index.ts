@@ -1,8 +1,7 @@
 /* eslint-disable no-console */
 import { parse } from './command-parser/commandParser'
 import { CommandExecutor } from './commandExecutor'
-import { getErrorTranslation } from './errors'
-import NamedError from './namedError'
+import { Errors } from './errors'
 import { CommandType } from './types'
 
 const executeCommand = async (): Promise<void> => {
@@ -32,11 +31,10 @@ const executeCommand = async (): Promise<void> => {
       await commandExecutor.createTxWitness(parsedArgs)
       break
     default:
-      throw NamedError('UndefinedCommandError')
+      throw Error(Errors.UndefinedCommandError)
   }
 }
 
 executeCommand().catch((e) => {
-  console.log(getErrorTranslation(e))
-  console.log(e.stack)
+  console.error(e.stack)
 }).finally(() => process.exit())

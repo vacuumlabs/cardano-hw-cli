@@ -1,5 +1,5 @@
 import { HARDENED_THRESHOLD, NETWORKS } from '../constants'
-import NamedError from '../namedError'
+import { Errors } from '../errors'
 import { XPubKey } from '../transaction/transaction'
 import { TxCertificateKeys, _Certificate, _TxAux } from '../transaction/types'
 import {
@@ -89,15 +89,15 @@ const txHasPoolPoolRegistrationCert = (
 const validateTx = (
   txAux: _TxAux, paymentSigningFiles: HwSigningData[], stakeSigningFiles: HwSigningData[],
 ): void => {
-  if (!txAux.inputs.length) throw NamedError('MissingInputError')
-  if (!txAux.outputs.length) throw NamedError('MissingOutputError')
+  if (!txAux.inputs.length) throw Error(Errors.MissingInputError)
+  if (!txAux.outputs.length) throw Error(Errors.MissingOutputError)
   if (paymentSigningFiles.length > txAux.inputs.length) {
-    throw NamedError('TooManySigningFilesError')
+    throw Error(Errors.TooManySigningFilesError)
   }
   const requireStakingSigningFile = !!(txAux.certificates.length + txAux.withdrawals.length)
   if (
     requireStakingSigningFile && !stakeSigningFiles.length
-  ) throw NamedError('MissingStakingSigningFileError')
+  ) throw Error(Errors.MissingStakingSigningFileError)
 }
 
 const validateWitnessing = (
@@ -110,10 +110,10 @@ const validateWitnessing = (
   validateTx(txAux, paymentSigningFiles, stakeSigningFiles)
   if (!txHasPoolPoolRegistrationCert(txAux.certificates)) return
 
-  if (txAux.certificates.length !== 1) throw NamedError('MultipleCertificatesWithPoolRegError')
-  if (txAux.withdrawals.length) throw NamedError('WithdrawalIncludedWithPoolRegError')
-  if (paymentSigningFiles.length) throw NamedError('PaymentFileInlucedWithPoolRegError')
-  if (stakeSigningFiles.length !== 1) throw NamedError('MultipleStakingSigningFilesWithPoolRegError')
+  if (txAux.certificates.length !== 1) throw Error(Errors.MultipleCertificatesWithPoolRegError)
+  if (txAux.withdrawals.length) throw Error(Errors.WithdrawalIncludedWithPoolRegError)
+  if (paymentSigningFiles.length) throw Error(Errors.PaymentFileInlucedWithPoolRegError)
+  if (stakeSigningFiles.length !== 1) throw Error(Errors.MultipleStakingSigningFilesWithPoolRegError)
 }
 
 const validateSigning = (
@@ -123,9 +123,9 @@ const validateSigning = (
     paymentSigningFiles,
     stakeSigningFiles,
   } = filterSigningFiles(signingFiles)
-  if (txHasPoolPoolRegistrationCert(txAux.certificates)) throw NamedError('CantSignTxWithPoolReg')
+  if (txHasPoolPoolRegistrationCert(txAux.certificates)) throw Error(Errors.CantSignTxWithPoolRegError)
   validateTx(txAux, paymentSigningFiles, stakeSigningFiles)
-  if (!paymentSigningFiles.length) throw NamedError('MissingPaymentSigningFileError')
+  if (!paymentSigningFiles.length) throw Error(Errors.MissingPaymentSigningFileError)
 }
 
 const _packBootStrapAddress = (
@@ -223,7 +223,7 @@ const getAddressAttributes = (address: Address) => {
     protocolMagic = NETWORKS.MAINNET.networkId === networkId
       ? NETWORKS.MAINNET.protocolMagic
       : NETWORKS.TESTNET.protocolMagic
-  } else throw NamedError('InvalidAddressError')
+  } else throw Error(Errors.InvalidAddressError)
 
   return { addressType, networkId, protocolMagic }
 }
