@@ -5,14 +5,9 @@ cd ..
 
 yarn build
 
-mkdir ./build/cardano-hw-cli-linux
+rm -rf ./build-linux-tar
 
-cp -R ./build/Release ./build/cardano-hw-cli-linux
-cp ./build/cardano-hw-cli ./build/cardano-hw-cli-linux
-cp package.json ./build/cardano-hw-cli-linux
-
+mkdir build-linux-tar
 cd ./build
-tar -czvf ./cardano-hw-cli.tar.gz ./cardano-hw-cli-linux
+tar -czvf ../build-linux-tar/cardano-hw-cli.tar.gz .
 cd ..
-
-rm -rf ./build/cardano-hw-cli-linux

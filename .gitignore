@@ -2,5 +2,8 @@
 /dist
 /build/*
 !/build/Release
+/build-linux-deb
+/build-linux-tar
+/build-windows-zip
 .vscode
 trezor-extended

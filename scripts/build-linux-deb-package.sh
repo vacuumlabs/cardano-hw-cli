@@ -12,18 +12,20 @@ cd ..
 
 yarn build
 
-mkdir ./build/linux
-mkdir ./build/linux/${PACKAGE}_${VERSION}
-mkdir ./build/linux/${PACKAGE}_${VERSION}/usr
-mkdir ./build/linux/${PACKAGE}_${VERSION}/usr/bin
-mkdir ./build/linux/${PACKAGE}_${VERSION}/usr/share
-mkdir ./build/linux/${PACKAGE}_${VERSION}/usr/share/cardano-hw-cli
-mkdir ./build/linux/${PACKAGE}_${VERSION}/DEBIAN
+sudo rm -rf ./build-linux-deb
 
-cp -R ./build/Release ./build/linux/${PACKAGE}_${VERSION}/usr/share/cardano-hw-cli
-cp ./package.json ./build/linux/${PACKAGE}_${VERSION}/usr/share/cardano-hw-cli
-cp ./build/cardano-hw-cli ./build/linux/${PACKAGE}_${VERSION}/usr/share/cardano-hw-cli
-ln -s /usr/share/cardano-hw-cli/cardano-hw-cli ./build/linux/${PACKAGE}_${VERSION}/usr/bin
+mkdir ./build-linux-deb
+mkdir ./build-linux-deb/${PACKAGE}_${VERSION}
+mkdir ./build-linux-deb/${PACKAGE}_${VERSION}/usr
+mkdir ./build-linux-deb/${PACKAGE}_${VERSION}/usr/bin
+mkdir ./build-linux-deb/${PACKAGE}_${VERSION}/usr/share
+mkdir ./build-linux-deb/${PACKAGE}_${VERSION}/usr/share/cardano-hw-cli
+mkdir ./build-linux-deb/${PACKAGE}_${VERSION}/DEBIAN
+
+cp -R ./build/Release ./build-linux-deb/${PACKAGE}_${VERSION}/usr/share/cardano-hw-cli
+cp ./package.json ./build-linux-deb/${PACKAGE}_${VERSION}/usr/share/cardano-hw-cli
+cp ./build/cardano-hw-cli ./build-linux-deb/${PACKAGE}_${VERSION}/usr/share/cardano-hw-cli
+ln -s /usr/share/cardano-hw-cli/cardano-hw-cli ./build-linux-deb/${PACKAGE}_${VERSION}/usr/bin
 
 CONTROL="Package: $PACKAGE
 Version: $VERSION
@@ -31,6 +33,6 @@ Architecture: $ARCHITECTURE
 Maintainer: $MAINTAINER
 Description: $DESCRIPTION"
 
-echo "$CONTROL" >> ./build/linux/${PACKAGE}_${VERSION}/DEBIAN/control
+echo "$CONTROL" >> ./build-linux-deb/${PACKAGE}_${VERSION}/DEBIAN/control
 
-dpkg-deb --build ./build/linux/${PACKAGE}_${VERSION}
+dpkg-deb --build ./build-linux-deb/${PACKAGE}_${VERSION}
