@@ -182,11 +182,13 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
   ): TrezorTxCertificate => {
     const owners: TrezorPoolOwner[] = preparePoolOwners(cert.poolOwnersPubKeyHashes, stakeSigningFiles)
     const relays: TrezorPoolRelay[] = prepareRelays(cert.relays)
-    const metadata: TrezorPoolMetadata = {
-      url: cert.metadata.metadataUrl,
-      hash: cert.metadata.metadataHash.toString('hex'),
-    }
-    const margin:TrezorPoolMargin = {
+    const metadata: TrezorPoolMetadata = cert.metadata
+      ? {
+        url: cert.metadata.metadataUrl,
+        hash: cert.metadata.metadataHash.toString('hex'),
+      }
+      : null
+    const margin: TrezorPoolMargin = {
       numerator: `${cert.margin.numerator}`,
       denominator: `${cert.margin.denominator}`,
     }
@@ -288,6 +290,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     changeOutputFiles: HwSigningData[],
   ): Promise<_ByronWitness | _ShelleyWitness> => {
     const signedTx = await signTx(txAux, [signingFile], network, changeOutputFiles)
+    console.log(signedTx)
     return Witness(signedTx)
   }
 

@@ -49,7 +49,7 @@ export type TrezorPoolRelay = {
   hostName?: string;
 }
 
-export type TrezorPoolMetadata = {
+export type TrezorPoolMetadata = null | {
   url: string;
   hash: string;
 }
