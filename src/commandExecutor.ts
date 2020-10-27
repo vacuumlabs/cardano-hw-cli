@@ -88,9 +88,9 @@ const CommandExecutor = async () => {
 
   const createTxWitness = async (args: ParsedTransactionWitnessArguments) => {
     const txAux = TxAux(args.txBodyFileData.cborHex)
-    validateWitnessing(txAux, [args.hwSigningFileData])
+    validateWitnessing(txAux, args.hwSigningFileData)
     const txWitness = await cryptoProvider.witnessTx(
-      txAux, args.hwSigningFileData, args.network, args.changeOutputKeyFileData,
+      txAux, args.hwSigningFileData[0], args.network, args.changeOutputKeyFileData,
     )
     write(args.outFile, TxWitnessOutput(txWitness))
   }

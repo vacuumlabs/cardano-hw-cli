@@ -3,6 +3,7 @@ const assert = require('assert')
 const { TxAux } = require('../../../../src/transaction/transaction')
 const { LedgerCryptoProvider } = require('../../../../src/crypto-providers/ledgerCryptoProvider')
 const { NETWORKS, HARDENED_THRESHOLD } = require('../../../../src/constants')
+const { validateSigning, validateWitnessing } = require('../../../../src/crypto-providers/util')
 
 const signingFiles = {
   payment0: {
@@ -93,6 +94,7 @@ const transactions = {
 }
 async function testTxSigning(cryptoProvider, transaction) {
   const txAux = TxAux(transaction.unsignedCborHex)
+  validateSigning(txAux, transaction.hwSigningFiles)
   const signedTxCborHex = await cryptoProvider.signTx(
     txAux,
     transaction.hwSigningFiles,
@@ -103,6 +105,7 @@ async function testTxSigning(cryptoProvider, transaction) {
 
 async function testTxWitnessing(cryptoProvider, transaction) {
   const txAux = TxAux(transaction.unsignedCborHex)
+  validateWitnessing(txAux, transaction.hwSigningFiles)
   const witness = await cryptoProvider.witnessTx(
     txAux,
     transaction.hwSigningFiles[0],
@@ -117,7 +120,8 @@ describe('Ledger tx signing and witnessing', () => {
     cryptoProvider = await LedgerCryptoProvider()
   })
   const txs = Object.entries(transactions)
-  txs.forEach(([txType, tx]) => it(
+  const txsToSign = txs.filter(([, tx]) => !tx.witness)
+  txsToSign.forEach(([txType, tx]) => it(
     `Should sign tx ${txType}`, async () => testTxSigning(cryptoProvider, tx),
   ).timeout(100000))
   const txsWithWitness = txs.filter(([, tx]) => tx.witness)

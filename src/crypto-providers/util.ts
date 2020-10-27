@@ -108,6 +108,7 @@ const validateTx = (
 const validateWitnessing = (
   txAux: _TxAux, signingFiles: HwSigningData[],
 ): void => {
+  if (signingFiles.length > 1) throw Error(Errors.TooManySigningFilesError)
   const {
     paymentSigningFiles,
     stakeSigningFiles,

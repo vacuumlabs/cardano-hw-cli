@@ -108,15 +108,7 @@ export const parserConfig = {
     },
     transaction: {
       sign: txSigningArgs,
-      witness: {
-        ...txSigningArgs,
-        '--hw-signing-file': {
-          dest: 'hwSigningFileData',
-          required: true,
-          type: (path: string) => parseHwSigningFile(path),
-          help: 'Output filepath of the verification key.',
-        },
-      },
+      witness: txSigningArgs,
     },
   },
 }
