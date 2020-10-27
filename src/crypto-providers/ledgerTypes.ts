@@ -34,8 +34,8 @@ export type LedgerPoolOwnerParams = {
 
 export type LedgerSingleHostIPRelay = {
   portNumber?: number,
-  ipv4Hex?: string,
-  ipv6Hex?: string
+  ipv4?: string | null,
+  ipv6?: string | null,
 }
 
 export type LedgerSingleHostNameRelay = {
@@ -52,7 +52,7 @@ export type LedgerRelayParams = {
   params: LedgerSingleHostIPRelay | LedgerSingleHostNameRelay | LedgerMultiHostNameRelay
 }
 
-export type LedgerPoolMetadataParams = {
+export type LedgerPoolMetadataParams = null | {
   metadataUrl: string,
   metadataHashHex: string
 }
@@ -68,7 +68,7 @@ export type LedgerPoolParams = {
   pledgeStr: string,
   costStr: string,
   margin: LedgerMargin,
-  rewardAccountKeyHash: string,
+  rewardAccountHex: string,
   poolOwners: Array<LedgerPoolOwnerParams>,
   relays: Array<LedgerRelayParams>,
   metadata: LedgerPoolMetadataParams

@@ -290,7 +290,6 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     changeOutputFiles: HwSigningData[],
   ): Promise<_ByronWitness | _ShelleyWitness> => {
     const signedTx = await signTx(txAux, [signingFile], network, changeOutputFiles)
-    console.log(signedTx)
     return Witness(signedTx)
   }
 
