@@ -77,7 +77,7 @@ export type _PoolRelay = {
   dnsName?: string,
 }
 
-export type _PoolMetadataParams = {
+export type _PoolMetadataParams = null | {
   metadataUrl: string,
   metadataHash: Buffer,
 }

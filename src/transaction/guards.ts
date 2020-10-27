@@ -93,10 +93,10 @@ const isMargin = (test: any) => typeof test === 'object'
   && 1 in test.value
   && Number.isInteger(test.value[1])
 
-const isMetaData = (test: any) => Array.isArray(test)
+const isMetaData = (test: any) => test === null || (Array.isArray(test)
   && test.length === 2
   && typeof test[0] === 'string'
-  && Buffer.isBuffer(test[1])
+  && Buffer.isBuffer(test[1]))
 
 export const isStakepoolRegistrationCert = (
   test: any,
