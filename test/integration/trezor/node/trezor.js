@@ -3,6 +3,7 @@ const assert = require('assert')
 const { TxAux } = require('../../../../src/transaction/transaction')
 const { TrezorCryptoProvider } = require('../../../../src/crypto-providers/trezorCryptoProvider')
 const { NETWORKS, HARDENED_THRESHOLD } = require('../../../../src/constants')
+const { validateSigning, validateWitnessing } = require('../../../../src/crypto-providers/util')
 
 // ./emu.py --mnemonic "all all all all all all all all all all all all"
 
@@ -108,6 +109,7 @@ const transactions = {
 
 async function testTxSigning(cryptoProvider, transaction) {
   const txAux = TxAux(transaction.unsignedCborHex)
+  validateSigning(txAux, transaction.hwSigningFiles)
   const signedTxCborHex = await cryptoProvider.signTx(
     txAux,
     transaction.hwSigningFiles,
@@ -119,6 +121,7 @@ async function testTxSigning(cryptoProvider, transaction) {
 
 async function testTxWitnessing(cryptoProvider, transaction) {
   const txAux = TxAux(transaction.unsignedCborHex)
+  validateWitnessing(txAux, transaction.hwSigningFiles)
   const witness = await cryptoProvider.witnessTx(
     txAux,
     transaction.hwSigningFiles[0],
@@ -136,7 +139,8 @@ describe('Trezor tx signing and witnessing', () => {
     process.exit(0)
   })
   const txs = Object.entries(transactions)
-  txs.forEach(([txType, tx]) => it(
+  const txsToSign = txs.filter(([, tx]) => !tx.witness)
+  txsToSign.forEach(([txType, tx]) => it(
     `Should sign tx ${txType}`, async () => testTxSigning(cryptoProvider, tx),
   ).timeout(100000))
   const txsWithWitness = txs.filter(([, tx]) => tx.witness)
