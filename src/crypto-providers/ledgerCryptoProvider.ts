@@ -57,6 +57,8 @@ import {
   isShelleyPath,
   getAddressAttributes,
   rewardAddressToPubKeyHash,
+  ipv4ToString,
+  ipv6ToString,
 } from './util'
 
 const TransportNodeHid = require('@ledgerhq/hw-transport-node-hid').default
@@ -155,7 +157,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     const SingleIPRelay = (
       { portNumber, ipv4, ipv6 }: _SingleHostIPRelay,
     ): LedgerSingleHostIPRelay => ({
-      portNumber, ipv4Hex: ipv4?.toString('hex'), ipv6Hex: ipv6?.toString('hex'),
+      portNumber, ipv4: ipv4ToString(ipv4), ipv6: ipv6ToString(ipv6),
     })
 
     const SingleNameRelay = (
@@ -193,6 +195,12 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     cert: _StakepoolRegistrationCert, stakeSigningFiles: HwSigningData[],
   ): LedgerCertificate => {
     const owners = preparePoolOwners(cert.poolOwnersPubKeyHashes, stakeSigningFiles)
+    const metadata = cert.metadata
+      ? {
+        metadataUrl: cert.metadata.metadataUrl,
+        metadataHashHex: cert.metadata.metadataHash.toString('hex'),
+      }
+      : null
     const poolRegistrationParams: LedgerPoolParams = {
       poolKeyHashHex: cert.poolKeyHash.toString('hex'),
       vrfKeyHashHex: cert.vrfPubKeyHash.toString('hex'),
@@ -202,13 +210,10 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
         numeratorStr: `${cert.margin.numerator}`,
         denominatorStr: `${cert.margin.denominator}`,
       },
-      rewardAccountKeyHash: cert.rewardAddress.toString('hex'),
+      rewardAccountHex: cert.rewardAddress.toString('hex'),
       poolOwners: owners,
       relays: prepareRelays(cert.relays),
-      metadata: {
-        metadataUrl: cert.metadata.metadataUrl,
-        metadataHashHex: cert.metadata.metadataHash.toString('hex'),
-      },
+      metadata,
     }
 
     return {

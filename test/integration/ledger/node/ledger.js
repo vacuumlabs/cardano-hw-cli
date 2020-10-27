@@ -98,8 +98,8 @@ const transactions = {
     witness: {
       key: 0,
       data: [
-        Buffer.from('bc65be1b0b9d7531778a1317c2aa6de936963c3f9ac7d5ee9e9eda25e0c97c5e', 'hex'),
-        Buffer.from('a1566eed590d732ce3734e9502f109035b209351b175bf27e33caeeac37602a22b5dbe5339e32ef985e449efb254b5da0251b8cb89dd444e0b28a59f60b30107', 'hex'),
+        Buffer.from('66610efd336e1137c525937b76511fbcf2a0e6bcf0d340a67bcb39bc870d85e8', 'hex'),
+        Buffer.from('98dbf7073ab0fe28afad08702bb9a363d638d55eed2ae6bc5c36a5137c36c9a806562180c8e33d0f3e74b27f61c7ebb7991e3cdb870af66e6fd9c943d197db0d', 'hex'),
       ],
     },
     network: 'MAINNET',
@@ -134,9 +134,9 @@ describe('Ledger tx signing and witnessing', () => {
   })
   const txs = Object.entries(transactions)
   const txsToSign = txs.filter(([, tx]) => !tx.witness)
-  // txsToSign.forEach(([txType, tx]) => it(
-  //   `Should sign tx ${txType}`, async () => testTxSigning(cryptoProvider, tx),
-  // ).timeout(100000))
+  txsToSign.forEach(([txType, tx]) => it(
+    `Should sign tx ${txType}`, async () => testTxSigning(cryptoProvider, tx),
+  ).timeout(100000))
   const txsWithWitness = txs.filter(([, tx]) => tx.witness)
   txsWithWitness.forEach(([txType, tx]) => it(
     `Should witness tx ${txType}`, async () => testTxWitnessing(cryptoProvider, tx),
