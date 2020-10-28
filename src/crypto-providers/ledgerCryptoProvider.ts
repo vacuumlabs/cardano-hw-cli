@@ -61,6 +61,7 @@ import {
   ipv6ToString,
 } from './util'
 
+const { AddressTypes } = require('cardano-crypto.js')
 const TransportNodeHid = require('@ledgerhq/hw-transport-node-hid').default
 const Ledger = require('@cardano-foundation/ledgerjs-hw-app-cardano').default
 
@@ -77,8 +78,9 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     paymentPath: BIP32Path, stakingPath: BIP32Path, address: Address,
   ): Promise<void> => {
     try {
-      const { addressType, networkId } = getAddressAttributes(address)
-      await ledger.showAddress(addressType, networkId, paymentPath, stakingPath)
+      const { addressType, networkId, protocolMagic } = getAddressAttributes(address)
+      const networkIdOrProtocolMagic = addressType === AddressTypes.BOOTSTRAP ? protocolMagic : networkId
+      await ledger.showAddress(addressType, networkIdOrProtocolMagic, paymentPath, stakingPath)
     } catch (err) {
       throw Error(Errors.LedgerOperationError)
     }
