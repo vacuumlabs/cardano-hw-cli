@@ -83,7 +83,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
       showOnTrezor: true,
     })
 
-    if (response.error || !response.success) throw Error(Errors.TrezorError)
+    if (response.error || !response.success) throw Error(Errors.InvalidAddressParametersProvidedError)
   }
 
   const getXPubKey = async (path: BIP32Path): Promise<string> => {

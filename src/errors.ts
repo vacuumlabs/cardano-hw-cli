@@ -41,6 +41,7 @@ enum Errors {
   CantSignTxWithPoolRegError = 'Can not sign trasaction with pool registration',
   InvalidAddressError = 'Invalid address',
   LedgerOperationError = 'Ledger operation error',
+  InvalidAddressParametersProvidedError = 'Invalid address parameters provided',
 }
 
 export {

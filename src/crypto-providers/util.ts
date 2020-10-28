@@ -212,7 +212,7 @@ const getChangeAddress = (
 
 const getAddressAttributes = (address: Address) => {
   const addressBuffer = addressToBuffer(address)
-  const addressType = getAddressType(addressBuffer)
+  const addressType: number = getAddressType(addressBuffer)
   let protocolMagic: ProtocolMagics
   let networkId: NetworkIds
 

@@ -78,7 +78,6 @@ export const parserConfig = {
           help: 'Payment derivation path.',
         },
         '--staking-path': {
-          required: true,
           type: (path: string) => parsePath(path),
           dest: 'stakingPath',
           help: 'Stake derivation path.',
