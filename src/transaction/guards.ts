@@ -24,15 +24,19 @@ export const isLovelace = (test: any): test is number => {
 
 export const isTxInput = (
   test: any,
-): test is TxInput => test.length === 2
-  && Buffer.isBuffer(test[0])
-  && Number.isInteger(test[1])
+): test is TxInput => {
+  if (!Array.isArray(test) || test.length !== 2) return false
+  const [txHash, outputIndex] = test
+  return Buffer.isBuffer(txHash) && Number.isInteger(outputIndex)
+}
 
 export const isTxOutput = (
   test: any,
-): test is TxOutput => test.length === 2
-  && Buffer.isBuffer(test[0])
-  && isLovelace(test[1])
+): test is TxOutput => {
+  if (!Array.isArray(test) || test.length !== 2) return false
+  const [address, coins] = test
+  return Buffer.isBuffer(address) && isLovelace(coins)
+}
 
 export const isWithdrawalsMap = (
   test: any,
@@ -42,82 +46,98 @@ export const isWithdrawalsMap = (
 
 export const isTxStakingKeyRegistrationCert = (
   test: any,
-): test is TxStakingKeyRegistrationCert => Array.isArray(test)
-  && test.length === 2
-  && test[0] === TxCertificateKeys.STAKING_KEY_REGISTRATION
-  && Array.isArray(test[1])
-  && test[1].length === 2
-  && Number.isInteger(test[1][0])
-  && Buffer.isBuffer(test[1][1])
+): test is TxStakingKeyRegistrationCert => {
+  if (!Array.isArray(test) || test.length !== 2) return false
+  if (!Array.isArray(test[1]) || test[1].length !== 2) return false
+  const [type, [, pubKeyHash]] = test
+  return type === TxCertificateKeys.STAKING_KEY_REGISTRATION && Buffer.isBuffer(pubKeyHash)
+}
 
 export const isStakingKeyDeregistrationCert = (
   test: any,
-): test is TxStakingKeyDeregistrationCert => Array.isArray(test)
-  && test.length === 2
-  && test[0] === TxCertificateKeys.STAKING_KEY_DEREGISTRATION
-  && Array.isArray(test[1])
-  && test[1].length === 2
-  && Number.isInteger(test[1][0])
-  && Buffer.isBuffer(test[1][1])
+): test is TxStakingKeyDeregistrationCert => {
+  if (!Array.isArray(test) || test.length !== 2) return false
+  if (!Array.isArray(test[1]) || test[1].length !== 2) return false
+  const [type, [, pubKeyHash]] = test
+  return type === TxCertificateKeys.STAKING_KEY_DEREGISTRATION && Buffer.isBuffer(pubKeyHash)
+}
 
 export const isDelegationCert = (
   test: any,
-): test is TxDelegationCert => Array.isArray(test)
-  && test.length === 3
-  && test[0] === TxCertificateKeys.DELEGATION
-  && Array.isArray(test[1])
-  && test[1].length === 2
-  && Number.isInteger(test[1][0])
-  && Buffer.isBuffer(test[1][1])
-  && Buffer.isBuffer(test[2])
+): test is TxDelegationCert => {
+  if (!Array.isArray(test) || test.length !== 3) return false
+  if (!Array.isArray(test[1]) || test[1].length !== 2) return false
+  const [type, [, pubKeyHash], poolHash] = test
+  return type === TxCertificateKeys.DELEGATION && Buffer.isBuffer(pubKeyHash) && Buffer.isBuffer(poolHash)
+}
 
 export const isTxSingleHostIPRelay = (
   test: any,
-): test is TxSingleHostIPRelay => Array.isArray(test)
-  && test.length <= 4
-  && test[0] === TxRelayTypes.SINGLE_HOST_IP
-  && (test[1] === null || Number.isInteger(test[1]))
-  && (test[2] === null || Buffer.isBuffer(test[2]))
-  && (test[3] === null || Buffer.isBuffer(test[3]))
+): test is TxSingleHostIPRelay => {
+  if (!Array.isArray(test) || test.length !== 4) return false
+  const [type, portNumber, ipv4, ipv6] = test
+  return type === TxRelayTypes.SINGLE_HOST_IP
+    && (portNumber === null || Number.isInteger(portNumber))
+    && (ipv4 === null || Buffer.isBuffer(ipv4))
+    && (ipv6 === null || Buffer.isBuffer(ipv6))
+}
 
 export const isTxSingleHostNameRelay = (
   test: any,
-): test is TxSingleHostNameRelay => Array.isArray(test)
-  && test.length === 3
-  && test[0] === TxRelayTypes.SINGLE_HOST_NAME
-  && Number.isInteger(test[1])
-  && typeof test[2] === 'string'
+): test is TxSingleHostNameRelay => {
+  if (!Array.isArray(test) || test.length !== 3) return false
+  const [type, portNumber, dnsName] = test
+  return type === TxRelayTypes.SINGLE_HOST_NAME && Number.isInteger(portNumber) && typeof dnsName === 'string'
+}
 
 export const isTxMultiHostNameRelay = (
   test: any,
-): test is TxMultiHostNameRelay => Array.isArray(test)
-  && test.length === 2
-  && test[0] === TxRelayTypes.MULTI_HOST_NAME
-  && typeof test[1] === 'string'
+): test is TxMultiHostNameRelay => {
+  if (!Array.isArray(test) || test.length !== 2) return false
+  const [type, dnsName] = test
+  return type === TxRelayTypes.MULTI_HOST_NAME && typeof dnsName === 'string'
+}
 
-const isMargin = (test: any) => typeof test === 'object'
-  && 'value' in test
-  && 0 in test.value
-  && Number.isInteger(test.value[0])
-  && 1 in test.value
-  && Number.isInteger(test.value[1])
+const isMargin = (test: any) => {
+  if (typeof test !== 'object') return false
+  return 'value' in test
+    && 0 in test.value
+    && Number.isInteger(test.value[0])
+    && 1 in test.value
+    && Number.isInteger(test.value[1])
+}
 
-const isMetaData = (test: any) => test === null || (Array.isArray(test)
-  && test.length === 2
-  && typeof test[0] === 'string'
-  && Buffer.isBuffer(test[1]))
+const isMetaData = (test: any) => {
+  if (test === null) return true
+  if (!Array.isArray(test) || test.length !== 2) return false
+  const [metadataUrl, metadataHash] = test
+  return typeof metadataUrl === 'string' && Buffer.isBuffer(metadataHash)
+}
 
 export const isStakepoolRegistrationCert = (
   test: any,
-): test is TxStakepoolRegistrationCert => Array.isArray(test)
-  && test.length === 10
-  && test[0] === TxCertificateKeys.STAKEPOOL_REGISTRATION
-  && Buffer.isBuffer(test[1])
-  && Buffer.isBuffer(test[2])
-  && isLovelace(test[3])
-  && isLovelace(test[4])
-  && isMargin(test[5])
-  && Buffer.isBuffer(test[6])
-  && isArrayOfType<Buffer>(test[7], Buffer.isBuffer)
-  && Array.isArray(test[8])
-  && isMetaData(test[9])
+): test is TxStakepoolRegistrationCert => {
+  if (!Array.isArray(test) || test.length !== 10) return false
+  const [
+    type,
+    poolKeyHash,
+    vrfPubKeyHash,
+    pledge,
+    cost,
+    margin,
+    rewardAddress,
+    poolOwnersPubKeyHashes,
+    relays,
+    metadata,
+  ] = test
+  return type === TxCertificateKeys.STAKEPOOL_REGISTRATION
+    && Buffer.isBuffer(poolKeyHash)
+    && Buffer.isBuffer(vrfPubKeyHash)
+    && isLovelace(pledge)
+    && isLovelace(cost)
+    && isMargin(margin)
+    && Buffer.isBuffer(rewardAddress)
+    && isArrayOfType<Buffer>(poolOwnersPubKeyHashes, Buffer.isBuffer)
+    && Array.isArray(relays)
+    && isMetaData(metadata)
+}
