@@ -49,7 +49,7 @@ const parseTxOutputs = (
   if (!isArrayOfType<TxOutput>(txOutputs, isTxOutput)) {
     throw Error(Errors.TxOutputParseError)
   }
-  return txOutputs.map(([address, coins]): _Output => ({ address, coins }))
+  return txOutputs.map(([address, coins]): _Output => ({ address, coins: BigInt(coins) }))
 }
 
 const parseRelay = (poolRelay: any): _PoolRelay => {
@@ -151,8 +151,8 @@ const parseTxCerts = (txCertificates: any[]): _Certificate[] => {
       type,
       poolKeyHash,
       vrfPubKeyHash,
-      pledge,
-      cost,
+      pledge: BigInt(pledge),
+      cost: BigInt(cost),
       margin: { numerator: value[0], denominator: value[1] }, // tagged
       rewardAddress,
       poolOwnersPubKeyHashes,
@@ -184,18 +184,18 @@ const parseTxCerts = (txCertificates: any[]): _Certificate[] => {
 }
 
 const parseTxWithdrawals = (
-  withdrawals: Map<Buffer, number>,
+  withdrawals: any,
 ): _Withdrawal[] => {
   if (!isWithdrawalsMap(withdrawals)) {
     throw Error(Errors.WithrawalsParseError)
   }
-  return Array.from(withdrawals).map(([address, coins]): _Withdrawal => ({ address, coins }))
+  return Array.from(withdrawals).map(([address, coins]): _Withdrawal => ({ address, coins: BigInt(coins) }))
 }
 
 const parseUnsignedTx = ([txBody, meta]: _UnsignedTxDecoded): _UnsignedTxParsed => {
   const inputs = parseTxInputs(txBody.get(TxBodyKeys.INPUTS))
   const outputs = parseTxOutputs(txBody.get(TxBodyKeys.OUTPUTS))
-  const fee = txBody.get(TxBodyKeys.FEE) as number
+  const fee = BigInt(txBody.get(TxBodyKeys.FEE))
   const ttl = txBody.get(TxBodyKeys.TTL) as number
   const certificates = parseTxCerts(
     txBody.get(TxBodyKeys.CERTIFICATES) || [],

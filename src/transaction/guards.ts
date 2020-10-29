@@ -11,7 +11,16 @@ import {
   TxSingleHostIPRelay,
   TxSingleHostNameRelay,
   TxRelayTypes,
+  TxWithdrawal,
 } from './types'
+
+export const isLovelace = (test: any): test is number => {
+  if (typeof test === 'number') return true
+  try {
+    BigInt(test)
+    return true
+  } catch (e) { return false }
+}
 
 export const isTxInput = (
   test: any,
@@ -23,13 +32,13 @@ export const isTxOutput = (
   test: any,
 ): test is TxOutput => test.length === 2
   && Buffer.isBuffer(test[0])
-  && Number.isInteger(test[1])
+  && isLovelace(test[1])
 
 export const isWithdrawalsMap = (
   test: any,
-): test is Map<Buffer, number> => test instanceof Map
-  && Array.from(test.keys()).every((value) => Buffer.isBuffer(value))
-  && Array.from(test.values()).every((value) => Number.isInteger(value))
+): test is TxWithdrawal => test instanceof Map
+  && Array.from(test.keys()).every((key) => Buffer.isBuffer(key))
+  && Array.from(test.values()).every((value) => isLovelace(value))
 
 export const isTxStakingKeyRegistrationCert = (
   test: any,
@@ -105,8 +114,8 @@ export const isStakepoolRegistrationCert = (
   && test[0] === TxCertificateKeys.STAKEPOOL_REGISTRATION
   && Buffer.isBuffer(test[1])
   && Buffer.isBuffer(test[2])
-  && Number.isInteger(test[3])
-  && Number.isInteger(test[4])
+  && isLovelace(test[3])
+  && isLovelace(test[4])
   && isMargin(test[5])
   && Buffer.isBuffer(test[6])
   && isArrayOfType<Buffer>(test[7], Buffer.isBuffer)

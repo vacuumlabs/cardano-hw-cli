@@ -20,6 +20,8 @@ export const enum TxCertificateKeys {
   STAKEPOOL_REGISTRATION = 3,
 }
 
+export type Lovelace = BigInt
+
 export type _Input = {
   txHash: Buffer,
   outputIndex: number,
@@ -27,7 +29,7 @@ export type _Input = {
 
 export type _Output = {
   address: Buffer,
-  coins: number,
+  coins: Lovelace,
 }
 export type _DelegationCert = {
   type: TxCertificateKeys.DELEGATION,
@@ -91,8 +93,8 @@ export type _StakepoolRegistrationCert = {
   type: TxCertificateKeys.STAKEPOOL_REGISTRATION,
   poolKeyHash: Buffer,
   vrfPubKeyHash: Buffer,
-  pledge: number,
-  cost: number,
+  pledge: Lovelace,
+  cost: Lovelace,
   margin: _Margin, // tagged
   rewardAddress: Buffer,
   poolOwnersPubKeyHashes: Array<Buffer>,
@@ -108,13 +110,13 @@ export type _Certificate =
 
 export type _Withdrawal = {
   address: Buffer,
-  coins: number,
+  coins: Lovelace,
 }
 
 export type _UnsignedTxParsed = {
   inputs: _Input[],
   outputs: _Output[],
-  fee: number,
+  fee: Lovelace,
   ttl: number,
   certificates: _Certificate[],
   withdrawals: _Withdrawal[],
@@ -196,7 +198,7 @@ export type TxInput = [
 
 export type TxOutput = [
   Buffer,
-  number
+  number,
 ]
 
 export type TxStakingKeyRegistrationCert = [
@@ -250,3 +252,5 @@ export type TxStakepoolRegistrationCert = [
   any,
   [string, Buffer],
 ]
+
+export type TxWithdrawal = Map<Buffer, Lovelace>
