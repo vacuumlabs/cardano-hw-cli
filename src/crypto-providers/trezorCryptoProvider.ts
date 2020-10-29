@@ -101,7 +101,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
   })
 
   const prepareChangeOutput = (
-    coins: number,
+    coins: BigInt,
     changeAddress: _AddressParameters,
   ) => ({
     amount: `${coins}`,

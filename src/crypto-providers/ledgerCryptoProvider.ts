@@ -93,7 +93,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
   })
 
   const prepareChangeOutput = (
-    coins: number,
+    coins: BigInt,
     changeOutput: _AddressParameters,
   ): LedgerOutput => ({
     addressTypeNibble: changeOutput.addressType,
