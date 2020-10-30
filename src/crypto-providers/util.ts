@@ -105,6 +105,17 @@ const validateTx = (
   ) throw Error(Errors.MissingStakingSigningFileError)
 }
 
+const validateTxWithPoolRegistration = (
+  txAux: _TxAux,
+  paymentSigningFiles: HwSigningData[],
+  stakeSigningFiles: HwSigningData[],
+): void => {
+  if (txAux.certificates.length !== 1) throw Error(Errors.MultipleCertificatesWithPoolRegError)
+  if (txAux.withdrawals.length) throw Error(Errors.WithdrawalIncludedWithPoolRegError)
+  if (paymentSigningFiles.length) throw Error(Errors.PaymentFileInlucedWithPoolRegError)
+  if (stakeSigningFiles.length !== 1) throw Error(Errors.MultipleStakingSigningFilesWithPoolRegError)
+}
+
 const validateWitnessing = (
   txAux: _TxAux, signingFiles: HwSigningData[],
 ): void => {
@@ -114,12 +125,9 @@ const validateWitnessing = (
     stakeSigningFiles,
   } = filterSigningFiles(signingFiles)
   validateTx(txAux, paymentSigningFiles, stakeSigningFiles)
-  if (!txHasPoolPoolRegistrationCert(txAux.certificates)) return
-
-  if (txAux.certificates.length !== 1) throw Error(Errors.MultipleCertificatesWithPoolRegError)
-  if (txAux.withdrawals.length) throw Error(Errors.WithdrawalIncludedWithPoolRegError)
-  if (paymentSigningFiles.length) throw Error(Errors.PaymentFileInlucedWithPoolRegError)
-  if (stakeSigningFiles.length !== 1) throw Error(Errors.MultipleStakingSigningFilesWithPoolRegError)
+  if (txHasPoolPoolRegistrationCert(txAux.certificates)) {
+    validateTxWithPoolRegistration(txAux, paymentSigningFiles, stakeSigningFiles)
+  }
 }
 
 const validateSigning = (
@@ -237,12 +245,8 @@ const ipv4ToString = (ipv4: Buffer | undefined): string | undefined => {
 }
 const ipv6ToString = (ipv6: Buffer | undefined): string | undefined => {
   if (!ipv6) return undefined
-  const _ipv6LE: Buffer[] = []
-  for (let i = 0; i < 16; i += 4) {
-    _ipv6LE.push(Buffer.from(new Uint32Array([ipv6.readUInt32BE(i)]).buffer))
-  }
   // concats the little endians to Buffer and divides the hex string to foursomes
-  const ipv6LE = Buffer.concat(_ipv6LE).toString('hex').match(/.{1,4}/g)
+  const ipv6LE = Buffer.from(ipv6).swap32().toString('hex').match(/.{1,4}/g)
   return ipv6LE ? ipv6LE.join(':') : undefined
 }
 
