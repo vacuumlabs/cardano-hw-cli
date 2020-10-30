@@ -112,6 +112,19 @@ const transactions = {
     },
     network: 'MAINNET',
   },
+  withBigintOutput: {
+    unsignedCborHex: '82a50081825820897c3429f794c44aecbe6f2e4f292836f3153f85ce2026b86a13ecbdbadaa05700018182581d60daad04ed2b7f69e2a9be582e37091739fa036a14c1c22f88061d43c71b0055a275925d560f021a000249f00319138804818a03581c61891bbdc08431a1d4d4911903dad04705f82e29a87e54cc77db217f582092c4a889cca979e804327595768d107295ad7cb6e9a787ef6b23b757ba3433381b0000b5e620f480001a1dcd6500d81e82030a581de05e3b888f476e3634020b43079cf27437aee4432648a7580bc24a7f1281581c122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b427780f6f6',
+    hwSigningFiles: [signingFiles.stake0],
+    signedTxCborHex: '',
+    witness: {
+      key: 0,
+      data: [
+        Buffer.from('bc65be1b0b9d7531778a1317c2aa6de936963c3f9ac7d5ee9e9eda25e0c97c5e', 'hex'),
+        Buffer.from('7eee4be1b2b5640c30dd4cfd67836c0d79e2efa9d7d72c73d24ce1ffd7ec40d601316c9b8bc2ae5e6d5a2fd5e664094f5ae97a83ffacccefb87e43e98c30aa0f', 'hex'),
+      ],
+    },
+    network: 'TESTNET',
+  },
   withByronInputAndOutput: {
     unsignedCborHex: '82a4008282582086e54b377489541d1e8fcd889c4e4a8d47cd03acfe784bc0bf191a9f1c84810f0082582086e54b377489541d1e8fcd889c4e4a8d47cd03acfe784bc0bf191a9f1c84810f01018282582b82d818582183581c578e965bd8e000b67ae6847de0c098b5c63470dc1a51222829c482bfa0001aae9713fc1a000f42408258390180f9e2c88e6c817008f3a812ed889b4a4da8e0bd103f86e7335422aa122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b42771a0017c72f021a0002e630031a00b5b373f6',
     hwSigningFiles: [signingFiles.payment0, signingFiles.byron0],
@@ -138,7 +151,7 @@ async function testTxWitnessing(cryptoProvider, transaction) {
   const witness = await cryptoProvider.witnessTx(
     txAux,
     transaction.hwSigningFiles[0],
-    NETWORKS.MAINNET,
+    NETWORKS[transaction.network],
   )
   assert.deepStrictEqual(witness, transaction.witness)
 }

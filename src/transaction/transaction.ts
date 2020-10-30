@@ -17,6 +17,23 @@ import {
 const cbor = require('borc')
 const { blake2b } = require('cardano-crypto.js')
 
+// eslint-disable-next-line import/no-extraneous-dependencies
+const { BigNumber } = require('bignumber.js')
+
+const encodeBigNum = (gen: any, object: any) => {
+  const bigNumHex = object.toString(16).padStart(16, '0')
+  const bigNumBuff = Buffer.from(`1b${bigNumHex}`, 'hex')
+  return gen.push(bigNumBuff)
+}
+
+const encoder = new cbor.Encoder({
+  genTypes: [
+    [BigNumber, encodeBigNum],
+  ],
+})
+
+const encode = (data: any) => encoder.finalize(encoder.pushAny(data))
+
 const TxByronWitness = (
   publicKey: Buffer, signature: Buffer, chaincode: Buffer, addressAttributes: object,
 ): TxWitnessByron => [publicKey, signature, chaincode, cbor.encode(addressAttributes)]
@@ -29,7 +46,7 @@ const TxAux = (unsignedTxCborHex: UnsignedTxCborHex): _TxAux => {
 
   const getId = (): string => {
     const [txBody] = unsignedTxDecoded
-    const encodedTxBody = cbor.encode(txBody)
+    const encodedTxBody = encode(txBody)
     return blake2b(
       encodedTxBody,
       32,
@@ -56,7 +73,7 @@ const TxSigned = (
   if (byronWitnesses.length > 0) {
     witnesses.set(TxWitnessKeys.BYRON, byronWitnesses)
   }
-  return cbor.encode([txBody, witnesses, meta]).toString('hex')
+  return encode([txBody, witnesses, meta]).toString('hex')
 }
 
 const Witness = (signedTxCborHex: SignedTxCborHex): _ShelleyWitness | _ByronWitness => {

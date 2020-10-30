@@ -36,6 +36,7 @@
     "@cardano-foundation/ledgerjs-hw-app-cardano": "https://github.com/vacuumlabs/ledgerjs-cardano-shelley/releases/download/v2.0.2-rc.1/cardano-foundation-ledgerjs-hw-app-cardano-2.0.2-rc.1.tgz",
     "@ledgerhq/hw-transport-node-hid": "^5.25.0",
     "argparse": "^2.0.1",
+    "bignumber": "^1.1.0",
     "borc": "^2.1.2",
     "cardano-crypto.js": "^5.3.6-rc.6",
     "trezor-connect": "^8.1.16-extended"
