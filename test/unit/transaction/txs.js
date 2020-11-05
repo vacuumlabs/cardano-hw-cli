@@ -22,33 +22,21 @@ const transactions = {
             '82d818582183581c9e1c71de652ec8b85fec296f0685ca3988781c94a2e1a5d89d92f45fa0001a0d0c2561',
             'hex',
           ),
-          coins: 3003112,
+          coins: BigInt(3003112),
         },
       ],
-      fee: 42,
+      fee: BigInt(42),
       ttl: 10,
       certificates: [],
       withdrawals: [
         {
           address: Buffer.from('e11d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c', 'hex'),
-          coins: 111,
+          coins: BigInt(111),
         },
       ],
       metaDataHash: undefined,
       meta: null,
     },
-    // witnesses: [
-    //   {
-    //     path: str_to_path("1852'/1815'/0'/0/0"),
-    //     witnessSignatureHex:
-    //       "22ef3b54a54a1f5390436911b23328225f92c660eb251189fceab2fa428187a2cec584ea5f6f9c9fcdf7f19bc496b3b2b9bb416ad07a3d31d73fbc0c05bec10c"
-    //   },
-    //   {
-    //     path: str_to_path("1852'/1815'/0'/2/0"),
-    //     witnessSignatureHex:
-    //       "04b995979c2072b469c1e0ace5331c3d188e3e65d5a6f06aa4e608fb18a3588621370ee1b5d39d55afe0744aa4906785baa07210dc4cb49594eba507f7215102",
-    //   }
-    // ]
   },
   TxWithRegistrationCertificate: {
     /*
@@ -69,10 +57,10 @@ const transactions = {
       outputs: [
         {
           address: Buffer.from('82d818582183581c9e1c71de652ec8b85fec296f0685ca3988781c94a2e1a5d89d92f45fa0001a0d0c2561', 'hex'),
-          coins: 3003112,
+          coins: BigInt(3003112),
         },
       ],
-      fee: 42,
+      fee: BigInt(42),
       ttl: 10,
       certificates: [{
         type: 0,
@@ -82,18 +70,6 @@ const transactions = {
       metaDataHash: undefined,
       meta: null,
     },
-    // witnesses: [
-    //   {
-    //     path: str_to_path("1852'/1815'/0'/0/0"),
-    //     witnessSignatureHex:
-    //       "9825594e5a91333b9f5762665ba316af34c2208bd7ef073178af5e48f2aae8673d50436045e292d5bb9be7492eeeda475a04e58621a326c91049a2ef26a33200"
-    //   },
-    //   {
-    //     path: str_to_path("1852'/1815'/0'/2/0"),
-    //     witnessSignatureHex:
-    //       "a2a22faa4ac4ba4b5a89c770dd7b2afe877ba8c86f0205df8c01a2184275aaafada9b6be4640aa573cafbbca26ac2eccd98f804065b39b10a0559c7dc441fa0a",
-    //   }
-    // ]
   },
   TxWithDelegationCertificate: {
     /*
@@ -115,10 +91,10 @@ const transactions = {
       outputs: [
         {
           address: Buffer.from('82d818582183581c9e1c71de652ec8b85fec296f0685ca3988781c94a2e1a5d89d92f45fa0001a0d0c2561', 'hex'),
-          coins: 3003112,
+          coins: BigInt(3003112),
         },
       ],
-      fee: 42,
+      fee: BigInt(42),
       ttl: 10,
       certificates: [{
         type: 2,
@@ -129,18 +105,6 @@ const transactions = {
       metaDataHash: undefined,
       meta: null,
     },
-    // witnesses: [
-    //   {
-    //     path: str_to_path("1852'/1815'/0'/0/0"),
-    //     witnessSignatureHex:
-    //       "d94c8f8fe73946c25f3bd0919d05a60b8373ef0a7261fa73eefe1f2a20e8a4c3401feb5eea701222184fceab2c45b47bd823ac76123e2d17f804d3e4ed2df909"
-    //   },
-    //   {
-    //     path: str_to_path("1852'/1815'/0'/2/0"),
-    //     witnessSignatureHex:
-    //       "035b4e6ae6f7a8089f2a302ddcb60bc56d48bcf267fdcb071844da5ce3086d51e816777a6fb5eabfcb326a32b830674ac0de40ee1b2360a69adba4b64c662404",
-    //   }
-    // ]
   },
   TxWithDeregistrationCertificate: {
     /*
@@ -161,10 +125,10 @@ const transactions = {
       outputs: [
         {
           address: Buffer.from('82d818582183581c9e1c71de652ec8b85fec296f0685ca3988781c94a2e1a5d89d92f45fa0001a0d0c2561', 'hex'),
-          coins: 3003112,
+          coins: BigInt(3003112),
         },
       ],
-      fee: 42,
+      fee: BigInt(42),
       ttl: 10,
       certificates: [{
         type: 1,
@@ -174,18 +138,6 @@ const transactions = {
       metaDataHash: undefined,
       meta: null,
     },
-    // witnesses: [
-    //   {
-    //     path: str_to_path("1852'/1815'/0'/0/0"),
-    //     witnessSignatureHex:
-    //       "6136510eb91449474f6137c8d1c7c69eb518e3844a3e63a626be8cf4af91afa24e12f4fa578398bf0e7992e22dcfc5f9773fb8546b88c19e3abfdaa3bbe7a304"
-    //   },
-    //   {
-    //     path: str_to_path("1852'/1815'/0'/2/0"),
-    //     witnessSignatureHex:
-    //       "77210ce6533a76db3673af1076bf3933747a8d81cabda80c8bc9c852c78685f8a42c9372721bdfe9b47611039364afb3391031211b5c427cfec0c5c505cfec0c",
-    //   }
-    // ]
   },
   TxWithMetaData: {
     /*
@@ -206,23 +158,16 @@ const transactions = {
       outputs: [
         {
           address: Buffer.from('82d818582183581c9e1c71de652ec8b85fec296f0685ca3988781c94a2e1a5d89d92f45fa0001a0d0c2561', 'hex'),
-          coins: 3003112,
+          coins: BigInt(3003112),
         },
       ],
-      fee: 42,
+      fee: BigInt(42),
       ttl: 10,
       certificates: [],
       withdrawals: [],
       metaDataHash: Buffer.from('deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef', 'hex'),
       meta: null,
     },
-    // witnesses: [
-    //   {
-    //     path: str_to_path("1852'/1815'/0'/0/0"),
-    //     witnessSignatureHex:
-    //       "953c5243ba09570dd4e52642236834c138ad4abbbb21796a90540a11e8dc96e47043401d370cdaed70ebc332dd4db80c9b167fd7f20971c4f142875cea57200c"
-    //   }
-    // ]
   },
   TxWithPoolRegistrationCertficate: {
     /*
@@ -240,18 +185,18 @@ const transactions = {
       outputs: [
         {
           address: Buffer.from('017cb05fce110fb999f01abb4f62bc455e217d4a51fde909fa9aea545443ac53c046cf6a42095e3c60310fa802771d0672f8fe2d1861138b09', 'hex'),
-          coins: 1,
+          coins: BigInt(1),
         },
       ],
-      fee: 42,
+      fee: BigInt(42),
       ttl: 10,
       certificates: [
         {
           type: 3,
           poolKeyHash: Buffer.from('13381d918ec0283ceeff60f7f4fc21e1540e053ccf8a77307a7a32ad', 'hex'),
           vrfPubKeyHash: Buffer.from('07821cd344d7fd7e3ae5f2ed863218cb979ff1d59e50c4276bdc479b0d084450', 'hex'),
-          pledge: 50000000000,
-          cost: 340000000,
+          pledge: BigInt(50000000000),
+          cost: BigInt(340000000),
           margin: { numerator: 3, denominator: 100 },
           rewardAddress: Buffer.from('e1794d9b3408c9fb67b950a48a0690f070f117e9978f7fc1d120fc58ad', 'hex'),
           poolOwnersPubKeyHashes: [
