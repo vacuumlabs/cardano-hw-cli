@@ -100,11 +100,12 @@ export const isTxMultiHostNameRelay = (
 
 const isMargin = (test: any) => {
   if (typeof test !== 'object') return false
-  return 'value' in test
-    && 0 in test.value
-    && Number.isInteger(test.value[0])
-    && 1 in test.value
-    && Number.isInteger(test.value[1])
+  const { tag, value } = test
+  if (!Array.isArray(value)) return false
+  const [numerator, denominator] = value
+  return tag === 30
+    && Number.isInteger(numerator)
+    && Number.isInteger(denominator)
 }
 
 const isMetaData = (test: any) => {
