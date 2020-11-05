@@ -273,8 +273,8 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
       certificates,
       withdrawals,
     })
-    if (response.error || !response.success) {
-      throw Error(Errors.TrezorSignTxError)
+    if (!response.success) {
+      throw Error(response.payload.error)
     }
     if (response.payload.hash !== txAux.getId()) {
       throw Error(Errors.TxSerializationMismatchError)

@@ -85,7 +85,7 @@ const findSigningPath = (
   return signingFile?.path
 }
 
-const txHasPoolPoolRegistrationCert = (
+const txHasStakePoolRegistrationCert = (
   certs: _Certificate[],
 ): boolean => certs.some(
   ({ type }) => type === TxCertificateKeys.STAKEPOOL_REGISTRATION,
@@ -125,7 +125,7 @@ const validateWitnessing = (
     stakeSigningFiles,
   } = filterSigningFiles(signingFiles)
   validateTx(txAux, paymentSigningFiles, stakeSigningFiles)
-  if (txHasPoolPoolRegistrationCert(txAux.certificates)) {
+  if (txHasStakePoolRegistrationCert(txAux.certificates)) {
     validateTxWithPoolRegistration(txAux, paymentSigningFiles, stakeSigningFiles)
   }
 }
@@ -137,7 +137,7 @@ const validateSigning = (
     paymentSigningFiles,
     stakeSigningFiles,
   } = filterSigningFiles(signingFiles)
-  if (txHasPoolPoolRegistrationCert(txAux.certificates)) throw Error(Errors.CantSignTxWithPoolRegError)
+  if (txHasStakePoolRegistrationCert(txAux.certificates)) throw Error(Errors.CantSignTxWithPoolRegError)
   validateTx(txAux, paymentSigningFiles, stakeSigningFiles)
   if (!paymentSigningFiles.length) throw Error(Errors.MissingPaymentSigningFileError)
 }
