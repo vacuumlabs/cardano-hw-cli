@@ -1,6 +1,5 @@
 /* eslint-disable max-len */
 enum Errors {
-  TrezorSignTxError = 'Error occured while signing the transaction with Trezor',
   HwTransportNotFoundError = 'Error occured while trying to find hw transport, make sure Ledger or Trezor is connected to you computer',
   InvalidPathError = 'Can not parse path',
   InvalidFileTypeError = 'Invalid file type of hw-signing-file',
