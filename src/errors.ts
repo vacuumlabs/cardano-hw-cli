@@ -41,6 +41,7 @@ enum Errors {
   InvalidAddressError = 'Invalid address',
   LedgerOperationError = 'Ledger operation error',
   InvalidAddressParametersProvidedError = 'Invalid address parameters provided',
+  InvalidKeyGenInputsError = 'Invalid key gen inputs error',
 }
 
 export {

@@ -56,17 +56,21 @@ export const parserConfig = {
       'key-gen': {
         '--path': {
           required: true,
+          action: 'append',
           type: (path: string) => parsePath(path),
+          dest: 'paths',
           help: 'Derivation path to the key to sign with.',
         },
         '--hw-signing-file': {
           required: true,
-          dest: 'hwSigningFile',
+          action: 'append',
+          dest: 'hwSigningFiles',
           help: 'Output filepath of the verification key.',
         },
         '--verification-key-file': {
           required: true,
-          dest: 'verificationKeyFile',
+          action: 'append',
+          dest: 'verificationKeyFiles',
           help: 'Output filepath of the hardware wallet signing file.',
         },
       },

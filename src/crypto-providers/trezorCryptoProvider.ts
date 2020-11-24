@@ -13,6 +13,7 @@ import {
   _StakingKeyRegistrationCert,
   _StakingKeyDeregistrationCert,
   _PoolRelay,
+  XPubKeyHex,
 } from '../transaction/types'
 import { CryptoProvider, _AddressParameters } from './types'
 import {
@@ -86,12 +87,14 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     if (response.error || !response.success) throw Error(Errors.InvalidAddressParametersProvidedError)
   }
 
-  const getXPubKey = async (path: BIP32Path): Promise<string> => {
+  const getXPubKeys = async (paths: BIP32Path[]): Promise<XPubKeyHex[]> => {
     const { payload } = await TrezorConnect.cardanoGetPublicKey({
-      path,
-      showOnTrezor: false,
+      bundle: paths.map((path) => ({
+        path,
+        showOnTrezor: false,
+      }))
     })
-    return payload.publicKey
+    return payload.map(result => result.publicKey)
   }
 
   const prepareInput = (input: _Input, path?: BIP32Path): TrezorInput => ({
@@ -298,7 +301,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     showAddress,
     witnessTx,
     signTx,
-    getXPubKey,
+    getXPubKeys,
   }
 }
 

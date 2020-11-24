@@ -42,9 +42,9 @@ export type ParsedShowAddressArguments = {
 
 export type ParsedKeyGenArguments = {
   command: CommandType.KEY_GEN,
-  path: BIP32Path,
-  hwSigningFile: string,
-  verificationKeyFile: string,
+  paths: BIP32Path[],
+  hwSigningFiles: string[],
+  verificationKeyFiles: string[],
 }
 
 export type ParsedVerificationKeyArguments = {

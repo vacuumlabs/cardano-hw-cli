@@ -23,9 +23,9 @@ describe('Command parser', () => {
     const { parsedArgs } = parse(args)
     const expectedResult = {
       command: CommandType.KEY_GEN,
-      path: [2147485500, 2147485463, 2147483648, 2, 1],
-      hwSigningFile: 'test/unit/commandParser/res/payment.hwsfile',
-      verificationKeyFile: 'test/unit/commandParser/res/payment.vkey',
+      paths: [[2147485500, 2147485463, 2147483648, 2, 1]],
+      hwSigningFiles: ['test/unit/commandParser/res/payment.hwsfile'],
+      verificationKeyFiles: ['test/unit/commandParser/res/payment.vkey'],
     }
     assert.deepEqual(parsedArgs, expectedResult)
   })

@@ -350,9 +350,9 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     return _shelleyWitnesses.length === 1 ? _shelleyWitnesses[0] : _byronWitnesses[0]
   }
 
-  const getXPubKey = async (path: BIP32Path): Promise<XPubKeyHex> => {
-    const { publicKeyHex, chainCodeHex } = await ledger.getExtendedPublicKey(path)
-    return publicKeyHex + chainCodeHex
+  const getXPubKeys = async (paths: BIP32Path[]): Promise<XPubKeyHex[]> => {
+    const xPubKeys = await ledger.getExtendedPublicKeys(paths)
+    return xPubKeys.map((xPubKey) => xPubKey.publicKeyHex + xPubKey.chainCodeHex)
   }
 
   return {
@@ -360,6 +360,6 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     showAddress,
     signTx,
     witnessTx,
-    getXPubKey,
+    getXPubKeys,
   }
 }

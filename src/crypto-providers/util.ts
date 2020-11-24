@@ -1,5 +1,6 @@
 import { HARDENED_THRESHOLD } from '../constants'
 import { Errors } from '../errors'
+import { isBIP32Path } from '../guards'
 import { XPubKey } from '../transaction/transaction'
 import { TxCertificateKeys, _Certificate, _TxAux } from '../transaction/types'
 import {
@@ -142,6 +143,22 @@ const validateSigning = (
   if (!paymentSigningFiles.length) throw Error(Errors.MissingPaymentSigningFileError)
 }
 
+const validateKeyGenInputs = (
+  paths: BIP32Path[],
+  hwSigningFiles: string[],
+  verificationKeyFiles: string[],
+): void => {
+  if (
+    !Array.isArray(paths) ||
+    !paths.every(isBIP32Path) ||
+    !Array.isArray(hwSigningFiles) ||
+    !Array.isArray(verificationKeyFiles) ||
+    paths.length < 1 ||
+    paths.length !== hwSigningFiles.length ||
+    paths.length !== verificationKeyFiles.length
+  ) throw Error(Errors.InvalidKeyGenInputsError)
+}
+
 const _packBootStrapAddress = (
   file: HwSigningData, network: Network,
 ): _AddressParameters => {
@@ -257,6 +274,7 @@ export {
   isStakingPath,
   validateSigning,
   validateWitnessing,
+  validateKeyGenInputs,
   getSigningPath,
   filterSigningFiles,
   findSigningPath,
