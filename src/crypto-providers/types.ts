@@ -27,7 +27,7 @@ export type CryptoProvider = {
     network: Network,
     changeOutputFiles: HwSigningData[],
   ) => Promise<_ShelleyWitness | _ByronWitness>
-  getXPubKey: (path: BIP32Path) => Promise<XPubKeyHex>
+  getXPubKeys: (paths: BIP32Path[]) => Promise<XPubKeyHex[]>
 }
 
 export type _AddressParameters = {

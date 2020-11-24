@@ -16,7 +16,7 @@ import {
 } from './types'
 import { LedgerCryptoProvider } from './crypto-providers/ledgerCryptoProvider'
 import { TrezorCryptoProvider } from './crypto-providers/trezorCryptoProvider'
-import { validateSigning, validateWitnessing } from './crypto-providers/util'
+import { validateSigning, validateWitnessing, validateKeyGenInputs } from './crypto-providers/util'
 import { Errors } from './errors'
 
 const promiseTimeout = <T> (promise: Promise<T>, ms: number): Promise<T> => {
@@ -61,11 +61,12 @@ const CommandExecutor = async () => {
   }
 
   const createSigningKeyFile = async (
-    { path, hwSigningFile, verificationKeyFile }: ParsedKeyGenArguments,
+    { paths, hwSigningFiles, verificationKeyFiles }: ParsedKeyGenArguments,
   ) => {
-    const xPubKey = await cryptoProvider.getXPubKey(path)
-    write(hwSigningFile, HwSigningKeyOutput(xPubKey, path))
-    write(verificationKeyFile, HwVerificationKeyOutput(xPubKey, path))
+    validateKeyGenInputs(paths, hwSigningFiles, verificationKeyFiles)
+    const xPubKeys = await cryptoProvider.getXPubKeys(paths)
+    xPubKeys.forEach((xPubKey, i) => write(hwSigningFiles[i], HwSigningKeyOutput(xPubKey, paths[i])))
+    xPubKeys.forEach((xPubKey, i) => write(verificationKeyFiles[i], HwVerificationKeyOutput(xPubKey, paths[i])))
   }
 
   const createVerificationKeyFile = (
