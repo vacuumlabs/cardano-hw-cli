@@ -1,7 +1,7 @@
 #!/bin/bash
 
 PACKAGE='cardano-hw-cli'
-VERSION='1.0.0-1' # majorVersion.minorVersion.patchVersion-packageRevision
+VERSION='1.1.0-1' # majorVersion.minorVersion.patchVersion-packageRevision
 ARCHITECTURE='i386'
 MAINTAINER='Peter Benc <peter.benc@vacuumlabs.com>, David Tran Duc <david.tran.duc@vacuumlabs.com>'
 DESCRIPTION='Cardano hw cli
