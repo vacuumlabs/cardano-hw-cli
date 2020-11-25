@@ -149,13 +149,13 @@ const validateKeyGenInputs = (
   verificationKeyFiles: string[],
 ): void => {
   if (
-    !Array.isArray(paths) ||
-    !paths.every(isBIP32Path) ||
-    !Array.isArray(hwSigningFiles) ||
-    !Array.isArray(verificationKeyFiles) ||
-    paths.length < 1 ||
-    paths.length !== hwSigningFiles.length ||
-    paths.length !== verificationKeyFiles.length
+    !Array.isArray(paths)
+    || !paths.every(isBIP32Path)
+    || !Array.isArray(hwSigningFiles)
+    || !Array.isArray(verificationKeyFiles)
+    || paths.length < 1
+    || paths.length !== hwSigningFiles.length
+    || paths.length !== verificationKeyFiles.length
   ) throw Error(Errors.InvalidKeyGenInputsError)
 }
 

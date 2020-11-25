@@ -49,7 +49,7 @@ import {
 } from './util'
 import { Errors } from '../errors'
 
-import TrezorConnect from '../../trezor-extended/lib'
+const TrezorConnect = require('trezor-connect').default
 
 const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
   TrezorConnect.manifest({
@@ -92,9 +92,9 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
       bundle: paths.map((path) => ({
         path,
         showOnTrezor: false,
-      }))
+      })),
     })
-    return payload.map(result => result.publicKey)
+    return payload.map((result) => result.publicKey)
   }
 
   const prepareInput = (input: _Input, path?: BIP32Path): TrezorInput => ({

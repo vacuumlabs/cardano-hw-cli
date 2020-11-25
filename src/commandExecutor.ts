@@ -66,7 +66,9 @@ const CommandExecutor = async () => {
     validateKeyGenInputs(paths, hwSigningFiles, verificationKeyFiles)
     const xPubKeys = await cryptoProvider.getXPubKeys(paths)
     xPubKeys.forEach((xPubKey, i) => write(hwSigningFiles[i], HwSigningKeyOutput(xPubKey, paths[i])))
-    xPubKeys.forEach((xPubKey, i) => write(verificationKeyFiles[i], HwVerificationKeyOutput(xPubKey, paths[i])))
+    xPubKeys.forEach((xPubKey, i) => write(
+      verificationKeyFiles[i], HwVerificationKeyOutput(xPubKey, paths[i]),
+    ))
   }
 
   const createVerificationKeyFile = (
