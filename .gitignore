@@ -2,6 +2,7 @@
 /dist
 /build/*
 !/build/Release
+!/build/macos-dependencies
 /build-linux-deb
 /build-linux-tar
 /build-windows-zip
