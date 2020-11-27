@@ -128,6 +128,8 @@ const validateWitnessing = (
   validateTx(txAux, paymentSigningFiles, stakeSigningFiles)
   if (txHasStakePoolRegistrationCert(txAux.certificates)) {
     validateTxWithPoolRegistration(txAux, paymentSigningFiles, stakeSigningFiles)
+  } else {
+    throw Error(Errors.CantWitnessTxWithoutPoolRegError)
   }
 }
 
