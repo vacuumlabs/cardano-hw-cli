@@ -111,10 +111,13 @@ const validateTxWithPoolRegistration = (
   paymentSigningFiles: HwSigningData[],
   stakeSigningFiles: HwSigningData[],
 ): void => {
+  if (!txAux.inputs.length) throw Error(Errors.MissingInputError)
+  if (!txAux.outputs.length) throw Error(Errors.MissingOutputError)
   if (txAux.certificates.length !== 1) throw Error(Errors.MultipleCertificatesWithPoolRegError)
   if (txAux.withdrawals.length) throw Error(Errors.WithdrawalIncludedWithPoolRegError)
   if (paymentSigningFiles.length) throw Error(Errors.PaymentFileInlucedWithPoolRegError)
-  if (stakeSigningFiles.length !== 1) throw Error(Errors.MultipleStakingSigningFilesWithPoolRegError)
+  if (stakeSigningFiles.length === 0) throw Error(Errors.MissingStakingSigningFileError)
+  if (stakeSigningFiles.length > 1) throw Error(Errors.MultipleStakingSigningFilesWithPoolRegError)
 }
 
 const validateWitnessing = (
@@ -125,12 +128,11 @@ const validateWitnessing = (
     paymentSigningFiles,
     stakeSigningFiles,
   } = filterSigningFiles(signingFiles)
-  validateTx(txAux, paymentSigningFiles, stakeSigningFiles)
-  if (txHasStakePoolRegistrationCert(txAux.certificates)) {
-    validateTxWithPoolRegistration(txAux, paymentSigningFiles, stakeSigningFiles)
-  } else {
+  if (!txHasStakePoolRegistrationCert(txAux.certificates)) {
     throw Error(Errors.CantWitnessTxWithoutPoolRegError)
   }
+
+  validateTxWithPoolRegistration(txAux, paymentSigningFiles, stakeSigningFiles)
 }
 
 const validateSigning = (
