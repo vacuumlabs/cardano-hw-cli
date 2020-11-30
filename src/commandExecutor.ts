@@ -50,7 +50,7 @@ const CommandExecutor = async () => {
   const cryptoProvider: CryptoProvider = await getCryptoProvider()
 
   // eslint-disable-next-line no-console
-  const printVersion = async () => console.log(await cryptoProvider.getVersion())
+  const printDeviceVersion = async () => console.log(await cryptoProvider.getVersion())
 
   const showAddress = async (
     { paymentPath, stakingPath, address }: ParsedShowAddressArguments,
@@ -99,7 +99,7 @@ const CommandExecutor = async () => {
   }
 
   return {
-    printVersion,
+    printDeviceVersion,
     showAddress,
     createSigningKeyFile,
     createVerificationKeyFile,

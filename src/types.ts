@@ -1,6 +1,7 @@
 import { SignedTxOutput, WitnessOutput } from './transaction/types'
 
 export enum CommandType {
+  APP_VERSION = 'version',
   DEVICE_VERSION = 'device.version',
   SHOW_ADDRESS = 'shelley.address.show',
   KEY_GEN = 'shelley.address.key-gen',
@@ -28,6 +29,10 @@ export type TxBodyData = {
 }
 
 export type Address = string
+
+export type ParsedAppVersionArguments = {
+  command: CommandType.APP_VERSION,
+}
 
 export type ParsedDeviceVersionArguments = {
   command: CommandType.DEVICE_VERSION,
@@ -87,6 +92,7 @@ export type ParsedTransactionWitnessArguments = {
 }
 
 export type ParsedArguments =
+  | ParsedAppVersionArguments
   | ParsedDeviceVersionArguments
   | ParsedShowAddressArguments
   | ParsedKeyGenArguments

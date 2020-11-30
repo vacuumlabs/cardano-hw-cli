@@ -36,7 +36,7 @@ cardano-hw-cli shelley transaction sign
 
 ## Witness transaction
 ```
-cardano-hw-cli shelley transaction sign
+cardano-hw-cli shelley transaction witness
 --tx-body-file FILE                    Input filepath of the TxBody.
 --hw-signing-file FILE                 Input filepath of the hardware wallet signing file.
 --change-output-key-file File          Input filepath of the hardware wallet signing file.
@@ -50,6 +50,11 @@ cardano-hw-cli shelley address show
   --payment-path PAYMENTPATH    Payment derivation path.
   --staking-path STAKINGPATH    Stake derivation path.
   --address-file ADDRESS        Input filepath of the address.
+```
+
+## Check app version
+```
+cardano-hw-cli version
 ```
 
 ## Check device version

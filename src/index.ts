@@ -4,16 +4,24 @@ import { CommandExecutor } from './commandExecutor'
 import { Errors } from './errors'
 import { CommandType } from './types'
 
+const { version } = require('../package.json')
+
 const executeCommand = async (): Promise<void> => {
   const { parser, parsedArgs } = parse(process.argv)
   if (!Object.values(CommandType).includes(parsedArgs.command)) {
     parser.print_help()
     return
   }
+
+  if (parsedArgs.command === CommandType.APP_VERSION) {
+    console.log(`Cardano HW CLI Tool version ${version}`)
+    return
+  }
+
   const commandExecutor = await CommandExecutor()
   switch (parsedArgs.command) {
     case (CommandType.DEVICE_VERSION):
-      await commandExecutor.printVersion()
+      await commandExecutor.printDeviceVersion()
       break
     case (CommandType.SHOW_ADDRESS):
       await commandExecutor.showAddress(parsedArgs)

@@ -48,6 +48,7 @@ const txSigningArgs = {
 }
 
 export const parserConfig = {
+  version: {},
   device: {
     version: {},
   },

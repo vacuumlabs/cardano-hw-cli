@@ -2,7 +2,7 @@ _cardano_hw_cli_completions()
 {
     case $COMP_CWORD in
         1)
-            COMPREPLY=( $(compgen -W "shelley device" "${COMP_WORDS[1]}") )
+            COMPREPLY=( $(compgen -W "shelley device version" "${COMP_WORDS[1]}") )
             ;;
         2)
             if [ "${COMP_WORDS[1]}" = "shelley" ]; then
