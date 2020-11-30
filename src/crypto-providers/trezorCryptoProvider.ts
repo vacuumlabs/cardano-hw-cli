@@ -1,3 +1,4 @@
+import { UI, UI_EVENT } from 'trezor-connect'
 import {
   SignedTxCborHex,
   _TxAux,
@@ -49,14 +50,39 @@ import {
 } from './util'
 import { Errors } from '../errors'
 
+// using require to suppress type errors from trezor-connect
 const TrezorConnect = require('trezor-connect').default
 
 const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
-  TrezorConnect.manifest({
-    email: 'todo',
-    appUrl: 'todo',
-  })
-  await TrezorConnect.getFeatures()
+  const initTrezorConnect = async (): Promise<void> => {
+    TrezorConnect.manifest({
+      email: 'adalite@vacuumlabs.com',
+      appUrl: 'https://github.com/vacuumlabs/cardano-hw-cli',
+    })
+
+    // without this listener, the passphrase, if enabled, would be infinitely awaited
+    // to be inserted in the browser, see https://github.com/trezor/connect/issues/714
+    TrezorConnect.on(UI_EVENT, (event) => {
+      if (event.type === UI.REQUEST_PASSPHRASE) {
+        if (event.payload.device.features.capabilities.includes('Capability_PassphraseEntry')) {
+          TrezorConnect.uiResponse({
+            type: UI.RECEIVE_PASSPHRASE,
+            payload: {
+              passphraseOnDevice: true,
+              save: true,
+              value: '',
+            },
+          })
+        } else {
+          throw Error(Errors.TrezorPassphraseNotInsertableOnDevice)
+        }
+      }
+    })
+
+    await TrezorConnect.getFeatures()
+  }
+
+  await initTrezorConnect()
 
   const getVersion = async (): Promise<string> => {
     const { payload: features } = await TrezorConnect.getFeatures()

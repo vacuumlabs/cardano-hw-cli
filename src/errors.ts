@@ -43,6 +43,7 @@ enum Errors {
   LedgerOperationError = 'Ledger operation error',
   InvalidAddressParametersProvidedError = 'Invalid address parameters provided',
   InvalidKeyGenInputsError = 'Invalid key gen inputs error',
+  TrezorPassphraseNotInsertableOnDevice = 'Trezor passphrase not insertable on the device',
 }
 
 export {

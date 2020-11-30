@@ -39,7 +39,7 @@
     "bignumber": "^1.1.0",
     "borc": "^2.1.2",
     "cardano-crypto.js": "^5.3.6-rc.6",
-    "trezor-connect": "https://github.com/vacuumlabs/connect/releases/download/8.1.18-rc.1/trezor-connect-8.1.18-extended-rc.1.tgz"
+    "trezor-connect": "https://github.com/vacuumlabs/connect/releases/download/8.1.18-rc.2/trezor-connect-8.1.18-rc.2-extended.tgz"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^4.2.0",
