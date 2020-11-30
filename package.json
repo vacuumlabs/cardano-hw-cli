@@ -18,7 +18,7 @@
     "test-bin": "yarn build && ./build/cardano-hw-cli --help",
     "test-integration-ledger": "mocha -r ts-node/register 'test/integration/ledger/node/**/*.js'",
     "test-integration-trezor": "mocha -r ts-node/register 'test/integration/trezor/node/**/*.js'",
-    "clean": "sudo rm -rf ./build/cardano-hw-cli && rm -rf  ./build/package.json && sudo rm -rf ./dist && sudo rm -rf ./node_modules",
+    "clean": "rm -rf ./build/cardano-hw-cli && rm -rf ./build/package.json && rm -rf ./dist && rm -rf ./node_modules",
     "nexe": "nexe"
   },
   "repository": {
