@@ -25,6 +25,9 @@ Create soft link:
 sudo ln -s /<PATH_TO_UNCOMPRESSED_DIRECTORY>/cardano-hw-cli /usr/bin
 ```
 
+## Setup arguments auto-completion
+Append contents of https://github.com/vacuumlabs/cardano-hw-cli/blob/develop/scripts/autocomplete.sh to the `/etc/bash.bashrc`.
+
 
 # Windows
 Unzip `cardano-hw-cli.zip` and add directory location to your PATH.
