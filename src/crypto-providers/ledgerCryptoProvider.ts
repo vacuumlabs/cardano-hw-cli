@@ -351,8 +351,25 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
   }
 
   const getXPubKeys = async (paths: BIP32Path[]): Promise<XPubKeyHex[]> => {
-    const xPubKeys = await ledger.getExtendedPublicKeys(paths)
-    return xPubKeys.map((xPubKey) => xPubKey.publicKeyHex + xPubKey.chainCodeHex)
+    const { major, minor, patch } = await ledger.getVersion()
+    const threshold = { major: 2, minor: 1, patch: 0 }
+
+    if (
+      major > threshold.major
+      || (major === threshold.major && minor > threshold.minor)
+      || (major === threshold.major && minor === threshold.minor && patch >= threshold.patch)
+    ) {
+      const xPubKeys = await ledger.getExtendedPublicKeys(paths)
+      return xPubKeys.map((xPubKey) => xPubKey.publicKeyHex + xPubKey.chainCodeHex)
+    }
+
+    const xPubKeys: XPubKeyHex[] = []
+    for (let i = 0; i < paths.length; i += 1) {
+      // eslint-disable-next-line no-await-in-loop
+      const { publicKeyHex, chainCodeHex } = await ledger.getExtendedPublicKey(paths[i])
+      xPubKeys.push(publicKeyHex + chainCodeHex)
+    }
+    return xPubKeys
   }
 
   return {
