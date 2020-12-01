@@ -17,7 +17,7 @@ if `.deb` package is not working for some reason you can uncompress the `.tar.gz
 
 Uncompress:
 ```
-tar -zxvf cardano-hw-cli.tar.gz
+tar -zxvf cardano-hw-cli-<VERSION>.tar.gz
 ```
 
 Create soft link:
@@ -37,7 +37,7 @@ export PATH=<PATH_TO_DIRECTORY>
 # Mac
 Uncompress the `.tar.gz` archive by double clicking archive in finder or uncompress in command line:
 ```
-tar -zxvf cardano-hw-cli.tar.gz
+tar -zxvf cardano-hw-cli-<VERSION>.tar.gz
 ```
 
 Add to PATH:
@@ -47,7 +47,7 @@ sudo vim /etc/paths
 add to the end of file on new line: `<PATH_TO_DIRECTORY>`
 
 # Windows
-Unzip `cardano-hw-cli.zip` and add directory location to your PATH.
+Unzip `cardano-hw-cli-<VERSION>.zip` and add directory location to your PATH.
 
 How to add to PATH: https://www.architectryan.com/2018/03/17/add-to-the-path-on-windows-10/
 

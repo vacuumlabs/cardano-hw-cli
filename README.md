@@ -66,7 +66,7 @@ cardano-hw-cli device version
 - https://github.com/vacuumlabs/cardano-hw-cli/blob/develop/docs/delegation-example.md
 - https://github.com/vacuumlabs/cardano-hw-cli/blob/develop/docs/transaction-example.md
 
-# Compiling from source
+# Running from source
 Install node version v12.16.2
 ```
 nvm i v12.16.2
@@ -90,4 +90,28 @@ yarn test-unit
 Run application with
 ```
 yarn dev ...
+```
+
+# Building from source
+Install node version v12.16.2
+```
+nvm i v12.16.2
+```
+
+Install yarn:
+```
+npm install -g yarn
+```
+
+To build all artifacts for each OS run:
+```
+yarn build
+```
+
+To target specific artifact, run one of following commands:
+```
+yarn build-linux-deb
+yarn build-linux-tar
+yarn build-windows
+yarn build-macos
 ```
