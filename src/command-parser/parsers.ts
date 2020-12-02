@@ -1,3 +1,4 @@
+import fsPath from 'path'
 import { HARDENED_THRESHOLD, NETWORKS } from '../constants'
 import { isBIP32Path, isHwSigningData, isTxBodyData } from '../guards'
 import { Errors } from '../errors'
@@ -66,4 +67,11 @@ export const parseTxBodyFile = (path: string): TxBodyData => {
 export const parseAddressFile = (path: string): Address => {
   const data = fs.readFileSync(path, 'utf8')
   return data.trim()
+}
+
+export const parseAppVersion = () => {
+  const { version, commit } = JSON.parse(
+    fs.readFileSync(fsPath.resolve(__dirname, '../../package.json'), 'utf8'),
+  )
+  return { version, commit }
 }

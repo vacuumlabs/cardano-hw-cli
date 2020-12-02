@@ -18,7 +18,7 @@ yarn nexe ./dist/index.js -o ./build/windows/cardano-hw-cli/cardano-hw-cli -t wi
 mv ./build/windows/cardano-hw-cli/cardano-hw-cli.exe ./build/windows/cardano-hw-cli/cardano-hw-cli 
 
 # Copy dependencies
-cp package.json ./build/windows/cardano-hw-cli/package.json
+cp _package.json ./build/windows/cardano-hw-cli/package.json
 cp -R ./build/dependencies/windows/Release ./build/windows/cardano-hw-cli/Release
 
 # Archive

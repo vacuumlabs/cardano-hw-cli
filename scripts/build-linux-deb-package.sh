@@ -30,7 +30,7 @@ yarn nexe ./dist/index.js -o ./build/linux/deb/cardano-hw-cli -t linux-x64-12.16
 
 # Copy files to package structure
 cp -R ./build/dependencies/linux/Release ./build/linux/deb/${PACKAGE}_${VERSION}/usr/share/cardano-hw-cli
-cp ./package.json ./build/linux/deb/${PACKAGE}_${VERSION}/usr/share/cardano-hw-cli
+cp ./_package.json ./build/linux/deb/${PACKAGE}_${VERSION}/usr/share/cardano-hw-cli/package.json
 cp ./build/linux/deb/cardano-hw-cli ./build/linux/deb/${PACKAGE}_${VERSION}/usr/share/cardano-hw-cli
 ln -s /usr/share/cardano-hw-cli/cardano-hw-cli ./build/linux/deb/${PACKAGE}_${VERSION}/usr/bin
 

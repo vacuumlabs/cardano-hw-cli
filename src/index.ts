@@ -1,10 +1,9 @@
 /* eslint-disable no-console */
 import { parse } from './command-parser/commandParser'
+import { parseAppVersion } from './command-parser/parsers'
 import { CommandExecutor } from './commandExecutor'
 import { Errors } from './errors'
 import { CommandType } from './types'
-
-const { version } = require('../package.json')
 
 const executeCommand = async (): Promise<void> => {
   const { parser, parsedArgs } = parse(process.argv)
@@ -14,7 +13,9 @@ const executeCommand = async (): Promise<void> => {
   }
 
   if (parsedArgs.command === CommandType.APP_VERSION) {
+    const { version, commit } = parseAppVersion()
     console.log(`Cardano HW CLI Tool version ${version}`)
+    if (commit) console.log(`Commit hash: ${commit}`)
     return
   }
 

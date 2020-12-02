@@ -17,7 +17,7 @@ mkdir ./build/macos/cardano-hw-cli
 yarn nexe ./dist/index.js -o ./build/macos/cardano-hw-cli/cardano-hw-cli -t mac-x64-12.16.2
 
 # Copy dependencies
-cp package.json ./build/macos/cardano-hw-cli/package.json
+cp _package.json ./build/macos/cardano-hw-cli/package.json
 cp -R ./build/dependencies/macos/Release ./build/macos/cardano-hw-cli/Release
 
 # Archive

@@ -17,7 +17,7 @@ mkdir ./build/linux/archive/cardano-hw-cli
 yarn nexe ./dist/index.js -o ./build/linux/archive/cardano-hw-cli/cardano-hw-cli -t linux-x64-12.16.2
 
 # Copy dependencies
-cp package.json ./build/linux/archive/cardano-hw-cli/package.json
+cp _package.json ./build/linux/archive/cardano-hw-cli/package.json
 cp -R ./build/dependencies/linux/Release ./build/linux/archive/cardano-hw-cli/Release
 
 # Archive
