@@ -194,7 +194,7 @@ cardano-cli shelley transaction build-raw \
 
 ## Create transaction witnesses
 
-This includes creating witnesses with the operator, pool and for all included pool owners. Only pool owners can provide their witness from a hardware wallet.
+This includes creating witnesses with the operator, pool and for all included pool owners. Only pool owners can provide their witness from a hardware wallet. Pool keys and spending keys must be managed by cardano-cli.
 
 ```
 ## operator witness - Signed by pool operator (payer of pool deposit and fees) 
@@ -221,7 +221,7 @@ sudo cardano-hw-cli shelley transaction witness \
 
 ## Create signed transaction 
 
-Use witnesses from previous step to sign the pool registration transaction
+Use witnesses from previous step to assemble the signed pool registration transaction
 
 ```
 cardano-cli shelley transaction sign-witness \
