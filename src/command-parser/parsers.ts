@@ -8,7 +8,7 @@ import {
   HwSigningData, HwSigningType, TxBodyData,
 } from '../types'
 
-const fs = require('fs')
+const rw = require('rw')
 
 export const parseNetwork = (name: string, protocolMagic?: string) => {
   if (!protocolMagic) return NETWORKS[name]
@@ -42,7 +42,7 @@ export const parseFileTypeMagic = (fileTypeMagic: string, path: string) => {
 }
 
 export const parseHwSigningFile = (path: string): HwSigningData => {
-  const data = JSON.parse(fs.readFileSync(path, 'utf8'))
+  const data = JSON.parse(rw.readFileSync(path, 'utf8'))
   data.path = parsePath(data.path)
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { type: fileTypeMagic, description, ...parsedData } = data
@@ -55,7 +55,7 @@ export const parseHwSigningFile = (path: string): HwSigningData => {
 }
 
 export const parseTxBodyFile = (path: string): TxBodyData => {
-  const data = JSON.parse(fs.readFileSync(path, 'utf8'))
+  const data = JSON.parse(rw.readFileSync(path, 'utf8'))
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { type, description, ...parsedData } = data
   if (isTxBodyData(parsedData)) {
@@ -65,13 +65,13 @@ export const parseTxBodyFile = (path: string): TxBodyData => {
 }
 
 export const parseAddressFile = (path: string): Address => {
-  const data = fs.readFileSync(path, 'utf8')
+  const data = rw.readFileSync(path, 'utf8')
   return data.trim()
 }
 
 export const parseAppVersion = () => {
   const { version, commit } = JSON.parse(
-    fs.readFileSync(fsPath.resolve(__dirname, '../../package.json'), 'utf8'),
+    rw.readFileSync(fsPath.resolve(__dirname, '../../package.json'), 'utf8'),
   )
   return { version, commit }
 }

@@ -16,10 +16,10 @@ import {
   VerificationKeyOutput,
 } from './types'
 
-const fs = require('fs')
+const rw = require('rw')
 const cbor = require('borc')
 
-const write = (path: string, data: OutputData) => fs.writeFileSync(
+const write = (path: string, data: OutputData) => rw.writeFileSync(
   path,
   JSON.stringify(data, null, 4),
   'utf8',

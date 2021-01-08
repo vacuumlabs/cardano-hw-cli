@@ -37,7 +37,7 @@ enum Errors {
   UnknownCertificateError = 'Unknown certificate',
   UnsupportedCertificateTypeError = 'Unsupported certificate type',
   MissingSigningFileForWithdrawalError = 'Missing signing file for withdrawal',
-  CantSignTxWithPoolRegError = 'Cannot sign trasaction with pool registration, use "witness" subcommand instead',
+  CantSignTxWithPoolRegError = 'Cannot sign transaction with pool registration, use "witness" subcommand instead',
   CantWitnessTxWithoutPoolRegError = 'Cannot create separate witness for transaction other than pool registration, use "sign" subcommand instead',
   InvalidAddressError = 'Invalid address',
   LedgerOperationError = 'Ledger operation error',
