@@ -13,7 +13,7 @@ should create `protocol.json` file.
 
 ### Verification payment key and hardware wallet signing file
 ```
-cardano-hw-cli shelley address key-gen \
+cardano-hw-cli address key-gen \
 --path 1852H/1815H/0H/0/0 \
 --verification-key-file payment.vkey \
 --hw-signing-file payment.hwsfile
@@ -22,7 +22,7 @@ should create `payment.vkey` and `payment.hwsfile` files.
 
 ## Verification stake key and hardware wallet signing file
 ```
-cardano-hw-cli shelley address key-gen \
+cardano-hw-cli address key-gen \
 --path 1852H/1815H/0H/2/0 \
 --verification-key-file stake.vkey \
 --hw-signing-file stake.hwsfile
@@ -107,7 +107,7 @@ cardano-cli shelley transaction build-raw \
 
 ## Sign the transaction
 ```
-cardano-hw-cli shelley transaction sign \
+cardano-hw-cli transaction sign \
 --tx-body-file tx.raw \
 --hw-signing-file payment.hwsfile \
 --hw-signing-file stake.hwsfile \

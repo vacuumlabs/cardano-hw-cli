@@ -52,67 +52,65 @@ export const parserConfig = {
   device: {
     version: {},
   },
-  shelley: {
-    address: {
-      'key-gen': {
-        '--path': {
-          required: true,
-          action: 'append',
-          type: (path: string) => parsePath(path),
-          dest: 'paths',
-          help: 'Derivation path to the key to sign with.',
-        },
-        '--hw-signing-file': {
-          required: true,
-          action: 'append',
-          dest: 'hwSigningFiles',
-          help: 'Output filepath of the verification key.',
-        },
-        '--verification-key-file': {
-          required: true,
-          action: 'append',
-          dest: 'verificationKeyFiles',
-          help: 'Output filepath of the hardware wallet signing file.',
-        },
+  address: {
+    'key-gen': {
+      '--path': {
+        required: true,
+        action: 'append',
+        type: (path: string) => parsePath(path),
+        dest: 'paths',
+        help: 'Derivation path to the key to sign with.',
       },
-      show: {
-        '--payment-path': {
-          required: true,
-          type: (path: string) => parsePath(path),
-          dest: 'paymentPath',
-          help: 'Payment derivation path.',
-        },
-        '--staking-path': {
-          type: (path: string) => parsePath(path),
-          dest: 'stakingPath',
-          help: 'Stake derivation path.',
-        },
-        '--address-file': {
-          required: true,
-          type: (path: string) => parseAddressFile(path),
-          dest: 'address',
-          help: 'Input filepath of the address.',
-        },
+      '--hw-signing-file': {
+        required: true,
+        action: 'append',
+        dest: 'hwSigningFiles',
+        help: 'Output filepath of the verification key.',
+      },
+      '--verification-key-file': {
+        required: true,
+        action: 'append',
+        dest: 'verificationKeyFiles',
+        help: 'Output filepath of the hardware wallet signing file.',
       },
     },
-    key: {
-      'verification-key': {
-        '--hw-signing-file': {
-          required: true,
-          dest: 'hwSigningFileData',
-          type: (path: string) => parseHwSigningFile(path),
-          help: 'Input filepath of the hardware wallet signing file.',
-        },
-        '--verification-key-file': {
-          required: true,
-          dest: 'verificationKeyFile',
-          help: 'Output filepath of the verification key.',
-        },
+    show: {
+      '--payment-path': {
+        required: true,
+        type: (path: string) => parsePath(path),
+        dest: 'paymentPath',
+        help: 'Payment derivation path.',
+      },
+      '--staking-path': {
+        type: (path: string) => parsePath(path),
+        dest: 'stakingPath',
+        help: 'Stake derivation path.',
+      },
+      '--address-file': {
+        required: true,
+        type: (path: string) => parseAddressFile(path),
+        dest: 'address',
+        help: 'Input filepath of the address.',
       },
     },
-    transaction: {
-      sign: txSigningArgs,
-      witness: txSigningArgs,
+  },
+  key: {
+    'verification-key': {
+      '--hw-signing-file': {
+        required: true,
+        dest: 'hwSigningFileData',
+        type: (path: string) => parseHwSigningFile(path),
+        help: 'Input filepath of the hardware wallet signing file.',
+      },
+      '--verification-key-file': {
+        required: true,
+        dest: 'verificationKeyFile',
+        help: 'Output filepath of the verification key.',
+      },
     },
+  },
+  transaction: {
+    sign: txSigningArgs,
+    witness: txSigningArgs,
   },
 }

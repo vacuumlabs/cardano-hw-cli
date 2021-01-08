@@ -55,7 +55,7 @@ How to add to PATH: https://www.architectryan.com/2018/03/17/add-to-the-path-on-
 This step is optional.
 
 ## Linux and windows
-Append contents of https://github.com/vacuumlabs/cardano-hw-cli/blob/develop/scripts/autocomplete.sh to the `~/.bashrc`.
+Append contents of https://github.com/vacuumlabs/cardano-hw-cli/blob/develop/scripts/autocomplete.sh to the `~/.bashrc` (or source it).
 
 On windows this works with Git Bash.
 

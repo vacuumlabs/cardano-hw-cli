@@ -63,7 +63,7 @@ cardano-cli shelley node issue-op-cert \
 ## Create owner signing key
 
 ```
-sudo cardano-hw-cli shelley address key-gen \
+sudo cardano-hw-cli address key-gen \
 --path 1852H/1815H/0H/2/0 \
 --hw-signing-file stake.hwsfile \
 --verification-key-file stake.vkey
@@ -214,7 +214,7 @@ cardano-cli shelley transaction witness \
 --out-file pool.witness
 
 ## owner witness - One or multiple hardware wallet pool owners
-sudo cardano-hw-cli shelley transaction witness \
+sudo cardano-hw-cli transaction witness \
 --tx-body-file tx.raw \
 --hw-signing-file stake.hwsfile \
 --mainnet \

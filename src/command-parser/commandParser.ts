@@ -32,8 +32,16 @@ const makeParser = () => {
   ), parserConfig)
 }
 
-// First 2 args are node version and script name
+const preProcessArgs = (inputArgs) => {
+  // First 2 args are node version and script name
+  const commandArgs = inputArgs.slice(2)
+  if (commandArgs[0] === 'shelley') {
+    return commandArgs.slice(1)
+  }
+  return commandArgs
+}
+
 export const parse = (inputArgs: string[]): { parser: any, parsedArgs: ParsedArguments } => {
-  const { parser, ...parsedArgs } = makeParser().parse_args(inputArgs.slice(2))
+  const { parser, ...parsedArgs } = makeParser().parse_args(preProcessArgs(inputArgs))
   return { parser, parsedArgs }
 }

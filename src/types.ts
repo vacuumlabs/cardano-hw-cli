@@ -3,11 +3,11 @@ import { SignedTxOutput, WitnessOutput } from './transaction/types'
 export enum CommandType {
   APP_VERSION = 'version',
   DEVICE_VERSION = 'device.version',
-  SHOW_ADDRESS = 'shelley.address.show',
-  KEY_GEN = 'shelley.address.key-gen',
-  VERIFICATION_KEY = 'shelley.key.verification-key',
-  SIGN_TRANSACTION = 'shelley.transaction.sign',
-  WITNESS_TRANSACTION = 'shelley.transaction.witness',
+  SHOW_ADDRESS = 'address.show',
+  KEY_GEN = 'address.key-gen',
+  VERIFICATION_KEY = 'key.verification-key',
+  SIGN_TRANSACTION = 'transaction.sign',
+  WITNESS_TRANSACTION = 'transaction.witness',
 }
 
 export type CborHex = string
