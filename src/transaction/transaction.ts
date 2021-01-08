@@ -13,6 +13,8 @@ import {
   XPubKeyCborHex,
   _XPubKey,
 } from './types'
+import { isUnsignedTxDecoded } from './guards'
+import { Errors } from '../errors'
 
 const cbor = require('borc')
 const { blake2b } = require('cardano-crypto.js')
@@ -41,22 +43,26 @@ const TxByronWitness = (
 const TxShelleyWitness = (publicKey: Buffer, signature: Buffer): TxWitnessShelley => [publicKey, signature]
 
 const TxAux = (unsignedTxCborHex: UnsignedTxCborHex): _TxAux => {
-  const unsignedTxDecoded:_UnsignedTxDecoded = cbor.decode(unsignedTxCborHex)
-  const parsedTx = parseUnsignedTx(unsignedTxDecoded)
+  const unsignedTxDecoded = cbor.decode(unsignedTxCborHex)
+  if (!isUnsignedTxDecoded(unsignedTxDecoded)) {
+    throw Error(Errors.InvalidTransactionBody)
+  } else {
+    const parsedTx = parseUnsignedTx(unsignedTxDecoded)
 
-  const getId = (): string => {
-    const [txBody] = unsignedTxDecoded
-    const encodedTxBody = encode(txBody)
-    return blake2b(
-      encodedTxBody,
-      32,
-    ).toString('hex')
-  }
+    const getId = (): string => {
+      const [txBody] = unsignedTxDecoded
+      const encodedTxBody = encode(txBody)
+      return blake2b(
+        encodedTxBody,
+        32,
+      ).toString('hex')
+    }
 
-  return {
-    getId,
-    unsignedTxDecoded,
-    ...parsedTx,
+    return {
+      getId,
+      unsignedTxDecoded,
+      ...parsedTx,
+    }
   }
 }
 

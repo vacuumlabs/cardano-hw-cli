@@ -10,6 +10,13 @@ export enum CommandType {
   WITNESS_TRANSACTION = 'transaction.witness',
 }
 
+export enum CardanoEra {
+  BYRON = 'Byron',
+  SHELLEY = 'Shelley',
+  Allegra = 'Allegra',
+  MARY = 'Mary',
+}
+
 export type CborHex = string
 
 export type BIP32Path = number[]
@@ -25,6 +32,7 @@ export type HwSigningData = {
 }
 
 export type TxBodyData = {
+  era: CardanoEra,
   cborHex: CborHex
 }
 

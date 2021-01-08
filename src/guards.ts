@@ -1,11 +1,14 @@
 import {
   BIP32Path,
   CborHex,
+  CardanoEra,
   HwSigningData,
   TxBodyData,
 } from './types'
 
 const cbor = require('borc')
+
+export const isEra = (test: any): test is CardanoEra => Object.values(CardanoEra).includes(test)
 
 export const isCborHex = (test: any): test is CborHex => {
   try {
@@ -29,7 +32,7 @@ export const isHwSigningData = (
 
 export const isTxBodyData = (
   test: any,
-): test is TxBodyData => isCborHex(test.cborHex)
+): test is TxBodyData => isEra(test.era) && isCborHex(test.cborHex)
 
 export const isArrayOfType = <T>(
   test: any,

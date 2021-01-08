@@ -5,6 +5,7 @@ import { Errors } from '../errors'
 import {
   Address,
   BIP32Path,
+  CardanoEra,
   HwSigningData, HwSigningType, TxBodyData,
 } from '../types'
 
@@ -55,11 +56,16 @@ export const parseHwSigningFile = (path: string): HwSigningData => {
 }
 
 export const parseTxBodyFile = (path: string): TxBodyData => {
-  const data = JSON.parse(rw.readFileSync(path, 'utf8'))
+  const json = JSON.parse(rw.readFileSync(path, 'utf8'))
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { type, description, ...parsedData } = data
-  if (isTxBodyData(parsedData)) {
-    return parsedData
+  const { type, description, ...parsedData } = json
+  const era = Object.values(CardanoEra).find((e) => type.includes(e))
+  const data = {
+    ...parsedData,
+    era,
+  }
+  if (isTxBodyData(data)) {
+    return data
   }
   throw Error(Errors.InvalidTxBodyFileError)
 }

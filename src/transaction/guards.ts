@@ -12,6 +12,8 @@ import {
   TxSingleHostNameRelay,
   TxRelayTypes,
   TxWithdrawal,
+  _UnsignedTxDecoded,
+  TxBodyKeys,
 } from './types'
 
 export const isLovelace = (test: any): test is number => {
@@ -141,4 +143,15 @@ export const isStakepoolRegistrationCert = (
     && isArrayOfType<Buffer>(poolOwnersPubKeyHashes, Buffer.isBuffer)
     && Array.isArray(relays)
     && isMetaData(metadata)
+}
+
+export const isUnsignedTxDecoded = (
+  test: any,
+): test is _UnsignedTxDecoded => {
+  if (Array.isArray(test)) {
+    const txBody = test[0]
+    const validKeys = Object.values(TxBodyKeys)
+    return Object.keys(txBody).every((key) => validKeys.includes(key))
+  }
+  return false
 }

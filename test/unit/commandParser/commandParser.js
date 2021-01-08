@@ -1,6 +1,6 @@
 const assert = require('assert')
 const { parse } = require('../../../src/command-parser/commandParser')
-const { CommandType, HwSigningType } = require('../../../src/types')
+const { CommandType, CardanoEra, HwSigningType } = require('../../../src/types')
 const { NETWORKS } = require('../../../src/constants')
 
 const resFolder = 'test/unit/commandParser/res/'
@@ -73,6 +73,7 @@ describe('Command parser', () => {
       txBodyFileData: {
         // eslint-disable-next-line max-len
         cborHex: '839f8200d81858248258206ca5fde47f4ff7f256a7464dbf0cb9b4fb6bce9049eee1067eed65cf5d6e2765008200d81858248258206ca5fde47f4ff7f256a7464dbf0cb9b4fb6bce9049eee1067eed65cf5d6e276501ff9f8282d818584283581c13f3997560a5b81f5ac680b3322a2339433424e4e589ab3d752afdb6a101581e581c2eab4601bfe583febc23a04fb0abc21557adb47cea49c68d7b2f40a5001ac63884bf182f8282d818584283581cf9a5257f805a1d378c87b0bfb09232c10d9098bc56fd21d9a6a4072aa101581e581c140539c64edded60a7f2c4692c460a154cbdd06088333fd7f75ea7e7001a0ff80ab91a002a81c7ffa0',
+        era: CardanoEra.SHELLEY,
       },
       hwSigningFileData: [
         {
@@ -108,6 +109,7 @@ describe('Command parser', () => {
       txBodyFileData: {
         // eslint-disable-next-line max-len
         cborHex: '839f8200d81858248258206ca5fde47f4ff7f256a7464dbf0cb9b4fb6bce9049eee1067eed65cf5d6e2765008200d81858248258206ca5fde47f4ff7f256a7464dbf0cb9b4fb6bce9049eee1067eed65cf5d6e276501ff9f8282d818584283581c13f3997560a5b81f5ac680b3322a2339433424e4e589ab3d752afdb6a101581e581c2eab4601bfe583febc23a04fb0abc21557adb47cea49c68d7b2f40a5001ac63884bf182f8282d818584283581cf9a5257f805a1d378c87b0bfb09232c10d9098bc56fd21d9a6a4072aa101581e581c140539c64edded60a7f2c4692c460a154cbdd06088333fd7f75ea7e7001a0ff80ab91a002a81c7ffa0',
+        era: CardanoEra.SHELLEY,
       },
       hwSigningFileData: [{
         type: 0,
@@ -141,6 +143,7 @@ describe('Command parser', () => {
       txBodyFileData: {
         // eslint-disable-next-line max-len
         cborHex: '839f8200d81858248258206ca5fde47f4ff7f256a7464dbf0cb9b4fb6bce9049eee1067eed65cf5d6e2765008200d81858248258206ca5fde47f4ff7f256a7464dbf0cb9b4fb6bce9049eee1067eed65cf5d6e276501ff9f8282d818584283581c13f3997560a5b81f5ac680b3322a2339433424e4e589ab3d752afdb6a101581e581c2eab4601bfe583febc23a04fb0abc21557adb47cea49c68d7b2f40a5001ac63884bf182f8282d818584283581cf9a5257f805a1d378c87b0bfb09232c10d9098bc56fd21d9a6a4072aa101581e581c140539c64edded60a7f2c4692c460a154cbdd06088333fd7f75ea7e7001a0ff80ab91a002a81c7ffa0',
+        era: CardanoEra.SHELLEY,
       },
       hwSigningFileData: [{
         type: 0,

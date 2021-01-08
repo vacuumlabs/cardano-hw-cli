@@ -86,7 +86,7 @@ const CommandExecutor = async () => {
     const signedTx = await cryptoProvider.signTx(
       txAux, args.hwSigningFileData, args.network, args.changeOutputKeyFileData,
     )
-    write(args.outFile, TxSignedOutput(signedTx))
+    write(args.outFile, TxSignedOutput(args.txBodyFileData.era, signedTx))
   }
 
   const createTxWitness = async (args: ParsedTransactionWitnessArguments) => {
@@ -95,7 +95,7 @@ const CommandExecutor = async () => {
     const txWitness = await cryptoProvider.witnessTx(
       txAux, args.hwSigningFileData[0], args.network, args.changeOutputKeyFileData,
     )
-    write(args.outFile, TxWitnessOutput(txWitness))
+    write(args.outFile, TxWitnessOutput(args.txBodyFileData.era, txWitness))
   }
 
   return {

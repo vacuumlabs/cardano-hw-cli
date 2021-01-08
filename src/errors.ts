@@ -44,6 +44,7 @@ enum Errors {
   InvalidAddressParametersProvidedError = 'Invalid address parameters provided',
   InvalidKeyGenInputsError = 'Invalid key gen inputs error',
   TrezorPassphraseNotInsertableOnDevice = 'Trezor passphrase not insertable on the device',
+  InvalidTransactionBody = 'Transaction body contains invalid data, check if your transaction is compatible with byron/shelley era',
 }
 
 export {

@@ -3,7 +3,6 @@ import { isStakingPath } from './crypto-providers/util'
 import {
   SignedTxCborHex,
   SignedTxOutput,
-  TxWitnessKeys,
   WitnessOutput,
   XPubKeyHex,
   _ByronWitness,
@@ -11,6 +10,7 @@ import {
 } from './transaction/types'
 import {
   BIP32Path,
+  CardanoEra,
   HwSigningOutput,
   OutputData,
   VerificationKeyOutput,
@@ -25,25 +25,20 @@ const write = (path: string, data: OutputData) => rw.writeFileSync(
   'utf8',
 )
 
-const TxSignedOutput = (signedTxCborHex: SignedTxCborHex): SignedTxOutput => ({
-  type: 'TxSignedShelley',
+const TxSignedOutput = (era: CardanoEra, signedTxCborHex: SignedTxCborHex): SignedTxOutput => ({
+  type: `TxSigned${era}`,
   description: '',
   cborHex: signedTxCborHex,
 })
 
 const TxWitnessOutput = (
+  era: CardanoEra,
   { key, data }: _ByronWitness | _ShelleyWitness,
-): WitnessOutput => {
-  const witnessTypes: {[key: number]: string} = {
-    [TxWitnessKeys.SHELLEY]: 'TxWitnessShelley',
-    [TxWitnessKeys.BYRON]: 'TxWitnessByron',
-  }
-  return {
-    type: witnessTypes[key],
-    description: '',
-    cborHex: cbor.encode([key, data]).toString('hex'),
-  }
-}
+): WitnessOutput => ({
+  type: `TxWitness${era}`,
+  description: '',
+  cborHex: cbor.encode([key, data]).toString('hex'),
+})
 
 const PathOutput = (path: BIP32Path): string => path
   .map((value) => (value >= HARDENED_THRESHOLD ? `${value - HARDENED_THRESHOLD}H` : `${value}`))

@@ -1,4 +1,4 @@
-export const enum TxBodyKeys {
+export enum TxBodyKeys {
   INPUTS = 0,
   OUTPUTS = 1,
   FEE = 2,
@@ -186,7 +186,7 @@ export type WitnessOutput = {
 }
 
 export type SignedTxOutput = {
-  type: 'TxSignedShelley',
+  type: string,
   description: '',
   cborHex: SignedTxCborHex,
 }
