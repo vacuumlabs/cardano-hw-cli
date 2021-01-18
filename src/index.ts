@@ -44,6 +44,9 @@ const executeCommand = async (): Promise<void> => {
   }
 }
 
-executeCommand().catch((e: Error) => {
-  console.log('Error:', e.message)
-}).finally(() => process.exit())
+executeCommand()
+  .then(() => process.exit(0))
+  .catch((e: Error) => {
+    console.error('Error:', e.message)
+    process.exit(1)
+  })
