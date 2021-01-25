@@ -16,6 +16,7 @@ cardano-hw-cli address key-gen
 --verification-key-file FILE    Output filepath of the verification key.
 --hw-signing-file FILE          Output filepath of the hardware wallet signing file.
 ```
+Arguments can be specified multiple times for bulk export.
 
 ## Generate public verification key
 ```
