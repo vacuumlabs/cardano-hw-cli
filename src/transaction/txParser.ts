@@ -192,11 +192,18 @@ const parseTxWithdrawals = (
   return Array.from(withdrawals).map(([address, coins]): _Withdrawal => ({ address, coins: BigInt(coins) }))
 }
 
+const parseTtl = (ttl: any): number => {
+  if (ttl === null || ttl === undefined) {
+    throw Error(Errors.MssingTTLParseError)
+  }
+  return ttl
+}
+
 const parseUnsignedTx = ([txBody, meta]: _UnsignedTxDecoded): _UnsignedTxParsed => {
   const inputs = parseTxInputs(txBody.get(TxBodyKeys.INPUTS))
   const outputs = parseTxOutputs(txBody.get(TxBodyKeys.OUTPUTS))
   const fee = BigInt(txBody.get(TxBodyKeys.FEE))
-  const ttl = txBody.get(TxBodyKeys.TTL) as number
+  const ttl = parseTtl(txBody.get(TxBodyKeys.TTL))
   const certificates = parseTxCerts(
     txBody.get(TxBodyKeys.CERTIFICATES) || [],
   )

@@ -45,6 +45,7 @@ enum Errors {
   InvalidKeyGenInputsError = 'Invalid key gen inputs error',
   TrezorPassphraseNotInsertableOnDevice = 'Trezor passphrase not insertable on the device',
   InvalidTransactionBody = 'Transaction body contains invalid data, check if your transaction is compatible with byron/shelley era',
+  MssingTTLParseError = 'Optional TTL is not supported in this version yet, add TTL to your transaction',
 }
 
 export {
