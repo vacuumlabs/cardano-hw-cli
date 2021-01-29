@@ -13,7 +13,7 @@ export enum CommandType {
 export enum CardanoEra {
   BYRON = 'Byron',
   SHELLEY = 'Shelley',
-  Allegra = 'Allegra',
+  ALLEGRA = 'Allegra',
   MARY = 'Mary',
 }
 

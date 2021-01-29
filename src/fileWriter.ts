@@ -25,17 +25,31 @@ const write = (path: string, data: OutputData) => rw.writeFileSync(
   'utf8',
 )
 
+const cardanoEraToSignedType: {[key in CardanoEra]: string} = {
+  [CardanoEra.BYRON]: 'TxSignedByron',
+  [CardanoEra.SHELLEY]: 'TxSignedShelley',
+  [CardanoEra.ALLEGRA]: 'Tx AllegraEra',
+  [CardanoEra.MARY]: 'Tx MaryEra',
+}
+
 const TxSignedOutput = (era: CardanoEra, signedTxCborHex: SignedTxCborHex): SignedTxOutput => ({
-  type: `TxSigned${era}`,
+  type: cardanoEraToSignedType[era],
   description: '',
   cborHex: signedTxCborHex,
 })
+
+const cardanoEraToWitnessType: {[key in CardanoEra]: string} = {
+  [CardanoEra.BYRON]: 'TxWitnessByron',
+  [CardanoEra.SHELLEY]: 'TxWitnessShelley',
+  [CardanoEra.ALLEGRA]: 'TxWitness AllegraEra',
+  [CardanoEra.MARY]: 'TxWitness MaryEra',
+}
 
 const TxWitnessOutput = (
   era: CardanoEra,
   { key, data }: _ByronWitness | _ShelleyWitness,
 ): WitnessOutput => ({
-  type: `TxWitness${era}`,
+  type: cardanoEraToWitnessType[era],
   description: '',
   cborHex: cbor.encode([key, data]).toString('hex'),
 })
