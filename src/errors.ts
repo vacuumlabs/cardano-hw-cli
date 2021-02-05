@@ -1,5 +1,5 @@
 /* eslint-disable max-len */
-enum Errors {
+const enum Errors {
   HwTransportNotFoundError = 'Error occured while trying to find hw transport, make sure Ledger or Trezor is connected to you computer',
   InvalidPathError = 'Can not parse path',
   InvalidFileTypeError = 'Invalid file type of hw-signing-file',
@@ -56,8 +56,14 @@ enum Errors {
   InvalidTransactionBody = 'Transaction body contains invalid or unsuported key',
   MintUnsupportedError = 'Minting is unsupported in current version',
   MultiAssetNotSupported = 'Transaction contains multi-asset, please update your device firmware',
-  ValidityIntervalStartNotSupported = 'Transaction contains validity interval start, please update your device firmware',
-  TrezorXPubKeyCancelled = 'Extended public key export cancelled by user'
+  TrezorValidityIntervalStartNotSupported = 'The current version of your trezor firmware does not support validity interval start. Update your device firmware to the latest version.',
+  LedgerValidityIntervalStartNotSupported = 'The current version of your Ledger Cardano app does not support validity interval start. Update your Cardano app to the latest version.',
+  TrezorOptionalTTLNotSupported = 'The current version of your trezor firmware does not support optional TTL. Update your device firmware to the latest version.',
+  LedgerOptionalTTLNotSupported = 'The current version of your Ledger Cardano app does not support optional TTL. Update your Cardano app to the latest version.',
+  TrezorMultiAssetsNotSupported = 'The current version of your trezor firmware does not support optional TTL. Update your device firmware to the latest version.',
+  LedgerMultiAssetsNotSupported = 'The current version of your Ledger Cardano app does not support optional TTL. Update your Cardano app to the latest version.',
+  TrezorXPubKeyCancelled = 'Extended public key export cancelled by user',
+  MetaDataHashParseError = 'Failed to parse transaction, metadata hash is not a Buffer.'
 }
 
 export {

@@ -29,14 +29,14 @@ export type _Input = {
   outputIndex: number,
 }
 
-export type _Asset = Map<Buffer, BigInt>
+export type _Asset = {assetName: Buffer, coins: BigInt}
 
-export type _MultiAsset = Map<Buffer, _Asset>
+export type _MultiAsset = {policyId: Buffer, assets: _Asset[]}
 
 export type _Output = {
   address: Buffer,
   coins: Lovelace,
-  tokenBundle?: _MultiAsset,
+  tokenBundle: _MultiAsset[],
 }
 
 export type _DelegationCert = {
@@ -206,13 +206,13 @@ export type TxInput = [
   number
 ]
 
-export type Asset = Map<Buffer, number>
+export type TxAsset = Map<Buffer, number>
 
-export type MultiAsset = Map<Buffer, Asset>
+export type TxMultiAsset = Map<Buffer, TxAsset>
 
 export type TxOutput = [
   Buffer,
-  any, // number | [number, MultiAsset],
+  number | [number, TxMultiAsset],
 ]
 
 export type TxStakingKeyRegistrationCert = [

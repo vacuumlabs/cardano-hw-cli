@@ -16,7 +16,6 @@ import {
   _PoolRelay,
   XPubKeyHex,
   _MultiAsset,
-  _Asset,
 } from '../transaction/types'
 import {
   CryptoProvider,
@@ -55,7 +54,6 @@ import {
   ipv4ToString,
   ipv6ToString,
   rewardAddressToPubKeyHash,
-  deviceVersionToStr,
   isDeviceVersionGTE,
 } from './util'
 import { Errors } from '../errors'
@@ -152,24 +150,22 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
   })
 
   const prepareTokenBundle = (
-    multiAsset?: _MultiAsset,
+    multiAssets: _MultiAsset[],
   ): TrezorMultiAsset | undefined => {
-    if (multiAsset) {
-      if (!isFeatureSupportedForVersion(TrezorCryptoProviderFeature.MULTI_ASSET)) {
-        const threshold = deviceVersionToStr(TREZOR_VERSIONS[TrezorCryptoProviderFeature.MULTI_ASSET])
-        throw Error(`${Errors.MultiAssetNotSupported} to version ${threshold} or higher`)
-      }
-      return Array
-        .from(multiAsset.entries())
-        .map(([policyId, asset]: [Buffer, _Asset]) => ({
-          policyId: policyId.toString('hex'),
-          tokenAmounts: Array.from(asset.entries()).map(([assetName, amount] : [Buffer, BigInt]) => ({
-            assetNameBytes: assetName.toString('hex'),
-            amount: amount.toString(),
-          })),
-        }))
+    if (multiAssets.length > 0 && !isFeatureSupportedForVersion(TrezorCryptoProviderFeature.MULTI_ASSET)) {
+      throw Error(Errors.TrezorMultiAssetsNotSupported)
     }
-    return undefined
+    const tokenBundle = multiAssets.map(({ policyId, assets }) => {
+      const tokenAmounts = assets.map(({ assetName, coins }) => ({
+        assetNameBytes: assetName.toString('hex'),
+        amount: coins.toString(),
+      }))
+      return {
+        policyId: policyId.toString('hex'),
+        tokenAmounts,
+      }
+    })
+    return tokenBundle.length > 0 ? tokenBundle : undefined
   }
 
   const prepareChangeOutput = (
@@ -317,19 +313,21 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     }
   }
 
-  const prepareTtl = (ttl: any): string | undefined => ttl && ttl.toString()
-
-  const prepareValidityIntervalStart = (validityIntervalStart: any): string | undefined => {
-    if (validityIntervalStart) {
-      if (!isFeatureSupportedForVersion(TrezorCryptoProviderFeature.VALIDITY_INTERVAL_START)) {
-        const threshold = deviceVersionToStr(
-          TREZOR_VERSIONS[TrezorCryptoProviderFeature.VALIDITY_INTERVAL_START],
-        )
-        throw Error(`${Errors.ValidityIntervalStartNotSupported} to version ${threshold} or higher`)
-      }
-      return validityIntervalStart.toString()
+  const prepareTtl = (ttl?: number) => {
+    if (!ttl && !isFeatureSupportedForVersion(TrezorCryptoProviderFeature.VALIDITY_INTERVAL_START)) {
+      throw Error(Errors.TrezorOptionalTTLNotSupported)
     }
-    return undefined
+    return ttl && ttl.toString()
+  }
+
+  const prepareValidityIntervalStart = (validityIntervalStart?: any): string | undefined => {
+    if (
+      validityIntervalStart
+      && !isFeatureSupportedForVersion(TrezorCryptoProviderFeature.VALIDITY_INTERVAL_START)
+    ) {
+      throw Error(Errors.TrezorValidityIntervalStartNotSupported)
+    }
+    return validityIntervalStart && validityIntervalStart.toString()
   }
 
   const signTx = async (

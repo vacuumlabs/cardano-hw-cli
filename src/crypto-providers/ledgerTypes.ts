@@ -7,17 +7,6 @@ export type LedgerInput = {
   outputIndex: number,
 }
 
-export type LedgerOutput = {
-  amountStr: string
-  addressHex: string
-} | {
-  addressTypeNibble: number
-  spendingPath: BIP32Path,
-  amountStr: string
-  stakingPath?: BIP32Path,
-  stakingKeyHashHex?: string
-}
-
 export type LedgerWitness = {
   path: BIP32Path
   signature: Buffer
@@ -89,3 +78,37 @@ export const enum LedgerCryptoProviderFeature {
 }
 
 export type LedgerVersionThresholdMap = { [key in LedgerCryptoProviderFeature]: DeviceVersion }
+
+export type LedgerStakingBlockchainPointer = {
+  blockIndex: number,
+  txIndex: number,
+  certificateIndex: number
+}
+
+export type LedgerToken = {
+  assetNameHex: string,
+  amountStr: string
+}
+
+export type LedgerAssetGroup = {
+  policyIdHex: string,
+  tokens: Array<LedgerToken>
+}
+
+export type LedgerTxOutputTypeAddress = {
+  amountStr: string,
+  tokenBundle: Array<LedgerAssetGroup>,
+  addressHex: string
+}
+
+export type LedgerTxOutputTypeAddressParams = {
+  amountStr: string,
+  tokenBundle: Array<LedgerAssetGroup>,
+  addressTypeNibble: number,
+  spendingPath: BIP32Path,
+  stakingPath?: BIP32Path,
+  stakingKeyHashHex?: string,
+  stakingBlockchainPointer?: LedgerStakingBlockchainPointer,
+}
+
+export type LedgerOutput = LedgerTxOutputTypeAddress | LedgerTxOutputTypeAddressParams;

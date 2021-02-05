@@ -28,6 +28,7 @@ import {
   _SingleHostNameRelay,
   TxRelayTypes,
   TxWitnessKeys,
+  _MultiAsset,
 } from '../transaction/types'
 import {
   Address,
@@ -37,6 +38,7 @@ import {
 } from '../types'
 import { LEDGER_VERSIONS } from './constants'
 import {
+  LedgerAssetGroup,
   LedgerCertificate,
   LedgerCryptoProviderFeature,
   LedgerInput,
@@ -47,6 +49,7 @@ import {
   LedgerRelayParams,
   LedgerSingleHostIPRelay,
   LedgerSingleHostNameRelay,
+  LedgerTxOutputTypeAddressParams,
   LedgerWithdrawal,
   LedgerWitness,
 } from './ledgerTypes'
@@ -104,13 +107,33 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     outputIndex: input.outputIndex,
   })
 
+  const prepareTokenBundle = (
+    multiAssets: _MultiAsset[],
+  ): LedgerAssetGroup[] => {
+    if (multiAssets.length > 0 && !isFeatureSupportedForVersion(LedgerCryptoProviderFeature.MULTI_ASSET)) {
+      throw Error(Errors.LedgerMultiAssetsNotSupported)
+    }
+    return multiAssets.map(({ policyId, assets }) => {
+      const tokens = assets.map(({ assetName, coins }) => ({
+        assetNameHex: assetName.toString('hex'),
+        amountStr: coins.toString(),
+      }))
+      return {
+        policyIdHex: policyId.toString('hex'),
+        tokens,
+      }
+    })
+  }
+
   const prepareChangeOutput = (
-    coins: BigInt,
+    amountStr: string,
     changeOutput: _AddressParameters,
-  ): LedgerOutput => ({
+    tokenBundle: LedgerAssetGroup[],
+  ): LedgerTxOutputTypeAddressParams => ({
+    amountStr,
+    tokenBundle,
     addressTypeNibble: changeOutput.addressType,
     spendingPath: changeOutput.paymentPath,
-    amountStr: `${coins}`,
     stakingPath: changeOutput.stakePath,
   })
 
@@ -120,11 +143,15 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     network: Network,
   ): LedgerOutput => {
     const changeAddress = getChangeAddress(changeOutputFiles, output.address, network)
+    const amountStr = `${output.coins}`
+    const tokenBundle = prepareTokenBundle(output.tokenBundle)
+
     if (changeAddress && !changeAddress.address.compare(output.address)) {
-      return prepareChangeOutput(output.coins, changeAddress)
+      return prepareChangeOutput(amountStr, changeAddress, tokenBundle)
     }
     return {
-      amountStr: `${output.coins}`,
+      amountStr,
+      tokenBundle,
       addressHex: output.address.toString('hex'),
     }
   }
@@ -265,6 +292,23 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     }
   }
 
+  const prepareTtl = (ttl?: number) => {
+    if (!ttl && !isFeatureSupportedForVersion(LedgerCryptoProviderFeature.VALIDITY_INTERVAL_START)) {
+      throw Error(Errors.LedgerOptionalTTLNotSupported)
+    }
+    return ttl && ttl.toString()
+  }
+
+  const prepareValidityIntervalStart = (validityIntervalStart?: number) => {
+    if (
+      validityIntervalStart
+      && !isFeatureSupportedForVersion(LedgerCryptoProviderFeature.VALIDITY_INTERVAL_START)
+    ) {
+      throw Error(Errors.LedgerValidityIntervalStartNotSupported)
+    }
+    return validityIntervalStart && validityIntervalStart.toString()
+  }
+
   const ledgerSignTx = async (
     txAux: _TxAux, signingFiles: HwSigningData[], network: Network, changeOutputFiles: HwSigningData[],
   ): Promise<LedgerWitness[]> => {
@@ -277,7 +321,8 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
       (certificate) => prepareCertificate(certificate, stakeSigningFiles),
     )
     const fee = `${txAux.fee}`
-    const ttl = `${txAux.ttl}`
+    const ttl = prepareTtl(txAux.ttl)
+    const validityIntervalStart = prepareValidityIntervalStart(txAux.validityIntervalStart)
     const withdrawals = txAux.withdrawals.map(
       (withdrawal) => prepareWithdrawal(withdrawal, stakeSigningFiles),
     )
@@ -291,8 +336,9 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
       ttl,
       certificates,
       withdrawals,
+      undefined,
+      validityIntervalStart,
     )
-
     if (response.txHashHex !== txAux.getId()) {
       throw Error(Errors.TxSerializationMismatchError)
     }

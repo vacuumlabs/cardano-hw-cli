@@ -7,14 +7,14 @@ export const LEDGER_VERSIONS: LedgerVersionThresholdMap = {
     minor: 1,
     patch: 0,
   },
-  [LedgerCryptoProviderFeature.MULTI_ASSET]: { // TODO
-    major: 0,
-    minor: 0,
+  [LedgerCryptoProviderFeature.MULTI_ASSET]: {
+    major: 2,
+    minor: 2,
     patch: 0,
   },
-  [LedgerCryptoProviderFeature.VALIDITY_INTERVAL_START]: { // TODO
-    major: 0,
-    minor: 0,
+  [LedgerCryptoProviderFeature.VALIDITY_INTERVAL_START]: {
+    major: 2,
+    minor: 2,
     patch: 0,
   },
 }

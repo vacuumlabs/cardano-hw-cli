@@ -47,38 +47,32 @@ const parseTxInputs = (
   return txInputs.map(([txHash, outputIndex]): _Input => ({ txHash, outputIndex }))
 }
 
-const parseAsset = (asset: any): _Asset => {
-  if (asset instanceof Map) {
-    return Array.from(asset.entries()).reduce(
-      (acc, [assetName, amount]) => {
-        if (Buffer.isBuffer(assetName)) {
-          try {
-            acc.set(Buffer.from(assetName), BigInt(amount))
-          } catch {
-            throw Error(Errors.TxMultiAssetAmountParseError)
-          }
-        } else throw Error(Errors.TxAssetNameParseError)
-        return acc
-      },
-      new Map<Buffer, BigInt>(),
-    )
+const parseAssets = (assets: any): _Asset[] => {
+  if (!(assets instanceof Map)) {
+    throw Error(Errors.TxAssetParseError)
   }
-  throw Error(Errors.TxAssetParseError)
+  return Array.from(assets).map(([assetName, coins]) => {
+    if (!Buffer.isBuffer(assetName)) {
+      throw Error()
+    }
+    // TODO: is lovelace is not the best name since its not a lovelace
+    if (!isLovelace(coins)) {
+      throw Error()
+    }
+    return { assetName, coins: BigInt(coins) }
+  })
 }
 
-const parseMultiAsset = (multiAsset: any): _MultiAsset => {
-  if (multiAsset instanceof Map) {
-    return Array.from(multiAsset.entries()).reduce(
-      (acc, [policyId, asset]) => {
-        if (Buffer.isBuffer(policyId)) {
-          acc.set(Buffer.from(policyId), parseAsset(asset))
-        } else throw Error(Errors.TxMultiAssetPolicyIdParseError)
-        return acc
-      },
-      new Map<Buffer, Map<Buffer, BigInt>>(),
-    )
+const parseMultiAsset = (multiAsset: any): _MultiAsset[] => {
+  if (!(multiAsset instanceof Map)) {
+    throw Error(Errors.TxMultiAssetParseError)
   }
-  throw Error(Errors.TxMultiAssetParseError)
+  return Array.from(multiAsset).map(([policyId, assets]) => {
+    if (!Buffer.isBuffer(policyId)) {
+      throw Error()
+    }
+    return { policyId, assets: parseAssets(assets) }
+  })
 }
 
 const parseTxOutputs = (txOutputs: any[]): _Output[] => {
@@ -86,23 +80,18 @@ const parseTxOutputs = (txOutputs: any[]): _Output[] => {
     throw Error(Errors.TxOutputParseArrayError)
   }
 
-  const parseLovelace = (coin: any): Lovelace => {
-    try {
-      return BigInt(coin)
-    } catch {
+  const parseAmount = (amount: any): { coins: BigInt, tokenBundle: _MultiAsset[] } => {
+    if (isLovelace(amount)) {
+      return { coins: BigInt(amount), tokenBundle: [] }
+    }
+    const [coins, multiAsset] = amount
+    if (!isLovelace(coins)) {
       throw Error(Errors.TxOutputParseCoinError)
     }
+    return { coins: BigInt(coins), tokenBundle: parseMultiAsset(multiAsset) }
   }
 
-  const parseAmount = (value: any): { coins: BigInt, tokenBundle?: _MultiAsset } => {
-    if (isLovelace(value)) {
-      return { coins: parseLovelace(value) }
-    }
-    const [coin, multiAsset] = value
-    return { coins: parseLovelace(coin), tokenBundle: parseMultiAsset(multiAsset) }
-  }
-
-  return txOutputs.map(([address, coins]): _Output => ({ address, ...parseAmount(coins) }))
+  return txOutputs.map(([address, amount]): _Output => ({ address, ...parseAmount(amount) }))
 }
 
 const parseRelay = (poolRelay: any): _PoolRelay => {
@@ -243,7 +232,7 @@ const parseTxWithdrawals = (withdrawals: any): _Withdrawal[] => {
   return Array.from(withdrawals).map(([address, coins]): _Withdrawal => ({ address, coins: BigInt(coins) }))
 }
 
-const parseFee = (fee: any): BigInt => {
+const parseFee = (fee: any): Lovelace => {
   if (!isLovelace(fee)) {
     throw Error(Errors.FeeParseError)
   }
@@ -264,6 +253,13 @@ const parseValidityIntervalStart = (validityIntervalStart: any): number | undefi
   return validityIntervalStart
 }
 
+const parseMetaDataHash = (metaDataHash: any): Buffer | undefined => {
+  if (metaDataHash && !Buffer.isBuffer(metaDataHash)) {
+    throw Error(Errors.MetaDataHashParseError)
+  }
+  return metaDataHash
+}
+
 const parseUnsignedTx = ([txBody, meta]: _UnsignedTxDecoded): _UnsignedTxParsed => {
   if (txBody.get(TxBodyKeys.MINT)) {
     throw Error(Errors.MintUnsupportedError)
@@ -278,7 +274,7 @@ const parseUnsignedTx = ([txBody, meta]: _UnsignedTxDecoded): _UnsignedTxParsed 
   const withdrawals = parseTxWithdrawals(
     txBody.get(TxBodyKeys.WITHDRAWALS) || new Map(),
   )
-  const metaDataHash = txBody.get(TxBodyKeys.META_DATA_HASH) as Buffer
+  const metaDataHash = parseMetaDataHash(txBody.get(TxBodyKeys.META_DATA_HASH))
   const validityIntervalStart = parseValidityIntervalStart(txBody.get(TxBodyKeys.VALIDITY_INTERVAL_START))
 
   return {
