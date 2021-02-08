@@ -35,9 +35,12 @@ export const isTxInput = (
 export const isTxOutput = (
   test: any,
 ): test is TxOutput => {
-  if (!Array.isArray(test) || test.length !== 2) return false
-  const [address, coins] = test
-  return Buffer.isBuffer(address) && isLovelace(coins)
+  if (Array.isArray(test) && test.length === 2) {
+    const [address, amount] = test
+    const isMultiAsset = (coins: any) => Array.isArray(coins) && coins.length === 2
+    return Buffer.isBuffer(address) && (isLovelace(amount) || isMultiAsset(amount))
+  }
+  return false
 }
 
 export const isWithdrawalsMap = (
@@ -150,8 +153,9 @@ export const isUnsignedTxDecoded = (
 ): test is _UnsignedTxDecoded => {
   if (Array.isArray(test)) {
     const txBody = test[0]
-    const validKeys = Object.values(TxBodyKeys)
-    return Object.keys(txBody).every((key) => validKeys.includes(key))
+    const validKeys = Object.values(TxBodyKeys).filter(Number.isInteger) as Array<Number>
+    const txBodyKeys: Array<Number> = Array.from(txBody.keys())
+    return txBodyKeys.every((key) => validKeys.includes(key))
   }
   return false
 }

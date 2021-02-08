@@ -36,6 +36,7 @@ const transactions = {
       ],
       metaDataHash: undefined,
       meta: null,
+      validityIntervalStart: undefined,
     },
   },
   TxWithRegistrationCertificate: {
@@ -69,6 +70,7 @@ const transactions = {
       withdrawals: [],
       metaDataHash: undefined,
       meta: null,
+      validityIntervalStart: undefined,
     },
   },
   TxWithDelegationCertificate: {
@@ -104,6 +106,7 @@ const transactions = {
       withdrawals: [],
       metaDataHash: undefined,
       meta: null,
+      validityIntervalStart: undefined,
     },
   },
   TxWithDeregistrationCertificate: {
@@ -137,6 +140,7 @@ const transactions = {
       withdrawals: [],
       metaDataHash: undefined,
       meta: null,
+      validityIntervalStart: undefined,
     },
   },
   TxWithMetaData: {
@@ -167,6 +171,7 @@ const transactions = {
       withdrawals: [],
       metaDataHash: Buffer.from('deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef', 'hex'),
       meta: null,
+      validityIntervalStart: undefined,
     },
   },
   TxWithPoolRegistrationCertficate: {
@@ -235,6 +240,7 @@ const transactions = {
       withdrawals: [],
       metaDataHash: undefined,
       meta: null,
+      validityIntervalStart: undefined,
     },
   },
 }

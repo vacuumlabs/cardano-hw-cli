@@ -2,6 +2,7 @@ import { isArrayOfType } from '../guards'
 import { Errors } from '../errors'
 import {
   isDelegationCert,
+  isLovelace,
   isStakepoolRegistrationCert,
   isStakingKeyDeregistrationCert,
   isTxInput,
@@ -32,6 +33,9 @@ import {
   _MultiHostNameRelay,
   TxInput,
   TxOutput,
+  Lovelace,
+  _MultiAsset,
+  _Asset,
 } from './types'
 
 const parseTxInputs = (
@@ -43,13 +47,62 @@ const parseTxInputs = (
   return txInputs.map(([txHash, outputIndex]): _Input => ({ txHash, outputIndex }))
 }
 
-const parseTxOutputs = (
-  txOutputs: any[],
-): _Output[] => {
-  if (!isArrayOfType<TxOutput>(txOutputs, isTxOutput)) {
-    throw Error(Errors.TxOutputParseError)
+const parseAsset = (asset: any): _Asset => {
+  if (asset instanceof Map) {
+    return Array.from(asset.entries()).reduce(
+      (acc, [assetName, amount]) => {
+        if (Buffer.isBuffer(assetName)) {
+          try {
+            acc.set(Buffer.from(assetName), BigInt(amount))
+          } catch {
+            throw Error(Errors.TxMultiAssetAmountParseError)
+          }
+        } else throw Error(Errors.TxAssetNameParseError)
+        return acc
+      },
+      new Map<Buffer, BigInt>(),
+    )
   }
-  return txOutputs.map(([address, coins]): _Output => ({ address, coins: BigInt(coins) }))
+  throw Error(Errors.TxAssetParseError)
+}
+
+const parseMultiAsset = (multiAsset: any): _MultiAsset => {
+  if (multiAsset instanceof Map) {
+    return Array.from(multiAsset.entries()).reduce(
+      (acc, [policyId, asset]) => {
+        if (Buffer.isBuffer(policyId)) {
+          acc.set(Buffer.from(policyId), parseAsset(asset))
+        } else throw Error(Errors.TxMultiAssetPolicyIdParseError)
+        return acc
+      },
+      new Map<Buffer, Map<Buffer, BigInt>>(),
+    )
+  }
+  throw Error(Errors.TxMultiAssetParseError)
+}
+
+const parseTxOutputs = (txOutputs: any[]): _Output[] => {
+  if (!isArrayOfType<TxOutput>(txOutputs, isTxOutput)) {
+    throw Error(Errors.TxOutputParseArrayError)
+  }
+
+  const parseLovelace = (coin: any): Lovelace => {
+    try {
+      return BigInt(coin)
+    } catch {
+      throw Error(Errors.TxOutputParseCoinError)
+    }
+  }
+
+  const parseAmount = (value: any): { coins: BigInt, tokenBundle?: _MultiAsset } => {
+    if (isLovelace(value)) {
+      return { coins: parseLovelace(value) }
+    }
+    const [coin, multiAsset] = value
+    return { coins: parseLovelace(coin), tokenBundle: parseMultiAsset(multiAsset) }
+  }
+
+  return txOutputs.map(([address, coins]): _Output => ({ address, ...parseAmount(coins) }))
 }
 
 const parseRelay = (poolRelay: any): _PoolRelay => {
@@ -183,26 +236,38 @@ const parseTxCerts = (txCertificates: any[]): _Certificate[] => {
   )
 }
 
-const parseTxWithdrawals = (
-  withdrawals: any,
-): _Withdrawal[] => {
+const parseTxWithdrawals = (withdrawals: any): _Withdrawal[] => {
   if (!isWithdrawalsMap(withdrawals)) {
     throw Error(Errors.WithrawalsParseError)
   }
   return Array.from(withdrawals).map(([address, coins]): _Withdrawal => ({ address, coins: BigInt(coins) }))
 }
 
-const parseTtl = (ttl: any): number => {
-  if (ttl === null || ttl === undefined) {
-    throw Error(Errors.MssingTTLParseError)
+const parseFee = (fee: any): BigInt => {
+  if (!isLovelace(fee)) {
+    throw Error(Errors.FeeParseError)
+  }
+  return BigInt(fee)
+}
+
+const parseTtl = (ttl: any): number | undefined => {
+  if (ttl && !Number.isInteger(ttl)) {
+    throw Error(Errors.TTLParseError)
   }
   return ttl
+}
+
+const parseValidityIntervalStart = (validityIntervalStart: any): number | undefined => {
+  if (validityIntervalStart && !Number.isInteger(validityIntervalStart)) {
+    throw Error(Errors.ValidityIntervalStartParseError)
+  }
+  return validityIntervalStart
 }
 
 const parseUnsignedTx = ([txBody, meta]: _UnsignedTxDecoded): _UnsignedTxParsed => {
   const inputs = parseTxInputs(txBody.get(TxBodyKeys.INPUTS))
   const outputs = parseTxOutputs(txBody.get(TxBodyKeys.OUTPUTS))
-  const fee = BigInt(txBody.get(TxBodyKeys.FEE))
+  const fee = parseFee(txBody.get(TxBodyKeys.FEE))
   const ttl = parseTtl(txBody.get(TxBodyKeys.TTL))
   const certificates = parseTxCerts(
     txBody.get(TxBodyKeys.CERTIFICATES) || [],
@@ -211,6 +276,8 @@ const parseUnsignedTx = ([txBody, meta]: _UnsignedTxDecoded): _UnsignedTxParsed 
     txBody.get(TxBodyKeys.WITHDRAWALS) || new Map(),
   )
   const metaDataHash = txBody.get(TxBodyKeys.META_DATA_HASH) as Buffer
+  const validityIntervalStart = parseValidityIntervalStart(txBody.get(TxBodyKeys.VALIDITY_INTERVAL_START))
+
   return {
     inputs,
     outputs,
@@ -220,6 +287,8 @@ const parseUnsignedTx = ([txBody, meta]: _UnsignedTxDecoded): _UnsignedTxParsed 
     withdrawals,
     metaDataHash,
     meta,
+    validityIntervalStart,
+    // mint, // unsupported in current version
   }
 }
 

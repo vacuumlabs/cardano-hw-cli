@@ -6,6 +6,8 @@ export enum TxBodyKeys {
   CERTIFICATES = 4,
   WITHDRAWALS = 5,
   META_DATA_HASH = 7,
+  VALIDITY_INTERVAL_START = 8,
+  MINT = 9, // unsupported in current version
 }
 
 export const enum TxWitnessKeys {
@@ -27,10 +29,16 @@ export type _Input = {
   outputIndex: number,
 }
 
+export type _Asset = Map<Buffer, BigInt>
+
+export type _MultiAsset = Map<Buffer, _Asset>
+
 export type _Output = {
   address: Buffer,
   coins: Lovelace,
+  tokenBundle?: _MultiAsset,
 }
+
 export type _DelegationCert = {
   type: TxCertificateKeys.DELEGATION,
   pubKeyHash: Buffer,
@@ -117,11 +125,13 @@ export type _UnsignedTxParsed = {
   inputs: _Input[],
   outputs: _Output[],
   fee: Lovelace,
-  ttl: number,
+  ttl?: number,
   certificates: _Certificate[],
   withdrawals: _Withdrawal[],
   metaDataHash?: Buffer,
   meta: Buffer | null,
+  validityIntervalStart?: number,
+  mint?: _MultiAsset,
 }
 
 export type TxWitnessByron = [
@@ -196,9 +206,13 @@ export type TxInput = [
   number
 ]
 
+export type Asset = Map<Buffer, number>
+
+export type MultiAsset = Map<Buffer, Asset>
+
 export type TxOutput = [
   Buffer,
-  number,
+  any, // number | [number, MultiAsset],
 ]
 
 export type TxStakingKeyRegistrationCert = [

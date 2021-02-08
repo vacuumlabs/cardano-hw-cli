@@ -22,7 +22,13 @@ enum Errors {
   MissingOutputError = 'Missing output',
   TrezorError = 'Trezor operation failed, please make sure you are using the latest version of Trezor firmware',
   TxInputParseError = 'Failed to parse input',
-  TxOutputParseError = 'Failed to parse output',
+  TxOutputParseArrayError = 'Failed to parse output: not an array',
+  TxOutputParseCoinError = 'Failed to parse output: not a number',
+  TxMultiAssetPolicyIdParseError = 'Failed to parse multi asset policy id: not a buffer',
+  TxAssetParseError = 'Failed to parse asset: not a buffer',
+  TxAssetNameParseError = 'Failed to parse asset name: not a buffer',
+  TxMultiAssetParseError = 'Failed to parse multiasset: not a map',
+  TxMultiAssetAmountParseError = 'Failed to parse multiasset amount: not a number',
   WithrawalsParseError = 'Failed to parse withdrawals',
   TxStakingKeyRegistrationCertParseError = 'Failed to parse staking key registration certificate',
   TxStakingKeyDeregistrationCertParseError = 'Failed to parse staking key deregistration certificate',
@@ -31,6 +37,7 @@ enum Errors {
   TxSingleHostIPRelayParseError = 'Failed to parse single host IP relay',
   TxSingleHostNameRelayParseError = 'Failed to parse single host name relay',
   TxMultiHostNameRelayParseError = 'Failed to parse multi host name relay',
+  ValidityIntervalStartParseError = 'Failed to parse validity internal start: not a number',
   MissingSigningFileForCertificateError = 'Missing signing file for certificate',
   OwnerMultipleTimesInTxError = 'Owner multiple times in tx',
   UnsupportedRelayTypeError = 'Unsupported relay type',
@@ -44,8 +51,14 @@ enum Errors {
   InvalidAddressParametersProvidedError = 'Invalid address parameters provided',
   InvalidKeyGenInputsError = 'Invalid key gen inputs error',
   TrezorPassphraseNotInsertableOnDevice = 'Trezor passphrase not insertable on the device',
+  FeeParseError = 'Failed to parse transaction, fee is not a number',
+  TTLParseError = 'Failed to parse transaction, TTL is not a number',
+  InvalidTransactionBody = 'Transaction body contains invalid or unsuported key',
   InvalidTransactionBody = 'Transaction body contains invalid data, check if your transaction is compatible with byron/shelley era',
   MssingTTLParseError = 'Optional TTL is not supported in this version yet, add TTL to your transaction',
+  MultiAssetNotSupported = 'Transaction contains multi-asset, please update your device firmware',
+  ValidityIntervalStartNotSupported = 'Transaction contains validity interval start, please update your device firmware',
+  TrezorXPubKeyCancelled = 'Extended public key export cancelled by user'
 }
 
 export {
