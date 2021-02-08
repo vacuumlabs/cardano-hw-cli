@@ -35,8 +35,10 @@ import {
   HwSigningData,
   Network,
 } from '../types'
+import { LEDGER_VERSIONS } from './constants'
 import {
   LedgerCertificate,
+  LedgerCryptoProviderFeature,
   LedgerInput,
   LedgerMultiHostNameRelay,
   LedgerOutput,
@@ -48,7 +50,10 @@ import {
   LedgerWithdrawal,
   LedgerWitness,
 } from './ledgerTypes'
-import { CryptoProvider, _AddressParameters } from './types'
+import {
+  CryptoProvider,
+  _AddressParameters,
+} from './types'
 import {
   filterSigningFiles,
   findSigningPath,
@@ -59,6 +64,7 @@ import {
   rewardAddressToPubKeyHash,
   ipv4ToString,
   ipv6ToString,
+  isDeviceVersionGTE,
 } from './util'
 
 const { AddressTypes } = require('cardano-crypto.js')
@@ -73,6 +79,12 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     const { major, minor, patch } = await ledger.getVersion()
     return `Ledger app version ${major}.${minor}.${patch}`
   }
+
+  const deviceVersion = await ledger.getVersion()
+
+  const isFeatureSupportedForVersion = (
+    feature: LedgerCryptoProviderFeature,
+  ): boolean => LEDGER_VERSIONS[feature] && isDeviceVersionGTE(deviceVersion, LEDGER_VERSIONS[feature])
 
   const showAddress = async (
     paymentPath: BIP32Path, stakingPath: BIP32Path, address: Address,
@@ -351,14 +363,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
   }
 
   const getXPubKeys = async (paths: BIP32Path[]): Promise<XPubKeyHex[]> => {
-    const { major, minor, patch } = await ledger.getVersion()
-    const threshold = { major: 2, minor: 1, patch: 0 }
-
-    if (
-      major > threshold.major
-      || (major === threshold.major && minor > threshold.minor)
-      || (major === threshold.major && minor === threshold.minor && patch >= threshold.patch)
-    ) {
+    if (isFeatureSupportedForVersion(LedgerCryptoProviderFeature.BULK_EXPORT)) {
       const xPubKeys = await ledger.getExtendedPublicKeys(paths)
       return xPubKeys.map((xPubKey) => xPubKey.publicKeyHex + xPubKey.chainCodeHex)
     }

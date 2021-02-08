@@ -1,5 +1,6 @@
 /* eslint-disable camelcase */
 import { BIP32Path } from '../types'
+import { DeviceVersion } from './types'
 
 export type TrezorCertificatePointer = {
   blockIndex: number
@@ -21,14 +22,28 @@ type TrezorAddressParameters = {
   certificatePointer?: TrezorCertificatePointer
 }
 
+export type TrezorToken = {
+  assetNameBytes: string
+  amount: string
+}
+
+export type TrezorAsset = {
+  policyId: string,
+  tokenAmounts: Array<TrezorToken>
+}
+
+export type TrezorMultiAsset = Array<TrezorAsset>
+
 export type TrezorOutput =
   | {
     addressParameters: TrezorAddressParameters
     amount: string
+    tokenBundle?: TrezorMultiAsset
   }
   | {
     address: string
     amount: string
+    tokenBundle?: TrezorMultiAsset
   }
 
 export type TrezorWithdrawal = {
@@ -70,9 +85,17 @@ export type TrezorPoolParameters = {
   relays: TrezorPoolRelay[];
   metadata: TrezorPoolMetadata;
 }
+
 export type TrezorTxCertificate = {
   type: number
   path?: Array<number>
   pool?: string
   poolParameters?: TrezorPoolParameters
 }
+
+export const enum TrezorCryptoProviderFeature {
+  MULTI_ASSET,
+  VALIDITY_INTERVAL_START,
+}
+
+export type TrezorVersionThresholdMap = { [key in TrezorCryptoProviderFeature]: DeviceVersion }

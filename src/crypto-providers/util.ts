@@ -12,7 +12,10 @@ import {
   NetworkIds,
   ProtocolMagics,
 } from '../types'
-import { _AddressParameters } from './types'
+import {
+  DeviceVersion,
+  _AddressParameters,
+} from './types'
 
 const {
   getPubKeyBlake2b224Hash,
@@ -273,6 +276,24 @@ const ipv6ToString = (ipv6: Buffer | undefined): string | undefined => {
 
 const rewardAddressToPubKeyHash = (address: Buffer) => address.slice(1)
 
+const deviceVersionToStr = (
+  deviceVersion: DeviceVersion,
+): string => `${deviceVersion.major}.${deviceVersion.minor}.${deviceVersion.patch}`
+
+const isDeviceVersionGTE = (
+  deviceVersion: DeviceVersion,
+  threshold: DeviceVersion,
+): boolean => deviceVersion.major > threshold.major
+  || (
+    deviceVersion.major === threshold.major
+    && deviceVersion.minor > threshold.minor
+  )
+  || (
+    deviceVersion.major === threshold.major
+    && deviceVersion.minor === threshold.minor
+    && deviceVersion.patch >= threshold.patch
+  )
+
 export {
   isShelleyPath,
   isStakingPath,
@@ -288,4 +309,6 @@ export {
   ipv4ToString,
   ipv6ToString,
   rewardAddressToPubKeyHash,
+  deviceVersionToStr,
+  isDeviceVersionGTE,
 }

@@ -1,4 +1,5 @@
 import { BIP32Path } from '../types'
+import { DeviceVersion } from './types'
 
 export type LedgerInput = {
   path?: BIP32Path,
@@ -80,3 +81,11 @@ export type LedgerCertificate = {
   poolKeyHashHex?: string,
   poolRegistrationParams?: LedgerPoolParams,
 }
+
+export const enum LedgerCryptoProviderFeature {
+  BULK_EXPORT,
+  MULTI_ASSET,
+  VALIDITY_INTERVAL_START,
+}
+
+export type LedgerVersionThresholdMap = { [key in LedgerCryptoProviderFeature]: DeviceVersion }

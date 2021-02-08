@@ -15,8 +15,14 @@ import {
   _StakingKeyDeregistrationCert,
   _PoolRelay,
   XPubKeyHex,
+  _MultiAsset,
+  _Asset,
 } from '../transaction/types'
-import { CryptoProvider, _AddressParameters } from './types'
+import {
+  CryptoProvider,
+  DeviceVersion,
+  _AddressParameters,
+} from './types'
 import {
   TrezorInput,
   TrezorOutput,
@@ -27,6 +33,8 @@ import {
   TrezorPoolParameters,
   TrezorPoolMetadata,
   TrezorPoolMargin,
+  TrezorMultiAsset,
+  TrezorCryptoProviderFeature,
 } from './trezorTypes'
 import {
   Witness,
@@ -47,8 +55,12 @@ import {
   ipv4ToString,
   ipv6ToString,
   rewardAddressToPubKeyHash,
+  deviceVersionToStr,
+  isDeviceVersionGTE,
 } from './util'
 import { Errors } from '../errors'
+import { removeNullFields } from '../util'
+import { TREZOR_VERSIONS } from './constants'
 
 // using require to suppress type errors from trezor-connect
 const TrezorConnect = require('trezor-connect').default
@@ -84,15 +96,22 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
 
   await initTrezorConnect()
 
-  const getVersion = async (): Promise<string> => {
+  const getDeviceVersion = async (): Promise<DeviceVersion> => {
     const { payload: features } = await TrezorConnect.getFeatures()
-    const {
-      major_version: major,
-      minor_version: minor,
-      patch_version: patch,
-    } = features
+    const { major_version: major, minor_version: minor, patch_version: patch } = features
+    return { major, minor, patch }
+  }
+
+  const deviceVersion = await getDeviceVersion()
+
+  const getVersion = async (): Promise<string> => {
+    const { major, minor, patch } = await getDeviceVersion()
     return `Trezor app version ${major}.${minor}.${patch}`
   }
+
+  const isFeatureSupportedForVersion = (
+    feature: TrezorCryptoProviderFeature,
+  ): boolean => TREZOR_VERSIONS[feature] && isDeviceVersionGTE(deviceVersion, TREZOR_VERSIONS[feature])
 
   const showAddress = async (
     paymentPath: BIP32Path, stakingPath: BIP32Path, address: Address,
@@ -117,9 +136,12 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     const { payload } = await TrezorConnect.cardanoGetPublicKey({
       bundle: paths.map((path) => ({
         path,
-        showOnTrezor: false,
+        showOnTrezor: true,
       })),
     })
+    if (payload.error) {
+      throw Error(Errors.TrezorXPubKeyCancelled)
+    }
     return payload.map((result) => result.publicKey)
   }
 
@@ -129,16 +151,39 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     prev_index: input.outputIndex,
   })
 
+  const prepareTokenBundle = (
+    multiAsset?: _MultiAsset,
+  ): TrezorMultiAsset | undefined => {
+    if (multiAsset) {
+      if (!isFeatureSupportedForVersion(TrezorCryptoProviderFeature.MULTI_ASSET)) {
+        const threshold = deviceVersionToStr(TREZOR_VERSIONS[TrezorCryptoProviderFeature.MULTI_ASSET])
+        throw Error(`${Errors.MultiAssetNotSupported} to version ${threshold} or higher`)
+      }
+      return Array
+        .from(multiAsset.entries())
+        .map(([policyId, asset]: [Buffer, _Asset]) => ({
+          policyId: policyId.toString('hex'),
+          tokenAmounts: Array.from(asset.entries()).map(([assetName, amount] : [Buffer, BigInt]) => ({
+            assetNameBytes: assetName.toString('hex'),
+            amount: amount.toString(),
+          })),
+        }))
+    }
+    return undefined
+  }
+
   const prepareChangeOutput = (
-    coins: BigInt,
+    lovelaceAmount: string,
     changeAddress: _AddressParameters,
-  ) => ({
-    amount: `${coins}`,
+    tokenBundle?: TrezorMultiAsset,
+  ): TrezorOutput => ({
+    amount: lovelaceAmount,
     addressParameters: {
       addressType: changeAddress.addressType,
       path: changeAddress.paymentPath,
       stakingPath: changeAddress.stakePath,
     },
+    tokenBundle,
   })
 
   const prepareOutput = (
@@ -148,12 +193,17 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
   ): TrezorOutput => {
     const changeAddress = getChangeAddress(changeOutputFiles, output.address, network)
     const address = encodeAddress(output.address)
+    const lovelaceAmount = `${output.coins}`
+    const tokenBundle = prepareTokenBundle(output.tokenBundle)
+
     if (changeAddress && !changeAddress.address.compare(output.address)) {
-      return prepareChangeOutput(output.coins, changeAddress)
+      return prepareChangeOutput(lovelaceAmount, changeAddress, tokenBundle)
     }
+
     return {
       address,
-      amount: `${output.coins}`,
+      amount: lovelaceAmount,
+      tokenBundle,
     }
   }
 
@@ -267,6 +317,21 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     }
   }
 
+  const prepareTtl = (ttl: any): string | undefined => ttl && ttl.toString()
+
+  const prepareValidityIntervalStart = (validityIntervalStart: any): string | undefined => {
+    if (validityIntervalStart) {
+      if (!isFeatureSupportedForVersion(TrezorCryptoProviderFeature.VALIDITY_INTERVAL_START)) {
+        const threshold = deviceVersionToStr(
+          TREZOR_VERSIONS[TrezorCryptoProviderFeature.VALIDITY_INTERVAL_START],
+        )
+        throw Error(`${Errors.ValidityIntervalStartNotSupported} to version ${threshold} or higher`)
+      }
+      return validityIntervalStart.toString()
+    }
+    return undefined
+  }
+
   const signTx = async (
     txAux: _TxAux,
     signingFiles: HwSigningData[],
@@ -278,30 +343,33 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
       stakeSigningFiles,
     } = filterSigningFiles(signingFiles)
     const inputs = txAux.inputs.map(
-      (input, i) => prepareInput(input, getSigningPath(paymentSigningFiles, i)),
+      (input: _Input, i: number) => prepareInput(input, getSigningPath(paymentSigningFiles, i)),
     )
     const outputs = txAux.outputs.map(
-      (output) => prepareOutput(output, network, changeOutputFiles),
+      (output: _Output) => prepareOutput(output, network, changeOutputFiles),
     )
     const certificates = txAux.certificates.map(
-      (certificate) => prepareCertificate(certificate, stakeSigningFiles),
+      (certificate: _Certificate) => prepareCertificate(certificate, stakeSigningFiles),
     )
-    const fee = `${txAux.fee}`
-    const ttl = `${txAux.ttl}`
+    const fee = txAux.fee.toString()
+    const ttl = prepareTtl(txAux.ttl)
+    const validityIntervalStart = prepareValidityIntervalStart(txAux.validityIntervalStart)
     const withdrawals = txAux.withdrawals.map(
-      (withdrawal) => prepareWithdrawal(withdrawal, stakeSigningFiles),
+      (withdrawal: _Withdrawal) => prepareWithdrawal(withdrawal, stakeSigningFiles),
     )
 
-    const response = await TrezorConnect.cardanoSignTransaction({
+    const response = await TrezorConnect.cardanoSignTransaction(removeNullFields({
       inputs,
       outputs,
       protocolMagic: network.protocolMagic,
       fee,
       ttl,
+      validityIntervalStart,
       networkId: network.networkId,
       certificates,
       withdrawals,
-    })
+    }))
+
     if (!response.success) {
       throw Error(response.payload.error)
     }
