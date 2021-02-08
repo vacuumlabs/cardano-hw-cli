@@ -54,8 +54,7 @@ enum Errors {
   FeeParseError = 'Failed to parse transaction, fee is not a number',
   TTLParseError = 'Failed to parse transaction, TTL is not a number',
   InvalidTransactionBody = 'Transaction body contains invalid or unsuported key',
-  InvalidTransactionBody = 'Transaction body contains invalid data, check if your transaction is compatible with byron/shelley era',
-  MssingTTLParseError = 'Optional TTL is not supported in this version yet, add TTL to your transaction',
+  MintUnsupportedError = 'Minting is unsupported in current version',
   MultiAssetNotSupported = 'Transaction contains multi-asset, please update your device firmware',
   ValidityIntervalStartNotSupported = 'Transaction contains validity interval start, please update your device firmware',
   TrezorXPubKeyCancelled = 'Extended public key export cancelled by user'

@@ -265,6 +265,9 @@ const parseValidityIntervalStart = (validityIntervalStart: any): number | undefi
 }
 
 const parseUnsignedTx = ([txBody, meta]: _UnsignedTxDecoded): _UnsignedTxParsed => {
+  if (txBody.get(TxBodyKeys.MINT)) {
+    throw Error(Errors.MintUnsupportedError)
+  }
   const inputs = parseTxInputs(txBody.get(TxBodyKeys.INPUTS))
   const outputs = parseTxOutputs(txBody.get(TxBodyKeys.OUTPUTS))
   const fee = parseFee(txBody.get(TxBodyKeys.FEE))
