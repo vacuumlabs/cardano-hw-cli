@@ -282,16 +282,16 @@ const deviceVersionToStr = (
 
 const isDeviceVersionGTE = (
   deviceVersion: DeviceVersion,
-  threshold: DeviceVersion,
-): boolean => deviceVersion.major > threshold.major
+  thresholdVersion: DeviceVersion,
+): boolean => deviceVersion.major > thresholdVersion.major
   || (
-    deviceVersion.major === threshold.major
-    && deviceVersion.minor > threshold.minor
+    deviceVersion.major === thresholdVersion.major
+    && deviceVersion.minor > thresholdVersion.minor
   )
   || (
-    deviceVersion.major === threshold.major
-    && deviceVersion.minor === threshold.minor
-    && deviceVersion.patch >= threshold.patch
+    deviceVersion.major === thresholdVersion.major
+    && deviceVersion.minor === thresholdVersion.minor
+    && deviceVersion.patch >= thresholdVersion.patch
   )
 
 export {

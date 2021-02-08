@@ -1,5 +1,4 @@
 import { BIP32Path } from '../types'
-import { DeviceVersion } from './types'
 
 export type LedgerInput = {
   path?: BIP32Path,
@@ -74,10 +73,8 @@ export type LedgerCertificate = {
 export const enum LedgerCryptoProviderFeature {
   BULK_EXPORT,
   MULTI_ASSET,
-  VALIDITY_INTERVAL_START,
+  ALLEGRA, // this includes optional TTL and validity interval start
 }
-
-export type LedgerVersionThresholdMap = { [key in LedgerCryptoProviderFeature]: DeviceVersion }
 
 export type LedgerStakingBlockchainPointer = {
   blockIndex: number,

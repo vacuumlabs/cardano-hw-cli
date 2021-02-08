@@ -293,7 +293,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
   }
 
   const prepareTtl = (ttl?: number) => {
-    if (!ttl && !isFeatureSupportedForVersion(LedgerCryptoProviderFeature.VALIDITY_INTERVAL_START)) {
+    if (!ttl && !isFeatureSupportedForVersion(LedgerCryptoProviderFeature.ALLEGRA)) {
       throw Error(Errors.LedgerOptionalTTLNotSupported)
     }
     return ttl && ttl.toString()
@@ -302,7 +302,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
   const prepareValidityIntervalStart = (validityIntervalStart?: number) => {
     if (
       validityIntervalStart
-      && !isFeatureSupportedForVersion(LedgerCryptoProviderFeature.VALIDITY_INTERVAL_START)
+      && !isFeatureSupportedForVersion(LedgerCryptoProviderFeature.ALLEGRA)
     ) {
       throw Error(Errors.LedgerValidityIntervalStartNotSupported)
     }

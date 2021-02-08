@@ -59,9 +59,9 @@ const enum Errors {
   TrezorValidityIntervalStartNotSupported = 'The current version of your trezor firmware does not support validity interval start. Update your device firmware to the latest version.',
   LedgerValidityIntervalStartNotSupported = 'The current version of your Ledger Cardano app does not support validity interval start. Update your Cardano app to the latest version.',
   TrezorOptionalTTLNotSupported = 'The current version of your trezor firmware does not support optional TTL. Update your device firmware to the latest version.',
-  LedgerOptionalTTLNotSupported = 'The current version of your Ledger Cardano app does not support optional TTL. Update your Cardano app to the latest version.',
-  TrezorMultiAssetsNotSupported = 'The current version of your trezor firmware does not support optional TTL. Update your device firmware to the latest version.',
-  LedgerMultiAssetsNotSupported = 'The current version of your Ledger Cardano app does not support optional TTL. Update your Cardano app to the latest version.',
+  LedgerOptionalTTLNotSupported = 'The current version of your Ledger Cardano app does not support multi asset transactions. Update your Cardano app to the latest version.',
+  TrezorMultiAssetsNotSupported = 'The current version of your trezor firmware does not support multi asset transactions. Update your device firmware to the latest version.',
+  LedgerMultiAssetsNotSupported = 'The current version of your Ledger Cardano app does not support multi asset transactions. Update your Cardano app to the latest version.',
   TrezorXPubKeyCancelled = 'Extended public key export cancelled by user',
   MetaDataHashParseError = 'Failed to parse transaction, metadata hash is not a Buffer.'
 }

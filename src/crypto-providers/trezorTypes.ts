@@ -1,6 +1,5 @@
 /* eslint-disable camelcase */
 import { BIP32Path } from '../types'
-import { DeviceVersion } from './types'
 
 export type TrezorCertificatePointer = {
   blockIndex: number
@@ -95,7 +94,5 @@ export type TrezorTxCertificate = {
 
 export const enum TrezorCryptoProviderFeature {
   MULTI_ASSET,
-  VALIDITY_INTERVAL_START,
+  ALLEGRA, // this includes optional TTL and validity interval start
 }
-
-export type TrezorVersionThresholdMap = { [key in TrezorCryptoProviderFeature]: DeviceVersion }
