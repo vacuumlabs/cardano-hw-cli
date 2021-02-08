@@ -15,7 +15,6 @@ mkdir ./build/windows/cardano-hw-cli
 
 # Build executable
 yarn nexe ./dist/index.js -o ./build/windows/cardano-hw-cli/cardano-hw-cli -t windows-x64-12.16.2
-mv ./build/windows/cardano-hw-cli/cardano-hw-cli.exe ./build/windows/cardano-hw-cli/cardano-hw-cli 
 
 # Copy dependencies
 cp _package.json ./build/windows/cardano-hw-cli/package.json

@@ -16,3 +16,4 @@ find ./build/linux -name '*.deb' -exec cp {} ./build/release \;
 find ./build/linux -name '*.tar.gz' -exec cp {} ./build/release \;
 find ./build/macos -name '*.tar.gz' -exec cp {} ./build/release \;
 find ./build/windows -name '*.zip' -exec cp {} ./build/release \;
+cp ./scripts/autocomplete.sh ./build/release/autocomplete.sh
