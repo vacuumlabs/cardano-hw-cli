@@ -63,7 +63,10 @@ const enum Errors {
   TrezorMultiAssetsNotSupported = 'The current version of your trezor firmware does not support multi asset transactions. Update your device firmware to the latest version.',
   LedgerMultiAssetsNotSupported = 'The current version of your Ledger Cardano app does not support multi asset transactions. Update your Cardano app to the latest version.',
   TrezorXPubKeyCancelled = 'Extended public key export cancelled by user',
-  MetaDataHashParseError = 'Failed to parse transaction, metadata hash is not a Buffer.'
+  MetaDataHashParseError = 'Failed to parse transaction, metadata hash is not a Buffer.',
+  AssetNameParseError = 'Failed to parse transaction, asset name is not a Buffer.',
+  AssetAmountParseError = 'Failed to parse transaction, asset amount is not a valid number.',
+  PolicyIdParseError = 'Failed to parse transaction, multi asset policy id is not a Buffer.'
 }
 
 export {

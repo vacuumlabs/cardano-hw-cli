@@ -17,10 +17,10 @@ import {
 } from './types'
 
 export const isLovelace = (test: any): test is number => {
-  if (typeof test === 'number') return true
+  if (typeof test === 'number' && test > 0) return true
   try {
     BigInt(test)
-    return true
+    return test > 0
   } catch (e) { return false }
 }
 
@@ -37,7 +37,7 @@ export const isTxOutput = (
 ): test is TxOutput => {
   if (Array.isArray(test) && test.length === 2) {
     const [address, amount] = test
-    const isMultiAsset = (coins: any) => Array.isArray(coins) && coins.length === 2
+    const isMultiAsset = (outputAmount: any) => Array.isArray(outputAmount) && outputAmount.length === 2
     return Buffer.isBuffer(address) && (isLovelace(amount) || isMultiAsset(amount))
   }
   return false
@@ -153,8 +153,8 @@ export const isUnsignedTxDecoded = (
 ): test is _UnsignedTxDecoded => {
   if (Array.isArray(test)) {
     const txBody = test[0]
-    const validKeys = Object.values(TxBodyKeys).filter(Number.isInteger) as Array<Number>
-    const txBodyKeys: Array<Number> = Array.from(txBody.keys())
+    const validKeys = Object.values(TxBodyKeys).filter(Number.isInteger) as Array<number>
+    const txBodyKeys: Array<number> = Array.from(txBody.keys())
     return txBodyKeys.every((key) => validKeys.includes(key))
   }
   return false

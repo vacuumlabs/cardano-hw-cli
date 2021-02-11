@@ -53,11 +53,11 @@ const parseAssets = (assets: any): _Asset[] => {
   }
   return Array.from(assets).map(([assetName, coins]) => {
     if (!Buffer.isBuffer(assetName)) {
-      throw Error()
+      throw Error(Errors.AssetNameParseError)
     }
     // TODO: is lovelace is not the best name since its not a lovelace
     if (!isLovelace(coins)) {
-      throw Error()
+      throw Error(Errors.AssetAmountParseError)
     }
     return { assetName, coins: BigInt(coins) }
   })
@@ -69,7 +69,7 @@ const parseMultiAsset = (multiAsset: any): _MultiAsset[] => {
   }
   return Array.from(multiAsset).map(([policyId, assets]) => {
     if (!Buffer.isBuffer(policyId)) {
-      throw Error()
+      throw Error(Errors.PolicyIdParseError)
     }
     return { policyId, assets: parseAssets(assets) }
   })
