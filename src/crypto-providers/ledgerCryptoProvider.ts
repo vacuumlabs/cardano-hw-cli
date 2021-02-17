@@ -292,14 +292,14 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     }
   }
 
-  const prepareTtl = (ttl?: number) => {
+  const prepareTtl = (ttl?: BigInt) => {
     if (!ttl && !isFeatureSupportedForVersion(LedgerCryptoProviderFeature.ALLEGRA)) {
       throw Error(Errors.LedgerOptionalTTLNotSupported)
     }
     return ttl && ttl.toString()
   }
 
-  const prepareValidityIntervalStart = (validityIntervalStart?: number) => {
+  const prepareValidityIntervalStart = (validityIntervalStart?: BigInt) => {
     if (
       validityIntervalStart
       && !isFeatureSupportedForVersion(LedgerCryptoProviderFeature.ALLEGRA)

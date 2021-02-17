@@ -125,12 +125,12 @@ export type _UnsignedTxParsed = {
   inputs: _Input[],
   outputs: _Output[],
   fee: Lovelace,
-  ttl?: number,
+  ttl?: BigInt,
   certificates: _Certificate[],
   withdrawals: _Withdrawal[],
   metaDataHash?: Buffer,
   meta: Buffer | null,
-  validityIntervalStart?: number,
+  validityIntervalStart?: BigInt,
   mint?: _MultiAsset,
 }
 

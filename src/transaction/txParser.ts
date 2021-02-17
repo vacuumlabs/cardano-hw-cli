@@ -239,18 +239,18 @@ const parseFee = (fee: any): Lovelace => {
   return BigInt(fee)
 }
 
-const parseTtl = (ttl: any): number | undefined => {
-  if (ttl && !Number.isInteger(ttl)) {
+const parseTtl = (ttl: any): BigInt | undefined => {
+  if (ttl && !isUint64(ttl)) {
     throw Error(Errors.TTLParseError)
   }
-  return ttl
+  return ttl && BigInt(ttl)
 }
 
-const parseValidityIntervalStart = (validityIntervalStart: any): number | undefined => {
-  if (validityIntervalStart && !Number.isInteger(validityIntervalStart)) {
+const parseValidityIntervalStart = (validityIntervalStart: any): BigInt | undefined => {
+  if (validityIntervalStart && !isUint64(validityIntervalStart)) {
     throw Error(Errors.ValidityIntervalStartParseError)
   }
-  return validityIntervalStart
+  return validityIntervalStart && BigInt(validityIntervalStart)
 }
 
 const parseMetaDataHash = (metaDataHash: any): Buffer | undefined => {
