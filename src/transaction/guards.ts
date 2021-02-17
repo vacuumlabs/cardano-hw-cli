@@ -16,7 +16,7 @@ import {
   TxBodyKeys,
 } from './types'
 
-export const isLovelace = (test: any): test is number => {
+export const isUint64 = (test: any): test is number => {
   if (typeof test === 'number' && test > 0) return true
   try {
     BigInt(test)
@@ -38,7 +38,7 @@ export const isTxOutput = (
   if (Array.isArray(test) && test.length === 2) {
     const [address, amount] = test
     const isMultiAsset = (outputAmount: any) => Array.isArray(outputAmount) && outputAmount.length === 2
-    return Buffer.isBuffer(address) && (isLovelace(amount) || isMultiAsset(amount))
+    return Buffer.isBuffer(address) && (isUint64(amount) || isMultiAsset(amount))
   }
   return false
 }
@@ -47,7 +47,7 @@ export const isWithdrawalsMap = (
   test: any,
 ): test is TxWithdrawal => test instanceof Map
   && Array.from(test.keys()).every((key) => Buffer.isBuffer(key))
-  && Array.from(test.values()).every((value) => isLovelace(value))
+  && Array.from(test.values()).every((value) => isUint64(value))
 
 export const isTxStakingKeyRegistrationCert = (
   test: any,
@@ -139,8 +139,8 @@ export const isStakepoolRegistrationCert = (
   return type === TxCertificateKeys.STAKEPOOL_REGISTRATION
     && Buffer.isBuffer(poolKeyHash)
     && Buffer.isBuffer(vrfPubKeyHash)
-    && isLovelace(pledge)
-    && isLovelace(cost)
+    && isUint64(pledge)
+    && isUint64(cost)
     && isMargin(margin)
     && Buffer.isBuffer(rewardAddress)
     && isArrayOfType<Buffer>(poolOwnersPubKeyHashes, Buffer.isBuffer)

@@ -2,7 +2,7 @@ import { isArrayOfType } from '../guards'
 import { Errors } from '../errors'
 import {
   isDelegationCert,
-  isLovelace,
+  isUint64,
   isStakepoolRegistrationCert,
   isStakingKeyDeregistrationCert,
   isTxInput,
@@ -56,7 +56,7 @@ const parseAssets = (assets: any): _Asset[] => {
       throw Error(Errors.AssetNameParseError)
     }
     // TODO: is lovelace is not the best name since its not a lovelace
-    if (!isLovelace(amount)) {
+    if (!isUint64(amount)) {
       throw Error(Errors.AssetAmountParseError)
     }
     return { assetName, amount: BigInt(amount) }
@@ -81,11 +81,11 @@ const parseTxOutputs = (txOutputs: any[]): _Output[] => {
   }
 
   const parseAmount = (amount: any): { coins: BigInt, tokenBundle: _MultiAsset[] } => {
-    if (isLovelace(amount)) {
+    if (isUint64(amount)) {
       return { coins: BigInt(amount), tokenBundle: [] }
     }
     const [coins, multiAsset] = amount
-    if (!isLovelace(coins)) {
+    if (!isUint64(coins)) {
       throw Error(Errors.TxOutputParseCoinError)
     }
     return { coins: BigInt(coins), tokenBundle: parseMultiAsset(multiAsset) }
@@ -233,7 +233,7 @@ const parseTxWithdrawals = (withdrawals: any): _Withdrawal[] => {
 }
 
 const parseFee = (fee: any): Lovelace => {
-  if (!isLovelace(fee)) {
+  if (!isUint64(fee)) {
     throw Error(Errors.FeeParseError)
   }
   return BigInt(fee)
