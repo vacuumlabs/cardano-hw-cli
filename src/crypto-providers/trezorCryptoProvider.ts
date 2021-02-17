@@ -156,9 +156,9 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
       throw Error(Errors.TrezorMultiAssetsNotSupported)
     }
     const tokenBundle = multiAssets.map(({ policyId, assets }) => {
-      const tokenAmounts = assets.map(({ assetName, coins }) => ({
+      const tokenAmounts = assets.map(({ assetName, amount }) => ({
         assetNameBytes: assetName.toString('hex'),
-        amount: coins.toString(),
+        amount: amount.toString(),
       }))
       return {
         policyId: policyId.toString('hex'),

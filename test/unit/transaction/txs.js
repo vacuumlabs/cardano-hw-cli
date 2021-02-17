@@ -276,7 +276,7 @@ const transactions = {
               assets: [
                 {
                   assetName: Buffer.from('66697273746173736574', 'hex'),
-                  coins: 4n,
+                  amount: 4n,
                 },
               ],
             },
@@ -285,11 +285,11 @@ const transactions = {
               assets: [
                 {
                   assetName: Buffer.from('66697273746173736574', 'hex'),
-                  coins: 4n,
+                  amount: 4n,
                 },
                 {
                   assetName: Buffer.from('7365636f6e646173736574', 'hex'),
-                  coins: 4n,
+                  amount: 4n,
                 },
               ],
             },

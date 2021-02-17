@@ -29,7 +29,7 @@ export type _Input = {
   outputIndex: number,
 }
 
-export type _Asset = {assetName: Buffer, coins: BigInt}
+export type _Asset = {assetName: Buffer, amount: BigInt}
 
 export type _MultiAsset = {policyId: Buffer, assets: _Asset[]}
 

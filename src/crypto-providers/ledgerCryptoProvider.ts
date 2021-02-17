@@ -114,9 +114,9 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
       throw Error(Errors.LedgerMultiAssetsNotSupported)
     }
     return multiAssets.map(({ policyId, assets }) => {
-      const tokens = assets.map(({ assetName, coins }) => ({
+      const tokens = assets.map(({ assetName, amount }) => ({
         assetNameHex: assetName.toString('hex'),
-        amountStr: coins.toString(),
+        amountStr: amount.toString(),
       }))
       return {
         policyIdHex: policyId.toString('hex'),

@@ -51,15 +51,15 @@ const parseAssets = (assets: any): _Asset[] => {
   if (!(assets instanceof Map)) {
     throw Error(Errors.TxAssetParseError)
   }
-  return Array.from(assets).map(([assetName, coins]) => {
+  return Array.from(assets).map(([assetName, amount]) => {
     if (!Buffer.isBuffer(assetName)) {
       throw Error(Errors.AssetNameParseError)
     }
     // TODO: is lovelace is not the best name since its not a lovelace
-    if (!isLovelace(coins)) {
+    if (!isLovelace(amount)) {
       throw Error(Errors.AssetAmountParseError)
     }
-    return { assetName, coins: BigInt(coins) }
+    return { assetName, amount: BigInt(amount) }
   })
 }
 
