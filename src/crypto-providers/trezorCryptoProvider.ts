@@ -196,11 +196,13 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
       return prepareChangeOutput(lovelaceAmount, changeAddress, tokenBundle)
     }
 
-    return {
+    const trezorOutput: TrezorOutput = {
       address,
       amount: lovelaceAmount,
       tokenBundle,
     }
+
+    return removeNullFields(trezorOutput) as TrezorOutput
   }
 
   const prepareStakingKeyRegistrationCert = (

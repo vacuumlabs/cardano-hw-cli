@@ -47,17 +47,6 @@
   resolved "https://registry.yarnpkg.com/@calebboyd/semaphore/-/semaphore-1.3.1.tgz#4faa403d12f80e5d5c1d6e0d7916d048b6fa79cb"
   integrity sha512-17z9me12RgAEcMhIgR7f+BiXKbzwF9p1VraI69OxrUUSWGuSMOyOTEHQNVtMKuVrkEDVD0/Av5uiGZPBMYZljw==
 
-"@cardano-foundation/ledgerjs-hw-app-cardano@https://github.com/vacuumlabs/ledgerjs-cardano-shelley/releases/download/v.2.1.0-rc.0/cardano-foundation-ledgerjs-hw-app-cardano-2.1.0-rc.0.tgz":
-  version "2.1.0-rc.0"
-  resolved "https://github.com/vacuumlabs/ledgerjs-cardano-shelley/releases/download/v.2.1.0-rc.0/cardano-foundation-ledgerjs-hw-app-cardano-2.1.0-rc.0.tgz#27d2e1654f71d0f7c5c83913e8c4e014c325fa46"
-  dependencies:
-    "@ledgerhq/hw-transport" "^5.12.0"
-    babel-polyfill "^6.26.0"
-    babel-runtime "^6.26.0"
-    base-x "^3.0.5"
-    bech32 "^1.1.4"
-    node-int64 "^0.4.0"
-
 "@cardano-foundation/ledgerjs-hw-app-cardano@https://github.com/vacuumlabs/ledgerjs-cardano-shelley/releases/download/v2.2.0-beta/cardano-foundation-ledgerjs-hw-app-cardano-2.2.0-beta.tgz":
   version "2.2.0"
   resolved "https://github.com/vacuumlabs/ledgerjs-cardano-shelley/releases/download/v2.2.0-beta/cardano-foundation-ledgerjs-hw-app-cardano-2.2.0-beta.tgz#ac19a3ee04fb90a71bf556679afdac4775206561"
@@ -190,9 +179,9 @@
     defer-to-connect "^1.0.1"
 
 "@trezor/blockchain-link@^1.0.15":
-  version "1.0.15"
-  resolved "https://registry.yarnpkg.com/@trezor/blockchain-link/-/blockchain-link-1.0.15.tgz#a3f7c1122d568a1a945f7f0c43de217cdc2d3c7a"
-  integrity sha512-qcGHa1OXHdQb6SoPW6yfXyomkKwtd/JpFXL4eSGvAl08roxtgmtXNHmQaJ8F0oRSClbPEprqf/qR3BPdK33HoQ==
+  version "1.0.16"
+  resolved "https://registry.yarnpkg.com/@trezor/blockchain-link/-/blockchain-link-1.0.16.tgz#842d2846385deef7a179df74c1d157332708934c"
+  integrity sha512-K5HHgAFWrQEODsarEV55efk+Iamf96n56B8PAxMNaKRwj04i6LpQ8uyHSJf7hVZQ+z4lMXG+Qw7vijS17qooRw==
   dependencies:
     bignumber.js "^9.0.1"
     es6-promise "^4.2.8"
@@ -209,7 +198,7 @@
     cross-fetch "^3.0.6"
     runtypes "^5.0.1"
 
-"@trezor/utxo-lib@0.1.1", "@trezor/utxo-lib@^0.1.1":
+"@trezor/utxo-lib@0.1.1":
   version "0.1.1"
   resolved "https://registry.yarnpkg.com/@trezor/utxo-lib/-/utxo-lib-0.1.1.tgz#63cb4b3accc90352a42a1c866fce8bfbb1c94b26"
   integrity sha512-Wonj9ldKCeoajCV6lSE6+hJ2hdPxmVaysWRO9GxhnKyiOdRhiOIQcdKOiXYqpcxwkIbbL9eLGDg73tfn3MUa6w==
@@ -224,6 +213,32 @@
     create-hmac "^1.1.3"
     debug "~3.1.0"
     ecurve "^1.0.0"
+    merkle-lib "^2.0.10"
+    pushdata-bitcoin "^1.0.1"
+    randombytes "^2.0.1"
+    safe-buffer "^5.0.1"
+    typeforce "^1.11.3"
+    varuint-bitcoin "^1.0.4"
+    wif "^2.0.1"
+  optionalDependencies:
+    secp256k1 "^3.5.2"
+
+"@trezor/utxo-lib@^0.1.2":
+  version "0.1.2"
+  resolved "https://registry.yarnpkg.com/@trezor/utxo-lib/-/utxo-lib-0.1.2.tgz#19319a424b0d0c648b0df456f1849eb08697fb44"
+  integrity sha512-ONAsg8LAyZY9g6X/qgqloUHwWsqtRmrx2Wt3wkz+7LO2VdE69HktAHWUjJLK9drskNwly3Fp0GKK6ZbbtX+Ghw==
+  dependencies:
+    bech32 "0.0.3"
+    bigi "^1.4.0"
+    bip66 "^1.1.0"
+    bitcoin-ops "^1.3.0"
+    blake2b "https://github.com/BitGo/blake2b#6268e6dd678661e0acc4359e9171b97eb1ebf8ac"
+    bs58check "^2.0.0"
+    create-hash "^1.1.0"
+    create-hmac "^1.1.3"
+    debug "~3.1.0"
+    ecurve "^1.0.0"
+    int64-buffer "0.99.1007"
     merkle-lib "^2.0.10"
     pushdata-bitcoin "^1.0.1"
     randombytes "^2.0.1"
@@ -717,6 +732,13 @@ bl@^4.0.3:
   dependencies:
     nanoassert "^1.0.0"
 
+"blake2b@git+https://github.com/BitGo/blake2b.git#6268e6dd678661e0acc4359e9171b97eb1ebf8ac":
+  version "2.1.3"
+  resolved "git+https://github.com/BitGo/blake2b.git#6268e6dd678661e0acc4359e9171b97eb1ebf8ac"
+  dependencies:
+    blake2b-wasm "https://github.com/BitGo/blake2b-wasm#193cdb71656c1a6c7f89b05d0327bb9b758d071b"
+    nanoassert "^1.0.0"
+
 "blake2b@https://github.com/BitGo/blake2b#6268e6dd678661e0acc4359e9171b97eb1ebf8ac":
   version "2.1.3"
   resolved "https://github.com/BitGo/blake2b#6268e6dd678661e0acc4359e9171b97eb1ebf8ac"
@@ -729,7 +751,7 @@ blob@0.0.5:
   resolved "https://registry.yarnpkg.com/blob/-/blob-0.0.5.tgz#d680eeef25f8cd91ad533f5b01eed48e64caf683"
   integrity sha512-gaqbzQPqOoamawKg0LGVd7SzLgXS+JH61oWprSLH+P+abTczqJbhTR8CmJ2u9/bUYNmHTGJx/UEmn6doAvvuig==
 
-bn.js@^4.11.8, bn.js@^4.4.0:
+bn.js@^4.11.8, bn.js@^4.11.9:
   version "4.11.9"
   resolved "https://registry.yarnpkg.com/bn.js/-/bn.js-4.11.9.tgz#26d556829458f9d1e81fc48952493d0ba3507828"
   integrity sha512-E6QoYqCKZfgatHTdHzs1RRKP7ip4vvm+EyRUeE2RF0NblwVvb0p6jSVeNTOFxPn26QXN2o6SMfNxKp6kU8zQaw==
@@ -788,7 +810,7 @@ braces@^3.0.1, braces@~3.0.2:
   dependencies:
     fill-range "^7.0.1"
 
-brorand@^1.0.1, brorand@^1.0.5:
+brorand@^1.0.5, brorand@^1.1.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/brorand/-/brorand-1.1.0.tgz#12c25efe40a45e3c323eb8675a0a0ce57b22371f"
   integrity sha1-EsJe/kCkXjwyPrhnWgoM5XsiNx8=
@@ -1476,17 +1498,17 @@ ecurve@^1.0.0, ecurve@^1.0.3:
     safe-buffer "^5.0.1"
 
 elliptic@^6.5.2:
-  version "6.5.3"
-  resolved "https://registry.yarnpkg.com/elliptic/-/elliptic-6.5.3.tgz#cb59eb2efdaf73a0bd78ccd7015a62ad6e0f93d6"
-  integrity sha512-IMqzv5wNQf+E6aHeIqATs0tOLeOTwj1QKbRcS3jBbYkl5oLAserA8yJTT7/VyHUYG91PRmPyeQDObKLPpeS4dw==
+  version "6.5.4"
+  resolved "https://registry.yarnpkg.com/elliptic/-/elliptic-6.5.4.tgz#da37cebd31e79a1367e941b592ed1fbebd58abbb"
+  integrity sha512-iLhC6ULemrljPZb+QutR5TQGB+pdW6KGD5RSegS+8sorOZT+rdQFbsQFJgvN3eRqNALqJer4oQ16YvJHlU8hzQ==
   dependencies:
-    bn.js "^4.4.0"
-    brorand "^1.0.1"
+    bn.js "^4.11.9"
+    brorand "^1.1.0"
     hash.js "^1.0.0"
-    hmac-drbg "^1.0.0"
-    inherits "^2.0.1"
-    minimalistic-assert "^1.0.0"
-    minimalistic-crypto-utils "^1.0.0"
+    hmac-drbg "^1.0.1"
+    inherits "^2.0.4"
+    minimalistic-assert "^1.0.1"
+    minimalistic-crypto-utils "^1.0.1"
 
 emoji-regex@^7.0.1:
   version "7.0.3"
@@ -2079,9 +2101,9 @@ get-caller-file@^2.0.1:
   integrity sha512-DyFP3BM/3YHTQOCUL/w0OZHR0lpKeGrxotcHWcqNEdnltqFwXVfhEBQ94eIo34AfQpo0rGki4cyIiftY06h2Fg==
 
 get-intrinsic@^1.0.2:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/get-intrinsic/-/get-intrinsic-1.1.0.tgz#892e62931e6938c8a23ea5aaebcfb67bd97da97e"
-  integrity sha512-M11rgtQp5GZMZzDL7jLTNxbDfurpzuau5uqRWDPvlHjfvg3TdScAZo96GLvhMjImrmR8uAt0FS2RLoMrfWGKlg==
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/get-intrinsic/-/get-intrinsic-1.1.1.tgz#15f59f376f855c446963948f0d24cd3637b4abc6"
+  integrity sha512-kWZrnVM42QCiEA2Ig1bG8zjoIMOgxWwYCEeNdwY6Tv/cOSeGpcoX4pXHfKUxNKVoArnrEr2e9srnAxxGIraS9Q==
   dependencies:
     function-bind "^1.1.1"
     has "^1.0.3"
@@ -2361,7 +2383,7 @@ he@1.2.0:
   resolved "https://registry.yarnpkg.com/he/-/he-1.2.0.tgz#84ae65fa7eafb165fddb61566ae14baf05664f0f"
   integrity sha512-F/1DnUGPopORZi0ni+CvrCgHQ5FyEAHRLSApuYWMmrbSwoN2Mn/7k+Gl38gJnR7yyDZk6WLXwiGod1JOWNDKGw==
 
-hmac-drbg@^1.0.0:
+hmac-drbg@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/hmac-drbg/-/hmac-drbg-1.0.1.tgz#d2745701025a6c775a6c545793ed502fc0c649a1"
   integrity sha1-0nRXAQJabHdabFRXk+1QL8DGSaE=
@@ -2443,6 +2465,11 @@ ini@^1.3.4, ini@~1.3.0:
   version "1.3.5"
   resolved "https://registry.yarnpkg.com/ini/-/ini-1.3.5.tgz#eee25f56db1c9ec6085e0c22778083f596abf927"
   integrity sha512-RZY5huIKCMRWDUqZlEi72f/lmXKMvuszcMBduliQ3nnWbx9X/ZBQO7DijMEYS9EhHBb2qacRUMtC7svLwe0lcw==
+
+int64-buffer@0.99.1007:
+  version "0.99.1007"
+  resolved "https://registry.yarnpkg.com/int64-buffer/-/int64-buffer-0.99.1007.tgz#211ea089a2fdb960070a2e77cd6d17dc456a5220"
+  integrity sha512-XDBEu44oSTqlvCSiOZ/0FoUkpWu/vwjJLGSKDabNISPQNZ5wub1FodGHBljRsrR0IXRPq7SslshZYMuA55CgTQ==
 
 into-stream@^3.1.0:
   version "3.1.0"
@@ -2991,7 +3018,7 @@ minimalistic-assert@^1.0.0, minimalistic-assert@^1.0.1:
   resolved "https://registry.yarnpkg.com/minimalistic-assert/-/minimalistic-assert-1.0.1.tgz#2e194de044626d4a10e7f7fbc00ce73e83e4d5c7"
   integrity sha512-UtJcAD4yEaGtjPezWuO9wC4nwUnVH/8/Im3yEHQP4b67cXlD/Qr9hdITCU1xDbSEXg2XKNaP8jsReV7vQd00/A==
 
-minimalistic-crypto-utils@^1.0.0, minimalistic-crypto-utils@^1.0.1:
+minimalistic-crypto-utils@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/minimalistic-crypto-utils/-/minimalistic-crypto-utils-1.0.1.tgz#f6c00c1c0b082246e5c4d99dfb8c7c083b2b582a"
   integrity sha1-9sAMHAsIIkblxNmd+4x8CDsrWCo=
@@ -4489,15 +4516,15 @@ to-regex@^3.0.1, to-regex@^3.0.2:
     regex-not "^1.0.2"
     safe-regex "^1.1.0"
 
-trezor-connect@8.1.20-extended:
-  version "8.1.20-extended"
-  resolved "https://registry.yarnpkg.com/trezor-connect/-/trezor-connect-8.1.20-extended.tgz#4926ed1cd1fb7e7bdaf6f337a53413b86d94dd13"
-  integrity sha512-nI2aoJjKGZPfPvfQi07OdmZk7tMrKXSoJsw1YMgXdXmEkRgusEhhGWtrTLuCagqQM4QfUJuoD/VdJqhbuGUJFQ==
+trezor-connect@8.1.22-extended:
+  version "8.1.22-extended"
+  resolved "https://registry.yarnpkg.com/trezor-connect/-/trezor-connect-8.1.22-extended.tgz#121d40c5dc9e25ca6032b5b541681d46d5de9fe6"
+  integrity sha512-j7FrInV+4qaO2Zjxkilkm6iaAYW0DdAEjesS453JlKGTcHsIMztem3k6x6tn00mdaYn4jSPKCTYtLTTy30b2QA==
   dependencies:
     "@babel/runtime" "^7.12.5"
     "@trezor/blockchain-link" "^1.0.15"
     "@trezor/rollout" "1.0.7"
-    "@trezor/utxo-lib" "^0.1.1"
+    "@trezor/utxo-lib" "^0.1.2"
     bchaddrjs "0.4.9"
     bignumber.js "^9.0.1"
     bowser "^2.11.0"
@@ -4757,9 +4784,9 @@ write@1.0.3:
     mkdirp "^0.5.1"
 
 ws@^7.2.0, ws@^7.4.0, ws@~7.4.2:
-  version "7.4.2"
-  resolved "https://registry.yarnpkg.com/ws/-/ws-7.4.2.tgz#782100048e54eb36fe9843363ab1c68672b261dd"
-  integrity sha512-T4tewALS3+qsrpGI/8dqNMLIVdq/g/85U98HPMa6F0m6xTbvhXU6RCQLqPH3+SlomNV/LdY6RXEbBpMH6EOJnA==
+  version "7.4.3"
+  resolved "https://registry.yarnpkg.com/ws/-/ws-7.4.3.tgz#1f9643de34a543b8edb124bdcbc457ae55a6e5cd"
+  integrity sha512-hr6vCR76GsossIRsr8OLR9acVVm1jyfEWvhbNjtgPOrfvAlKzvyeg/P6r8RuDjRyrcQoPQT7K0DGEPc7Ae6jzA==
 
 xmlhttprequest-ssl@~1.5.4:
   version "1.5.5"
