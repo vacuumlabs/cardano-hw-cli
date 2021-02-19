@@ -169,11 +169,11 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
   }
 
   const prepareChangeOutput = (
-    lovelaceAmount: string,
+    lovelaceAmount: BigInt,
     changeAddress: _AddressParameters,
     tokenBundle?: TrezorMultiAsset,
   ): TrezorOutput => ({
-    amount: lovelaceAmount,
+    amount: lovelaceAmount.toString(),
     addressParameters: {
       addressType: changeAddress.addressType,
       path: changeAddress.paymentPath,
@@ -189,16 +189,15 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
   ): TrezorOutput => {
     const changeAddress = getChangeAddress(changeOutputFiles, output.address, network)
     const address = encodeAddress(output.address)
-    const lovelaceAmount = `${output.coins}`
     const tokenBundle = prepareTokenBundle(output.tokenBundle)
 
     if (changeAddress && !changeAddress.address.compare(output.address)) {
-      return prepareChangeOutput(lovelaceAmount, changeAddress, tokenBundle)
+      return prepareChangeOutput(output.coins, changeAddress, tokenBundle)
     }
 
     const trezorOutput: TrezorOutput = {
       address,
-      amount: lovelaceAmount,
+      amount: output.coins.toString(),
       tokenBundle,
     }
 
