@@ -313,21 +313,21 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     }
   }
 
-  const prepareTtl = (ttl?: BigInt) => {
+  const prepareTtl = (ttl?: BigInt): string | null => {
     if (!ttl && !isFeatureSupportedForVersion(TrezorCryptoProviderFeature.ALLEGRA)) {
       throw Error(Errors.TrezorOptionalTTLNotSupported)
     }
-    return ttl && ttl.toString()
+    return ttl ? ttl.toString() : null
   }
 
-  const prepareValidityIntervalStart = (validityIntervalStart?: BigInt): string | undefined => {
+  const prepareValidityIntervalStart = (validityIntervalStart?: BigInt): string | null => {
     if (
       validityIntervalStart
       && !isFeatureSupportedForVersion(TrezorCryptoProviderFeature.ALLEGRA)
     ) {
       throw Error(Errors.TrezorValidityIntervalStartNotSupported)
     }
-    return validityIntervalStart && validityIntervalStart.toString()
+    return validityIntervalStart ? validityIntervalStart.toString() : null
   }
 
   const signTx = async (
