@@ -315,7 +315,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
   }
 
   const prepareTtl = (ttl?: BigInt): string | null => {
-    if (!ttl && !isFeatureSupportedForVersion(TrezorCryptoProviderFeature.ALLEGRA)) {
+    if (!ttl && !isFeatureSupportedForVersion(TrezorCryptoProviderFeature.OPTIONAL_TTL)) {
       throw Error(Errors.TrezorOptionalTTLNotSupported)
     }
     return ttl ? ttl.toString() : null
@@ -324,7 +324,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
   const prepareValidityIntervalStart = (validityIntervalStart?: BigInt): string | null => {
     if (
       validityIntervalStart
-      && !isFeatureSupportedForVersion(TrezorCryptoProviderFeature.ALLEGRA)
+      && !isFeatureSupportedForVersion(TrezorCryptoProviderFeature.VALIDITY_INTERVAL_START)
     ) {
       throw Error(Errors.TrezorValidityIntervalStartNotSupported)
     }

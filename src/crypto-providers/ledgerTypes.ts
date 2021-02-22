@@ -73,7 +73,8 @@ export type LedgerCertificate = {
 export const enum LedgerCryptoProviderFeature {
   BULK_EXPORT,
   MULTI_ASSET,
-  ALLEGRA, // this includes optional TTL and validity interval start
+  OPTIONAL_TTL,
+  VALIDITY_INTERVAL_START,
 }
 
 export type LedgerStakingBlockchainPointer = {

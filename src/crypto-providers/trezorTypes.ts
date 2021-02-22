@@ -94,5 +94,6 @@ export type TrezorTxCertificate = {
 
 export const enum TrezorCryptoProviderFeature {
   MULTI_ASSET,
-  ALLEGRA, // this includes optional TTL and validity interval start
+  OPTIONAL_TTL,
+  VALIDITY_INTERVAL_START,
 }
