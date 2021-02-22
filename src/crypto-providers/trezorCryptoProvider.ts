@@ -152,9 +152,6 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
   const prepareTokenBundle = (
     multiAssets: _MultiAsset[],
   ): TrezorMultiAsset | undefined => {
-    if (multiAssets.length > 0 && !isFeatureSupportedForVersion(TrezorCryptoProviderFeature.MULTI_ASSET)) {
-      throw Error(Errors.TrezorMultiAssetsNotSupported)
-    }
     const tokenBundle = multiAssets.map(({ policyId, assets }) => {
       const tokenAmounts = assets.map(({ assetName, amount }) => ({
         assetNameBytes: assetName.toString('hex'),
@@ -314,21 +311,28 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     }
   }
 
-  const prepareTtl = (ttl?: BigInt): string | null => {
-    if (!ttl && !isFeatureSupportedForVersion(TrezorCryptoProviderFeature.OPTIONAL_TTL)) {
+  const prepareTtl = (ttl?: BigInt): string | null => (ttl ? ttl.toString() : null)
+
+  const prepareValidityIntervalStart = (validityIntervalStart?: BigInt): string | null => (
+    validityIntervalStart ? validityIntervalStart.toString() : null
+  )
+
+  const ensureFirmwareSupportsParams = (txAux: _TxAux) => {
+    if (txAux.ttl == null && !isFeatureSupportedForVersion(TrezorCryptoProviderFeature.OPTIONAL_TTL)) {
       throw Error(Errors.TrezorOptionalTTLNotSupported)
     }
-    return ttl ? ttl.toString() : null
-  }
-
-  const prepareValidityIntervalStart = (validityIntervalStart?: BigInt): string | null => {
     if (
-      validityIntervalStart
+      txAux.validityIntervalStart != null
       && !isFeatureSupportedForVersion(TrezorCryptoProviderFeature.VALIDITY_INTERVAL_START)
     ) {
       throw Error(Errors.TrezorValidityIntervalStartNotSupported)
     }
-    return validityIntervalStart ? validityIntervalStart.toString() : null
+    txAux.outputs.forEach((output) => {
+      const multiAssets: _MultiAsset[] = output.tokenBundle
+      if (multiAssets.length > 0 && !isFeatureSupportedForVersion(TrezorCryptoProviderFeature.MULTI_ASSET)) {
+        throw Error(Errors.TrezorMultiAssetsNotSupported)
+      }
+    })
   }
 
   const signTx = async (
@@ -337,6 +341,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     network: Network,
     changeOutputFiles: HwSigningData[],
   ): Promise<SignedTxCborHex> => {
+    ensureFirmwareSupportsParams(txAux)
     const {
       paymentSigningFiles,
       stakeSigningFiles,

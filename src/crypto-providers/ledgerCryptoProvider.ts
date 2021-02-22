@@ -109,21 +109,16 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
 
   const prepareTokenBundle = (
     multiAssets: _MultiAsset[],
-  ): LedgerAssetGroup[] => {
-    if (multiAssets.length > 0 && !isFeatureSupportedForVersion(LedgerCryptoProviderFeature.MULTI_ASSET)) {
-      throw Error(Errors.LedgerMultiAssetsNotSupported)
+  ): LedgerAssetGroup[] => multiAssets.map(({ policyId, assets }) => {
+    const tokens = assets.map(({ assetName, amount }) => ({
+      assetNameHex: assetName.toString('hex'),
+      amountStr: amount.toString(),
+    }))
+    return {
+      policyIdHex: policyId.toString('hex'),
+      tokens,
     }
-    return multiAssets.map(({ policyId, assets }) => {
-      const tokens = assets.map(({ assetName, amount }) => ({
-        assetNameHex: assetName.toString('hex'),
-        amountStr: amount.toString(),
-      }))
-      return {
-        policyIdHex: policyId.toString('hex'),
-        tokens,
-      }
-    })
-  }
+  })
 
   const prepareChangeOutput = (
     amountStr: string,
@@ -292,26 +287,34 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     }
   }
 
-  const prepareTtl = (ttl?: BigInt) => {
-    if (!ttl && !isFeatureSupportedForVersion(LedgerCryptoProviderFeature.OPTIONAL_TTL)) {
+  const prepareTtl = (ttl?: BigInt) => (ttl && ttl.toString())
+
+  const prepareValidityIntervalStart = (validityIntervalStart?: BigInt) => (
+    validityIntervalStart && validityIntervalStart.toString()
+  )
+
+  const ensureFirmwareSupportsParams = (txAux: _TxAux) => {
+    if (txAux.ttl == null && !isFeatureSupportedForVersion(LedgerCryptoProviderFeature.OPTIONAL_TTL)) {
       throw Error(Errors.LedgerOptionalTTLNotSupported)
     }
-    return ttl && ttl.toString()
-  }
-
-  const prepareValidityIntervalStart = (validityIntervalStart?: BigInt) => {
     if (
-      validityIntervalStart
+      txAux.validityIntervalStart != null
       && !isFeatureSupportedForVersion(LedgerCryptoProviderFeature.VALIDITY_INTERVAL_START)
     ) {
       throw Error(Errors.LedgerValidityIntervalStartNotSupported)
     }
-    return validityIntervalStart && validityIntervalStart.toString()
+    txAux.outputs.forEach((output) => {
+      const multiAssets: _MultiAsset[] = output.tokenBundle
+      if (multiAssets.length > 0 && !isFeatureSupportedForVersion(LedgerCryptoProviderFeature.MULTI_ASSET)) {
+        throw Error(Errors.LedgerMultiAssetsNotSupported)
+      }
+    })
   }
 
   const ledgerSignTx = async (
     txAux: _TxAux, signingFiles: HwSigningData[], network: Network, changeOutputFiles: HwSigningData[],
   ): Promise<LedgerWitness[]> => {
+    ensureFirmwareSupportsParams(txAux)
     const { paymentSigningFiles, stakeSigningFiles } = filterSigningFiles(signingFiles)
     const inputs = txAux.inputs.map((input, i) => prepareInput(input, getSigningPath(paymentSigningFiles, i)))
     const outputs = txAux.outputs.map(
