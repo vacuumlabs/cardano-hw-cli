@@ -121,11 +121,11 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
   })
 
   const prepareChangeOutput = (
-    amountStr: string,
+    amount: BigInt,
     changeOutput: _AddressParameters,
     tokenBundle: LedgerAssetGroup[],
   ): LedgerTxOutputTypeAddressParams => ({
-    amountStr,
+    amountStr: `${amount}`,
     tokenBundle,
     addressTypeNibble: changeOutput.addressType,
     spendingPath: changeOutput.paymentPath,
@@ -138,14 +138,14 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     network: Network,
   ): LedgerOutput => {
     const changeAddress = getChangeAddress(changeOutputFiles, output.address, network)
-    const amountStr = `${output.coins}`
+    const amount = output.coins
     const tokenBundle = prepareTokenBundle(output.tokenBundle)
 
     if (changeAddress && !changeAddress.address.compare(output.address)) {
-      return prepareChangeOutput(amountStr, changeAddress, tokenBundle)
+      return prepareChangeOutput(amount, changeAddress, tokenBundle)
     }
     return {
-      amountStr,
+      amountStr: `${output.coins}`,
       tokenBundle,
       addressHex: output.address.toString('hex'),
     }
@@ -287,10 +287,10 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     }
   }
 
-  const prepareTtl = (ttl?: BigInt) => (ttl && ttl.toString())
+  const prepareTtl = (ttl?: BigInt): string | null => (ttl != null ? ttl.toString() : null)
 
-  const prepareValidityIntervalStart = (validityIntervalStart?: BigInt) => (
-    validityIntervalStart && validityIntervalStart.toString()
+  const prepareValidityIntervalStart = (validityIntervalStart?: BigInt): string | null => (
+    validityIntervalStart != null ? validityIntervalStart.toString() : null
   )
 
   const ensureFirmwareSupportsParams = (txAux: _TxAux) => {
@@ -339,7 +339,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
       ttl,
       certificates,
       withdrawals,
-      undefined,
+      null,
       validityIntervalStart,
     )
     if (response.txHashHex !== txAux.getId()) {
