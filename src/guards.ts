@@ -8,34 +8,34 @@ import {
 
 const cbor = require('borc')
 
-export const isEra = (test: any): test is CardanoEra => Object.values(CardanoEra).includes(test)
+export const isEra = (value: any): value is CardanoEra => Object.values(CardanoEra).includes(value)
 
-export const isCborHex = (test: any): test is CborHex => {
+export const isCborHex = (value: any): value is CborHex => {
   try {
-    cbor.decode(test)
+    cbor.decode(value)
     return true
   } catch (e) {
     return false
   }
 }
 
-const isString = (test: any): test is string => test && typeof test === 'string'
+const isString = (value: any): value is string => value && typeof value === 'string'
 
 export const isBIP32Path = (
-  test: any,
-): test is BIP32Path => Array.isArray(test)
-  && test.every((element) => Number.isInteger(element))
+  value: any,
+): value is BIP32Path => Array.isArray(value)
+  && value.every((element) => Number.isInteger(element))
 
 export const isHwSigningData = (
-  test: any,
-): test is HwSigningData => isBIP32Path(test.path) && isString(test.cborXPubKeyHex)
+  value: any,
+): value is HwSigningData => isBIP32Path(value.path) && isString(value.cborXPubKeyHex)
 
 export const isTxBodyData = (
-  test: any,
-): test is TxBodyData => isEra(test.era) && isCborHex(test.cborHex)
+  value: any,
+): value is TxBodyData => isEra(value.era) && isCborHex(value.cborHex)
 
 export const isArrayOfType = <T>(
-  test: any,
-  valueGuard: (test: any) => boolean,
-): test is T[] => Array.isArray(test)
-  && (test as any[]).every((value) => valueGuard(value))
+  value: any,
+  valueGuard: (item: any) => boolean,
+): value is T[] => Array.isArray(value)
+  && (value as any[]).every((item) => valueGuard(item))
