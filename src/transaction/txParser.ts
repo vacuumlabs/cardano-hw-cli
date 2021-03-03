@@ -239,25 +239,25 @@ const parseFee = (fee: any): Lovelace => {
   return BigInt(fee)
 }
 
-const parseTtl = (ttl: any): BigInt | undefined => {
-  if (ttl && !isUint64(ttl)) {
+const parseTtl = (ttl: any): BigInt | null => {
+  if (ttl != null && !isUint64(ttl)) {
     throw Error(Errors.TTLParseError)
   }
-  return ttl && BigInt(ttl)
+  return ttl != null ? BigInt(ttl) : null
 }
 
-const parseValidityIntervalStart = (validityIntervalStart: any): BigInt | undefined => {
-  if (validityIntervalStart && !isUint64(validityIntervalStart)) {
+const parseValidityIntervalStart = (validityIntervalStart: any): BigInt | null => {
+  if (validityIntervalStart != null && !isUint64(validityIntervalStart)) {
     throw Error(Errors.ValidityIntervalStartParseError)
   }
-  return validityIntervalStart && BigInt(validityIntervalStart)
+  return validityIntervalStart != null ? BigInt(validityIntervalStart) : null
 }
 
-const parseMetaDataHash = (metaDataHash: any): Buffer | undefined => {
-  if (metaDataHash && !Buffer.isBuffer(metaDataHash)) {
+const parseMetaDataHash = (metaDataHash: any): Buffer | null => {
+  if (metaDataHash != null && !Buffer.isBuffer(metaDataHash)) {
     throw Error(Errors.MetaDataHashParseError)
   }
-  return metaDataHash
+  return metaDataHash || null
 }
 
 const parseUnsignedTx = ([txBody, meta]: _UnsignedTxDecoded): _UnsignedTxParsed => {
@@ -287,7 +287,7 @@ const parseUnsignedTx = ([txBody, meta]: _UnsignedTxDecoded): _UnsignedTxParsed 
     metaDataHash,
     meta,
     validityIntervalStart,
-    // mint, // unsupported in current version
+    mint: null, // unsupported in current version
   }
 }
 

@@ -125,13 +125,13 @@ export type _UnsignedTxParsed = {
   inputs: _Input[],
   outputs: _Output[],
   fee: Lovelace,
-  ttl?: BigInt,
+  ttl: BigInt | null,
   certificates: _Certificate[],
   withdrawals: _Withdrawal[],
-  metaDataHash?: Buffer,
+  metaDataHash: Buffer | null,
   meta: Buffer | null,
-  validityIntervalStart?: BigInt,
-  mint?: _MultiAsset,
+  validityIntervalStart: BigInt | null,
+  mint: _MultiAsset | null,
 }
 
 export type TxWitnessByron = [

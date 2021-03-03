@@ -308,10 +308,10 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     }
   }
 
-  const prepareTtl = (ttl?: BigInt): string | null => (ttl != null ? ttl.toString() : null)
+  const prepareTtl = (ttl: BigInt | null): string | null => ttl && ttl.toString()
 
-  const prepareValidityIntervalStart = (validityIntervalStart?: BigInt): string | null => (
-    validityIntervalStart != null ? validityIntervalStart.toString() : null
+  const prepareValidityIntervalStart = (validityIntervalStart: BigInt | null): string | null => (
+    validityIntervalStart && validityIntervalStart.toString()
   )
 
   const ensureFirmwareSupportsParams = (txAux: _TxAux) => {
