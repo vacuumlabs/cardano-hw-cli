@@ -212,7 +212,7 @@ export type TxMultiAsset = Map<Buffer, TxAsset>
 
 export type TxOutput = [
   Buffer,
-  number | [number, TxMultiAsset],
+  BigInt | [BigInt, TxMultiAsset],
 ]
 
 export type TxStakingKeyRegistrationCert = [
