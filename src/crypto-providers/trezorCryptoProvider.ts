@@ -151,19 +151,16 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
 
   const prepareTokenBundle = (
     multiAssets: _MultiAsset[],
-  ): TrezorMultiAsset | undefined => {
-    const tokenBundle = multiAssets.map(({ policyId, assets }) => {
-      const tokenAmounts = assets.map(({ assetName, amount }) => ({
-        assetNameBytes: assetName.toString('hex'),
-        amount: amount.toString(),
-      }))
-      return {
-        policyId: policyId.toString('hex'),
-        tokenAmounts,
-      }
-    })
-    return tokenBundle.length > 0 ? tokenBundle : undefined
-  }
+  ): TrezorMultiAsset => multiAssets.map(({ policyId, assets }) => {
+    const tokenAmounts = assets.map(({ assetName, amount }) => ({
+      assetNameBytes: assetName.toString('hex'),
+      amount: amount.toString(),
+    }))
+    return {
+      policyId: policyId.toString('hex'),
+      tokenAmounts,
+    }
+  })
 
   const prepareChangeOutput = (
     lovelaceAmount: BigInt,
