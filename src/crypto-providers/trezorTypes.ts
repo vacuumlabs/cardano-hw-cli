@@ -28,10 +28,10 @@ export type TrezorToken = {
 
 export type TrezorAsset = {
   policyId: string,
-  tokenAmounts: Array<TrezorToken>
+  tokenAmounts: TrezorToken[]
 }
 
-export type TrezorMultiAsset = Array<TrezorAsset>
+export type TrezorMultiAsset = TrezorAsset[]
 
 export type TrezorOutput =
   | {
@@ -87,7 +87,7 @@ export type TrezorPoolParameters = {
 
 export type TrezorTxCertificate = {
   type: number
-  path?: Array<number>
+  path?: number[]
   pool?: string
   poolParameters?: TrezorPoolParameters
 }

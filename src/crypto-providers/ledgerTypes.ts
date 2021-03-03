@@ -58,8 +58,8 @@ export type LedgerPoolParams = {
   costStr: string,
   margin: LedgerMargin,
   rewardAccountHex: string,
-  poolOwners: Array<LedgerPoolOwnerParams>,
-  relays: Array<LedgerRelayParams>,
+  poolOwners: LedgerPoolOwnerParams[],
+  relays: LedgerRelayParams[],
   metadata: LedgerPoolMetadataParams
 }
 
@@ -90,18 +90,18 @@ export type LedgerToken = {
 
 export type LedgerAssetGroup = {
   policyIdHex: string,
-  tokens: Array<LedgerToken>
+  tokens: LedgerToken[]
 }
 
 export type LedgerTxOutputTypeAddress = {
   amountStr: string,
-  tokenBundle: Array<LedgerAssetGroup>,
+  tokenBundle: LedgerAssetGroup[],
   addressHex: string
 }
 
 export type LedgerTxOutputTypeAddressParams = {
   amountStr: string,
-  tokenBundle: Array<LedgerAssetGroup>,
+  tokenBundle: LedgerAssetGroup[],
   addressTypeNibble: number,
   spendingPath: BIP32Path,
   stakingPath?: BIP32Path,

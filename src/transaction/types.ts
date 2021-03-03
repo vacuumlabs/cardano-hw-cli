@@ -105,8 +105,8 @@ export type _StakepoolRegistrationCert = {
   cost: Lovelace,
   margin: _Margin, // tagged
   rewardAddress: Buffer,
-  poolOwnersPubKeyHashes: Array<Buffer>,
-  relays: Array<_PoolRelay>,
+  poolOwnersPubKeyHashes: Buffer[],
+  relays: _PoolRelay[],
   metadata: _PoolMetadataParams,
 }
 
@@ -262,7 +262,7 @@ export type TxStakepoolRegistrationCert = [
     },
   },
   Buffer,
-  Array<Buffer>,
+  Buffer[],
   any,
   [string, Buffer],
 ]

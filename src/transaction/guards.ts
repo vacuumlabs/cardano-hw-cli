@@ -153,8 +153,8 @@ export const isUnsignedTxDecoded = (
 ): value is _UnsignedTxDecoded => {
   if (Array.isArray(value)) {
     const txBody = value[0]
-    const validKeys = Object.values(TxBodyKeys).filter(Number.isInteger) as Array<number>
-    const txBodyKeys: Array<number> = Array.from(txBody.keys())
+    const validKeys = Object.values(TxBodyKeys).filter(Number.isInteger) as number[]
+    const txBodyKeys: number[] = Array.from(txBody.keys())
     return txBodyKeys.every((key) => validKeys.includes(key))
   }
   return false
