@@ -2,6 +2,16 @@
 
 This guide will walk you through registering a stake pool with a hardware wallet. Make sure you are well aware of [staking in Cardano](https://cardano.org/stake-pool-delegation) and [stake pool operations](https://docs.cardano.org/en/latest/getting-started/stake-pool-operators/index.html). Thorough documentation of how to register a staking pool in steps without a hardware wallet can be found [here](https://docs.cardano.org/projects/cardano-node/en/latest/stake-pool-operations/node_keys.html). It contains all the details, implications and explanations. We will reference it in further steps and give general overview of what is going on in each major step.
 
+## Stake pool registration (as an owner) limitations
+
+HW wallets support signing of stake pool registration certificates only when providing pool owner signatures. In the general case, the transaction may contain external inputs (e.g. belonging to the pool operator) and Ledger is not able verify whether they are actually external or not, so if we allowed signing the transaction with a spending key, there is the risk of losing funds from an input that the user did not intend to spend from. Moreover there is the risk of inadvertedly signing a withdrawal in the transaction if there's any. To mitigate those risks, Ledger has special validation rules for stake pool registration transactions. The validation rules are the following:
+
+1. The transaction must not contain any other certificates, not even another stake pool registration
+2. The transaction must not contain any withdrawals
+3. The transaction inputs must all be external, i.e. path must be either undefined or null
+4. Exactly one owner should be passed as a staking path and the rest of owners should be passed as bech32-encoded reward addresses
+
+
 ## Create pool keys
 
 These commands create stake pool keys - cold, VRF, KES. The process is identical with the official documentation found [here](https://docs.cardano.org/projects/cardano-node/en/latest/stake-pool-operations/node_keys.html). All of these keys will be required for further steps and for running a block producing node, therefore keep them very secure and do not share them with anyone.
