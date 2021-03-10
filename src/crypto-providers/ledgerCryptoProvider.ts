@@ -372,6 +372,10 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     validityIntervalStart && validityIntervalStart.toString()
   )
 
+  const prepareMetaDataHashHex = (metaDataHash: Buffer | null): string | null => (
+    metaDataHash && metaDataHash.toString('hex')
+  )
+
   const ensureFirmwareSupportsParams = (txAux: _TxAux, signingFiles: HwSigningData[]) => {
     if (txAux.ttl == null && !isFeatureSupportedForVersion(LedgerCryptoProviderFeature.OPTIONAL_TTL)) {
       throw Error(Errors.LedgerOptionalTTLNotSupported)
@@ -421,6 +425,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     const withdrawals = txAux.withdrawals.map(
       (withdrawal) => prepareWithdrawal(withdrawal, stakeSigningFiles),
     )
+    const metaDataHashHex = prepareMetaDataHashHex(txAux.metaDataHash)
 
     const response = await ledger.signTransaction(
       network.networkId,
@@ -431,7 +436,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
       ttl,
       certificates,
       withdrawals,
-      null,
+      metaDataHashHex,
       validityIntervalStart,
     )
     if (response.txHashHex !== txAux.getId()) {
