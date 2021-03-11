@@ -61,6 +61,8 @@ import { removeNullFields } from '../util'
 import { TREZOR_VERSIONS } from './constants'
 import { KesVKey, OpCertIssueCounter, SignedOpCertCborHex } from '../opCert/opCert'
 
+const cbor = require('borc')
+
 // using require to suppress type errors from trezor-connect
 const TrezorConnect = require('trezor-connect').default
 
@@ -315,6 +317,13 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     validityIntervalStart && validityIntervalStart.toString()
   )
 
+  const prepareMetaDataHex = (metaData: Buffer | null): string | null => {
+    if (Array.isArray(metaData)) {
+      throw Error(Errors.TrezorUnsupportedMetaData)
+    }
+    return metaData && cbor.encode(metaData).toString('hex')
+  }
+
   const ensureFirmwareSupportsParams = (txAux: _TxAux) => {
     if (txAux.ttl == null && !isFeatureSupportedForVersion(TrezorCryptoProviderFeature.OPTIONAL_TTL)) {
       throw Error(Errors.TrezorOptionalTTLNotSupported)
@@ -359,6 +368,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     const withdrawals = txAux.withdrawals.map(
       (withdrawal: _Withdrawal) => prepareWithdrawal(withdrawal, stakeSigningFiles),
     )
+    const metaDataHex = prepareMetaDataHex(txAux.meta)
 
     const response = await TrezorConnect.cardanoSignTransaction(removeNullFields({
       inputs,
@@ -370,6 +380,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
       networkId: network.networkId,
       certificates,
       withdrawals,
+      metadata: metaDataHex,
     }))
 
     if (!response.success) {
