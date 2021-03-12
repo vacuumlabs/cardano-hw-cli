@@ -7,6 +7,7 @@ import {
   TxDelegationCert,
   TxCertificateKeys,
   TxStakepoolRegistrationCert,
+  TxStakepoolRetirementCert,
   TxMultiHostNameRelay,
   TxSingleHostIPRelay,
   TxSingleHostNameRelay,
@@ -113,6 +114,7 @@ const isMargin = (_value: any) => {
     && Number.isInteger(denominator)
 }
 
+// TODO should be renamed to isPoolMetadata to avoid potential confusion with tx metadata
 const isMetaData = (value: any) => {
   if (value === null) return true
   if (!Array.isArray(value) || value.length !== 2) return false
@@ -146,6 +148,23 @@ export const isStakepoolRegistrationCert = (
     && isArrayOfType<Buffer>(poolOwnersPubKeyHashes, Buffer.isBuffer)
     && Array.isArray(relays)
     && isMetaData(metadata)
+}
+
+export const isStakepoolRetirementCert = (
+  value: any,
+): value is TxStakepoolRetirementCert => {
+  if (!Array.isArray(value) || value.length !== 3) return false
+  const [
+    type,
+    poolKeyHash,
+    retirementEpoch,
+  ] = value
+  return type === TxCertificateKeys.STAKEPOOL_RETIREMENT
+    && Buffer.isBuffer(poolKeyHash)
+    // TODO not checked elsewhere; make 28 a named constant
+    // and perhaps have a function for checking fixed-length buffer
+    && poolKeyHash.length === 28
+    && isUint64(retirementEpoch)
 }
 
 export const isUnsignedTxDecoded = (

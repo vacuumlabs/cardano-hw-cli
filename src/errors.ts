@@ -34,6 +34,7 @@ const enum Errors {
   TxStakingKeyDeregistrationCertParseError = 'Failed to parse staking key deregistration certificate',
   TxDelegationCertParseError = 'Failed to parse delegation certificate',
   TxStakepoolRegistrationCertParseError = 'Failed to parse stakepool registration certificate',
+  TxStakepoolRetirementCertParseError = 'Failed to parse stakepool retirement certificate',
   TxSingleHostIPRelayParseError = 'Failed to parse single host IP relay',
   TxSingleHostNameRelayParseError = 'Failed to parse single host name relay',
   TxMultiHostNameRelayParseError = 'Failed to parse multi host name relay',

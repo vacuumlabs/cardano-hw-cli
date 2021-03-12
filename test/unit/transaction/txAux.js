@@ -6,6 +6,7 @@ function testTxHashAndParsing(tx) {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { getId, unsignedTxDecoded, ...parsedTx } = TxAux(tx.unsignedCborHex)
   const txHashHex = getId()
+
   it('Should parse tx', () => {
     assert.deepStrictEqual(parsedTx, tx.parsed)
   })

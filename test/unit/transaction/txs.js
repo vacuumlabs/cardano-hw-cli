@@ -255,6 +255,40 @@ const transactions = {
       validityIntervalStart: null,
     },
   },
+  TxWithPoolRetirementCertificate: {
+    /*
+    * txBody: // TODO
+    */
+    unsignedCborHex: '82a500818258201af8fa0b754ff99253d983894e63a2b09cbb56c833ba18c3384210163f63dcfc00018182582b82d818582183581c9e1c71de652ec8b85fec296f0685ca3988781c94a2e1a5d89d92f45fa0001a0d0c25611a002dd2e802182a030a04818304581c1d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c186df6',
+    hashHex: '1de14fdd8eadbf3b92e231f764c2817044259a90b81288794467be7df8dad5b3',
+    parsed: {
+      inputs: [
+        {
+          txHash: Buffer.from('1af8fa0b754ff99253d983894e63a2b09cbb56c833ba18c3384210163f63dcfc', 'hex'),
+          outputIndex: 0,
+        },
+      ],
+      outputs: [
+        {
+          address: Buffer.from('82d818582183581c9e1c71de652ec8b85fec296f0685ca3988781c94a2e1a5d89d92f45fa0001a0d0c2561', 'hex'),
+          coins: BigInt(3003112),
+          tokenBundle: [],
+        },
+      ],
+      fee: BigInt(42),
+      ttl: BigInt(10),
+      certificates: [{
+        type: 4,
+        poolKeyHash: Buffer.from('1d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c', 'hex'), // TODO replace with 1853'/1852'/0'/0' or so
+        retirementEpoch: BigInt(109),
+      }],
+      withdrawals: [],
+      metaDataHash: null,
+      mint: null,
+      meta: null,
+      validityIntervalStart: null,
+    },
+  },
   TxWithMultiAssets: {
     /*
     * txBody: 82a50082825820a2218c7738c374fa68fed428bf28447f550c3c33cb92a5bd06e2b62f3777953900825820ade4616f96066ab24f49dcd4adbcae9ae83750d34e4620a49d737d4a66835d6400018282583900bf63a166d9c10d85e4fd3401de03907e232e7707218c3bfd5a570d7acab53e9efebb49bafb4e74d675c2d682dd8e402f15885fb6d1bc0023821a0095b050a2581c0b1bda00e69de8d554eeafe22b04541fbb2ff89a61d12049f55ba688a14a6669727374617373657404581c95a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39a24a66697273746173736574044b7365636f6e646173736574048258390014c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c1a0035476f021a0002e630031a0097fa40081a0089c970f6

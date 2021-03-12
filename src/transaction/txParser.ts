@@ -4,6 +4,7 @@ import {
   isDelegationCert,
   isUint64,
   isStakepoolRegistrationCert,
+  isStakepoolRetirementCert,
   isStakingKeyDeregistrationCert,
   isTxInput,
   isTxMultiHostNameRelay,
@@ -20,6 +21,7 @@ import {
   _StakingKeyRegistrationCert,
   _StakingKeyDeregistrationCert,
   _StakepoolRegistrationCert,
+  _StakepoolRetirementCert,
   _Withdrawal,
   _UnsignedTxDecoded,
   _UnsignedTxParsed,
@@ -205,6 +207,20 @@ const parseTxCerts = (txCertificates: any[]): _Certificate[] => {
     })
   }
 
+  const stakepoolRetirementCertParser = (
+    txCertificate: any,
+  ): _StakepoolRetirementCert => {
+    if (!isStakepoolRetirementCert(txCertificate)) {
+      throw Error(Errors.TxStakepoolRetirementCertParseError)
+    }
+    const [type, poolKeyHash, retirementEpoch] = txCertificate
+    return ({
+      type,
+      poolKeyHash,
+      retirementEpoch: BigInt(retirementEpoch),
+    })
+  }
+
   const parseTxCert = (cert: any) => {
     switch (cert[0]) {
       case TxCertificateKeys.STAKING_KEY_REGISTRATION:
@@ -215,6 +231,8 @@ const parseTxCerts = (txCertificates: any[]): _Certificate[] => {
         return delegationCertParser(cert)
       case TxCertificateKeys.STAKEPOOL_REGISTRATION:
         return stakepoolRegistrationCertParser(cert)
+      case TxCertificateKeys.STAKEPOOL_RETIREMENT:
+        return stakepoolRetirementCertParser(cert)
       default:
         throw Error(Errors.UnsupportedCertificateTypeError)
     }
