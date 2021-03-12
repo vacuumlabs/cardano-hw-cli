@@ -19,6 +19,9 @@ import {
   TxCertificateKeys,
   _Withdrawal,
   _StakepoolRegistrationCert,
+  // TODO let's avoid these endless imports
+  // TODO what about using something like tx.StakepoolRetirementCert?
+  _StakepoolRetirementCert,
   _DelegationCert,
   _StakingKeyDeregistrationCert,
   _StakingKeyRegistrationCert,
@@ -46,6 +49,7 @@ import {
   LedgerOutput,
   LedgerPoolOwnerParams,
   LedgerPoolParams,
+  LedgerPoolRetirementParams,
   LedgerRelayParams,
   LedgerSingleHostIPRelay,
   LedgerSingleHostNameRelay,
@@ -259,6 +263,23 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     }
   }
 
+  // TODO we use both StakePool and Stakepool in names
+  const prepareStakePoolRetirementCert = (
+    cert: _StakepoolRetirementCert,
+    stakeSigningFiles: HwSigningData[], // TODO JM: the name seems inappropriate
+  ): LedgerCertificate => {
+    const poolKeyPath = findSigningPath(cert.poolKeyHash, stakeSigningFiles)
+    if (!poolKeyPath) throw Error(Errors.MissingSigningFileForCertificateError)
+    const poolRetirementParams: LedgerPoolRetirementParams = {
+      poolKeyPath,
+      retirementEpochStr: cert.retirementEpoch.toString(),
+    }
+    return {
+      type: cert.type,
+      poolRetirementParams,
+    }
+  }
+
   const prepareCertificate = (
     certificate: _Certificate, stakeSigningFiles: HwSigningData[],
   ): LedgerCertificate => {
@@ -271,6 +292,8 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
         return prepareDelegationCert(certificate, stakeSigningFiles)
       case TxCertificateKeys.STAKEPOOL_REGISTRATION:
         return prepareStakePoolRegistrationCert(certificate, stakeSigningFiles)
+      case TxCertificateKeys.STAKEPOOL_RETIREMENT:
+        return prepareStakePoolRetirementCert(certificate, stakeSigningFiles)
       default:
         throw Error(Errors.UnknownCertificateError)
     }

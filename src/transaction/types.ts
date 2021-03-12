@@ -20,6 +20,7 @@ export const enum TxCertificateKeys {
   STAKING_KEY_DEREGISTRATION = 1,
   DELEGATION = 2,
   STAKEPOOL_REGISTRATION = 3,
+  STAKEPOOL_RETIREMENT = 4,
 }
 
 export type Lovelace = BigInt
@@ -93,7 +94,7 @@ export type _PoolMetadataParams = null | {
 }
 
 export type _Margin = {
-  numerator: number,
+  numerator: number, // TODO why are these not BigInts?
   denominator: number,
 }
 
@@ -110,11 +111,18 @@ export type _StakepoolRegistrationCert = {
   metadata: _PoolMetadataParams,
 }
 
+export type _StakepoolRetirementCert = {
+  type: TxCertificateKeys.STAKEPOOL_RETIREMENT,
+  poolKeyHash: Buffer,
+  retirementEpoch: BigInt,
+}
+
 export type _Certificate =
   | _StakingKeyRegistrationCert
   | _StakingKeyDeregistrationCert
   | _DelegationCert
   | _StakepoolRegistrationCert
+  | _StakepoolRetirementCert
 
 export type _Withdrawal = {
   address: Buffer,
@@ -253,7 +261,7 @@ export type TxStakepoolRegistrationCert = [
   TxCertificateKeys.STAKEPOOL_REGISTRATION,
   Buffer,
   Buffer,
-  number,
+  number, // TODO some of these numbers around here should be BigInt
   number,
   {
     value: {
@@ -265,6 +273,12 @@ export type TxStakepoolRegistrationCert = [
   Buffer[],
   any,
   [string, Buffer],
+]
+
+export type TxStakepoolRetirementCert = [
+  TxCertificateKeys.STAKEPOOL_RETIREMENT,
+  Buffer,
+  BigInt,
 ]
 
 export type TxWithdrawal = Map<Buffer, Lovelace>

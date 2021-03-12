@@ -63,11 +63,17 @@ export type LedgerPoolParams = {
   metadata: LedgerPoolMetadataParams
 }
 
+export type LedgerPoolRetirementParams = {
+  poolKeyPath: BIP32Path,
+  retirementEpochStr: string,
+}
+
 export type LedgerCertificate = {
   type: number,
   path?: BIP32Path,
   poolKeyHashHex?: string,
   poolRegistrationParams?: LedgerPoolParams,
+  poolRetirementParams?: LedgerPoolRetirementParams,
 }
 
 export const enum LedgerCryptoProviderFeature {
