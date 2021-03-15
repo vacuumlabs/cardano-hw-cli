@@ -92,7 +92,11 @@ cardano-cli shelley stake-address build \
 
 creates a reward address, where all the pool rewards will go. Pool operator must then manually distribute these rewards between all the pool owners, if there are multiple of them.
 
-The staking key (`stake.vkey`) can either be managed from cardano-cli or cardano-hw-cli, and of course, the corresponding CLI then should be used to sign the transaction to withdraw the respective rewards. Also note that the reward address does not have to be witnessed when registering the stake pool, so you don't have to provide the corresponding staking signing key when registering the stake pool unless it's bound to an owner as well.
+The staking key (`stake.vkey`) can either be managed from cardano-cli or cardano-hw-cli, and of course, the corresponding CLI then should be used to sign the transaction to withdraw the respective rewards.
+
+If you prefer, you can also manage your staking key/reward address from a UI-based wallet, e.g. Adalite, see this blog for a visual tutorial: https://adalite.medium.com/cardano-stake-pool-owners-hw-support-6d9278dba0ba
+
+Also note that the reward address does not have to be witnessed when registering the stake pool, so you don't have to provide the corresponding staking signing key when registering the stake pool unless it's bound to an owner as well.
 
 Make sure you understand the structure and limitations of the stake pool's metadata and the stake pool registration certificate described [here](https://docs.cardano.org/projects/cardano-node/en/latest/stake-pool-operations/register_stakepool.html). It is crucial in the following blocks of commands.
 
@@ -249,4 +253,3 @@ cardano-cli shelley transaction assemble \
 ```
 cardano-cli shelley transaction submit --tx-file tx.signed --mainnet
 ```
-
