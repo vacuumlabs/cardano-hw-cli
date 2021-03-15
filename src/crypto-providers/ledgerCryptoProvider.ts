@@ -62,7 +62,8 @@ import {
   findSigningPath,
   getChangeAddress,
   getSigningPath,
-  isShelleyPath,
+  PathTypes,
+  classifyPath,
   getAddressAttributes,
   rewardAddressToPubKeyHash,
   ipv4ToString,
@@ -368,16 +369,19 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
       throw Error(Errors.MissingHwSigningDataAtPathError)
     }
 
+    const isByronPath = (path: number[]) => classifyPath(path) === PathTypes.PATH_WALLET_SPENDING_KEY_BYRON
+
     const byronWitnesses = ledgerWitnesses
-      .filter((witness) => !isShelleyPath(witness.path))
+      .filter((witness) => isByronPath(witness.path))
       .map((witness) => {
         const { cborXPubKeyHex } = getSigningFileDataByPath(witness.path)
         const { pubKey, chainCode } = XPubKey(cborXPubKeyHex)
         return TxByronWitness(pubKey, witness.signature, chainCode, {})
       })
 
+    // TODO should be properly checked is the witness path is valid?
     const shelleyWitnesses = ledgerWitnesses
-      .filter((witness) => isShelleyPath(witness.path))
+      .filter((witness) => !isByronPath(witness.path))
       .map((witness) => {
         const { cborXPubKeyHex } = getSigningFileDataByPath(witness.path)
         const { pubKey } = XPubKey(cborXPubKeyHex)

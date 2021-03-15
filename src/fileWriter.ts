@@ -1,5 +1,5 @@
 import { HARDENED_THRESHOLD } from './constants'
-import { isStakingPath } from './crypto-providers/util'
+import { classifyPath, PathTypes } from './crypto-providers/util'
 import {
   SignedTxCborHex,
   SignedTxOutput,
@@ -58,11 +58,31 @@ const PathOutput = (path: BIP32Path): string => path
   .map((value) => (value >= HARDENED_THRESHOLD ? `${value - HARDENED_THRESHOLD}H` : `${value}`))
   .join('/')
 
+const pathTypeDescription = (path: number[]): string => {
+  switch (classifyPath(path)) {
+    case PathTypes.PATH_POOL_COLD_KEY:
+      return 'PoolCold'
+
+    // TODO what about these two cases?
+    case PathTypes.PATH_WALLET_ACCOUNT:
+    case PathTypes.PATH_INVALID:
+    default:
+      throw Error('unsuitable path, FIX IT')
+
+    case PathTypes.PATH_WALLET_SPENDING_KEY_BYRON:
+    case PathTypes.PATH_WALLET_SPENDING_KEY_SHELLEY:
+      return 'Payment'
+
+    case PathTypes.PATH_WALLET_STAKING_KEY:
+      return 'Stake'
+  }
+}
+
 const HwSigningKeyOutput = (xPubKey: XPubKeyHex, path: BIP32Path): HwSigningOutput => {
-  const type = isStakingPath(path) ? 'Stake' : 'Payment'
+  const typeDesc = pathTypeDescription(path)
   return {
-    type: `${type}HWSigningFileShelley_ed25519`,
-    description: `${type} Hardware Signing File`,
+    type: `${typeDesc}HWSigningFileShelley_ed25519`,
+    description: `${typeDesc} Hardware Signing File`,
     path: PathOutput(path),
     cborXPubKeyHex: cbor.encode(Buffer.from(xPubKey, 'hex')).toString('hex'),
   }
@@ -71,10 +91,10 @@ const HwSigningKeyOutput = (xPubKey: XPubKeyHex, path: BIP32Path): HwSigningOutp
 const HwVerificationKeyOutput = (xPubKey: XPubKeyHex, path: BIP32Path): VerificationKeyOutput => {
   // to get pub key also from cbor encoded xpub
   const pubKey = Buffer.from(xPubKey, 'hex').slice(-64).slice(0, 32)
-  const type = isStakingPath(path) ? 'Stake' : 'Payment'
+  const typeDesc = pathTypeDescription(path)
   return {
-    type: `${type}VerificationKeyShelley_ed25519`,
-    description: `${type} Verification Key`,
+    type: `${typeDesc}VerificationKeyShelley_ed25519`,
+    description: `${typeDesc} Verification Key`,
     cborHex: cbor.encode(pubKey).toString('hex'),
   }
 }

@@ -33,9 +33,91 @@ const {
   getBootstrapAddressProtocolMagic,
 } = require('cardano-crypto.js')
 
-const isShelleyPath = (path: number[]) => path[0] - HARDENED_THRESHOLD === 1852
+enum PathTypes {
+  // hd wallet account
+  PATH_WALLET_ACCOUNT,
 
-const isStakingPath = (path: number[]) => path[3] === 2
+  // hd wallet address
+  PATH_WALLET_SPENDING_KEY_BYRON,
+  PATH_WALLET_SPENDING_KEY_SHELLEY,
+
+  // hd wallet reward adress, withdrawal witness, pool owner
+  PATH_WALLET_STAKING_KEY,
+
+  // pool cold key in pool registrations and retirements
+  PATH_POOL_COLD_KEY,
+
+  // not one of the above
+  PATH_INVALID,
+}
+
+const classifyPath = (path: number[]) => {
+  if (path.length < 3) return PathTypes.PATH_INVALID
+
+  const HD = HARDENED_THRESHOLD
+
+  if (path[0] === 1853 + HD) {
+    // cold keys
+    if (path.length !== 4) return PathTypes.PATH_INVALID
+    if (path[1] !== 1815 + HD) return PathTypes.PATH_INVALID
+    if (path[2] !== 0 + HD) return PathTypes.PATH_INVALID
+    if (path[3] < HD) return PathTypes.PATH_INVALID
+
+    return PathTypes.PATH_POOL_COLD_KEY
+  }
+
+  if (path[0] === 44 + HD) {
+    if (path[1] !== 1815 + HD) return PathTypes.PATH_INVALID
+
+    if (path.length === 3) {
+      return PathTypes.PATH_WALLET_ACCOUNT
+    }
+
+    if (path.length !== 5) {
+      return PathTypes.PATH_INVALID
+    }
+
+    switch (path[3]) {
+      case 0:
+      case 1:
+        return PathTypes.PATH_WALLET_SPENDING_KEY_BYRON
+
+      default:
+        return PathTypes.PATH_INVALID
+    }
+  }
+
+  if (path[0] === 1852 + HD) {
+    if (path[1] !== 1815 + HD) {
+      return PathTypes.PATH_INVALID
+    }
+
+    if (path.length === 3) {
+      return PathTypes.PATH_WALLET_ACCOUNT
+    }
+
+    if (path.length !== 5) {
+      return PathTypes.PATH_INVALID
+    }
+
+    switch (path[3]) {
+      case 0:
+      case 1:
+        return PathTypes.PATH_WALLET_SPENDING_KEY_SHELLEY
+
+      case 2:
+        if (path[4] === 0) {
+          return PathTypes.PATH_WALLET_STAKING_KEY
+        }
+        return PathTypes.PATH_INVALID
+
+      default:
+        return PathTypes.PATH_INVALID
+    }
+  }
+
+  return PathTypes.PATH_INVALID
+}
 
 const encodeAddress = (address: Buffer): string => {
   const addressType = getAddressType(address)
@@ -188,9 +270,11 @@ const _packBootStrapAddress = (
 const _packBaseAddress = (
   changeOutputFiles: HwSigningData[], network: Network,
 ): _AddressParameters | null => {
+  const isStakingPath = (path: number[]) => classifyPath(path) === PathTypes.PATH_WALLET_STAKING_KEY
   const stakePathFile = changeOutputFiles.find(({ path }) => isStakingPath(path))
   const paymentPathFile = changeOutputFiles.find(({ path }) => !isStakingPath(path))
   if (!stakePathFile || !paymentPathFile) return null
+
   const { pubKey: stakePubKey } = XPubKey(stakePathFile.cborXPubKeyHex)
   const { pubKey: paymentPubKey } = XPubKey(paymentPathFile.cborXPubKeyHex)
   const address: Buffer = packBaseAddress(
@@ -295,8 +379,8 @@ const isDeviceVersionGTE = (
   )
 
 export {
-  isShelleyPath,
-  isStakingPath,
+  PathTypes,
+  classifyPath,
   validateSigning,
   validateWitnessing,
   validateKeyGenInputs,
