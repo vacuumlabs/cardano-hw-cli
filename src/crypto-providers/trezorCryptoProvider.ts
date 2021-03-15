@@ -268,7 +268,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
       pledge: `${cert.pledge}`,
       cost: `${cert.cost}`,
       margin,
-      rewardAccount: encodeAddress(cert.rewardAddress),
+      rewardAccount: encodeAddress(cert.rewardAccount),
       owners,
       relays,
       metadata,

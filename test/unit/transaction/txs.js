@@ -214,7 +214,7 @@ const transactions = {
           pledge: BigInt(50000000000),
           cost: BigInt(340000000),
           margin: { numerator: 3, denominator: 100 },
-          rewardAddress: Buffer.from('e1794d9b3408c9fb67b950a48a0690f070f117e9978f7fc1d120fc58ad', 'hex'),
+          rewardAccount: Buffer.from('e1794d9b3408c9fb67b950a48a0690f070f117e9978f7fc1d120fc58ad', 'hex'),
           poolOwnersPubKeyHashes: [
             Buffer.from('1d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c', 'hex'),
             Buffer.from('794d9b3408c9fb67b950a48a0690f070f117e9978f7fc1d120fc58ad', 'hex'),

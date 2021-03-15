@@ -51,13 +51,18 @@ export type LedgerMargin = {
   denominatorStr: string,
 }
 
+export type LedgerPoolRewardAccount = {
+  path?: BIP32Path,
+  rewardAccountHex?: string,
+}
+
 export type LedgerPoolParams = {
   poolKeyHashHex: string,
   vrfKeyHashHex: string,
   pledgeStr: string,
   costStr: string,
   margin: LedgerMargin,
-  rewardAccountHex: string,
+  rewardAccount: LedgerPoolRewardAccount,
   poolOwners: LedgerPoolOwnerParams[],
   relays: LedgerRelayParams[],
   metadata: LedgerPoolMetadataParams
