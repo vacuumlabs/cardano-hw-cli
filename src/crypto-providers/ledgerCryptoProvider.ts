@@ -251,7 +251,9 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
         numeratorStr: `${cert.margin.numerator}`,
         denominatorStr: `${cert.margin.denominator}`,
       },
-      rewardAccountHex: cert.rewardAddress.toString('hex'),
+      rewardAccount: {
+        rewardAccountHex: cert.rewardAccount.toString('hex'),
+      },
       poolOwners: owners,
       relays: prepareRelays(cert.relays),
       metadata,

@@ -186,7 +186,7 @@ const parseTxCerts = (txCertificates: any[]): _Certificate[] => {
       pledge,
       cost,
       { value },
-      rewardAddress,
+      rewardAccount,
       poolOwnersPubKeyHashes,
       relays,
       metadata,
@@ -198,7 +198,7 @@ const parseTxCerts = (txCertificates: any[]): _Certificate[] => {
       pledge: BigInt(pledge),
       cost: BigInt(cost),
       margin: { numerator: value[0], denominator: value[1] }, // tagged
-      rewardAddress,
+      rewardAccount,
       poolOwnersPubKeyHashes,
       relays: relays.map(parseRelay),
       metadata: metadata

@@ -105,7 +105,7 @@ export type _StakepoolRegistrationCert = {
   pledge: Lovelace,
   cost: Lovelace,
   margin: _Margin, // tagged
-  rewardAddress: Buffer,
+  rewardAccount: Buffer,
   poolOwnersPubKeyHashes: Buffer[],
   relays: _PoolRelay[],
   metadata: _PoolMetadataParams,
