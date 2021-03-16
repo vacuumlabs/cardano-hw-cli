@@ -114,8 +114,7 @@ const isMargin = (_value: any) => {
     && Number.isInteger(denominator)
 }
 
-// TODO should be renamed to isPoolMetadata to avoid potential confusion with tx metadata
-const isMetaData = (value: any) => {
+const isPoolMetaData = (value: any) => {
   if (value === null) return true
   if (!Array.isArray(value) || value.length !== 2) return false
   const [metadataUrl, metadataHash] = value
@@ -147,7 +146,7 @@ export const isStakepoolRegistrationCert = (
     && Buffer.isBuffer(rewardAddress)
     && isArrayOfType<Buffer>(poolOwnersPubKeyHashes, Buffer.isBuffer)
     && Array.isArray(relays)
-    && isMetaData(metadata)
+    && isPoolMetaData(metadata)
 }
 
 export const isStakepoolRetirementCert = (
