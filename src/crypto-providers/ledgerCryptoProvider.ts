@@ -243,7 +243,9 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
       }
       : null
     const poolRegistrationParams: LedgerPoolParams = {
-      poolKeyHashHex: cert.poolKeyHash.toString('hex'),
+      poolKey: {
+        keyHashHex: cert.poolKeyHash.toString('hex'),
+      },
       vrfKeyHashHex: cert.vrfPubKeyHash.toString('hex'),
       pledgeStr: `${cert.pledge}`,
       costStr: `${cert.cost}`,
