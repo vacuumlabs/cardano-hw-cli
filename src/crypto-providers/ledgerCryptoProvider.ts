@@ -62,7 +62,6 @@ import {
   _AddressParameters,
 } from './types'
 import {
-  filterSigningFiles,
   findSigningPath,
   getChangeAddress,
   getSigningPath,
@@ -78,6 +77,13 @@ import {
 const { AddressTypes } = require('cardano-crypto.js')
 const TransportNodeHid = require('@ledgerhq/hw-transport-node-hid').default
 const Ledger = require('@cardano-foundation/ledgerjs-hw-app-cardano').default
+
+// TODO copied from ledgerjs --- perhaps make it public there and just import here?
+const enum SignTxUsecases {
+  SIGN_TX_USECASE_ORDINARY_TX,
+  SIGN_TX_USECASE_POOL_REGISTRATION_OWNER,
+  SIGN_TX_USECASE_POOL_REGISTRATION_OPERATOR,
+}
 
 export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
   const transport = await TransportNodeHid.create()
@@ -106,11 +112,33 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     }
   }
 
-  const prepareInput = (input: _Input, path?: BIP32Path): LedgerInput => ({
-    path,
-    txHashHex: input.txHash.toString('hex'),
-    outputIndex: input.outputIndex,
-  })
+  const determineUsecase = (certificates: _Certificate[], signingFiles: HwSigningData[]) => {
+    const poolRegistrationCert = certificates.find(
+      (cert) => cert.type === TxCertificateKeys.STAKEPOOL_REGISTRATION,
+    ) as _StakepoolRegistrationCert
+
+    if (!poolRegistrationCert) {
+      return SignTxUsecases.SIGN_TX_USECASE_ORDINARY_TX
+    }
+
+    const poolKeyPath = findSigningPath(poolRegistrationCert.poolKeyHash, signingFiles)
+    if (!poolKeyPath) {
+      return SignTxUsecases.SIGN_TX_USECASE_POOL_REGISTRATION_OWNER
+    }
+
+    return SignTxUsecases.SIGN_TX_USECASE_POOL_REGISTRATION_OPERATOR
+  }
+
+  const prepareInput = (usecase: SignTxUsecases, input: _Input, path?: BIP32Path): LedgerInput => {
+    const pathToUse = (usecase === SignTxUsecases.SIGN_TX_USECASE_POOL_REGISTRATION_OWNER)
+      ? undefined // inputs are required to be given without path in this case
+      : path
+    return {
+      path: pathToUse,
+      txHashHex: input.txHash.toString('hex'),
+      outputIndex: input.outputIndex,
+    }
+  }
 
   const prepareTokenBundle = (
     multiAssets: _MultiAsset[],
@@ -180,17 +208,22 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     }
   }
 
+  // TODO revisit this
   const preparePoolOwners = (
-    owners: Buffer[], stakeSigningFiles: HwSigningData[],
+    usecase: SignTxUsecases,
+    owners: Buffer[],
+    stakeSigningFiles: HwSigningData[],
   ): LedgerPoolOwnerParams[] => {
     const poolOwners = owners.map((owner): LedgerPoolOwnerParams => {
       const path = findSigningPath(owner, stakeSigningFiles)
-      return path
+      return path && (usecase === SignTxUsecases.SIGN_TX_USECASE_POOL_REGISTRATION_OWNER)
         ? { stakingPath: path }
         : { stakingKeyHashHex: owner.toString('hex') }
     })
+
     const ownersWithPath = poolOwners.filter((owner) => owner.stakingPath)
     if (ownersWithPath.length > 1) throw Error(Errors.OwnerMultipleTimesInTxError)
+
     return poolOwners
   }
 
@@ -233,19 +266,30 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
   }
 
   const prepareStakePoolRegistrationCert = (
-    cert: _StakepoolRegistrationCert, stakeSigningFiles: HwSigningData[],
+    cert: _StakepoolRegistrationCert, signingFiles: HwSigningData[],
   ): LedgerCertificate => {
-    const owners = preparePoolOwners(cert.poolOwnersPubKeyHashes, stakeSigningFiles)
+    // if path is given, we are signing as pool operator
+    // if keyHashHex is given, we are signing as pool owner
+    const poolKeyPath = findSigningPath(cert.poolKeyHash, signingFiles)
+    const poolKey = (poolKeyPath)
+      ? { path: poolKeyPath }
+      : { keyHashHex: cert.poolKeyHash.toString('hex') }
+
+    const usecase = (poolKeyPath)
+      ? SignTxUsecases.SIGN_TX_USECASE_POOL_REGISTRATION_OPERATOR
+      : SignTxUsecases.SIGN_TX_USECASE_POOL_REGISTRATION_OWNER
+
+    const owners = preparePoolOwners(usecase, cert.poolOwnersPubKeyHashes, signingFiles)
+
     const metadata = cert.metadata
       ? {
         metadataUrl: cert.metadata.metadataUrl,
         metadataHashHex: cert.metadata.metadataHash.toString('hex'),
       }
       : null
+
     const poolRegistrationParams: LedgerPoolParams = {
-      poolKey: {
-        keyHashHex: cert.poolKeyHash.toString('hex'),
-      },
+      poolKey,
       vrfKeyHashHex: cert.vrfPubKeyHash.toString('hex'),
       pledgeStr: `${cert.pledge}`,
       costStr: `${cert.cost}`,
@@ -253,7 +297,8 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
         numeratorStr: `${cert.margin.numerator}`,
         denominatorStr: `${cert.margin.denominator}`,
       },
-      rewardAccount: {
+      rewardAccount: { // TODO add option to use path here
+        // (replace changeOutputKeyFileData from --change-output-key-file with --hw-signing-file-auxiliary)
         rewardAccountHex: cert.rewardAccount.toString('hex'),
       },
       poolOwners: owners,
@@ -270,14 +315,15 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
   // TODO we use both StakePool and Stakepool in names
   const prepareStakePoolRetirementCert = (
     cert: _StakepoolRetirementCert,
-    stakeSigningFiles: HwSigningData[], // TODO JM: the name seems inappropriate
+    signingFiles: HwSigningData[],
   ): LedgerCertificate => {
-    const poolKeyPath = findSigningPath(cert.poolKeyHash, stakeSigningFiles)
+    const poolKeyPath = findSigningPath(cert.poolKeyHash, signingFiles)
     if (!poolKeyPath) throw Error(Errors.MissingSigningFileForCertificateError)
     const poolRetirementParams: LedgerPoolRetirementParams = {
       poolKeyPath,
       retirementEpochStr: cert.retirementEpoch.toString(),
     }
+
     return {
       type: cert.type,
       poolRetirementParams,
@@ -285,19 +331,19 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
   }
 
   const prepareCertificate = (
-    certificate: _Certificate, stakeSigningFiles: HwSigningData[],
+    certificate: _Certificate, signingFiles: HwSigningData[],
   ): LedgerCertificate => {
     switch (certificate.type) {
       case TxCertificateKeys.STAKING_KEY_REGISTRATION:
-        return prepareStakingKeyRegistrationCert(certificate, stakeSigningFiles)
+        return prepareStakingKeyRegistrationCert(certificate, signingFiles)
       case TxCertificateKeys.STAKING_KEY_DEREGISTRATION:
-        return prepareStakingKeyRegistrationCert(certificate, stakeSigningFiles)
+        return prepareStakingKeyRegistrationCert(certificate, signingFiles)
       case TxCertificateKeys.DELEGATION:
-        return prepareDelegationCert(certificate, stakeSigningFiles)
+        return prepareDelegationCert(certificate, signingFiles)
       case TxCertificateKeys.STAKEPOOL_REGISTRATION:
-        return prepareStakePoolRegistrationCert(certificate, stakeSigningFiles)
+        return prepareStakePoolRegistrationCert(certificate, signingFiles)
       case TxCertificateKeys.STAKEPOOL_RETIREMENT:
-        return prepareStakePoolRetirementCert(certificate, stakeSigningFiles)
+        return prepareStakePoolRetirementCert(certificate, signingFiles)
       default:
         throw Error(Errors.UnknownCertificateError)
     }
@@ -321,7 +367,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     validityIntervalStart && validityIntervalStart.toString()
   )
 
-  const ensureFirmwareSupportsParams = (txAux: _TxAux) => {
+  const ensureFirmwareSupportsParams = (txAux: _TxAux, signingFiles: HwSigningData[]) => {
     if (txAux.ttl == null && !isFeatureSupportedForVersion(LedgerCryptoProviderFeature.OPTIONAL_TTL)) {
       throw Error(Errors.LedgerOptionalTTLNotSupported)
     }
@@ -337,25 +383,37 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
         throw Error(Errors.LedgerMultiAssetsNotSupported)
       }
     })
+
+    // TODO revisit, use a switch?
+    const usecase = determineUsecase(txAux.certificates, signingFiles)
+    if ((usecase === SignTxUsecases.SIGN_TX_USECASE_POOL_REGISTRATION_OPERATOR)
+      && !isFeatureSupportedForVersion(LedgerCryptoProviderFeature.POOL_REGISTRATION_OPERATOR)
+    ) {
+      throw Error(Errors.PoolRegistrationAsOperatorNotSupported)
+    }
   }
 
   const ledgerSignTx = async (
     txAux: _TxAux, signingFiles: HwSigningData[], network: Network, changeOutputFiles: HwSigningData[],
   ): Promise<LedgerWitness[]> => {
-    ensureFirmwareSupportsParams(txAux)
-    const { paymentSigningFiles, stakeSigningFiles } = filterSigningFiles(signingFiles)
-    const inputs = txAux.inputs.map((input, i) => prepareInput(input, getSigningPath(paymentSigningFiles, i)))
+    ensureFirmwareSupportsParams(txAux, signingFiles)
+
+    const usecase = determineUsecase(txAux.certificates, signingFiles)
+
+    const inputs = txAux.inputs.map(
+      (input, i) => prepareInput(usecase, input, getSigningPath(signingFiles, i)),
+    )
     const outputs = txAux.outputs.map(
       (output) => prepareOutput(output, changeOutputFiles, network),
     )
     const certificates = txAux.certificates.map(
-      (certificate) => prepareCertificate(certificate, stakeSigningFiles),
+      (certificate) => prepareCertificate(certificate, signingFiles),
     )
     const fee = `${txAux.fee}`
     const ttl = prepareTtl(txAux.ttl)
     const validityIntervalStart = prepareValidityIntervalStart(txAux.validityIntervalStart)
     const withdrawals = txAux.withdrawals.map(
-      (withdrawal) => prepareWithdrawal(withdrawal, stakeSigningFiles),
+      (withdrawal) => prepareWithdrawal(withdrawal, signingFiles),
     )
 
     const response = await ledger.signTransaction(

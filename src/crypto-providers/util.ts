@@ -147,23 +147,31 @@ const getSigningPath = (
 
 const filterSigningFiles = (
   signingFiles: HwSigningData[],
-): {paymentSigningFiles: HwSigningData[], stakeSigningFiles: HwSigningData[]} => {
+): {
+    paymentSigningFiles: HwSigningData[],
+    stakeSigningFiles: HwSigningData[],
+    poolColdSigningFiles: HwSigningData[]
+} => {
   const paymentSigningFiles = signingFiles.filter(
     (signingFile) => signingFile.type === HwSigningType.Payment,
   )
   const stakeSigningFiles = signingFiles.filter(
     (signingFile) => signingFile.type === HwSigningType.Stake,
   )
+  const poolColdSigningFiles = signingFiles.filter(
+    (signingFile) => signingFile.type === HwSigningType.PoolCold,
+  )
   return {
     paymentSigningFiles,
     stakeSigningFiles,
+    poolColdSigningFiles,
   }
 }
 
 const findSigningPath = (
-  certPubKeyHash: Buffer, stakingSigningFiles: HwSigningData[],
+  certPubKeyHash: Buffer, signingFiles: HwSigningData[],
 ): BIP32Path | undefined => {
-  const signingFile = stakingSigningFiles.find((file) => {
+  const signingFile = signingFiles.find((file) => {
     const { pubKey } = XPubKey(file.cborXPubKeyHex)
     const pubKeyHash = getPubKeyBlake2b224Hash(pubKey)
     return !Buffer.compare(pubKeyHash, certPubKeyHash)
@@ -177,59 +185,100 @@ const txHasStakePoolRegistrationCert = (
   ({ type }) => type === TxCertificateKeys.STAKEPOOL_REGISTRATION,
 )
 
-const validateTx = (
-  txAux: _TxAux, paymentSigningFiles: HwSigningData[], stakeSigningFiles: HwSigningData[],
+// validates if the given signing files correspond to the tx body
+// TODO not entirely, e.g. we don't count unique witnesses, and don't verify there is an input included
+const validateTxWithoutPoolRegistration = (
+  txAux: _TxAux, signingFiles: HwSigningData[],
 ): void => {
-  if (!txAux.inputs.length) throw Error(Errors.MissingInputError)
-  if (!txAux.outputs.length) throw Error(Errors.MissingOutputError)
-  if (paymentSigningFiles.length > txAux.inputs.length) {
-    throw Error(Errors.TooManySigningFilesError)
+  const { paymentSigningFiles, stakeSigningFiles, poolColdSigningFiles } = filterSigningFiles(signingFiles)
+
+  if (paymentSigningFiles.length === 0) {
+    throw Error(Errors.MissingPaymentSigningFileError)
   }
-  const requireStakingSigningFile = !!(txAux.certificates.length + txAux.withdrawals.length)
-  if (
-    requireStakingSigningFile && !stakeSigningFiles.length
-  ) throw Error(Errors.MissingStakingSigningFileError)
+  if (paymentSigningFiles.length > txAux.inputs.length) {
+    throw Error(Errors.TooManyPaymentSigningFilesError)
+  }
+
+  let numStakeWitnesses = txAux.withdrawals.length
+  let numPoolColdWitnesses = 0
+  txAux.certificates.forEach((cert) => {
+    switch (cert.type) {
+      case TxCertificateKeys.STAKING_KEY_REGISTRATION:
+      case TxCertificateKeys.STAKING_KEY_DEREGISTRATION:
+      case TxCertificateKeys.DELEGATION:
+        numStakeWitnesses += 1
+        break
+
+      case TxCertificateKeys.STAKEPOOL_RETIREMENT:
+        numPoolColdWitnesses += 1
+        break
+
+      default:
+        break
+    }
+  })
+
+  if (numStakeWitnesses > 0 && (stakeSigningFiles.length === 0)) {
+    throw Error(Errors.MissingStakeSigningFileError)
+  }
+  if (stakeSigningFiles.length > numStakeWitnesses) {
+    throw Error(Errors.TooManyStakeSigningFilesError)
+  }
+
+  if (numPoolColdWitnesses > 0 && (poolColdSigningFiles.length === 0)) {
+    throw Error(Errors.MissingPoolColdSigningFileError)
+  }
+  if (poolColdSigningFiles.length > numPoolColdWitnesses) {
+    throw Error(Errors.TooManyPoolColdSigningFilesError)
+  }
 }
 
+// validates if the given signing files correspond to the tx body
 const validateTxWithPoolRegistration = (
-  txAux: _TxAux,
-  paymentSigningFiles: HwSigningData[],
-  stakeSigningFiles: HwSigningData[],
+  txAux: _TxAux, signingFiles: HwSigningData[],
 ): void => {
-  if (!txAux.inputs.length) throw Error(Errors.MissingInputError)
-  if (!txAux.outputs.length) throw Error(Errors.MissingOutputError)
-  if (txAux.certificates.length !== 1) throw Error(Errors.MultipleCertificatesWithPoolRegError)
-  if (txAux.withdrawals.length) throw Error(Errors.WithdrawalIncludedWithPoolRegError)
-  if (paymentSigningFiles.length) throw Error(Errors.PaymentFileInlucedWithPoolRegError)
-  if (stakeSigningFiles.length === 0) throw Error(Errors.MissingStakingSigningFileError)
-  if (stakeSigningFiles.length > 1) throw Error(Errors.MultipleStakingSigningFilesWithPoolRegError)
+  const { paymentSigningFiles, stakeSigningFiles, poolColdSigningFiles } = filterSigningFiles(signingFiles)
+
+  // TODO needs revisiting
+  if (!txAux.inputs.length) {
+    throw Error(Errors.MissingInputError)
+  }
+  if (txAux.certificates.length !== 1) {
+    throw Error(Errors.MultipleCertificatesWithPoolRegError)
+  }
+  if (txAux.withdrawals.length) {
+    throw Error(Errors.WithdrawalIncludedWithPoolRegError)
+  }
+
+  if (paymentSigningFiles.length !== 0) {
+    throw Error(Errors.PaymentFileIncludedWithPoolRegError)
+  }
+  if (stakeSigningFiles.length + poolColdSigningFiles.length === 0) {
+    throw Error(Errors.MissingStakeSigningFileError)
+  }
+  if (stakeSigningFiles.length + poolColdSigningFiles.length > 1) {
+    throw Error(Errors.MultipleStakingSigningFilesWithPoolRegError)
+  }
 }
 
 const validateWitnessing = (
   txAux: _TxAux, signingFiles: HwSigningData[],
 ): void => {
-  if (signingFiles.length > 1) throw Error(Errors.TooManySigningFilesError)
-  const {
-    paymentSigningFiles,
-    stakeSigningFiles,
-  } = filterSigningFiles(signingFiles)
   if (!txHasStakePoolRegistrationCert(txAux.certificates)) {
     throw Error(Errors.CantWitnessTxWithoutPoolRegError)
   }
 
-  validateTxWithPoolRegistration(txAux, paymentSigningFiles, stakeSigningFiles)
+  validateTxWithPoolRegistration(txAux, signingFiles)
 }
 
 const validateSigning = (
   txAux: _TxAux, signingFiles: HwSigningData[],
 ): void => {
-  const {
-    paymentSigningFiles,
-    stakeSigningFiles,
-  } = filterSigningFiles(signingFiles)
-  if (txHasStakePoolRegistrationCert(txAux.certificates)) throw Error(Errors.CantSignTxWithPoolRegError)
-  validateTx(txAux, paymentSigningFiles, stakeSigningFiles)
-  if (!paymentSigningFiles.length) throw Error(Errors.MissingPaymentSigningFileError)
+  if (txHasStakePoolRegistrationCert(txAux.certificates)) {
+    throw Error(Errors.CantSignTxWithPoolRegError)
+  }
+
+  validateTxWithoutPoolRegistration(txAux, signingFiles)
 }
 
 const validateKeyGenInputs = (
