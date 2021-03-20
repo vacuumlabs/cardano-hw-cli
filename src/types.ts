@@ -1,14 +1,5 @@
 import { SignedTxOutput, WitnessOutput } from './transaction/types'
-
-export enum CommandType {
-  APP_VERSION = 'version',
-  DEVICE_VERSION = 'device.version',
-  SHOW_ADDRESS = 'address.show',
-  KEY_GEN = 'address.key-gen',
-  VERIFICATION_KEY = 'key.verification-key',
-  SIGN_TRANSACTION = 'transaction.sign',
-  WITNESS_TRANSACTION = 'transaction.witness',
-}
+import { CommandType } from './command-parser/commandParser'
 
 export enum CardanoEra {
   BYRON = 'Byron',

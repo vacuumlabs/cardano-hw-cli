@@ -3,6 +3,17 @@ import { parserConfig } from './parserConfig'
 
 const { ArgumentParser } = require('argparse')
 
+export enum CommandType {
+  APP_VERSION = 'version',
+  DEVICE_VERSION = 'device.version',
+  SHOW_ADDRESS = 'address.show',
+  KEY_GEN = 'address.key-gen',
+  VERIFICATION_KEY = 'key.verification-key',
+  SIGN_TRANSACTION = 'transaction.sign',
+  WITNESS_TRANSACTION = 'transaction.witness',
+  SIGN_OPERATIONAL_CERTIFICATE = 'node.issue-op-cert'
+}
+
 const makeParser = () => {
   const initParser = (parser: any, config: any) => {
     const isCommand = (str: string) => !str.startsWith('--')
