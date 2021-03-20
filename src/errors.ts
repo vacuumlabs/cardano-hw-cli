@@ -5,6 +5,8 @@ const enum Errors {
   InvalidFileTypeError = 'Invalid file type of hw-signing-file',
   InvalidHwSigningFileError = 'Invalid file contents of hw-signing-file',
   InvalidTxBodyFileError = 'Invalid file contents of tx-body-file',
+  InvalidKesVKeyFileError = 'Invalid KES verification key file',
+  InvalidOpCertIssueCounterFileError = 'Invalid operational certificate issue counter file',
   TxSerializationMismatchError = 'Tx serialization mismatch',
   MissingHwSigningDataAtPathError = 'Can not find hw signing data',
   MultipleWitnessesError = 'Multiple witnesses found',
@@ -72,7 +74,8 @@ const enum Errors {
   MetaDataHashParseError = 'Failed to parse transaction, metadata hash is not a Buffer.',
   AssetNameParseError = 'Failed to parse transaction, asset name is not a Buffer.',
   AssetAmountParseError = 'Failed to parse transaction, asset amount is not a valid number.',
-  PolicyIdParseError = 'Failed to parse transaction, multi asset policy id is not a Buffer.'
+  PolicyIdParseError = 'Failed to parse transaction, multi asset policy id is not a Buffer.',
+  UnsupportedCryptoProviderCall = 'The call is not supported by the chosen crypto provider',
 }
 
 export {

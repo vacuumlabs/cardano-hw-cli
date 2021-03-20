@@ -168,13 +168,25 @@ const filterSigningFiles = (
   }
 }
 
-const findSigningPath = (
+// TOOD rename arguemnt, what about buffer length?
+const findSigningPathForKeyHash = (
   certPubKeyHash: Buffer, signingFiles: HwSigningData[],
 ): BIP32Path | undefined => {
   const signingFile = signingFiles.find((file) => {
     const { pubKey } = XPubKey(file.cborXPubKeyHex)
     const pubKeyHash = getPubKeyBlake2b224Hash(pubKey)
     return !Buffer.compare(pubKeyHash, certPubKeyHash)
+  })
+  return signingFile?.path
+}
+
+// TOOD rename arguemnt, what about buffer length?
+const findSigningPathForKey = (
+  key: Buffer, signingFiles: HwSigningData[],
+): BIP32Path | undefined => {
+  const signingFile = signingFiles.find((file) => {
+    const { pubKey } = XPubKey(file.cborXPubKeyHex)
+    return !Buffer.compare(pubKey, key)
   })
   return signingFile?.path
 }
@@ -435,7 +447,8 @@ export {
   validateKeyGenInputs,
   getSigningPath,
   filterSigningFiles,
-  findSigningPath,
+  findSigningPathForKeyHash,
+  findSigningPathForKey,
   encodeAddress,
   getChangeAddress,
   getAddressAttributes,

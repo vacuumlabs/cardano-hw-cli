@@ -3,15 +3,16 @@ import {
   parseAddressFile,
   parseHwSigningFile,
   parseNetwork,
-  parsePath,
+  parseBIP32Path,
   parseTxBodyFile,
+  parseKesVKeyFile,
 } from './parsers'
 
 const keyGenArgs = {
   '--path': {
     required: true,
     action: 'append',
-    type: (path: string) => parsePath(path),
+    type: (path: string) => parseBIP32Path(path),
     dest: 'paths',
     help: 'Derivation path to the key to sign with.',
   },
@@ -73,8 +74,8 @@ const txSigningArgs = {
 const opCertIssueCounterPathArgs = {
   '--operational-certificate-issue-counter': {
     required: true,
-    dest: 'issueCounter',
-    type: (path: string) => parseOpCertIssueCounterFile(path), // TODO no, we need the path itself and parse it only later
+    dest: 'issueCounterFile',
+    type: (path: string) => path, // TODO create a type for file path and validate it here?
     help: 'Input filepath of the issue counter file.',
   },
 }
@@ -134,18 +135,18 @@ export const parserConfig = {
   // ===============  commands taken from cardano-cli interface  ===============
   'address': {
     // TODO JM: I don't like this endpoint here since it also supports staking keys
-    // and bulk export unlike in cardano-cli; let's move it under 'key' above
+    // and bulk export unlike in cardano-cli; let's move it near/under 'key' above
     'key-gen': keyGenArgs,
 
     'show': { // hw-specific subpath
       '--payment-path': {
         required: true,
-        type: (path: string) => parsePath(path),
+        type: (path: string) => parseBIP32Path(path),
         dest: 'paymentPath',
         help: 'Payment derivation path.',
       },
       '--staking-path': {
-        type: (path: string) => parsePath(path),
+        type: (path: string) => parseBIP32Path(path),
         dest: 'stakingPath',
         help: 'Stake derivation path.',
       },

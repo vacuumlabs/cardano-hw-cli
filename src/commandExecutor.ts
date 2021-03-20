@@ -1,10 +1,12 @@
 import { CryptoProvider } from './crypto-providers/types'
 import {
-  TxSignedOutput,
+  constructSignedTxOutput,
   write,
-  HwSigningKeyOutput,
-  HwVerificationKeyOutput,
-  TxWitnessOutput,
+  constructHwSigningKeyOutput,
+  constructVerificationKeyOutput,
+  constructTxWitnessOutput,
+  constructSignedOpCertOutput,
+  constructOpCertIssueCounterOutput,
 } from './fileWriter'
 import { TxAux } from './transaction/transaction'
 import {
@@ -13,11 +15,13 @@ import {
   ParsedTransactionSignArguments,
   ParsedTransactionWitnessArguments,
   ParsedVerificationKeyArguments,
+  ParsedOpCertArguments,
 } from './types'
 import { LedgerCryptoProvider } from './crypto-providers/ledgerCryptoProvider'
 import { TrezorCryptoProvider } from './crypto-providers/trezorCryptoProvider'
 import { validateSigning, validateWitnessing, validateKeyGenInputs } from './crypto-providers/util'
 import { Errors } from './errors'
+import { parseOpCertIssueCounterFile } from './command-parser/parsers'
 
 const promiseTimeout = <T> (promise: Promise<T>, ms: number): Promise<T> => {
   const timeout: Promise<T> = new Promise((resolve, reject) => {
@@ -65,16 +69,16 @@ const CommandExecutor = async () => {
   ) => {
     validateKeyGenInputs(paths, hwSigningFiles, verificationKeyFiles)
     const xPubKeys = await cryptoProvider.getXPubKeys(paths)
-    xPubKeys.forEach((xPubKey, i) => write(hwSigningFiles[i], HwSigningKeyOutput(xPubKey, paths[i])))
+    xPubKeys.forEach((xPubKey, i) => write(hwSigningFiles[i], constructHwSigningKeyOutput(xPubKey, paths[i])))
     xPubKeys.forEach((xPubKey, i) => write(
-      verificationKeyFiles[i], HwVerificationKeyOutput(xPubKey, paths[i]),
+      verificationKeyFiles[i], constructVerificationKeyOutput(xPubKey, paths[i]),
     ))
   }
 
   const createVerificationKeyFile = (
     { verificationKeyFile, hwSigningFileData }: ParsedVerificationKeyArguments,
   ) => {
-    write(verificationKeyFile, HwVerificationKeyOutput(
+    write(verificationKeyFile, constructVerificationKeyOutput(
       hwSigningFileData.cborXPubKeyHex,
       hwSigningFileData.path,
     ))
@@ -86,7 +90,7 @@ const CommandExecutor = async () => {
     const signedTx = await cryptoProvider.signTx(
       txAux, args.hwSigningFileData, args.network, args.changeOutputKeyFileData,
     )
-    write(args.outFile, TxSignedOutput(args.txBodyFileData.era, signedTx))
+    write(args.outFile, constructSignedTxOutput(args.txBodyFileData.era, signedTx))
   }
 
   const createTxWitness = async (args: ParsedTransactionWitnessArguments) => {
@@ -95,7 +99,28 @@ const CommandExecutor = async () => {
     const txWitness = await cryptoProvider.witnessTx(
       txAux, args.hwSigningFileData[0], args.network, args.changeOutputKeyFileData,
     )
-    write(args.outFile, TxWitnessOutput(args.txBodyFileData.era, txWitness))
+    write(args.outFile, constructTxWitnessOutput(args.txBodyFileData.era, txWitness))
+  }
+
+  const createSignedOperationalCertificate = async (args: ParsedOpCertArguments) => {
+    const issueCounter = parseOpCertIssueCounterFile(args.issueCounterFile)
+
+    const signedCertCborHex = await cryptoProvider.signOperationalCertificate(
+      args.kesVKey, args.kesPeriod, issueCounter, args.hwSigningFileData,
+    )
+
+    console.log('a1')
+
+    write(args.outFile, constructSignedOpCertOutput(signedCertCborHex))
+
+    console.log('a2')
+
+    // TODO how to increment BigInt?
+    issueCounter.counter = BigInt(issueCounter.counter) + BigInt(1)
+    console.log('a3')
+
+    write(args.issueCounterFile, constructOpCertIssueCounterOutput(issueCounter))
+    console.log('a4')
   }
 
   return {
@@ -105,6 +130,7 @@ const CommandExecutor = async () => {
     createVerificationKeyFile,
     createSignedTx,
     createTxWitness,
+    createSignedOperationalCertificate,
   }
 }
 
