@@ -1,5 +1,8 @@
 import { Errors } from '../errors'
 import {
+  KesVKey, OpCertIssueCounter, OpCertSigned, SignedOpCertCborHex,
+} from '../opCert/opCert'
+import {
   TxByronWitness,
   TxShelleyWitness,
   TxSigned,
@@ -62,7 +65,8 @@ import {
   _AddressParameters,
 } from './types'
 import {
-  findSigningPath,
+  findSigningPathForKey,
+  findSigningPathForKeyHash,
   getChangeAddress,
   getSigningPath,
   PathTypes,
@@ -121,7 +125,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
       return SignTxUsecases.SIGN_TX_USECASE_ORDINARY_TX
     }
 
-    const poolKeyPath = findSigningPath(poolRegistrationCert.poolKeyHash, signingFiles)
+    const poolKeyPath = findSigningPathForKeyHash(poolRegistrationCert.poolKeyHash, signingFiles)
     if (!poolKeyPath) {
       return SignTxUsecases.SIGN_TX_USECASE_POOL_REGISTRATION_OWNER
     }
@@ -188,7 +192,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     cert: _StakingKeyDeregistrationCert | _StakingKeyRegistrationCert,
     stakeSigningFiles: HwSigningData[],
   ): LedgerCertificate => {
-    const path = findSigningPath(cert.pubKeyHash, stakeSigningFiles)
+    const path = findSigningPathForKeyHash(cert.pubKeyHash, stakeSigningFiles)
     if (!path) throw Error(Errors.MissingSigningFileForCertificateError)
     return {
       type: cert.type,
@@ -199,7 +203,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
   const prepareDelegationCert = (
     cert: _DelegationCert, stakeSigningFiles: HwSigningData[],
   ): LedgerCertificate => {
-    const path = findSigningPath(cert.pubKeyHash, stakeSigningFiles)
+    const path = findSigningPathForKeyHash(cert.pubKeyHash, stakeSigningFiles)
     if (!path) throw Error(Errors.MissingSigningFileForCertificateError)
     return {
       type: cert.type,
@@ -215,7 +219,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     stakeSigningFiles: HwSigningData[],
   ): LedgerPoolOwnerParams[] => {
     const poolOwners = owners.map((owner): LedgerPoolOwnerParams => {
-      const path = findSigningPath(owner, stakeSigningFiles)
+      const path = findSigningPathForKeyHash(owner, stakeSigningFiles)
       return path && (usecase === SignTxUsecases.SIGN_TX_USECASE_POOL_REGISTRATION_OWNER)
         ? { stakingPath: path }
         : { stakingKeyHashHex: owner.toString('hex') }
@@ -270,7 +274,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
   ): LedgerCertificate => {
     // if path is given, we are signing as pool operator
     // if keyHashHex is given, we are signing as pool owner
-    const poolKeyPath = findSigningPath(cert.poolKeyHash, signingFiles)
+    const poolKeyPath = findSigningPathForKeyHash(cert.poolKeyHash, signingFiles)
     const poolKey = (poolKeyPath)
       ? { path: poolKeyPath }
       : { keyHashHex: cert.poolKeyHash.toString('hex') }
@@ -317,7 +321,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     cert: _StakepoolRetirementCert,
     signingFiles: HwSigningData[],
   ): LedgerCertificate => {
-    const poolKeyPath = findSigningPath(cert.poolKeyHash, signingFiles)
+    const poolKeyPath = findSigningPathForKeyHash(cert.poolKeyHash, signingFiles)
     if (!poolKeyPath) throw Error(Errors.MissingSigningFileForCertificateError)
     const poolRetirementParams: LedgerPoolRetirementParams = {
       poolKeyPath,
@@ -353,7 +357,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     withdrawal: _Withdrawal, stakeSigningFiles: HwSigningData[],
   ): LedgerWithdrawal => {
     const pubKeyHash = rewardAddressToPubKeyHash(withdrawal.address)
-    const path = findSigningPath(pubKeyHash, stakeSigningFiles)
+    const path = findSigningPathForKeyHash(pubKeyHash, stakeSigningFiles)
     if (!path) throw Error(Errors.MissingSigningFileForWithdrawalError)
     return {
       path,
@@ -465,6 +469,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
       })
 
     // TODO should be properly checked is the witness path is valid?
+    // TODO pool cold key witnesses?
     const shelleyWitnesses = ledgerWitnesses
       .filter((witness) => !isByronPath(witness.path))
       .map((witness) => {
@@ -515,11 +520,43 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     return xPubKeys
   }
 
+  const signOperationalCertificate = async (
+    kesVKey: KesVKey,
+    kesPeriod: BigInt,
+    issueCounter: OpCertIssueCounter,
+    signingFiles: HwSigningData[],
+  ): Promise<SignedOpCertCborHex> => {
+    // TODO  something like   ensureFirmwareSupportsParams(txAux, signingFiles)
+
+    const poolColdKeyPath = findSigningPathForKey(issueCounter.poolColdKey, signingFiles)
+
+    const params = [
+      kesVKey.toString('hex'),
+      kesPeriod.toString(),
+      issueCounter.counter.toString(),
+      poolColdKeyPath,
+    ]
+
+    console.log(params)
+
+    const { operationalCertificateSignatureHex } = await ledger.signOperationalCertificate(
+      ...params,
+    )
+
+    return OpCertSigned(
+      kesVKey,
+      kesPeriod,
+      issueCounter,
+      Buffer.from(operationalCertificateSignatureHex, 'hex'),
+    )
+  }
+
   return {
     getVersion,
     showAddress,
     signTx,
     witnessTx,
     getXPubKeys,
+    signOperationalCertificate,
   }
 }

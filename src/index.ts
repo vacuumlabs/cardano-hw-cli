@@ -1,9 +1,8 @@
 /* eslint-disable no-console */
-import { parse } from './command-parser/commandParser'
+import { CommandType, parse } from './command-parser/commandParser'
 import { parseAppVersion } from './command-parser/parsers'
 import { CommandExecutor } from './commandExecutor'
 import { Errors } from './errors'
-import { CommandType } from './types'
 
 const executeCommand = async (): Promise<void> => {
   const { parser, parsedArgs } = parse(process.argv)
@@ -38,6 +37,9 @@ const executeCommand = async (): Promise<void> => {
       break
     case (CommandType.WITNESS_TRANSACTION):
       await commandExecutor.createTxWitness(parsedArgs)
+      break
+    case (CommandType.SIGN_OPERATIONAL_CERTIFICATE):
+      await commandExecutor.createSignedOperationalCertificate(parsedArgs)
       break
     default:
       throw Error(Errors.UndefinedCommandError)

@@ -1,5 +1,6 @@
 import { SignedTxOutput, WitnessOutput } from './transaction/types'
 import { CommandType } from './command-parser/commandParser'
+import { KesVKey } from './opCert/opCert'
 
 export enum CardanoEra {
   BYRON = 'Byron',
@@ -90,6 +91,15 @@ export type ParsedTransactionWitnessArguments = {
   changeOutputKeyFileData: HwSigningData[],
 }
 
+export type ParsedOpCertArguments = {
+  command: CommandType.SIGN_OPERATIONAL_CERTIFICATE,
+  kesVKey: KesVKey,
+  kesPeriod: BigInt,
+  issueCounterFile: string,
+  hwSigningFileData: HwSigningData[],
+  outFile: string,
+}
+
 export type ParsedArguments =
   | ParsedAppVersionArguments
   | ParsedDeviceVersionArguments
@@ -98,6 +108,7 @@ export type ParsedArguments =
   | ParsedVerificationKeyArguments
   | ParsedTransactionSignArguments
   | ParsedTransactionWitnessArguments
+  | ParsedOpCertArguments
 
 export type HwSigningOutput = {
   type: string,
@@ -112,8 +123,16 @@ export type VerificationKeyOutput = {
   cborHex: CborHex,
 }
 
+// TODO maybe generalize? see also VerificationKeyOutput
+export type OpCertIssueCounterOutput = {
+  type: string,
+  description: string,
+  cborHex: CborHex
+}
+
 export type OutputData =
   | SignedTxOutput
   | WitnessOutput
   | HwSigningOutput
   | VerificationKeyOutput
+  | OpCertIssueCounterOutput

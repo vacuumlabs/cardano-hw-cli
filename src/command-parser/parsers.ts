@@ -1,14 +1,20 @@
 import fsPath from 'path'
 import { HARDENED_THRESHOLD, NETWORKS } from '../constants'
-import { isBIP32Path, isHwSigningData, isTxBodyData } from '../guards'
+import {
+  isBIP32Path, isCborHex, isHwSigningData, isTxBodyData,
+} from '../guards'
 import { Errors } from '../errors'
 import {
   Address,
   BIP32Path,
   CardanoEra,
-  HwSigningData, HwSigningType, TxBodyData,
+  HwSigningData,
+  HwSigningType,
+  TxBodyData,
 } from '../types'
+import { KesVKey, OpCertIssueCounter } from '../opCert/opCert'
 
+const cbor = require('borc')
 const rw = require('rw')
 
 export const parseNetwork = (name: string, protocolMagic?: string) => {
@@ -19,7 +25,7 @@ export const parseNetwork = (name: string, protocolMagic?: string) => {
   }
 }
 
-export const parsePath = (
+export const parseBIP32Path = (
   path: string,
 ): BIP32Path => {
   const parsedPath = path
@@ -39,12 +45,17 @@ export const parseFileTypeMagic = (fileTypeMagic: string, path: string) => {
   if (fileTypeMagic.startsWith('Stake')) {
     return HwSigningType.Stake
   }
+
+  if (fileTypeMagic.startsWith('PoolCold')) { // TODO this string should be a symbolic constant, occurs twice
+    return HwSigningType.PoolCold
+  }
+
   throw Error(Errors.InvalidFileTypeError)
 }
 
 export const parseHwSigningFile = (path: string): HwSigningData => {
   const data = JSON.parse(rw.readFileSync(path, 'utf8'))
-  data.path = parsePath(data.path)
+  data.path = parseBIP32Path(data.path)
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { type: fileTypeMagic, description, ...parsedData } = data
 
@@ -80,4 +91,50 @@ export const parseAppVersion = () => {
     rw.readFileSync(fsPath.resolve(__dirname, '../../package.json'), 'utf8'),
   )
   return { version, commit }
+}
+
+export const parseKesVKeyFile = (path: string): KesVKey => {
+  const data = JSON.parse(rw.readFileSync(path, 'utf8'))
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { type, description, cborHex } = data
+  // TODO ? validate that "type": "KesVerificationKey_ed25519_kes_2^6",
+  // TODO ? validate that "description": "KES Verification Key",
+
+  if (isCborHex(cborHex)) {
+    const decoded = cbor.decode(cborHex)
+    if (decoded instanceof Buffer && decoded.length === 32) {
+      return decoded
+    }
+  }
+
+  throw Error(Errors.InvalidKesVKeyFileError)
+}
+
+export const parseOpCertIssueCounterFile = (path: string): OpCertIssueCounter => {
+  const data = JSON.parse(rw.readFileSync(path, 'utf8'))
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { type, description, cborHex } = data
+
+  if (type !== 'NodeOperationalCertificateIssueCounter') {
+    throw Error(Errors.InvalidOpCertIssueCounterFileError)
+  }
+
+  // TODO what about updating the counter in the file? should we? cardano-cli probably does that
+
+  try {
+    const decoded = cbor.decode(cborHex)
+    if (decoded instanceof Array
+      && decoded.length === 2
+      && decoded[1] instanceof Buffer
+      && decoded[1].length === 32) {
+      return {
+        counter: BigInt(decoded[0]),
+        poolColdKey: decoded[1],
+      }
+    }
+  } catch (e) {
+    // we throw, see below
+  }
+
+  throw Error(Errors.InvalidOpCertIssueCounterFileError)
 }

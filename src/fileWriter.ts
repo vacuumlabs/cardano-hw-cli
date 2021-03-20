@@ -1,5 +1,6 @@
 import { HARDENED_THRESHOLD } from './constants'
 import { classifyPath, PathTypes } from './crypto-providers/util'
+import { OpCertIssueCounter, SignedOpCertCborHex } from './opCert/opCert'
 import {
   SignedTxCborHex,
   SignedTxOutput,
@@ -12,12 +13,14 @@ import {
   BIP32Path,
   CardanoEra,
   HwSigningOutput,
+  OpCertIssueCounterOutput,
   OutputData,
   VerificationKeyOutput,
 } from './types'
 
 const rw = require('rw')
 const cbor = require('borc')
+const { BigNumber } = require('bignumber.js')
 
 const write = (path: string, data: OutputData) => rw.writeFileSync(
   path,
@@ -32,7 +35,7 @@ const cardanoEraToSignedType: {[key in CardanoEra]: string} = {
   [CardanoEra.MARY]: 'Tx MaryEra',
 }
 
-const TxSignedOutput = (era: CardanoEra, signedTxCborHex: SignedTxCborHex): SignedTxOutput => ({
+const constructSignedTxOutput = (era: CardanoEra, signedTxCborHex: SignedTxCborHex): SignedTxOutput => ({
   type: cardanoEraToSignedType[era],
   description: '',
   cborHex: signedTxCborHex,
@@ -45,7 +48,7 @@ const cardanoEraToWitnessType: {[key in CardanoEra]: string} = {
   [CardanoEra.MARY]: 'TxWitness MaryEra',
 }
 
-const TxWitnessOutput = (
+const constructTxWitnessOutput = (
   era: CardanoEra,
   { key, data }: _ByronWitness | _ShelleyWitness,
 ): WitnessOutput => ({
@@ -54,22 +57,21 @@ const TxWitnessOutput = (
   cborHex: cbor.encode([key, data]).toString('hex'),
 })
 
-const PathOutput = (path: BIP32Path): string => path
+const constructBIP32PathOutput = (path: BIP32Path): string => path
   .map((value) => (value >= HARDENED_THRESHOLD ? `${value - HARDENED_THRESHOLD}H` : `${value}`))
   .join('/')
 
-const pathTypeDescription = (path: number[]): string => {
+const bip32PathLabel = (path: number[]): string => {
   switch (classifyPath(path)) {
     case PathTypes.PATH_POOL_COLD_KEY:
-      return 'PoolCold'
+      return 'StakePool'
 
-    // TODO what about these two cases?
+    case PathTypes.PATH_WALLET_SPENDING_KEY_BYRON:
     case PathTypes.PATH_WALLET_ACCOUNT:
     case PathTypes.PATH_INVALID:
     default:
-      throw Error('unsuitable path, FIX IT')
+      throw Error('not implemented')
 
-    case PathTypes.PATH_WALLET_SPENDING_KEY_BYRON:
     case PathTypes.PATH_WALLET_SPENDING_KEY_SHELLEY:
       return 'Payment'
 
@@ -78,31 +80,68 @@ const pathTypeDescription = (path: number[]): string => {
   }
 }
 
-const HwSigningKeyOutput = (xPubKey: XPubKeyHex, path: BIP32Path): HwSigningOutput => {
-  const typeDesc = pathTypeDescription(path)
-  return {
-    type: `${typeDesc}HWSigningFileShelley_ed25519`,
-    description: `${typeDesc} Hardware Signing File`,
-    path: PathOutput(path),
-    cborXPubKeyHex: cbor.encode(Buffer.from(xPubKey, 'hex')).toString('hex'),
+const verificationKeyType = (path: number[]): string => `${bip32PathLabel(path)}VerificationKey_ed25519`
+
+const verificationKeyDescription = (path: number[]): string => {
+  switch (classifyPath(path)) {
+    case PathTypes.PATH_POOL_COLD_KEY:
+      return 'Stake Pool Operator Verification Key'
+
+    case PathTypes.PATH_WALLET_SPENDING_KEY_BYRON:
+    case PathTypes.PATH_WALLET_ACCOUNT:
+    case PathTypes.PATH_INVALID:
+    default:
+      throw Error('not implemented')
+
+    case PathTypes.PATH_WALLET_SPENDING_KEY_SHELLEY:
+      return 'Payment Verification Key'
+
+    case PathTypes.PATH_WALLET_STAKING_KEY:
+      return 'Stake Verification Key'
   }
 }
 
-const HwVerificationKeyOutput = (xPubKey: XPubKeyHex, path: BIP32Path): VerificationKeyOutput => {
+const constructVerificationKeyOutput = (xPubKey: XPubKeyHex, path: BIP32Path): VerificationKeyOutput => {
   // to get pub key also from cbor encoded xpub
   const pubKey = Buffer.from(xPubKey, 'hex').slice(-64).slice(0, 32)
-  const typeDesc = pathTypeDescription(path)
   return {
-    type: `${typeDesc}VerificationKeyShelley_ed25519`,
-    description: `${typeDesc} Verification Key`,
+    type: `${verificationKeyType(path)}`,
+    description: `${verificationKeyDescription(path)}`,
     cborHex: cbor.encode(pubKey).toString('hex'),
   }
 }
 
+const constructHwSigningKeyOutput = (xPubKey: XPubKeyHex, path: BIP32Path): HwSigningOutput => {
+  const label = bip32PathLabel(path)
+  return {
+    type: `${label}HWSigningFileShelley_ed25519`,
+    description: `${label} Hardware Signing File`,
+    path: constructBIP32PathOutput(path),
+    cborXPubKeyHex: cbor.encode(Buffer.from(xPubKey, 'hex')).toString('hex'),
+  }
+}
+
+const constructSignedOpCertOutput = (signedOpCertCborHex: SignedOpCertCborHex): SignedTxOutput => ({
+  type: 'NodeOperationalCertificate',
+  description: '',
+  cborHex: signedOpCertCborHex,
+})
+
+const constructOpCertIssueCounterOutput = (issueCounter: OpCertIssueCounter): OpCertIssueCounterOutput => ({
+  type: 'NodeOperationalCertificateIssueCounter',
+  description: `Next certificate issue number: ${issueCounter.counter.toString()}`,
+  cborHex: cbor.encode([
+    BigNumber(issueCounter.counter),
+    issueCounter.poolColdKey,
+  ]).toString('hex'),
+})
+
 export {
   write,
-  TxSignedOutput,
-  TxWitnessOutput,
-  HwSigningKeyOutput,
-  HwVerificationKeyOutput,
+  constructSignedTxOutput,
+  constructTxWitnessOutput,
+  constructHwSigningKeyOutput,
+  constructVerificationKeyOutput,
+  constructSignedOpCertOutput,
+  constructOpCertIssueCounterOutput,
 }

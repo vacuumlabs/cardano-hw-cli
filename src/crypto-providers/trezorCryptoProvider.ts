@@ -47,7 +47,7 @@ import {
 import {
   encodeAddress,
   filterSigningFiles,
-  findSigningPath,
+  findSigningPathForKeyHash,
   getAddressAttributes,
   getChangeAddress,
   getSigningPath,
@@ -59,6 +59,7 @@ import {
 import { Errors } from '../errors'
 import { removeNullFields } from '../util'
 import { TREZOR_VERSIONS } from './constants'
+import { KesVKey, OpCertIssueCounter, SignedOpCertCborHex } from '../opCert/opCert'
 
 // using require to suppress type errors from trezor-connect
 const TrezorConnect = require('trezor-connect').default
@@ -202,7 +203,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     cert: _StakingKeyRegistrationCert | _StakingKeyDeregistrationCert,
     stakeSigningFiles: HwSigningData[],
   ): TrezorTxCertificate => {
-    const path = findSigningPath(cert.pubKeyHash, stakeSigningFiles)
+    const path = findSigningPathForKeyHash(cert.pubKeyHash, stakeSigningFiles)
     if (!path) throw Error(Errors.MissingSigningFileForCertificateError)
     return {
       type: cert.type,
@@ -213,7 +214,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
   const prepareDelegationCert = (
     cert: _DelegationCert, stakeSigningFiles: HwSigningData[],
   ): TrezorTxCertificate => {
-    const path = findSigningPath(cert.pubKeyHash, stakeSigningFiles)
+    const path = findSigningPathForKeyHash(cert.pubKeyHash, stakeSigningFiles)
     if (!path) throw Error(Errors.MissingSigningFileForCertificateError)
     return {
       type: cert.type,
@@ -226,7 +227,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     owners: Buffer[], stakeSigningFiles: HwSigningData[],
   ): TrezorPoolOwner[] => {
     const poolOwners = owners.map((owner): TrezorPoolOwner => {
-      const path = findSigningPath(owner, stakeSigningFiles)
+      const path = findSigningPathForKeyHash(owner, stakeSigningFiles)
       return path
         ? { stakingKeyPath: path }
         : { stakingKeyHash: owner.toString('hex') }
@@ -300,7 +301,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     withdrawal: _Withdrawal, stakeSigningFiles: HwSigningData[],
   ): TrezorWithdrawal => {
     const pubKeyHash = rewardAddressToPubKeyHash(withdrawal.address)
-    const path = findSigningPath(pubKeyHash, stakeSigningFiles)
+    const path = findSigningPathForKeyHash(pubKeyHash, stakeSigningFiles)
     if (!path) throw Error(Errors.MissingSigningFileForWithdrawalError)
     return {
       path,
@@ -391,12 +392,23 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     return Witness(signedTx)
   }
 
+  const signOperationalCertificate = async (
+    kesVKey: KesVKey,
+    kesPeriod: BigInt,
+    issueCounter: OpCertIssueCounter,
+    signingFile: HwSigningData[],
+  ): Promise<SignedOpCertCborHex> => {
+    // TODO is this the right way to deal with this?
+    throw Error(Errors.UnsupportedCryptoProviderCall)
+  }
+
   return {
     getVersion,
     showAddress,
     witnessTx,
     signTx,
     getXPubKeys,
+    signOperationalCertificate,
   }
 }
 

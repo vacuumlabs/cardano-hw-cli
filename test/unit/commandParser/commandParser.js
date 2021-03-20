@@ -1,6 +1,6 @@
 const assert = require('assert')
-const { parse } = require('../../../src/command-parser/commandParser')
-const { CommandType, CardanoEra, HwSigningType } = require('../../../src/types')
+const { CommandType, parse } = require('../../../src/command-parser/commandParser')
+const { CardanoEra, HwSigningType } = require('../../../src/types')
 const { NETWORKS } = require('../../../src/constants')
 
 const resFolder = 'test/unit/commandParser/res/'
@@ -27,7 +27,7 @@ describe('Command parser', () => {
       hwSigningFiles: ['test/unit/commandParser/res/payment.hwsfile'],
       verificationKeyFiles: ['test/unit/commandParser/res/payment.vkey'],
     }
-    assert.deepEqual(parsedArgs, expectedResult)
+    assert.deepStrictEqual(parsedArgs, expectedResult)
   })
 
   it('Should parse key-verification', () => {
@@ -50,7 +50,7 @@ describe('Command parser', () => {
       },
       verificationKeyFile: 'test/unit/commandParser/res/payment.vkey',
     }
-    assert.deepEqual(parsedArgs, expectedResult)
+    assert.deepStrictEqual(parsedArgs, expectedResult)
   })
 
   it('Should parse sign transaction', () => {
@@ -85,7 +85,7 @@ describe('Command parser', () => {
       outFile: 'test/unit/commandParser/res/tx.signed',
       changeOutputKeyFileData: [],
     }
-    assert.deepEqual(parsedArgs, expectedResult)
+    assert.deepStrictEqual(parsedArgs, expectedResult)
   })
 
   it('Should parse witness transaction', () => {
@@ -119,7 +119,7 @@ describe('Command parser', () => {
       outFile: 'test/unit/commandParser/res/witness.out',
       changeOutputKeyFileData: [],
     }
-    assert.deepEqual(parsedArgs, expectedResult)
+    assert.deepStrictEqual(parsedArgs, expectedResult)
   })
   it('Should parse sign transaction with change', () => {
     const args = pad([
@@ -157,6 +157,6 @@ describe('Command parser', () => {
         cborXPubKeyHex: '5880e0d9c2e5b...7277e7db',
       }],
     }
-    assert.deepEqual(parsedArgs, expectedResult)
+    assert.deepStrictEqual(parsedArgs, expectedResult)
   })
 })

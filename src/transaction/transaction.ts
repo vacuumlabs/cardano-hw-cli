@@ -92,6 +92,7 @@ const Witness = (signedTxCborHex: SignedTxCborHex): _ShelleyWitness | _ByronWitn
   } as _ShelleyWitness | _ByronWitness
 }
 
+// TODO why is this in transaction.ts?
 const XPubKey = (xPubKeyCborHex: XPubKeyCborHex): _XPubKey => {
   const xPubKeyDecoded = cbor.decode(xPubKeyCborHex)
   const pubKey = xPubKeyDecoded.slice(0, 32)
