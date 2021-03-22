@@ -45,8 +45,8 @@ export type ParsedShowAddressArguments = {
   address: Address,
 }
 
-export type ParsedKeyGenArguments = {
-  command: CommandType.KEY_GEN,
+export type ParsedAddressKeyGenArguments = {
+  command: CommandType.ADDRESS_KEY_GEN,
   paths: BIP32Path[],
   hwSigningFiles: string[],
   verificationKeyFiles: string[],
@@ -100,14 +100,23 @@ export type ParsedOpCertArguments = {
   outFile: string,
 }
 
+export type ParsedNodeKeyGenArguments = {
+  command: CommandType.NODE_KEY_GEN,
+  paths: BIP32Path[],
+  verificationKeyFiles: string[],
+  hwSigningFiles: string[],
+  issueCounterFiles: string[],
+}
+
 export type ParsedArguments =
   | ParsedAppVersionArguments
   | ParsedDeviceVersionArguments
   | ParsedShowAddressArguments
-  | ParsedKeyGenArguments
+  | ParsedAddressKeyGenArguments
   | ParsedVerificationKeyArguments
   | ParsedTransactionSignArguments
   | ParsedTransactionWitnessArguments
+  | ParsedNodeKeyGenArguments
   | ParsedOpCertArguments
 
 export type HwSigningOutput = {

@@ -7,6 +7,7 @@ const enum Errors {
   InvalidTxBodyFileError = 'Invalid file contents of tx-body-file',
   InvalidKesVKeyFileError = 'Invalid KES verification key file',
   InvalidOpCertIssueCounterFileError = 'Invalid operational certificate issue counter file',
+  InvalidNodeKeyGenInputsError = 'Invalid node key-gen inputs',
   TxSerializationMismatchError = 'Tx serialization mismatch',
   MissingHwSigningDataAtPathError = 'Can not find hw signing data',
   MultipleWitnessesError = 'Multiple witnesses found',

@@ -11,15 +11,18 @@ import {
 import { TxAux } from './transaction/transaction'
 import {
   ParsedShowAddressArguments,
-  ParsedKeyGenArguments,
+  ParsedAddressKeyGenArguments,
   ParsedTransactionSignArguments,
   ParsedTransactionWitnessArguments,
   ParsedVerificationKeyArguments,
   ParsedOpCertArguments,
+  ParsedNodeKeyGenArguments,
 } from './types'
 import { LedgerCryptoProvider } from './crypto-providers/ledgerCryptoProvider'
 import { TrezorCryptoProvider } from './crypto-providers/trezorCryptoProvider'
-import { validateSigning, validateWitnessing, validateKeyGenInputs } from './crypto-providers/util'
+import {
+  validateSigning, validateWitnessing, validateKeyGenInputs, classifyPath, PathTypes,
+} from './crypto-providers/util'
 import { Errors } from './errors'
 import { parseOpCertIssueCounterFile } from './command-parser/parsers'
 
@@ -65,7 +68,7 @@ const CommandExecutor = async () => {
   }
 
   const createSigningKeyFile = async (
-    { paths, hwSigningFiles, verificationKeyFiles }: ParsedKeyGenArguments,
+    { paths, hwSigningFiles, verificationKeyFiles }: ParsedAddressKeyGenArguments,
   ) => {
     validateKeyGenInputs(paths, hwSigningFiles, verificationKeyFiles)
     const xPubKeys = await cryptoProvider.getXPubKeys(paths)
@@ -102,6 +105,36 @@ const CommandExecutor = async () => {
     write(args.outFile, constructTxWitnessOutput(args.txBodyFileData.era, txWitness))
   }
 
+  const createNodeSigningKeyFiles = async (args: ParsedNodeKeyGenArguments) => {
+    const {
+      paths, hwSigningFiles, verificationKeyFiles, issueCounterFiles,
+    } = args
+    if (hwSigningFiles.length !== paths.length
+      || verificationKeyFiles.length !== paths.length
+      || issueCounterFiles.length !== paths.length) {
+      throw Error(Errors.InvalidNodeKeyGenInputsError)
+    }
+
+    for (let i = 0; i < paths.length; i += 1) {
+      const path = paths[i]
+      if (classifyPath(path) !== PathTypes.PATH_POOL_COLD_KEY) {
+        throw Error(Errors.InvalidNodeKeyGenInputsError)
+      }
+
+      // eslint-disable-next-line no-await-in-loop
+      const xPubKey = (await cryptoProvider.getXPubKeys([path]))[0]
+
+      write(hwSigningFiles[i], constructHwSigningKeyOutput(xPubKey, path))
+      write(verificationKeyFiles[i], constructVerificationKeyOutput(xPubKey, path))
+
+      const issueCounter = {
+        counter: BigInt(1),
+        poolColdKey: Buffer.from(xPubKey, 'hex').slice(-64).slice(0, 32),
+      }
+      write(issueCounterFiles[i], constructOpCertIssueCounterOutput(issueCounter))
+    }
+  }
+
   const createSignedOperationalCertificate = async (args: ParsedOpCertArguments) => {
     const issueCounter = parseOpCertIssueCounterFile(args.issueCounterFile)
 
@@ -123,6 +156,7 @@ const CommandExecutor = async () => {
     createVerificationKeyFile,
     createSignedTx,
     createTxWitness,
+    createNodeSigningKeyFiles,
     createSignedOperationalCertificate,
   }
 }
