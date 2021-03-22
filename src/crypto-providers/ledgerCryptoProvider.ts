@@ -537,8 +537,6 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
       poolColdKeyPath,
     ]
 
-    console.log(params)
-
     const { operationalCertificateSignatureHex } = await ledger.signOperationalCertificate(
       ...params,
     )

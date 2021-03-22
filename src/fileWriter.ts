@@ -17,10 +17,9 @@ import {
   OutputData,
   VerificationKeyOutput,
 } from './types'
+import { encodeCbor } from './util'
 
 const rw = require('rw')
-const cbor = require('borc')
-const { BigNumber } = require('bignumber.js')
 
 const write = (path: string, data: OutputData) => rw.writeFileSync(
   path,
@@ -54,7 +53,7 @@ const constructTxWitnessOutput = (
 ): WitnessOutput => ({
   type: cardanoEraToWitnessType[era],
   description: '',
-  cborHex: cbor.encode([key, data]).toString('hex'),
+  cborHex: encodeCbor([key, data]).toString('hex'),
 })
 
 const constructBIP32PathOutput = (path: BIP32Path): string => path
@@ -107,7 +106,7 @@ const constructVerificationKeyOutput = (xPubKey: XPubKeyHex, path: BIP32Path): V
   return {
     type: `${verificationKeyType(path)}`,
     description: `${verificationKeyDescription(path)}`,
-    cborHex: cbor.encode(pubKey).toString('hex'),
+    cborHex: encodeCbor(pubKey).toString('hex'),
   }
 }
 
@@ -117,7 +116,7 @@ const constructHwSigningKeyOutput = (xPubKey: XPubKeyHex, path: BIP32Path): HwSi
     type: `${label}HWSigningFileShelley_ed25519`,
     description: `${label} Hardware Signing File`,
     path: constructBIP32PathOutput(path),
-    cborXPubKeyHex: cbor.encode(Buffer.from(xPubKey, 'hex')).toString('hex'),
+    cborXPubKeyHex: encodeCbor(Buffer.from(xPubKey, 'hex')).toString('hex'),
   }
 }
 
@@ -130,8 +129,8 @@ const constructSignedOpCertOutput = (signedOpCertCborHex: SignedOpCertCborHex): 
 const constructOpCertIssueCounterOutput = (issueCounter: OpCertIssueCounter): OpCertIssueCounterOutput => ({
   type: 'NodeOperationalCertificateIssueCounter',
   description: `Next certificate issue number: ${issueCounter.counter.toString()}`,
-  cborHex: cbor.encode([
-    BigNumber(issueCounter.counter),
+  cborHex: encodeCbor([
+    issueCounter.counter,
     issueCounter.poolColdKey,
   ]).toString('hex'),
 })

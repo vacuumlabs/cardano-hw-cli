@@ -15,35 +15,18 @@ import {
 } from './types'
 import { isUnsignedTxDecoded } from './guards'
 import { Errors } from '../errors'
+import { decodeCbor, encodeCbor } from '../util'
 
-const cbor = require('borc')
 const { blake2b } = require('cardano-crypto.js')
-
-// eslint-disable-next-line import/no-extraneous-dependencies
-const { BigNumber } = require('bignumber.js')
-
-const encodeBigNum = (gen: any, object: any) => {
-  const bigNumHex = object.toString(16).padStart(16, '0')
-  const bigNumBuff = Buffer.from(`1b${bigNumHex}`, 'hex')
-  return gen.push(bigNumBuff)
-}
-
-const encoder = new cbor.Encoder({
-  genTypes: [
-    [BigNumber, encodeBigNum],
-  ],
-})
-
-const encode = (data: any) => encoder.finalize(encoder.pushAny(data))
 
 const TxByronWitness = (
   publicKey: Buffer, signature: Buffer, chaincode: Buffer, addressAttributes: object,
-): TxWitnessByron => [publicKey, signature, chaincode, cbor.encode(addressAttributes)]
+): TxWitnessByron => [publicKey, signature, chaincode, encodeCbor(addressAttributes)]
 
 const TxShelleyWitness = (publicKey: Buffer, signature: Buffer): TxWitnessShelley => [publicKey, signature]
 
 const TxAux = (unsignedTxCborHex: UnsignedTxCborHex): _TxAux => {
-  const unsignedTxDecoded = cbor.decode(unsignedTxCborHex)
+  const unsignedTxDecoded = decodeCbor(unsignedTxCborHex)
   if (!isUnsignedTxDecoded(unsignedTxDecoded)) {
     throw Error(Errors.InvalidTransactionBody)
   } else {
@@ -51,7 +34,7 @@ const TxAux = (unsignedTxCborHex: UnsignedTxCborHex): _TxAux => {
 
     const getId = (): string => {
       const [txBody] = unsignedTxDecoded
-      const encodedTxBody = encode(txBody)
+      const encodedTxBody = encodeCbor(txBody)
       return blake2b(
         encodedTxBody,
         32,
@@ -79,11 +62,11 @@ const TxSigned = (
   if (byronWitnesses.length > 0) {
     witnesses.set(TxWitnessKeys.BYRON, byronWitnesses)
   }
-  return encode([txBody, witnesses, meta]).toString('hex')
+  return encodeCbor([txBody, witnesses, meta]).toString('hex')
 }
 
 const Witness = (signedTxCborHex: SignedTxCborHex): _ShelleyWitness | _ByronWitness => {
-  const [, witnesses]: _SignedTxDecoded = cbor.decode(signedTxCborHex)
+  const [, witnesses]: _SignedTxDecoded = decodeCbor(signedTxCborHex)
   // there can be only one witness since only one signing file was passed
   const [key, [data]] = Array.from(witnesses)[0]
   return {
@@ -94,7 +77,7 @@ const Witness = (signedTxCborHex: SignedTxCborHex): _ShelleyWitness | _ByronWitn
 
 // TODO why is this in transaction.ts?
 const XPubKey = (xPubKeyCborHex: XPubKeyCborHex): _XPubKey => {
-  const xPubKeyDecoded = cbor.decode(xPubKeyCborHex)
+  const xPubKeyDecoded = decodeCbor(xPubKeyCborHex)
   const pubKey = xPubKeyDecoded.slice(0, 32)
   const chainCode = xPubKeyDecoded.slice(32, 64)
   return { pubKey, chainCode }
