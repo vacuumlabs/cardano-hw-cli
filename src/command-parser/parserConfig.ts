@@ -30,6 +30,34 @@ const keyGenArgs = {
   },
 }
 
+const nodeKeyGenArgs = {
+  '--path': {
+    required: true,
+    action: 'append',
+    type: (path: string) => parseBIP32Path(path),
+    dest: 'paths',
+    help: 'Derivation path to the key to sign with.',
+  },
+  '--hw-signing-file': {
+    required: true,
+    action: 'append',
+    dest: 'hwSigningFiles',
+    help: 'Output filepath of the verification key.',
+  },
+  '--cold-verification-key-file': {
+    required: true,
+    action: 'append',
+    dest: 'verificationKeyFiles',
+    help: 'Output filepath of the hardware wallet signing file.',
+  },
+  '--operational-certificate-issue-counter-file': {
+    required: true,
+    action: 'append',
+    dest: 'issueCounterFiles',
+    help: 'Output filepath of the issue counter file.',
+  },
+}
+
 const txSigningArgs = {
   '--mainnet': {
     nargs: '?',
@@ -71,15 +99,6 @@ const txSigningArgs = {
   },
 }
 
-const opCertIssueCounterPathArgs = {
-  '--operational-certificate-issue-counter': {
-    required: true,
-    dest: 'issueCounterFile',
-    type: (path: string) => path, // TODO create a type for file path and validate it here?
-    help: 'Input filepath of the issue counter file.',
-  },
-}
-
 const opCertSigningArgs = {
   '--kes-verification-key-file': {
     required: true,
@@ -93,7 +112,11 @@ const opCertSigningArgs = {
     type: (kesPeriod: string) => BigInt(kesPeriod),
     help: 'KES period.',
   },
-  ...opCertIssueCounterPathArgs,
+  '--operational-certificate-issue-counter': {
+    required: true,
+    dest: 'issueCounterFile',
+    help: 'Input filepath of the issue counter file.',
+  },
   '--hw-signing-file': {
     dest: 'hwSigningFileData',
     required: true,
@@ -163,10 +186,7 @@ export const parserConfig = {
     'witness': txSigningArgs,
   },
   'node': {
-    'key-gen': {
-      ...keyGenArgs,
-      ...opCertIssueCounterPathArgs,
-    },
+    'key-gen': nodeKeyGenArgs,
     'issue-op-cert': opCertSigningArgs,
   },
 }

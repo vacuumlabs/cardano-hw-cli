@@ -22,7 +22,7 @@ describe('Command parser', () => {
     ])
     const { parsedArgs } = parse(args)
     const expectedResult = {
-      command: CommandType.KEY_GEN,
+      command: CommandType.ADDRESS_KEY_GEN,
       paths: [[2147485500, 2147485463, 2147483648, 2, 1]],
       hwSigningFiles: ['test/unit/commandParser/res/payment.hwsfile'],
       verificationKeyFiles: ['test/unit/commandParser/res/payment.vkey'],
@@ -160,3 +160,5 @@ describe('Command parser', () => {
     assert.deepStrictEqual(parsedArgs, expectedResult)
   })
 })
+
+// TODO add something for op certs (node ...)

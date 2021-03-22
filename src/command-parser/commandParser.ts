@@ -7,11 +7,12 @@ export enum CommandType {
   APP_VERSION = 'version',
   DEVICE_VERSION = 'device.version',
   SHOW_ADDRESS = 'address.show',
-  KEY_GEN = 'address.key-gen',
+  ADDRESS_KEY_GEN = 'address.key-gen',
   VERIFICATION_KEY = 'key.verification-key',
   SIGN_TRANSACTION = 'transaction.sign',
   WITNESS_TRANSACTION = 'transaction.witness',
-  SIGN_OPERATIONAL_CERTIFICATE = 'node.issue-op-cert'
+  SIGN_OPERATIONAL_CERTIFICATE = 'node.issue-op-cert',
+  NODE_KEY_GEN = 'node.key-gen',
 }
 
 const makeParser = () => {

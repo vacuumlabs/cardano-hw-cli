@@ -26,7 +26,7 @@ const executeCommand = async (): Promise<void> => {
     case (CommandType.SHOW_ADDRESS):
       await commandExecutor.showAddress(parsedArgs)
       break
-    case (CommandType.KEY_GEN):
+    case (CommandType.ADDRESS_KEY_GEN):
       await commandExecutor.createSigningKeyFile(parsedArgs)
       break
     case (CommandType.VERIFICATION_KEY):
@@ -37,6 +37,9 @@ const executeCommand = async (): Promise<void> => {
       break
     case (CommandType.WITNESS_TRANSACTION):
       await commandExecutor.createTxWitness(parsedArgs)
+      break
+    case (CommandType.NODE_KEY_GEN):
+      await commandExecutor.createNodeSigningKeyFiles(parsedArgs)
       break
     case (CommandType.SIGN_OPERATIONAL_CERTIFICATE):
       await commandExecutor.createSignedOperationalCertificate(parsedArgs)
