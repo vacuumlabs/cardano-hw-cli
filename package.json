@@ -1,6 +1,6 @@
 {
   "name": "cardano-hw-cli",
-  "version": "1.2.0",
+  "version": "1.3.0-rc.0",
   "engines": {
     "node": "12.16.2"
   },
@@ -35,7 +35,7 @@
   "homepage": "https://github.com/vacuumlabs/cardano-hw-cli#readme",
   "dependencies": {
     "@babel/runtime": "^7.11.2",
-    "@cardano-foundation/ledgerjs-hw-app-cardano": "../ledgerjs-cardano-shelley/cardano-foundation-ledgerjs-hw-app-cardano-2.3.0.tgz",
+    "@cardano-foundation/ledgerjs-hw-app-cardano": "https://github.com/vacuumlabs/ledgerjs-cardano-shelley/releases/download/v2.3.0-operatorapp-rc.0/cardano-foundation-ledgerjs-hw-app-cardano-v2.3.0-operatorapp-rc.0.tgz",
     "@ledgerhq/hw-transport-node-hid": "^5.25.0",
     "argparse": "^2.0.1",
     "bignumber": "^1.1.0",
