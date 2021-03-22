@@ -40,7 +40,7 @@ cardano-hw-cli transaction sign
 cardano-hw-cli transaction witness
 --tx-body-file FILE                    Input filepath of the TxBody.
 --hw-signing-file FILE                 Input filepath of the hardware wallet signing file.
---change-output-key-file File          Input filepath of the hardware wallet signing file.
+--change-output-key-file FILE          Input filepath of the hardware wallet signing file.
 --mainnet | --testnet-magic NATURAL    Use the mainnet magic id or specify testnet magic id.
 --out-file FILE                        Output filepath of the Tx.
 ```
@@ -51,6 +51,16 @@ cardano-hw-cli address show
   --payment-path PAYMENTPATH    Payment derivation path.
   --staking-path STAKINGPATH    Stake derivation path.
   --address-file ADDRESS        Input filepath of the address.
+```
+
+# Issue operational certificate
+```
+cardano-hw-cli node issue-op-cert
+--kes-verification-key-file FILE                  Input filepath of the file with KES vkey.
+--operational-certificate-issue-counter FILE      Input filepath of the file with certificate counter.
+--kes-period UINT64                               Kes period for the certificate.
+--out-file FILE                                   Output filepath for node certificate.
+--hw-signing-file FILE                            Input filepath of the hardware wallet signing file.
 ```
 
 ## Check app version
