@@ -1,6 +1,4 @@
-const cbor = require('borc')
-// eslint-disable-next-line import/no-extraneous-dependencies
-const { BigNumber } = require('bignumber.js')
+import { encodeCbor } from '../util'
 
 export type KesVKey = Buffer
 
@@ -16,13 +14,12 @@ export const OpCertSigned = (
   kesPeriod: BigInt,
   issueCounter: OpCertIssueCounter,
   signature: Buffer,
-): SignedOpCertCborHex => cbor.encode(
+): SignedOpCertCborHex => encodeCbor(
   [
     [
       kesVKey,
-      // TODO ?? how to encode BigInt?
-      BigNumber(issueCounter.counter),
-      BigNumber(kesPeriod),
+      issueCounter.counter,
+      kesPeriod,
       signature,
     ],
     issueCounter.poolColdKey,

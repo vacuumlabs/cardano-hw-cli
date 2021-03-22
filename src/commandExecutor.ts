@@ -109,18 +109,11 @@ const CommandExecutor = async () => {
       args.kesVKey, args.kesPeriod, issueCounter, args.hwSigningFileData,
     )
 
-    console.log('a1')
-
     write(args.outFile, constructSignedOpCertOutput(signedCertCborHex))
-
-    console.log('a2')
 
     // TODO how to increment BigInt?
     issueCounter.counter = BigInt(issueCounter.counter) + BigInt(1)
-    console.log('a3')
-
     write(args.issueCounterFile, constructOpCertIssueCounterOutput(issueCounter))
-    console.log('a4')
   }
 
   return {

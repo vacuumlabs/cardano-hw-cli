@@ -5,14 +5,13 @@ import {
   HwSigningData,
   TxBodyData,
 } from './types'
-
-const cbor = require('borc')
+import { decodeCbor } from './util'
 
 export const isEra = (value: any): value is CardanoEra => Object.values(CardanoEra).includes(value)
 
 export const isCborHex = (value: any): value is CborHex => {
   try {
-    cbor.decode(value)
+    decodeCbor(value)
     return true
   } catch (e) {
     return false

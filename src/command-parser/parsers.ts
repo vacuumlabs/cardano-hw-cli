@@ -13,8 +13,8 @@ import {
   TxBodyData,
 } from '../types'
 import { KesVKey, OpCertIssueCounter } from '../opCert/opCert'
+import { decodeCbor } from '../util'
 
-const cbor = require('borc')
 const rw = require('rw')
 
 export const parseNetwork = (name: string, protocolMagic?: string) => {
@@ -101,7 +101,7 @@ export const parseKesVKeyFile = (path: string): KesVKey => {
   // TODO ? validate that "description": "KES Verification Key",
 
   if (isCborHex(cborHex)) {
-    const decoded = cbor.decode(cborHex)
+    const decoded = decodeCbor(cborHex)
     if (decoded instanceof Buffer && decoded.length === 32) {
       return decoded
     }
@@ -122,7 +122,7 @@ export const parseOpCertIssueCounterFile = (path: string): OpCertIssueCounter =>
   // TODO what about updating the counter in the file? should we? cardano-cli probably does that
 
   try {
-    const decoded = cbor.decode(cborHex)
+    const decoded = decodeCbor(cborHex)
     if (decoded instanceof Array
       && decoded.length === 2
       && decoded[1] instanceof Buffer
