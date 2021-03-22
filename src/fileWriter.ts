@@ -79,9 +79,12 @@ const bip32PathLabel = (path: number[]): string => {
   }
 }
 
-const verificationKeyType = (path: number[]): string => (
-  `${bip32PathLabel(path)}VerificationKeyShelley_ed25519`
-)
+const verificationKeyType = (path: number[]): string => {
+  const pathType = classifyPath(path)
+  const isShelleyEnvelope = pathType === PathTypes.PATH_WALLET_SPENDING_KEY_SHELLEY
+    || pathType === PathTypes.PATH_WALLET_STAKING_KEY
+  return `${bip32PathLabel(path)}VerificationKey${isShelleyEnvelope ? 'Shelley' : ''}_ed25519`
+}
 
 const verificationKeyDescription = (path: number[]): string => {
   switch (classifyPath(path)) {
