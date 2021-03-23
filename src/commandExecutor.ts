@@ -99,10 +99,12 @@ const CommandExecutor = async () => {
   const createTxWitness = async (args: ParsedTransactionWitnessArguments) => {
     const txAux = TxAux(args.txBodyFileData.cborHex)
     validateWitnessing(txAux, args.hwSigningFileData)
-    const txWitness = await cryptoProvider.witnessTx(
-      txAux, args.hwSigningFileData[0], args.network, args.changeOutputKeyFileData,
+    const txWitnesses = await cryptoProvider.witnessTx(
+      txAux, args.hwSigningFileData, args.network, args.changeOutputKeyFileData,
     )
-    write(args.outFile, constructTxWitnessOutput(args.txBodyFileData.era, txWitness))
+    for (let i = 0; i < txWitnesses.length; i += 1) {
+      write(args.outFiles[i], constructTxWitnessOutput(args.txBodyFileData.era, txWitnesses[i]))
+    }
   }
 
   const createNodeSigningKeyFiles = async (args: ParsedNodeKeyGenArguments) => {

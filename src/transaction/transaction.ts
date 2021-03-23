@@ -65,14 +65,16 @@ const TxSigned = (
   return encodeCbor([txBody, witnesses, meta]).toString('hex')
 }
 
-const Witness = (signedTxCborHex: SignedTxCborHex): _ShelleyWitness | _ByronWitness => {
+const Witness = (signedTxCborHex: SignedTxCborHex): Array<_ShelleyWitness | _ByronWitness> => {
   const [, witnesses]: _SignedTxDecoded = decodeCbor(signedTxCborHex)
-  // there can be only one witness since only one signing file was passed
-  const [key, [data]] = Array.from(witnesses)[0]
-  return {
-    key,
-    data,
-  } as _ShelleyWitness | _ByronWitness
+
+  return Array.from(witnesses).map((witness) => {
+    const [key, [data]] = witness
+    return {
+      key,
+      data,
+    } as _ShelleyWitness | _ByronWitness
+  })
 }
 
 // TODO why is this in transaction.ts?

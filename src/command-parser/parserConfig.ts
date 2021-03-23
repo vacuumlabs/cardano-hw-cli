@@ -92,11 +92,6 @@ const txSigningArgs = {
     type: (path: string) => parseHwSigningFile(path),
     help: 'Input filepath of change output file.',
   },
-  '--out-file': {
-    required: true,
-    dest: 'outFile',
-    help: 'Output filepath.',
-  },
 }
 
 const opCertSigningArgs = {
@@ -182,8 +177,23 @@ export const parserConfig = {
     },
   },
   'transaction': {
-    'sign': txSigningArgs,
-    'witness': txSigningArgs,
+    'sign': {
+      ...txSigningArgs,
+      '--out-file': {
+        required: true,
+        dest: 'outFile',
+        help: 'Output filepath.',
+      },
+    },
+    'witness': {
+      ...txSigningArgs,
+      '--out-file': {
+        required: true,
+        action: 'append',
+        dest: 'outFiles',
+        help: 'Output filepath.',
+      },
+    },
   },
   'node': {
     'key-gen': nodeKeyGenArgs,

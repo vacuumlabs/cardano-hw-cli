@@ -384,11 +384,11 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
 
   const witnessTx = async (
     txAux: _TxAux,
-    signingFile: HwSigningData,
+    signingFiles: HwSigningData[],
     network: Network,
     changeOutputFiles: HwSigningData[],
-  ): Promise<_ByronWitness | _ShelleyWitness> => {
-    const signedTx = await signTx(txAux, [signingFile], network, changeOutputFiles)
+  ): Promise<Array<_ByronWitness | _ShelleyWitness>> => {
+    const signedTx = await signTx(txAux, signingFiles, network, changeOutputFiles)
     return Witness(signedTx)
   }
 

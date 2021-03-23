@@ -251,7 +251,7 @@ const validateTxWithPoolRegistration = (
 ): void => {
   const { paymentSigningFiles, stakeSigningFiles, poolColdSigningFiles } = filterSigningFiles(signingFiles)
 
-  // TODO needs revisiting
+  // TODO needs revisiting, including the error messages
   if (!txAux.inputs.length) {
     throw Error(Errors.MissingInputError)
   }
@@ -262,14 +262,28 @@ const validateTxWithPoolRegistration = (
     throw Error(Errors.WithdrawalIncludedWithPoolRegError)
   }
 
-  if (paymentSigningFiles.length !== 0) {
-    throw Error(Errors.PaymentFileIncludedWithPoolRegError)
+  if (poolColdSigningFiles.length > 1) {
+    throw Error(Errors.TooManyPoolColdSigningFilesError)
   }
-  if (stakeSigningFiles.length + poolColdSigningFiles.length === 0) {
-    throw Error(Errors.MissingStakeSigningFileError)
-  }
-  if (stakeSigningFiles.length + poolColdSigningFiles.length > 1) {
-    throw Error(Errors.MultipleStakingSigningFilesWithPoolRegError)
+
+  const isOperator = (poolColdSigningFiles.length > 0)
+
+  if (isOperator) {
+    // pool operator
+    if (stakeSigningFiles.length > 0) {
+      throw Error(Errors.TooManyStakeSigningFilesError)
+    }
+  } else {
+    // pool owner
+    if (paymentSigningFiles.length > 0) {
+      throw Error(Errors.TooManyPaymentFilesWithPoolRegError)
+    }
+    if (stakeSigningFiles.length === 0) {
+      throw Error(Errors.MissingStakeSigningFileError)
+    }
+    if (stakeSigningFiles.length > 1) {
+      throw Error(Errors.TooManyStakeSigningFilesError)
+    }
   }
 }
 
