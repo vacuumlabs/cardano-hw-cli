@@ -490,10 +490,10 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
   }
 
   const witnessTx = async (
-    txAux: _TxAux, signingFiles: HwSigningData, network: Network, changeOutputFiles: HwSigningData[],
-  ): Promise<_ShelleyWitness | _ByronWitness> => {
-    const ledgerWitnesses = await ledgerSignTx(txAux, [signingFiles], network, changeOutputFiles)
-    const { byronWitnesses, shelleyWitnesses } = await createWitnesses(ledgerWitnesses, [signingFiles])
+    txAux: _TxAux, signingFiles: HwSigningData[], network: Network, changeOutputFiles: HwSigningData[],
+  ): Promise<Array<_ShelleyWitness | _ByronWitness>> => {
+    const ledgerWitnesses = await ledgerSignTx(txAux, signingFiles, network, changeOutputFiles)
+    const { byronWitnesses, shelleyWitnesses } = await createWitnesses(ledgerWitnesses, signingFiles)
     const _byronWitnesses = byronWitnesses.map((byronWitness) => (
       { key: TxWitnessKeys.BYRON, data: byronWitness }
     ) as _ByronWitness)
@@ -501,8 +501,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
       { key: TxWitnessKeys.SHELLEY, data: shelleyWitness }
     ) as _ShelleyWitness)
 
-    if (_byronWitnesses.length + _shelleyWitnesses.length !== 1) throw Error(Errors.MultipleWitnessesError)
-    return _shelleyWitnesses.length === 1 ? _shelleyWitnesses[0] : _byronWitnesses[0]
+    return [..._shelleyWitnesses, ..._byronWitnesses]
   }
 
   const getXPubKeys = async (paths: BIP32Path[]): Promise<XPubKeyHex[]> => {

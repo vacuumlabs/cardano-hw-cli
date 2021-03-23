@@ -87,7 +87,7 @@ export type ParsedTransactionWitnessArguments = {
   network: Network,
   txBodyFileData: TxBodyData,
   hwSigningFileData: HwSigningData[],
-  outFile: string,
+  outFiles: string[],
   changeOutputKeyFileData: HwSigningData[],
 }
 
