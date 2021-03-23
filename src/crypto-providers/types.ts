@@ -24,10 +24,10 @@ export type CryptoProvider = {
   ) => Promise<SignedTxCborHex>,
   witnessTx: (
     txAux: _TxAux,
-    signingFile: HwSigningData,
+    signingFiles: HwSigningData[],
     network: Network,
     changeOutputFiles: HwSigningData[],
-  ) => Promise<_ShelleyWitness | _ByronWitness>,
+  ) => Promise<Array<_ShelleyWitness | _ByronWitness>>,
   getXPubKeys: (paths: BIP32Path[]) => Promise<XPubKeyHex[]>,
   signOperationalCertificate: (
     kesVKey: KesVKey,
