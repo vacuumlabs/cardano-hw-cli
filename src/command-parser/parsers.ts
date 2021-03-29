@@ -42,12 +42,12 @@ export const parseFileTypeMagic = (fileTypeMagic: string, path: string) => {
     return HwSigningType.Payment
   }
 
-  if (fileTypeMagic.startsWith('Stake')) {
-    return HwSigningType.Stake
+  if (fileTypeMagic.startsWith('StakePool')) { // TODO this string should be a symbolic constant, occurs twice
+    return HwSigningType.PoolCold
   }
 
-  if (fileTypeMagic.startsWith('PoolCold')) { // TODO this string should be a symbolic constant, occurs twice
-    return HwSigningType.PoolCold
+  if (fileTypeMagic.startsWith('Stake')) {
+    return HwSigningType.Stake
   }
 
   throw Error(Errors.InvalidFileTypeError)
