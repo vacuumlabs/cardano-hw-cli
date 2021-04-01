@@ -23,6 +23,6 @@ describe('Testing CBOR', () => {
 
     testCases.forEach(([value, expected]) => {
       testCbor(value, expected)
-    });
+    })
   })
 })

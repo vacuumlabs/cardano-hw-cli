@@ -4,7 +4,7 @@ const cbor = require('cbor')
 
 export const decodeCbor = cbor.decode
 export const encodeCbor = (value: any) => {
-  const enc = new Encoder({canonical: true, collapseBigIntegers: true})
+  const enc = new Encoder({ canonical: true, collapseBigIntegers: true })
   enc.pushAny(value)
   return enc.read()
 }
