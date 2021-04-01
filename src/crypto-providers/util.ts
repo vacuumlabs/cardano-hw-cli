@@ -262,19 +262,14 @@ const validateTxWithPoolRegistration = (
     throw Error(Errors.WithdrawalIncludedWithPoolRegError)
   }
 
+  if (paymentSigningFiles.length !== 0) {
+    throw Error(Errors.PaymentFileIncludedWithPoolRegError)
+  }
+  if (stakeSigningFiles.length + poolColdSigningFiles.length === 0) {
+    throw Error(Errors.MissingStakeSigningFileError)
+  }
   if (stakeSigningFiles.length + poolColdSigningFiles.length > 1) {
     throw Error(Errors.MultipleStakingSigningFilesWithPoolRegError)
-  }
-
-  const isOperatorPaymentWitness = paymentSigningFiles.length === 1
-  const isOperatorColdKeyWitness = stakeSigningFiles.length + poolColdSigningFiles.length === 1
-
-  if (isOperatorPaymentWitness && isOperatorColdKeyWitness) {
-    throw Error(Errors.PaymentAndColdFoundWithPoolReg)
-  }
-
-  if (!isOperatorPaymentWitness && !isOperatorColdKeyWitness) {
-    throw Error(Errors.NoPaymentOrColdFoundWithPoolReg)
   }
 }
 
