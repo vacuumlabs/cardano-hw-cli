@@ -76,6 +76,7 @@ import {
   ipv4ToString,
   ipv6ToString,
   isDeviceVersionGTE,
+  filterSigningFiles,
 } from './util'
 
 const { AddressTypes } = require('cardano-crypto.js')
@@ -401,23 +402,24 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     txAux: _TxAux, signingFiles: HwSigningData[], network: Network, changeOutputFiles: HwSigningData[],
   ): Promise<LedgerWitness[]> => {
     ensureFirmwareSupportsParams(txAux, signingFiles)
+    const { paymentSigningFiles, stakeSigningFiles, poolColdSigningFiles } = filterSigningFiles(signingFiles)
 
     const usecase = determineUsecase(txAux.certificates, signingFiles)
 
     const inputs = txAux.inputs.map(
-      (input, i) => prepareInput(usecase, input, getSigningPath(signingFiles, i)),
+      (input, i) => prepareInput(usecase, input, getSigningPath(paymentSigningFiles, i)),
     )
     const outputs = txAux.outputs.map(
       (output) => prepareOutput(output, changeOutputFiles, network),
     )
     const certificates = txAux.certificates.map(
-      (certificate) => prepareCertificate(certificate, signingFiles),
+      (certificate) => prepareCertificate(certificate, [...stakeSigningFiles, ...poolColdSigningFiles]),
     )
     const fee = `${txAux.fee}`
     const ttl = prepareTtl(txAux.ttl)
     const validityIntervalStart = prepareValidityIntervalStart(txAux.validityIntervalStart)
     const withdrawals = txAux.withdrawals.map(
-      (withdrawal) => prepareWithdrawal(withdrawal, signingFiles),
+      (withdrawal) => prepareWithdrawal(withdrawal, stakeSigningFiles),
     )
 
     const response = await ledger.signTransaction(
