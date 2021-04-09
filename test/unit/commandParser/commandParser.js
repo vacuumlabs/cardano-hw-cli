@@ -116,7 +116,7 @@ describe('Command parser', () => {
         path: [2147485463, 2147485500, 2147483648, 2, 1],
         cborXPubKeyHex: '5880e0d9c2e5b...7277e7db',
       }],
-      outFile: 'test/unit/commandParser/res/witness.out',
+      outFiles: ['test/unit/commandParser/res/witness.out'],
       changeOutputKeyFileData: [],
     }
     assert.deepStrictEqual(parsedArgs, expectedResult)
