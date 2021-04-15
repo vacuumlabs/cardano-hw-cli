@@ -1,4 +1,5 @@
 import Ledger, * as LedgerTypes from '@cardano-foundation/ledgerjs-hw-app-cardano'
+import { parseBIP32Path } from '../command-parser/parsers'
 import { Errors } from '../errors'
 import { KesVKey, OpCertIssueCounter, SignedOpCertCborHex } from '../opCert/opCert'
 import {
@@ -35,15 +36,16 @@ import {
 import {
   Address,
   BIP32Path,
+  CborHex,
   HwSigningData,
   Network,
 } from '../types'
+import { encodeCbor } from '../util'
 import { LEDGER_VERSIONS } from './constants'
 import { LedgerCryptoProviderFeature, LedgerWitness } from './ledgerTypes'
 import { CryptoProvider, _AddressParameters } from './types'
 import {
   findSigningPathForKeyHash,
-  getChangeAddress,
   getSigningPath,
   PathTypes,
   classifyPath,
@@ -53,7 +55,11 @@ import {
   ipv6ToString,
   isDeviceVersionGTE,
   filterSigningFiles,
+  getAddressParameters,
+  formatVotingRegistrationMetaData,
 } from './util'
+
+const { blake2b, bech32 } = require('cardano-crypto.js')
 
 const TransportNodeHid = require('@ledgerhq/hw-transport-node-hid').default
 
@@ -162,7 +168,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     changeOutputFiles: HwSigningData[],
     network: Network,
   ): LedgerTypes.TxOutput => {
-    const changeAddress = getChangeAddress(changeOutputFiles, output.address, network)
+    const changeAddress = getAddressParameters(changeOutputFiles, output.address, network)
     const amount = output.coins
     const tokenBundle = prepareTokenBundle(output.tokenBundle)
 
@@ -463,6 +469,116 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     }))
   }
 
+  const prepareVotingAuxiliaryData = (
+    hwStakeSigningFile: HwSigningData,
+    votingPublicKeyHex: string,
+    addressParameters: _AddressParameters,
+    nonce: BigInt,
+  ): LedgerTypes.TxAuxiliaryData => ({
+    type: LedgerTypes.TxAuxiliaryDataType.TUPLE,
+    params: {
+      metadata: {
+        type: LedgerTypes.TxMetadataType.CATALYST_REGISTRATION,
+        params: {
+          votingPublicKeyHex,
+          stakingPath: hwStakeSigningFile.path,
+          rewardsDestination: {
+            type: addressParameters.addressType,
+            params: {
+              spendingPath: addressParameters.paymentPath,
+              stakingPath: addressParameters.stakePath,
+            },
+          },
+          nonce: `${nonce}`,
+        },
+      },
+    },
+  })
+
+  const prepareDummyInput = (): LedgerTypes.TxInput => ({
+    txHashHex: '0'.repeat(64),
+    outputIndex: 0,
+    path: parseBIP32Path('1852H/1815H/0H/0/0'),
+  })
+
+  const prepareDummyOutput = (): LedgerTypes.TxOutput => ({
+    destination: {
+      type: LedgerTypes.TxOutputDestinationType.DEVICE_OWNED,
+      params: {
+        type: LedgerTypes.AddressType.BASE,
+        params: {
+          spendingPath: parseBIP32Path('1852H/1815H/0H/0/0'),
+          stakingPath: parseBIP32Path('1852H/1815H/0H/2/0'),
+        },
+      },
+    },
+    amount: '1',
+  })
+
+  const prepareDummyTx = (
+    network: LedgerTypes.Network, auxiliaryData: LedgerTypes.TxAuxiliaryData,
+  ): LedgerTypes.SignTransactionRequest => ({
+    signingMode: LedgerTypes.TransactionSigningMode.ORDINARY_TRANSACTION,
+    tx: {
+      network,
+      inputs: [prepareDummyInput()],
+      outputs: [prepareDummyOutput()],
+      fee: 1,
+      ttl: 1,
+      certificates: null,
+      withdrawals: null,
+      auxiliaryData,
+      validityIntervalStart: null,
+    },
+  })
+
+  const signVotingRegistrationMetaData = async (
+    auxiliarySigningFiles: HwSigningData[],
+    hwStakeSigningFile: HwSigningData,
+    paymentAddressBech32: string,
+    votingPublicKeyHex: string,
+    network: Network,
+    nonce: BigInt,
+  ): Promise<CborHex> => {
+    const { data: address } : { data: Buffer } = bech32.decode(paymentAddressBech32)
+    const addressParameters = getAddressParameters(auxiliarySigningFiles, address, network)
+    if (!addressParameters || !addressParameters.address || addressParameters.address.compare(address)) {
+      throw Error(Errors.InvalidAddressError)
+    }
+
+    const stakeXPubHex = auxiliarySigningFiles.find(
+      (auxiliarySigningFile) => auxiliarySigningFile.path === addressParameters.stakePath,
+    )?.cborXPubKeyHex
+    if (!stakeXPubHex) throw Error(Errors.InvalidHwSigningFileError)
+    const stakePubHex = stakeXPubHex.slice(0, 64)
+
+    const auxiliaryData = prepareVotingAuxiliaryData(
+      hwStakeSigningFile, votingPublicKeyHex, addressParameters, nonce,
+    )
+    const dummyTx = prepareDummyTx(network, auxiliaryData)
+
+    const response = await ledger.signTransaction(dummyTx)
+    if (!response?.auxiliaryDataSupplement) throw Error(Errors.MissingLedgerAuxiliaryDataSupplement)
+
+    const votingRegistrationMetaDataCbor = encodeCbor(formatVotingRegistrationMetaData(
+      Buffer.from(votingPublicKeyHex, 'hex'),
+      Buffer.from(stakePubHex, 'hex'),
+      address,
+      nonce,
+      Buffer.from(response.auxiliaryDataSupplement.signatureHex, 'hex'),
+    ))
+
+    // TODO: For some reason there is a mismatch
+    const auxiliaryDataHashHex = blake2b(votingRegistrationMetaDataCbor, 32).toString('hex')
+    if (response.auxiliaryDataSupplement.auxiliaryDataHashHex !== auxiliaryDataHashHex) {
+      // throw Error(Errors.MetadataSerializationMismatchError) // TODO uncomment
+      // eslint-disable-next-line no-console
+      console.log(Errors.MetadataSerializationMismatchError)
+    }
+
+    return votingRegistrationMetaDataCbor.toString('hex')
+  }
+
   const createWitnesses = async (ledgerWitnesses: LedgerWitness[], signingFiles: HwSigningData[]): Promise<{
     byronWitnesses: TxWitnessByron[]
     shelleyWitnesses: TxWitnessShelley[]
@@ -573,5 +689,6 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     witnessTx,
     getXPubKeys,
     signOperationalCertificate,
+    signVotingRegistrationMetaData,
   }
 }

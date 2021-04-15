@@ -282,3 +282,5 @@ export type TxStakepoolRetirementCert = [
 ]
 
 export type TxWithdrawal = Map<Buffer, Lovelace>
+
+export type VotingRegistrationMetaData = [Map<number, Map<number, Buffer | BigInt>>, []]

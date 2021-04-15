@@ -9,6 +9,7 @@ const enum Errors {
   InvalidOpCertIssueCounterFileError = 'Invalid operational certificate issue counter file',
   InvalidNodeKeyGenInputsError = 'Invalid node key-gen inputs',
   TxSerializationMismatchError = 'Tx serialization mismatch',
+  MetadataSerializationMismatchError = 'Metadata serialization mismatch',
   MissingHwSigningDataAtPathError = 'Can not find hw signing data',
   UndefinedCommandError = 'command undefined',
   MissingSigningFileError = 'missing signing file',
@@ -76,7 +77,8 @@ const enum Errors {
   AssetAmountParseError = 'Failed to parse transaction, asset amount is not a valid number.',
   PolicyIdParseError = 'Failed to parse transaction, multi asset policy id is not a Buffer.',
   UnsupportedCryptoProviderCall = 'The call is not supported by the chosen crypto provider',
-  TrezorUnsupportedMetaData = 'MetaData are in unsupported format, try using shelley era format instead.'
+  TrezorUnsupportedMetaData = 'MetaData are in unsupported format, try using shelley era format instead.',
+  MissingLedgerAuxiliaryDataSupplement = 'Missing ledger auxiliary data supplement in response.'
 }
 
 export {

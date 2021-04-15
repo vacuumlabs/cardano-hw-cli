@@ -41,6 +41,7 @@ import {
 import {
   Address,
   BIP32Path,
+  CborHex,
   HwSigningData,
   Network,
 } from '../types'
@@ -49,19 +50,17 @@ import {
   filterSigningFiles,
   findSigningPathForKeyHash,
   getAddressAttributes,
-  getChangeAddress,
   getSigningPath,
   ipv4ToString,
   ipv6ToString,
   rewardAddressToPubKeyHash,
   isDeviceVersionGTE,
+  getAddressParameters,
 } from './util'
 import { Errors } from '../errors'
-import { removeNullFields } from '../util'
+import { encodeCbor, removeNullFields } from '../util'
 import { TREZOR_VERSIONS } from './constants'
 import { KesVKey, OpCertIssueCounter, SignedOpCertCborHex } from '../opCert/opCert'
-
-const cbor = require('borc')
 
 // using require to suppress type errors from trezor-connect
 const TrezorConnect = require('trezor-connect').default
@@ -184,7 +183,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     network: Network,
     changeOutputFiles: HwSigningData[],
   ): TrezorOutput => {
-    const changeAddress = getChangeAddress(changeOutputFiles, output.address, network)
+    const changeAddress = getAddressParameters(changeOutputFiles, output.address, network)
     const address = encodeAddress(output.address)
     const tokenBundle = prepareTokenBundle(output.tokenBundle)
 
@@ -321,7 +320,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     if (Array.isArray(metaData)) {
       throw Error(Errors.TrezorUnsupportedMetaData)
     }
-    return metaData && cbor.encode(metaData).toString('hex')
+    return metaData && encodeCbor(metaData).toString('hex')
   }
 
   const ensureFirmwareSupportsParams = (txAux: _TxAux) => {
@@ -393,6 +392,15 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     return response.payload.serializedTx as SignedTxCborHex
   }
 
+  const signVotingRegistrationMetaData = async (
+    auxiliarySigningFiles: HwSigningData[],
+    hwStakeSigningFile: HwSigningData,
+    paymentAddressBech32: string,
+    votingPublicKeyHex: string,
+    network: Network,
+    nonce: BigInt,
+  ): Promise<CborHex> => null as any
+
   const witnessTx = async (
     txAux: _TxAux,
     signingFiles: HwSigningData[],
@@ -420,6 +428,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     signTx,
     getXPubKeys,
     signOperationalCertificate,
+    signVotingRegistrationMetaData,
   }
 }
 

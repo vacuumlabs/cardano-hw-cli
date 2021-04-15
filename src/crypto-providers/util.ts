@@ -2,7 +2,9 @@ import { HARDENED_THRESHOLD } from '../constants'
 import { Errors } from '../errors'
 import { isBIP32Path } from '../guards'
 import { XPubKey } from '../transaction/transaction'
-import { TxCertificateKeys, _Certificate, _TxAux } from '../transaction/types'
+import {
+  TxCertificateKeys, VotingRegistrationMetaData, _Certificate, _TxAux,
+} from '../transaction/types'
 import {
   Address,
   BIP32Path,
@@ -380,20 +382,20 @@ const _packEnterpriseAddress = (
   }
 }
 
-const getChangeAddress = (
-  changeOutputFiles: HwSigningData[],
-  outputAddress: Buffer,
+const getAddressParameters = (
+  hwSigningData: HwSigningData[],
+  address: Buffer,
   network: Network,
 ): _AddressParameters | null => {
-  const addressType = getAddressType(outputAddress)
+  const addressType = getAddressType(address)
   try {
     switch (addressType) {
       case AddressTypes.BOOTSTRAP:
-        return _packBootStrapAddress(changeOutputFiles[0], network)
+        return _packBootStrapAddress(hwSigningData[0], network)
       case AddressTypes.BASE:
-        return _packBaseAddress(changeOutputFiles, network)
+        return _packBaseAddress(hwSigningData, network)
       case AddressTypes.ENTERPRISE:
-        return _packEnterpriseAddress(changeOutputFiles[0], network)
+        return _packEnterpriseAddress(hwSigningData[0], network)
       default: return null
     }
   } catch (e) {
@@ -453,6 +455,33 @@ const isDeviceVersionGTE = (
     && deviceVersion.patch >= thresholdVersion.patch
   )
 
+const formatVotingRegistrationMetaData = (
+  votingPublicKey: Buffer,
+  stakePub: Buffer,
+  address: Buffer,
+  nonce: BigInt,
+  signature: Buffer,
+): VotingRegistrationMetaData => [
+  new Map<number, Map<number, Buffer | BigInt>>([
+    [
+      61284,
+      new Map<number, Buffer | BigInt>([
+        [1, votingPublicKey],
+        [2, stakePub],
+        [3, address],
+        [4, nonce],
+      ]),
+    ],
+    [
+      61285,
+      new Map<number, Buffer>([
+        [1, signature],
+      ]),
+    ],
+  ]),
+  [],
+]
+
 export {
   PathTypes,
   classifyPath,
@@ -464,11 +493,12 @@ export {
   findSigningPathForKeyHash,
   findSigningPathForKey,
   encodeAddress,
-  getChangeAddress,
+  getAddressParameters,
   getAddressAttributes,
   ipv4ToString,
   ipv6ToString,
   rewardAddressToPubKeyHash,
   deviceVersionToStr,
   isDeviceVersionGTE,
+  formatVotingRegistrationMetaData,
 }
