@@ -13,6 +13,7 @@ export enum CommandType {
   WITNESS_TRANSACTION = 'transaction.witness',
   SIGN_OPERATIONAL_CERTIFICATE = 'node.issue-op-cert',
   NODE_KEY_GEN = 'node.key-gen',
+  CATALYST_VOTING_KEY_REGISTRATION_METADATA = 'catalyst.voting-key-registration-metadata',
 }
 
 const makeParser = () => {

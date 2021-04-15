@@ -15,6 +15,7 @@ import {
 import { KesVKey, OpCertIssueCounter } from '../opCert/opCert'
 import { decodeCbor } from '../util'
 
+const { bech32 } = require('cardano-crypto.js')
 const rw = require('rw')
 
 export const parseNetwork = (name: string, protocolMagic?: string) => {
@@ -137,4 +138,9 @@ export const parseOpCertIssueCounterFile = (path: string): OpCertIssueCounter =>
   }
 
   throw Error(Errors.InvalidOpCertIssueCounterFileError)
+}
+
+export const parseVotePubFile = (path: string): string => {
+  const data: string = rw.readFileSync(path, 'utf8')
+  return bech32.decode(data).data.toString('hex')
 }

@@ -6,6 +6,7 @@ import {
   parseBIP32Path,
   parseTxBodyFile,
   parseKesVKeyFile,
+  parseVotePubFile,
 } from './parsers'
 
 const keyGenArgs = {
@@ -198,5 +199,57 @@ export const parserConfig = {
   'node': {
     'key-gen': nodeKeyGenArgs,
     'issue-op-cert': opCertSigningArgs,
+  },
+  'catalyst': {
+    'voting-key-registration-metadata': {
+      '--mainnet': {
+        nargs: '?',
+        dest: 'network',
+        const: parseNetwork('MAINNET'),
+        default: parseNetwork('MAINNET'),
+        help: 'NETWORK.',
+      },
+      '--testnet-magic': {
+        nargs: '?',
+        dest: 'network',
+        type: (magic: string) => parseNetwork('TESTNET', magic),
+        help: 'Protocol magic number.',
+      },
+      '--vote-public-key': {
+        required: true,
+        dest: 'votePublicKey',
+        type: (path: string) => parseVotePubFile(path),
+        help: 'Input filepath to vote public key.',
+      },
+      '--payment-address': {
+        required: true,
+        dest: 'paymentAddress',
+        help: 'Payment address.',
+      },
+      '--stake-signing-key': {
+        required: true,
+        dest: 'hwStakeSigningFileData',
+        type: (path: string) => parseHwSigningFile(path),
+        help: 'Input filepath of the hardware wallet stake signing file.',
+      },
+      '--nonce': {
+        required: true,
+        dest: 'nonce',
+        type: (nonce: string) => BigInt(nonce),
+        help: 'Nonce',
+      },
+      '--auxiliary-signing-key': {
+        action: 'append',
+        required: true,
+        dest: 'auxiliarySigningKeyData',
+        type: (path: string) => parseHwSigningFile(path),
+        help: 'Input filepath of the hardware wallet auxiliary signing file.',
+      },
+      '--out-file': {
+        required: true,
+        dest: 'outFile',
+        help: 'Output filepath.',
+      },
+    },
   },
 }
