@@ -11,6 +11,7 @@ import {
   BIP32Path,
   Network,
   Address,
+  CborHex,
 } from '../types'
 
 export type CryptoProvider = {
@@ -35,6 +36,14 @@ export type CryptoProvider = {
     issueCounter: OpCertIssueCounter,
     signingFile: HwSigningData[],
   ) => Promise<SignedOpCertCborHex>
+  signVotingRegistrationMetaData: (
+    auxiliarySigningFiles: HwSigningData[],
+    hwStakeSigningFile: HwSigningData,
+    paymentAddressBech32: string,
+    votingPublicKeyHex: string,
+    network: Network,
+    nonce: BigInt,
+  ) => Promise<CborHex>
 }
 
 export type _AddressParameters = {

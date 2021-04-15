@@ -17,6 +17,7 @@ import {
   ParsedVerificationKeyArguments,
   ParsedOpCertArguments,
   ParsedNodeKeyGenArguments,
+  ParsedCatalystVotingKeyRegistrationMetadataArguments,
 } from './types'
 import { LedgerCryptoProvider } from './crypto-providers/ledgerCryptoProvider'
 import { TrezorCryptoProvider } from './crypto-providers/trezorCryptoProvider'
@@ -25,6 +26,8 @@ import {
 } from './crypto-providers/util'
 import { Errors } from './errors'
 import { parseOpCertIssueCounterFile } from './command-parser/parsers'
+
+const rw = require('rw')
 
 const promiseTimeout = <T> (promise: Promise<T>, ms: number): Promise<T> => {
   const timeout: Promise<T> = new Promise((resolve, reject) => {
@@ -151,6 +154,21 @@ const CommandExecutor = async () => {
     write(args.issueCounterFile, constructOpCertIssueCounterOutput(issueCounter))
   }
 
+  const createCatalystVotingKeyRegistrationMetadata = async (
+    args: ParsedCatalystVotingKeyRegistrationMetadataArguments,
+  ) => {
+    const votingRegistrationMetaData = await cryptoProvider.signVotingRegistrationMetaData(
+      args.auxiliarySigningKeyData,
+      args.hwStakeSigningFileData,
+      args.paymentAddress,
+      args.votePublicKey,
+      args.network,
+      args.nonce,
+    )
+
+    rw.writeFileSync(args.outFile, votingRegistrationMetaData, 'utf8')
+  }
+
   return {
     printDeviceVersion,
     showAddress,
@@ -160,6 +178,7 @@ const CommandExecutor = async () => {
     createTxWitness,
     createNodeSigningKeyFiles,
     createSignedOperationalCertificate,
+    createCatalystVotingKeyRegistrationMetadata,
   }
 }
 

@@ -108,6 +108,17 @@ export type ParsedNodeKeyGenArguments = {
   issueCounterFiles: string[],
 }
 
+export type ParsedCatalystVotingKeyRegistrationMetadataArguments = {
+  command: CommandType.CATALYST_VOTING_KEY_REGISTRATION_METADATA,
+  network: Network,
+  votePublicKey: string,
+  paymentAddress: string,
+  hwStakeSigningFileData: HwSigningData,
+  nonce: BigInt,
+  auxiliarySigningKeyData: HwSigningData[],
+  outFile: string,
+}
+
 export type ParsedArguments =
   | ParsedAppVersionArguments
   | ParsedDeviceVersionArguments
@@ -118,6 +129,7 @@ export type ParsedArguments =
   | ParsedTransactionWitnessArguments
   | ParsedNodeKeyGenArguments
   | ParsedOpCertArguments
+  | ParsedCatalystVotingKeyRegistrationMetadataArguments
 
 export type HwSigningOutput = {
   type: string,
