@@ -146,7 +146,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     return payload.map((result) => result.publicKey)
   }
 
-  const prepareInput = (input: _Input, path?: BIP32Path): TrezorInput => ({
+  const prepareInput = (input: _Input, path: BIP32Path | null): TrezorInput => ({
     path,
     prev_hash: input.txHash.toString('hex'),
     prev_index: input.outputIndex,

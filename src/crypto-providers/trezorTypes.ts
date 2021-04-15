@@ -8,7 +8,7 @@ export type TrezorCertificatePointer = {
 }
 
 export type TrezorInput = {
-  path?: string | BIP32Path
+  path: string | BIP32Path | null
   prev_hash: string
   prev_index: number
 }

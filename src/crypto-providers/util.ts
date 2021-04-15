@@ -137,8 +137,8 @@ const encodeAddress = (address: Buffer): string => {
 
 const getSigningPath = (
   signingFiles: HwSigningData[], i: number,
-): BIP32Path | undefined => {
-  if (!signingFiles.length) return undefined
+): BIP32Path | null => {
+  if (!signingFiles.length) return null
   // in case signingFiles.length < input.length
   // we return the first path since all we need is to pass all the paths
   // disregarding their order

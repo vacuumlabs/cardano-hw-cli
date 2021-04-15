@@ -1,12 +1,8 @@
+import Ledger, * as LedgerTypes from '@cardano-foundation/ledgerjs-hw-app-cardano'
 import { Errors } from '../errors'
+import { KesVKey, OpCertIssueCounter, SignedOpCertCborHex } from '../opCert/opCert'
 import {
-  KesVKey, OpCertIssueCounter, OpCertSigned, SignedOpCertCborHex,
-} from '../opCert/opCert'
-import {
-  TxByronWitness,
-  TxShelleyWitness,
-  TxSigned,
-  XPubKey,
+  TxByronWitness, TxShelleyWitness, TxSigned, XPubKey,
 } from '../transaction/transaction'
 import {
   _Input,
@@ -43,29 +39,9 @@ import {
   Network,
 } from '../types'
 import { LEDGER_VERSIONS } from './constants'
+import { LedgerCryptoProviderFeature, LedgerWitness } from './ledgerTypes'
+import { CryptoProvider, _AddressParameters } from './types'
 import {
-  LedgerAssetGroup,
-  LedgerCertificate,
-  LedgerCryptoProviderFeature,
-  LedgerInput,
-  LedgerMultiHostNameRelay,
-  LedgerOutput,
-  LedgerPoolOwnerParams,
-  LedgerPoolParams,
-  LedgerPoolRetirementParams,
-  LedgerRelayParams,
-  LedgerSingleHostIPRelay,
-  LedgerSingleHostNameRelay,
-  LedgerTxOutputTypeAddressParams,
-  LedgerWithdrawal,
-  LedgerWitness,
-} from './ledgerTypes'
-import {
-  CryptoProvider,
-  _AddressParameters,
-} from './types'
-import {
-  findSigningPathForKey,
   findSigningPathForKeyHash,
   getChangeAddress,
   getSigningPath,
@@ -79,27 +55,18 @@ import {
   filterSigningFiles,
 } from './util'
 
-const { AddressTypes } = require('cardano-crypto.js')
 const TransportNodeHid = require('@ledgerhq/hw-transport-node-hid').default
-const Ledger = require('@cardano-foundation/ledgerjs-hw-app-cardano').default
-
-// TODO copied from ledgerjs --- perhaps make it public there and just import here?
-const enum SignTxUsecases {
-  SIGN_TX_USECASE_ORDINARY_TX,
-  SIGN_TX_USECASE_POOL_REGISTRATION_OWNER,
-  SIGN_TX_USECASE_POOL_REGISTRATION_OPERATOR,
-}
 
 export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
   const transport = await TransportNodeHid.create()
   const ledger = new Ledger(transport)
 
   const getVersion = async (): Promise<string> => {
-    const { major, minor, patch } = await ledger.getVersion()
+    const { major, minor, patch } = (await ledger.getVersion()).version
     return `Ledger app version ${major}.${minor}.${patch}`
   }
 
-  const deviceVersion = await ledger.getVersion()
+  const deviceVersion = (await ledger.getVersion()).version
 
   const isFeatureSupportedForVersion = (
     feature: LedgerCryptoProviderFeature,
@@ -110,8 +77,19 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
   ): Promise<void> => {
     try {
       const { addressType, networkId, protocolMagic } = getAddressAttributes(address)
-      const networkIdOrProtocolMagic = addressType === AddressTypes.BOOTSTRAP ? protocolMagic : networkId
-      await ledger.showAddress(addressType, networkIdOrProtocolMagic, paymentPath, stakingPath)
+      await ledger.showAddress({
+        network: {
+          protocolMagic,
+          networkId,
+        },
+        address: {
+          type: addressType,
+          params: {
+            spendingPath: paymentPath,
+            stakingPath,
+          },
+        },
+      })
     } catch (err) {
       throw Error(Errors.LedgerOperationError)
     }
@@ -123,20 +101,22 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     ) as _StakepoolRegistrationCert
 
     if (!poolRegistrationCert) {
-      return SignTxUsecases.SIGN_TX_USECASE_ORDINARY_TX
+      return LedgerTypes.TransactionSigningMode.ORDINARY_TRANSACTION
     }
 
     const poolKeyPath = findSigningPathForKeyHash(poolRegistrationCert.poolKeyHash, signingFiles)
     if (!poolKeyPath) {
-      return SignTxUsecases.SIGN_TX_USECASE_POOL_REGISTRATION_OWNER
+      return LedgerTypes.TransactionSigningMode.POOL_REGISTRATION_AS_OWNER
     }
 
-    return SignTxUsecases.SIGN_TX_USECASE_POOL_REGISTRATION_OPERATOR
+    return LedgerTypes.TransactionSigningMode.__RESEVED_POOL_REGISTRATION_AS_OPERATOR
   }
 
-  const prepareInput = (usecase: SignTxUsecases, input: _Input, path?: BIP32Path): LedgerInput => {
-    const pathToUse = (usecase === SignTxUsecases.SIGN_TX_USECASE_POOL_REGISTRATION_OWNER)
-      ? undefined // inputs are required to be given without path in this case
+  const prepareInput = (
+    usecase: LedgerTypes.TransactionSigningMode, input: _Input, path: BIP32Path | null,
+  ): LedgerTypes.TxInput => {
+    const pathToUse = (usecase === LedgerTypes.TransactionSigningMode.POOL_REGISTRATION_AS_OWNER)
+      ? null // inputs are required to be given without path in this case
       : path
     return {
       path: pathToUse,
@@ -147,10 +127,10 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
 
   const prepareTokenBundle = (
     multiAssets: _MultiAsset[],
-  ): LedgerAssetGroup[] => multiAssets.map(({ policyId, assets }) => {
-    const tokens = assets.map(({ assetName, amount }) => ({
+  ): LedgerTypes.AssetGroup[] => multiAssets.map(({ policyId, assets }) => {
+    const tokens: LedgerTypes.Token[] = assets.map(({ assetName, amount }) => ({
       assetNameHex: assetName.toString('hex'),
-      amountStr: amount.toString(),
+      amount: amount.toString(),
     }))
     return {
       policyIdHex: policyId.toString('hex'),
@@ -161,20 +141,27 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
   const prepareChangeOutput = (
     amount: BigInt,
     changeOutput: _AddressParameters,
-    tokenBundle: LedgerAssetGroup[],
-  ): LedgerTxOutputTypeAddressParams => ({
-    amountStr: `${amount}`,
+    tokenBundle: LedgerTypes.AssetGroup[] | null,
+  ): LedgerTypes.TxOutput => ({
+    destination: {
+      type: LedgerTypes.TxOutputDestinationType.DEVICE_OWNED,
+      params: {
+        type: changeOutput.addressType,
+        params: {
+          spendingPath: changeOutput.paymentPath,
+          stakingPath: changeOutput.stakePath,
+        },
+      },
+    },
+    amount: `${amount}`,
     tokenBundle,
-    addressTypeNibble: changeOutput.addressType,
-    spendingPath: changeOutput.paymentPath,
-    stakingPath: changeOutput.stakePath,
   })
 
   const prepareOutput = (
     output: _Output,
     changeOutputFiles: HwSigningData[],
     network: Network,
-  ): LedgerOutput => {
+  ): LedgerTypes.TxOutput => {
     const changeAddress = getChangeAddress(changeOutputFiles, output.address, network)
     const amount = output.coins
     const tokenBundle = prepareTokenBundle(output.tokenBundle)
@@ -183,75 +170,97 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
       return prepareChangeOutput(amount, changeAddress, tokenBundle)
     }
     return {
-      amountStr: `${output.coins}`,
+      destination: {
+        type: LedgerTypes.TxOutputDestinationType.THIRD_PARTY,
+        params: {
+          addressHex: output.address.toString('hex'),
+        },
+      },
+      amount: `${output.coins}`,
       tokenBundle,
-      addressHex: output.address.toString('hex'),
     }
   }
 
   const prepareStakingKeyRegistrationCert = (
-    cert: _StakingKeyDeregistrationCert | _StakingKeyRegistrationCert,
+    cert: _StakingKeyRegistrationCert,
     stakeSigningFiles: HwSigningData[],
-  ): LedgerCertificate => {
+  ): LedgerTypes.Certificate => {
     const path = findSigningPathForKeyHash(cert.pubKeyHash, stakeSigningFiles)
     if (!path) throw Error(Errors.MissingSigningFileForCertificateError)
     return {
-      type: cert.type,
-      path,
+      type: LedgerTypes.CertificateType.STAKE_REGISTRATION,
+      params: { path },
+    }
+  }
+
+  const prepareStakingKeyDeregistrationCert = (
+    cert: _StakingKeyDeregistrationCert,
+    stakeSigningFiles: HwSigningData[],
+  ): LedgerTypes.Certificate => {
+    const path = findSigningPathForKeyHash(cert.pubKeyHash, stakeSigningFiles)
+    if (!path) throw Error(Errors.MissingSigningFileForCertificateError)
+    return {
+      type: LedgerTypes.CertificateType.STAKE_DEREGISTRATION,
+      params: { path },
     }
   }
 
   const prepareDelegationCert = (
     cert: _DelegationCert, stakeSigningFiles: HwSigningData[],
-  ): LedgerCertificate => {
+  ): LedgerTypes.Certificate => {
     const path = findSigningPathForKeyHash(cert.pubKeyHash, stakeSigningFiles)
     if (!path) throw Error(Errors.MissingSigningFileForCertificateError)
     return {
-      type: cert.type,
-      path,
-      poolKeyHashHex: cert.poolHash.toString('hex'),
+      type: LedgerTypes.CertificateType.STAKE_DELEGATION,
+      params: {
+        poolKeyHashHex: cert.poolHash.toString('hex'),
+        path,
+      },
     }
   }
 
   // TODO revisit this
   const preparePoolOwners = (
-    usecase: SignTxUsecases,
+    usecase: LedgerTypes.TransactionSigningMode,
     owners: Buffer[],
     stakeSigningFiles: HwSigningData[],
-  ): LedgerPoolOwnerParams[] => {
-    const poolOwners = owners.map((owner): LedgerPoolOwnerParams => {
+  ): LedgerTypes.PoolOwner[] => {
+    const poolOwners: LedgerTypes.PoolOwner[] = owners.map((owner) => {
       const path = findSigningPathForKeyHash(owner, stakeSigningFiles)
-      return path && (usecase === SignTxUsecases.SIGN_TX_USECASE_POOL_REGISTRATION_OWNER)
-        ? { stakingPath: path }
-        : { stakingKeyHashHex: owner.toString('hex') }
+      return path && (usecase === LedgerTypes.TransactionSigningMode.POOL_REGISTRATION_AS_OWNER)
+        ? {
+          type: LedgerTypes.PoolOwnerType.DEVICE_OWNED,
+          params: { stakingPath: path },
+        }
+        : {
+          type: LedgerTypes.PoolOwnerType.THIRD_PARTY,
+          params: { stakingKeyHashHex: owner.toString('hex') },
+        }
     })
 
-    const ownersWithPath = poolOwners.filter((owner) => owner.stakingPath)
+    const ownersWithPath = poolOwners.filter((owner) => owner.type === LedgerTypes.PoolOwnerType.DEVICE_OWNED)
     if (ownersWithPath.length > 1) throw Error(Errors.OwnerMultipleTimesInTxError)
 
     return poolOwners
   }
 
-  const prepareRelays = (relays: _PoolRelay[]): LedgerRelayParams[] => {
-    const SingleIPRelay = (
-      { portNumber, ipv4, ipv6 }: _SingleHostIPRelay,
-    ): LedgerSingleHostIPRelay => ({
-      portNumber, ipv4: ipv4ToString(ipv4), ipv6: ipv6ToString(ipv6),
+  const prepareRelays = (relays: _PoolRelay[]): LedgerTypes.Relay[] => {
+    const SingleIPRelay = ({ portNumber, ipv4, ipv6 }: _SingleHostIPRelay): LedgerTypes.Relay => ({
+      type: LedgerTypes.RelayType.SINGLE_HOST_IP_ADDR,
+      params: { portNumber, ipv4: ipv4ToString(ipv4), ipv6: ipv6ToString(ipv6) },
     })
 
-    const SingleNameRelay = (
-      { dnsName, portNumber }: _SingleHostNameRelay,
-    ): LedgerSingleHostNameRelay => ({
-      portNumber, dnsName,
+    const SingleNameRelay = ({ dnsName, portNumber }: _SingleHostNameRelay): LedgerTypes.Relay => ({
+      type: LedgerTypes.RelayType.SINGLE_HOST_HOSTNAME,
+      params: { portNumber, dnsName },
     })
 
-    const MultiNameRelay = (
-      { dnsName }: _MultiHostNameRelay,
-    ): LedgerMultiHostNameRelay => ({
-      dnsName,
+    const MultiNameRelay = ({ dnsName }: _MultiHostNameRelay): LedgerTypes.Relay => ({
+      type: LedgerTypes.RelayType.MULTI_HOST,
+      params: { dnsName },
     })
 
-    const prepareRelay = (relay: _PoolRelay) => {
+    const prepareRelay = (relay: _PoolRelay): LedgerTypes.Relay => {
       switch (relay.type) {
         case TxRelayTypes.SINGLE_HOST_IP:
           return SingleIPRelay(relay as _SingleHostIPRelay)
@@ -264,85 +273,78 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
       }
     }
 
-    return relays.map((relay) => ({
-      type: relay.type,
-      params: prepareRelay(relay),
-    }))
+    return relays.map(prepareRelay)
   }
 
   const prepareStakePoolRegistrationCert = (
     cert: _StakepoolRegistrationCert, signingFiles: HwSigningData[],
-  ): LedgerCertificate => {
+  ): LedgerTypes.Certificate => {
     // if path is given, we are signing as pool operator
     // if keyHashHex is given, we are signing as pool owner
     const poolKeyPath = findSigningPathForKeyHash(cert.poolKeyHash, signingFiles)
-    const poolKey = (poolKeyPath)
-      ? { path: poolKeyPath }
-      : { keyHashHex: cert.poolKeyHash.toString('hex') }
 
     const usecase = (poolKeyPath)
-      ? SignTxUsecases.SIGN_TX_USECASE_POOL_REGISTRATION_OPERATOR
-      : SignTxUsecases.SIGN_TX_USECASE_POOL_REGISTRATION_OWNER
+      ? LedgerTypes.TransactionSigningMode.__RESEVED_POOL_REGISTRATION_AS_OPERATOR
+      : LedgerTypes.TransactionSigningMode.POOL_REGISTRATION_AS_OWNER
 
-    const owners = preparePoolOwners(usecase, cert.poolOwnersPubKeyHashes, signingFiles)
+    const owners: LedgerTypes.PoolOwner[] = (
+      preparePoolOwners(usecase, cert.poolOwnersPubKeyHashes, signingFiles)
+    )
 
-    const metadata = cert.metadata
+    const metadata: LedgerTypes.PoolMetadataParams | null = cert.metadata
       ? {
         metadataUrl: cert.metadata.metadataUrl,
         metadataHashHex: cert.metadata.metadataHash.toString('hex'),
       }
       : null
 
-    const poolRegistrationParams: LedgerPoolParams = {
-      poolKey,
+    const params: LedgerTypes.PoolRegistrationParams = {
+      poolKeyHashHex: cert.poolKeyHash.toString('hex'),
       vrfKeyHashHex: cert.vrfPubKeyHash.toString('hex'),
-      pledgeStr: `${cert.pledge}`,
-      costStr: `${cert.cost}`,
+      pledge: `${cert.pledge}`,
+      cost: `${cert.cost}`,
       margin: {
-        numeratorStr: `${cert.margin.numerator}`,
-        denominatorStr: `${cert.margin.denominator}`,
+        numerator: `${cert.margin.numerator}`,
+        denominator: `${cert.margin.denominator}`,
       },
-      rewardAccount: { // TODO add option to use path here
-        // (replace changeOutputKeyFileData from --change-output-key-file with --hw-signing-file-auxiliary)
-        rewardAccountHex: cert.rewardAccount.toString('hex'),
-      },
+      rewardAccountHex: cert.rewardAccount.toString('hex'),
       poolOwners: owners,
       relays: prepareRelays(cert.relays),
       metadata,
     }
 
     return {
-      type: cert.type,
-      poolRegistrationParams,
+      type: LedgerTypes.CertificateType.STAKE_POOL_REGISTRATION,
+      params,
     }
   }
 
-  // TODO we use both StakePool and Stakepool in names
   const prepareStakePoolRetirementCert = (
     cert: _StakepoolRetirementCert,
     signingFiles: HwSigningData[],
-  ): LedgerCertificate => {
-    const poolKeyPath = findSigningPathForKeyHash(cert.poolKeyHash, signingFiles)
-    if (!poolKeyPath) throw Error(Errors.MissingSigningFileForCertificateError)
-    const poolRetirementParams: LedgerPoolRetirementParams = {
-      poolKeyPath,
-      retirementEpochStr: cert.retirementEpoch.toString(),
-    }
+  ): LedgerTypes.Certificate => {
+    throw Error(Errors.UnsupportedCryptoProviderCall)
+    // const poolKeyPath = findSigningPathForKeyHash(cert.poolKeyHash, signingFiles)
+    // if (!poolKeyPath) throw Error(Errors.MissingSigningFileForCertificateError)
+    // const poolRetirementParams: LedgerPoolRetirementParams = {
+    //   poolKeyPath,
+    //   retirementEpochStr: cert.retirementEpoch.toString(),
+    // }
 
-    return {
-      type: cert.type,
-      poolRetirementParams,
-    }
+    // return {
+    //   type: cert.type,
+    //   poolRetirementParams,
+    // }
   }
 
   const prepareCertificate = (
     certificate: _Certificate, signingFiles: HwSigningData[],
-  ): LedgerCertificate => {
+  ): LedgerTypes.Certificate => {
     switch (certificate.type) {
       case TxCertificateKeys.STAKING_KEY_REGISTRATION:
         return prepareStakingKeyRegistrationCert(certificate, signingFiles)
       case TxCertificateKeys.STAKING_KEY_DEREGISTRATION:
-        return prepareStakingKeyRegistrationCert(certificate, signingFiles)
+        return prepareStakingKeyDeregistrationCert(certificate, signingFiles)
       case TxCertificateKeys.DELEGATION:
         return prepareDelegationCert(certificate, signingFiles)
       case TxCertificateKeys.STAKEPOOL_REGISTRATION:
@@ -356,13 +358,13 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
 
   const prepareWithdrawal = (
     withdrawal: _Withdrawal, stakeSigningFiles: HwSigningData[],
-  ): LedgerWithdrawal => {
+  ): LedgerTypes.Withdrawal => {
     const pubKeyHash = rewardAddressToPubKeyHash(withdrawal.address)
     const path = findSigningPathForKeyHash(pubKeyHash, stakeSigningFiles)
     if (!path) throw Error(Errors.MissingSigningFileForWithdrawalError)
     return {
       path,
-      amountStr: `${withdrawal.coins}`,
+      amount: `${withdrawal.coins}`,
     }
   }
 
@@ -372,8 +374,13 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     validityIntervalStart && validityIntervalStart.toString()
   )
 
-  const prepareMetaDataHashHex = (metaDataHash: Buffer | null): string | null => (
-    metaDataHash && metaDataHash.toString('hex')
+  const prepareMetaDataHashHex = (metaDataHash: Buffer | null): LedgerTypes.TxAuxiliaryData | null => (
+    metaDataHash && ({
+      type: LedgerTypes.TxAuxiliaryDataType.ARBITRARY_HASH,
+      params: {
+        hashHex: metaDataHash.toString('hex'),
+      },
+    })
   )
 
   const ensureFirmwareSupportsParams = (txAux: _TxAux, signingFiles: HwSigningData[]) => {
@@ -395,7 +402,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
 
     // TODO revisit, use a switch?
     const usecase = determineUsecase(txAux.certificates, signingFiles)
-    if ((usecase === SignTxUsecases.SIGN_TX_USECASE_POOL_REGISTRATION_OPERATOR)
+    if ((usecase === LedgerTypes.TransactionSigningMode.__RESEVED_POOL_REGISTRATION_AS_OPERATOR)
       && !isFeatureSupportedForVersion(LedgerCryptoProviderFeature.POOL_REGISTRATION_OPERATOR)
     ) {
       throw Error(Errors.PoolRegistrationAsOperatorNotSupported)
@@ -403,7 +410,11 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
   }
 
   const ledgerSignTx = async (
-    txAux: _TxAux, signingFiles: HwSigningData[], network: Network, changeOutputFiles: HwSigningData[],
+    signingMode: LedgerTypes.TransactionSigningMode,
+    txAux: _TxAux,
+    signingFiles: HwSigningData[],
+    network: Network,
+    changeOutputFiles: HwSigningData[],
   ): Promise<LedgerWitness[]> => {
     ensureFirmwareSupportsParams(txAux, signingFiles)
     const { paymentSigningFiles, stakeSigningFiles, poolColdSigningFiles } = filterSigningFiles(signingFiles)
@@ -425,20 +436,23 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     const withdrawals = txAux.withdrawals.map(
       (withdrawal) => prepareWithdrawal(withdrawal, stakeSigningFiles),
     )
-    const metaDataHashHex = prepareMetaDataHashHex(txAux.metaDataHash)
+    const auxiliaryData = prepareMetaDataHashHex(txAux.metaDataHash)
 
-    const response = await ledger.signTransaction(
-      network.networkId,
-      network.protocolMagic,
-      inputs,
-      outputs,
-      fee,
-      ttl,
-      certificates,
-      withdrawals,
-      metaDataHashHex,
-      validityIntervalStart,
-    )
+    const response = await ledger.signTransaction({
+      signingMode,
+      tx: {
+        network,
+        inputs,
+        outputs,
+        fee,
+        ttl,
+        certificates,
+        withdrawals,
+        auxiliaryData,
+        validityIntervalStart,
+      },
+    })
+
     if (response.txHashHex !== txAux.getId()) {
       throw Error(Errors.TxSerializationMismatchError)
     }
@@ -491,7 +505,10 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
   const signTx = async (
     txAux: _TxAux, signingFiles: HwSigningData[], network: Network, changeOutputFiles: HwSigningData[],
   ): Promise<SignedTxCborHex> => {
-    const ledgerWitnesses = await ledgerSignTx(txAux, signingFiles, network, changeOutputFiles)
+    const ledgerWitnesses = await ledgerSignTx(
+      LedgerTypes.TransactionSigningMode.ORDINARY_TRANSACTION,
+      txAux, signingFiles, network, changeOutputFiles,
+    )
     const { byronWitnesses, shelleyWitnesses } = await createWitnesses(ledgerWitnesses, signingFiles)
     return TxSigned(txAux.unsignedTxDecoded, byronWitnesses, shelleyWitnesses)
   }
@@ -499,7 +516,10 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
   const witnessTx = async (
     txAux: _TxAux, signingFiles: HwSigningData[], network: Network, changeOutputFiles: HwSigningData[],
   ): Promise<Array<_ShelleyWitness | _ByronWitness>> => {
-    const ledgerWitnesses = await ledgerSignTx(txAux, signingFiles, network, changeOutputFiles)
+    const ledgerWitnesses = await ledgerSignTx(
+      LedgerTypes.TransactionSigningMode.POOL_REGISTRATION_AS_OWNER,
+      txAux, signingFiles, network, changeOutputFiles,
+    )
     const { byronWitnesses, shelleyWitnesses } = await createWitnesses(ledgerWitnesses, signingFiles)
     const _byronWitnesses = byronWitnesses.map((byronWitness) => (
       { key: TxWitnessKeys.BYRON, data: byronWitness }
@@ -512,18 +532,8 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
   }
 
   const getXPubKeys = async (paths: BIP32Path[]): Promise<XPubKeyHex[]> => {
-    if (isFeatureSupportedForVersion(LedgerCryptoProviderFeature.BULK_EXPORT)) {
-      const xPubKeys = await ledger.getExtendedPublicKeys(paths)
-      return xPubKeys.map((xPubKey) => xPubKey.publicKeyHex + xPubKey.chainCodeHex)
-    }
-
-    const xPubKeys: XPubKeyHex[] = []
-    for (let i = 0; i < paths.length; i += 1) {
-      // eslint-disable-next-line no-await-in-loop
-      const { publicKeyHex, chainCodeHex } = await ledger.getExtendedPublicKey(paths[i])
-      xPubKeys.push(publicKeyHex + chainCodeHex)
-    }
-    return xPubKeys
+    const xPubKeys = await ledger.getExtendedPublicKeys({ paths })
+    return xPubKeys.map((xPubKey) => xPubKey.publicKeyHex + xPubKey.chainCodeHex)
   }
 
   const signOperationalCertificate = async (
@@ -532,27 +542,28 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     issueCounter: OpCertIssueCounter,
     signingFiles: HwSigningData[],
   ): Promise<SignedOpCertCborHex> => {
+    throw Error(Errors.UnsupportedCryptoProviderCall)
     // TODO  something like   ensureFirmwareSupportsParams(txAux, signingFiles)
 
-    const poolColdKeyPath = findSigningPathForKey(issueCounter.poolColdKey, signingFiles)
+    // const poolColdKeyPath = findSigningPathForKey(issueCounter.poolColdKey, signingFiles)
 
-    const params = [
-      kesVKey.toString('hex'),
-      kesPeriod.toString(),
-      issueCounter.counter.toString(),
-      poolColdKeyPath,
-    ]
+    // const params = [
+    //   kesVKey.toString('hex'),
+    //   kesPeriod.toString(),
+    //   issueCounter.counter.toString(),
+    //   poolColdKeyPath,
+    // ]
 
-    const { operationalCertificateSignatureHex } = await ledger.signOperationalCertificate(
-      ...params,
-    )
+    // const { operationalCertificateSignatureHex } = await ledger.signOperationalCertificate(
+    //   ...params,
+    // )
 
-    return OpCertSigned(
-      kesVKey,
-      kesPeriod,
-      issueCounter,
-      Buffer.from(operationalCertificateSignatureHex, 'hex'),
-    )
+    // return OpCertSigned(
+    //   kesVKey,
+    //   kesPeriod,
+    //   issueCounter,
+    //   Buffer.from(operationalCertificateSignatureHex, 'hex'),
+    // )
   }
 
   return {
