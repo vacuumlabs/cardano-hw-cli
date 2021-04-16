@@ -78,7 +78,9 @@ const enum Errors {
   PolicyIdParseError = 'Failed to parse transaction, multi asset policy id is not a Buffer.',
   UnsupportedCryptoProviderCall = 'The call is not supported by the chosen crypto provider',
   TrezorUnsupportedMetaData = 'MetaData are in unsupported format, try using shelley era format instead.',
-  MissingLedgerAuxiliaryDataSupplement = 'Missing ledger auxiliary data supplement in response.'
+  MissingLedgerAuxiliaryDataSupplement = 'Missing ledger auxiliary data supplement in response.',
+  InternalInvalidTypeError = 'Internal invalid type error',
+  InvalidCatalystVotePublicKey = 'Invalid catalyst vote public key',
 }
 
 export {

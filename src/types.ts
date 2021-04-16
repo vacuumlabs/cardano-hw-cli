@@ -2,6 +2,27 @@ import { SignedTxOutput, WitnessOutput } from './transaction/types'
 import { CommandType } from './command-parser/commandParser'
 import { KesVKey } from './opCert/opCert'
 
+export type HexString = string & { __type: 'hex' }
+export type FixlenHexString<N> = string & { __type: 'hex', __length: N }
+
+export const PUB_KEY_HEX_LENGTH = 32
+export type PubKeyHex = FixlenHexString<typeof PUB_KEY_HEX_LENGTH>
+
+export const VERIFICATION_KEY_CBOR_HEX_LENGTH = 34
+export type PubKeyCborHex = FixlenHexString<typeof VERIFICATION_KEY_CBOR_HEX_LENGTH>
+
+export const CHAIN_CODE_HEX_LENGTH = 32
+export type ChainCodeHex = FixlenHexString<typeof CHAIN_CODE_HEX_LENGTH>
+
+export const X_PUB_KEY_HEX_LENGTH = 64
+export type XPubKeyHex = FixlenHexString<typeof X_PUB_KEY_HEX_LENGTH>
+
+export const X_PUB_KEY_CBOR_HEX_LENGTH = 66
+export type XPubKeyCborHex = FixlenHexString<typeof X_PUB_KEY_CBOR_HEX_LENGTH>
+
+export const VOTE_PUBLIC_KEY_HEX_LENGTH = 32
+export type VotePublicKeyHex = FixlenHexString<typeof VOTE_PUBLIC_KEY_HEX_LENGTH>
+
 export enum CardanoEra {
   BYRON = 'Byron',
   SHELLEY = 'Shelley',
@@ -9,9 +30,9 @@ export enum CardanoEra {
   MARY = 'Mary',
 }
 
-export type CborHex = string
+export type CborHex = HexString
 
-export type BIP32Path = number[]
+export type BIP32Path = number[] & { __type: 'bip32path' }
 
 export enum HwSigningType {
   Payment, Stake, PoolCold
@@ -20,7 +41,7 @@ export enum HwSigningType {
 export type HwSigningData = {
   type: HwSigningType
   path: BIP32Path,
-  cborXPubKeyHex: CborHex
+  cborXPubKeyHex: XPubKeyCborHex
 }
 
 export type TxBodyData = {
@@ -111,7 +132,7 @@ export type ParsedNodeKeyGenArguments = {
 export type ParsedCatalystVotingKeyRegistrationMetadataArguments = {
   command: CommandType.CATALYST_VOTING_KEY_REGISTRATION_METADATA,
   network: Network,
-  votePublicKey: string,
+  votePublicKey: VotePublicKeyHex,
   paymentAddress: string,
   hwStakeSigningFileData: HwSigningData,
   nonce: BigInt,
@@ -135,7 +156,7 @@ export type HwSigningOutput = {
   type: string,
   description: string,
   path: string,
-  cborXPubKeyHex: CborHex,
+  cborXPubKeyHex: XPubKeyCborHex,
 }
 
 export type VerificationKeyOutput = {

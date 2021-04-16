@@ -4,7 +4,6 @@ import {
   _TxAux,
   _ShelleyWitness,
   _ByronWitness,
-  XPubKeyHex,
 } from '../transaction/types'
 import {
   HwSigningData,
@@ -12,6 +11,8 @@ import {
   Network,
   Address,
   CborHex,
+  XPubKeyHex,
+  VotePublicKeyHex,
 } from '../types'
 
 export type CryptoProvider = {
@@ -40,7 +41,7 @@ export type CryptoProvider = {
     auxiliarySigningFiles: HwSigningData[],
     hwStakeSigningFile: HwSigningData,
     paymentAddressBech32: string,
-    votingPublicKeyHex: string,
+    votePublicKeyHex: VotePublicKeyHex,
     network: Network,
     nonce: BigInt,
   ) => Promise<CborHex>

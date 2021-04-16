@@ -1,7 +1,7 @@
 import fsPath from 'path'
 import { HARDENED_THRESHOLD, NETWORKS } from '../constants'
 import {
-  isBIP32Path, isCborHex, isHwSigningData, isTxBodyData,
+  isBIP32Path, isCborHex, isHwSigningData, isTxBodyData, isVotePublicKeyHex,
 } from '../guards'
 import { Errors } from '../errors'
 import {
@@ -11,6 +11,7 @@ import {
   HwSigningData,
   HwSigningType,
   TxBodyData,
+  VotePublicKeyHex,
 } from '../types'
 import { KesVKey, OpCertIssueCounter } from '../opCert/opCert'
 import { decodeCbor } from '../util'
@@ -140,7 +141,9 @@ export const parseOpCertIssueCounterFile = (path: string): OpCertIssueCounter =>
   throw Error(Errors.InvalidOpCertIssueCounterFileError)
 }
 
-export const parseVotePubFile = (path: string): string => {
+export const parseVotePubFile = (path: string): VotePublicKeyHex => {
   const data: string = rw.readFileSync(path, 'utf8')
-  return bech32.decode(data).data.toString('hex')
+  const hexString = bech32.decode(data).data.toString('hex')
+  if (isVotePublicKeyHex(hexString)) return bech32.decode(data).data.toString('hex')
+  throw Error(Errors.InvalidCatalystVotePublicKey)
 }

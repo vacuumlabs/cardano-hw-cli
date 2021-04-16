@@ -5,7 +5,6 @@ import {
   SignedTxCborHex,
   SignedTxOutput,
   WitnessOutput,
-  XPubKeyHex,
   _ByronWitness,
   _ShelleyWitness,
 } from './transaction/types'
@@ -16,6 +15,8 @@ import {
   OpCertIssueCounterOutput,
   OutputData,
   VerificationKeyOutput,
+  XPubKeyCborHex,
+  XPubKeyHex,
 } from './types'
 import { encodeCbor } from './util'
 
@@ -105,8 +106,9 @@ const verificationKeyDescription = (path: number[]): string => {
   }
 }
 
-const constructVerificationKeyOutput = (xPubKey: XPubKeyHex, path: BIP32Path): VerificationKeyOutput => {
-  // to get pub key also from cbor encoded xpub
+const constructVerificationKeyOutput = (
+  xPubKey: XPubKeyHex | XPubKeyCborHex, path: BIP32Path,
+): VerificationKeyOutput => {
   const pubKey = Buffer.from(xPubKey, 'hex').slice(-64).slice(0, 32)
   return {
     type: `${verificationKeyType(path)}`,

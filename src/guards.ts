@@ -4,6 +4,18 @@ import {
   CardanoEra,
   HwSigningData,
   TxBodyData,
+  PubKeyHex,
+  PubKeyCborHex,
+  ChainCodeHex,
+  XPubKeyHex,
+  XPubKeyCborHex,
+  VotePublicKeyHex,
+  PUB_KEY_HEX_LENGTH,
+  VERIFICATION_KEY_CBOR_HEX_LENGTH,
+  CHAIN_CODE_HEX_LENGTH,
+  X_PUB_KEY_HEX_LENGTH,
+  X_PUB_KEY_CBOR_HEX_LENGTH,
+  VOTE_PUBLIC_KEY_HEX_LENGTH,
 } from './types'
 import { decodeCbor } from './util'
 
@@ -38,3 +50,28 @@ export const isArrayOfType = <T>(
   valueGuard: (item: any) => boolean,
 ): value is T[] => Array.isArray(value)
   && (value as any[]).every((item) => valueGuard(item))
+
+export const isPubKeyHex = (
+  value: any,
+): value is PubKeyHex => typeof value === 'string' && value.length === PUB_KEY_HEX_LENGTH * 2
+
+export const isPubKeyCborHex = (
+  value: any,
+): value is PubKeyCborHex => typeof value === 'string'
+  && value.length === VERIFICATION_KEY_CBOR_HEX_LENGTH * 2
+
+export const isChainCodeHex = (
+  value: any,
+): value is ChainCodeHex => typeof value === 'string' && value.length === CHAIN_CODE_HEX_LENGTH * 2
+
+export const isXPubKeyHex = (
+  value: any,
+): value is XPubKeyHex => typeof value === 'string' && value.length === X_PUB_KEY_HEX_LENGTH * 2
+
+export const isXPubKeyCborHex = (
+  value: any,
+): value is XPubKeyCborHex => typeof value === 'string' && value.length === X_PUB_KEY_CBOR_HEX_LENGTH * 2
+
+export const isVotePublicKeyHex = (
+  value: any,
+): value is VotePublicKeyHex => typeof value === 'string' && value.length === VOTE_PUBLIC_KEY_HEX_LENGTH * 2

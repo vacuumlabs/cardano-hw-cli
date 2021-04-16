@@ -10,8 +10,6 @@ import {
   _TxAux,
   _ShelleyWitness,
   _ByronWitness,
-  XPubKeyCborHex,
-  _XPubKey,
 } from './types'
 import { isUnsignedTxDecoded } from './guards'
 import { Errors } from '../errors'
@@ -77,19 +75,10 @@ const Witness = (signedTxCborHex: SignedTxCborHex): Array<_ShelleyWitness | _Byr
   })
 }
 
-// TODO why is this in transaction.ts?
-const XPubKey = (xPubKeyCborHex: XPubKeyCborHex): _XPubKey => {
-  const xPubKeyDecoded = decodeCbor(xPubKeyCborHex)
-  const pubKey = xPubKeyDecoded.slice(0, 32)
-  const chainCode = xPubKeyDecoded.slice(32, 64)
-  return { pubKey, chainCode }
-}
-
 export {
   TxByronWitness,
   TxShelleyWitness,
   TxAux,
   TxSigned,
   Witness,
-  XPubKey,
 }

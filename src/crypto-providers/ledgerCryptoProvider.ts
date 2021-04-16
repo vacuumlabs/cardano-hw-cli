@@ -1,10 +1,9 @@
 import Ledger, * as LedgerTypes from '@cardano-foundation/ledgerjs-hw-app-cardano'
 import { parseBIP32Path } from '../command-parser/parsers'
 import { Errors } from '../errors'
+import { isChainCodeHex, isPubKeyHex, isXPubKeyHex } from '../guards'
 import { KesVKey, OpCertIssueCounter, SignedOpCertCborHex } from '../opCert/opCert'
-import {
-  TxByronWitness, TxShelleyWitness, TxSigned, XPubKey,
-} from '../transaction/transaction'
+import { TxByronWitness, TxShelleyWitness, TxSigned } from '../transaction/transaction'
 import {
   _Input,
   _Output,
@@ -14,7 +13,6 @@ import {
   _ShelleyWitness,
   TxWitnessByron,
   TxWitnessShelley,
-  XPubKeyHex,
   _Certificate,
   TxCertificateKeys,
   _Withdrawal,
@@ -39,6 +37,8 @@ import {
   CborHex,
   HwSigningData,
   Network,
+  VotePublicKeyHex,
+  XPubKeyHex,
 } from '../types'
 import { encodeCbor } from '../util'
 import { LEDGER_VERSIONS } from './constants'
@@ -57,6 +57,8 @@ import {
   filterSigningFiles,
   getAddressParameters,
   formatVotingRegistrationMetaData,
+  destructXPubKeyCborHex,
+  extractStakePubKey,
 } from './util'
 
 const { blake2b, bech32 } = require('cardano-crypto.js')
@@ -469,7 +471,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     }))
   }
 
-  const prepareVotingAuxiliaryData = (
+  const prepareVoteAuxiliaryData = (
     hwStakeSigningFile: HwSigningData,
     votingPublicKeyHex: string,
     addressParameters: _AddressParameters,
@@ -536,32 +538,25 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     auxiliarySigningFiles: HwSigningData[],
     hwStakeSigningFile: HwSigningData,
     paymentAddressBech32: string,
-    votingPublicKeyHex: string,
+    votePublicKeyHex: VotePublicKeyHex,
     network: Network,
     nonce: BigInt,
   ): Promise<CborHex> => {
     const { data: address } : { data: Buffer } = bech32.decode(paymentAddressBech32)
-    const addressParameters = getAddressParameters(auxiliarySigningFiles, address, network)
-    if (!addressParameters || !addressParameters.address || addressParameters.address.compare(address)) {
+    const addressParams = getAddressParameters(auxiliarySigningFiles, address, network)
+    if (!addressParams || !addressParams.stakePath || addressParams.address.compare(address)) {
       throw Error(Errors.InvalidAddressError)
     }
 
-    const stakeXPubHex = auxiliarySigningFiles.find(
-      (auxiliarySigningFile) => auxiliarySigningFile.path === addressParameters.stakePath,
-    )?.cborXPubKeyHex
-    if (!stakeXPubHex) throw Error(Errors.InvalidHwSigningFileError)
-    const stakePubHex = stakeXPubHex.slice(4, 68)
-
-    const auxiliaryData = prepareVotingAuxiliaryData(
-      hwStakeSigningFile, votingPublicKeyHex, addressParameters, nonce,
-    )
+    const stakePubHex = extractStakePubKey(addressParams.stakePath, auxiliarySigningFiles)
+    const auxiliaryData = prepareVoteAuxiliaryData(hwStakeSigningFile, votePublicKeyHex, addressParams, nonce)
     const dummyTx = prepareDummyTx(network, auxiliaryData)
 
     const response = await ledger.signTransaction(dummyTx)
     if (!response?.auxiliaryDataSupplement) throw Error(Errors.MissingLedgerAuxiliaryDataSupplement)
 
     const votingRegistrationMetaDataCbor = encodeCbor(formatVotingRegistrationMetaData(
-      Buffer.from(votingPublicKeyHex, 'hex'),
+      Buffer.from(votePublicKeyHex, 'hex'),
       Buffer.from(stakePubHex, 'hex'),
       address,
       nonce,
@@ -598,7 +593,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
       .filter((witness) => isByronPath(witness.path))
       .map((witness) => {
         const { cborXPubKeyHex } = getSigningFileDataByPath(witness.path)
-        const { pubKey, chainCode } = XPubKey(cborXPubKeyHex)
+        const { pubKey, chainCode } = destructXPubKeyCborHex(cborXPubKeyHex)
         return TxByronWitness(pubKey, witness.signature, chainCode, {})
       })
 
@@ -608,7 +603,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
       .filter((witness) => !isByronPath(witness.path))
       .map((witness) => {
         const { cborXPubKeyHex } = getSigningFileDataByPath(witness.path)
-        const { pubKey } = XPubKey(cborXPubKeyHex)
+        const { pubKey } = destructXPubKeyCborHex(cborXPubKeyHex)
         return TxShelleyWitness(pubKey, witness.signature)
       })
 
@@ -646,7 +641,15 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
 
   const getXPubKeys = async (paths: BIP32Path[]): Promise<XPubKeyHex[]> => {
     const xPubKeys = await ledger.getExtendedPublicKeys({ paths })
-    return xPubKeys.map((xPubKey) => xPubKey.publicKeyHex + xPubKey.chainCodeHex)
+    return xPubKeys.map((xPubKey) => {
+      const { publicKeyHex, chainCodeHex } = xPubKey
+      if (isPubKeyHex(xPubKey.publicKeyHex) && isChainCodeHex(xPubKey.chainCodeHex)) {
+        const xPubKeyHex = publicKeyHex + chainCodeHex
+        if (isXPubKeyHex(xPubKeyHex)) return xPubKeyHex
+        throw Error(Errors.InternalInvalidTypeError)
+      }
+      throw Error(Errors.InternalInvalidTypeError)
+    })
   }
 
   const signOperationalCertificate = async (

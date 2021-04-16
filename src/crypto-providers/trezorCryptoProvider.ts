@@ -14,7 +14,6 @@ import {
   _StakingKeyRegistrationCert,
   _StakingKeyDeregistrationCert,
   _PoolRelay,
-  XPubKeyHex,
   _MultiAsset,
 } from '../transaction/types'
 import {
@@ -44,6 +43,8 @@ import {
   CborHex,
   HwSigningData,
   Network,
+  VotePublicKeyHex,
+  XPubKeyHex,
 } from '../types'
 import {
   encodeAddress,
@@ -396,7 +397,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     auxiliarySigningFiles: HwSigningData[],
     hwStakeSigningFile: HwSigningData,
     paymentAddressBech32: string,
-    votingPublicKeyHex: string,
+    votePublicKeyHex: VotePublicKeyHex,
     network: Network,
     nonce: BigInt,
   ): Promise<CborHex> => null as any

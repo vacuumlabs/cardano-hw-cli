@@ -150,7 +150,7 @@ const CommandExecutor = async () => {
     write(args.outFile, constructSignedOpCertOutput(signedCertCborHex))
 
     // TODO how to increment BigInt?
-    issueCounter.counter = BigInt(issueCounter.counter) + BigInt(1)
+    issueCounter.counter = BigInt(issueCounter.counter as bigint) + BigInt(1)
     write(args.issueCounterFile, constructOpCertIssueCounterOutput(issueCounter))
   }
 

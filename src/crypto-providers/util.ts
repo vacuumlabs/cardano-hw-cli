@@ -1,9 +1,8 @@
 import { HARDENED_THRESHOLD } from '../constants'
 import { Errors } from '../errors'
-import { isBIP32Path } from '../guards'
-import { XPubKey } from '../transaction/transaction'
+import { isBIP32Path, isPubKeyHex } from '../guards'
 import {
-  TxCertificateKeys, VotingRegistrationMetaData, _Certificate, _TxAux,
+  TxCertificateKeys, VotingRegistrationMetaData, _Certificate, _TxAux, _XPubKey,
 } from '../transaction/types'
 import {
   Address,
@@ -13,7 +12,10 @@ import {
   Network,
   NetworkIds,
   ProtocolMagics,
+  PubKeyHex,
+  XPubKeyCborHex,
 } from '../types'
+import { decodeCbor } from '../util'
 import {
   DeviceVersion,
   _AddressParameters,
@@ -121,6 +123,13 @@ const classifyPath = (path: number[]) => {
   return PathTypes.PATH_INVALID
 }
 
+const destructXPubKeyCborHex = (xPubKeyCborHex: XPubKeyCborHex): _XPubKey => {
+  const xPubKeyDecoded = decodeCbor(xPubKeyCborHex)
+  const pubKey = xPubKeyDecoded.slice(0, 32)
+  const chainCode = xPubKeyDecoded.slice(32, 64)
+  return { pubKey, chainCode }
+}
+
 const encodeAddress = (address: Buffer): string => {
   const addressType = getAddressType(address)
   if (addressType === AddressTypes.BOOTSTRAP) {
@@ -175,7 +184,7 @@ const findSigningPathForKeyHash = (
   certPubKeyHash: Buffer, signingFiles: HwSigningData[],
 ): BIP32Path | undefined => {
   const signingFile = signingFiles.find((file) => {
-    const { pubKey } = XPubKey(file.cborXPubKeyHex)
+    const { pubKey } = destructXPubKeyCborHex(file.cborXPubKeyHex)
     const pubKeyHash = getPubKeyBlake2b224Hash(pubKey)
     return !Buffer.compare(pubKeyHash, certPubKeyHash)
   })
@@ -187,10 +196,20 @@ const findSigningPathForKey = (
   key: Buffer, signingFiles: HwSigningData[],
 ): BIP32Path | undefined => {
   const signingFile = signingFiles.find((file) => {
-    const { pubKey } = XPubKey(file.cborXPubKeyHex)
+    const { pubKey } = destructXPubKeyCborHex(file.cborXPubKeyHex)
     return !Buffer.compare(pubKey, key)
   })
   return signingFile?.path
+}
+
+const extractStakePubKey = (
+  path: BIP32Path, signingFiles: HwSigningData[],
+): PubKeyHex => {
+  const cborStakeXPubKeyHex = signingFiles.find((signingFile) => signingFile.path === path)?.cborXPubKeyHex
+  if (!cborStakeXPubKeyHex) throw Error(Errors.InvalidHwSigningFileError)
+  const stakePubHex = destructXPubKeyCborHex(cborStakeXPubKeyHex).pubKey.toString('hex')
+  if (isPubKeyHex(stakePubHex)) return stakePubHex
+  throw Error(Errors.InternalInvalidTypeError)
 }
 
 const txHasStakePoolRegistrationCert = (
@@ -328,7 +347,7 @@ const validateKeyGenInputs = (
 const _packBootStrapAddress = (
   file: HwSigningData, network: Network,
 ): _AddressParameters => {
-  const { pubKey, chainCode } = XPubKey(file.cborXPubKeyHex)
+  const { pubKey, chainCode } = destructXPubKeyCborHex(file.cborXPubKeyHex)
   const xPubKey = Buffer.concat([pubKey, chainCode])
   const address: Buffer = packBootstrapAddress(
     file.path,
@@ -352,8 +371,8 @@ const _packBaseAddress = (
   const paymentPathFile = changeOutputFiles.find(({ path }) => !isStakingPath(path))
   if (!stakePathFile || !paymentPathFile) return null
 
-  const { pubKey: stakePubKey } = XPubKey(stakePathFile.cborXPubKeyHex)
-  const { pubKey: paymentPubKey } = XPubKey(paymentPathFile.cborXPubKeyHex)
+  const { pubKey: stakePubKey } = destructXPubKeyCborHex(stakePathFile.cborXPubKeyHex)
+  const { pubKey: paymentPubKey } = destructXPubKeyCborHex(paymentPathFile.cborXPubKeyHex)
   const address: Buffer = packBaseAddress(
     getPubKeyBlake2b224Hash(paymentPubKey),
     getPubKeyBlake2b224Hash(stakePubKey),
@@ -370,7 +389,7 @@ const _packBaseAddress = (
 const _packEnterpriseAddress = (
   changeOutputFile: HwSigningData, network: Network,
 ): _AddressParameters => {
-  const { pubKey: paymentPubKey } = XPubKey(changeOutputFile.cborXPubKeyHex)
+  const { pubKey: paymentPubKey } = destructXPubKeyCborHex(changeOutputFile.cborXPubKeyHex)
   const address: Buffer = packEnterpriseAddress(
     getPubKeyBlake2b224Hash(paymentPubKey),
     network.networkId,
@@ -485,6 +504,7 @@ const formatVotingRegistrationMetaData = (
 export {
   PathTypes,
   classifyPath,
+  destructXPubKeyCborHex,
   validateSigning,
   validateWitnessing,
   validateKeyGenInputs,
@@ -492,6 +512,7 @@ export {
   filterSigningFiles,
   findSigningPathForKeyHash,
   findSigningPathForKey,
+  extractStakePubKey,
   encodeAddress,
   getAddressParameters,
   getAddressAttributes,

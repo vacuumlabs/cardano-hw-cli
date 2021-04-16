@@ -171,12 +171,6 @@ export type UnsignedTxCborHex = string
 
 export type TxWitnessCborHex = string
 
-export type XPubKeyCborHex = string
-
-export type pubKeyHex = string
-
-export type XPubKeyHex = string
-
 export type _XPubKey = {
   pubKey: Buffer,
   chainCode: Buffer,
