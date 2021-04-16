@@ -550,7 +550,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
       (auxiliarySigningFile) => auxiliarySigningFile.path === addressParameters.stakePath,
     )?.cborXPubKeyHex
     if (!stakeXPubHex) throw Error(Errors.InvalidHwSigningFileError)
-    const stakePubHex = stakeXPubHex.slice(0, 64)
+    const stakePubHex = stakeXPubHex.slice(4, 68)
 
     const auxiliaryData = prepareVotingAuxiliaryData(
       hwStakeSigningFile, votingPublicKeyHex, addressParameters, nonce,
@@ -568,12 +568,9 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
       Buffer.from(response.auxiliaryDataSupplement.signatureHex, 'hex'),
     ))
 
-    // TODO: For some reason there is a mismatch
     const auxiliaryDataHashHex = blake2b(votingRegistrationMetaDataCbor, 32).toString('hex')
     if (response.auxiliaryDataSupplement.auxiliaryDataHashHex !== auxiliaryDataHashHex) {
-      // throw Error(Errors.MetadataSerializationMismatchError) // TODO uncomment
-      // eslint-disable-next-line no-console
-      console.log(Errors.MetadataSerializationMismatchError)
+      throw Error(Errors.MetadataSerializationMismatchError)
     }
 
     return votingRegistrationMetaDataCbor.toString('hex')
