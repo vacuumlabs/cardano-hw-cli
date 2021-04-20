@@ -31,7 +31,7 @@ import {
   TxWitnessKeys,
   _MultiAsset,
   VotingRegistrationAuxiliaryData,
-  VotingRegistrationMetaData,
+  VotingRegistrationMetaDataCborHex,
 } from '../transaction/types'
 import {
   Address,
@@ -542,7 +542,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     votePublicKeyHex: VotePublicKeyHex,
     network: Network,
     nonce: BigInt,
-  ): Promise<VotingRegistrationMetaData> => {
+  ): Promise<VotingRegistrationMetaDataCborHex> => {
     const { data: address } : { data: Buffer } = bech32.decode(paymentAddressBech32)
     const addressParams = getAddressParameters(auxiliarySigningFiles, address, network)
     if (!addressParams || addressParams.address.compare(address)) {
@@ -572,7 +572,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
       throw Error(Errors.MetadataSerializationMismatchError)
     }
 
-    return votingRegistrationMetaData
+    return encodeCbor(votingRegistrationMetaData).toString('hex')
   }
 
   const createWitnesses = async (ledgerWitnesses: LedgerWitness[], signingFiles: HwSigningData[]): Promise<{

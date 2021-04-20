@@ -178,3 +178,5 @@ export type OutputData =
   | HwSigningOutput
   | VerificationKeyOutput
   | OpCertIssueCounterOutput
+
+export type Cbor = Buffer & { __type: 'cbor' }

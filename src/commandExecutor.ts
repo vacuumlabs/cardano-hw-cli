@@ -7,6 +7,7 @@ import {
   constructTxWitnessOutput,
   constructSignedOpCertOutput,
   constructOpCertIssueCounterOutput,
+  writeCbor,
 } from './fileWriter'
 import { TxAux } from './transaction/transaction'
 import {
@@ -18,6 +19,7 @@ import {
   ParsedOpCertArguments,
   ParsedNodeKeyGenArguments,
   ParsedCatalystVotingKeyRegistrationMetadataArguments,
+  Cbor,
 } from './types'
 import { LedgerCryptoProvider } from './crypto-providers/ledgerCryptoProvider'
 import { TrezorCryptoProvider } from './crypto-providers/trezorCryptoProvider'
@@ -31,9 +33,6 @@ import {
 } from './crypto-providers/util'
 import { Errors } from './errors'
 import { parseOpCertIssueCounterFile } from './command-parser/parsers'
-import { encodeCbor } from './util'
-
-const rw = require('rw')
 
 const promiseTimeout = <T> (promise: Promise<T>, ms: number): Promise<T> => {
   const timeout: Promise<T> = new Promise((resolve, reject) => {
@@ -176,7 +175,7 @@ const CommandExecutor = async () => {
       args.nonce,
     )
 
-    rw.writeFileSync(args.outFile, encodeCbor(votingRegistrationMetaData))
+    writeCbor(args.outFile, Buffer.from(votingRegistrationMetaData, 'hex') as Cbor)
   }
 
   return {

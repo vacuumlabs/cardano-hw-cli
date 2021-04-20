@@ -11,6 +11,7 @@ import {
 import {
   BIP32Path,
   CardanoEra,
+  Cbor,
   HwSigningOutput,
   OpCertIssueCounterOutput,
   OutputData,
@@ -23,9 +24,11 @@ import { encodeCbor } from './util'
 const rw = require('rw')
 
 const write = (path: string, data: OutputData) => rw.writeFileSync(
-  path,
-  JSON.stringify(data, null, 4),
-  'utf8',
+  path, JSON.stringify(data, null, 4), 'utf8',
+)
+
+const writeCbor = (path: string, data: Cbor) => rw.writeFileSync(
+  path, data,
 )
 
 const cardanoEraToSignedType: {[key in CardanoEra]: string} = {
@@ -144,6 +147,7 @@ const constructOpCertIssueCounterOutput = (issueCounter: OpCertIssueCounter): Op
 
 export {
   write,
+  writeCbor,
   constructSignedTxOutput,
   constructTxWitnessOutput,
   constructHwSigningKeyOutput,

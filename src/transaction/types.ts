@@ -1,3 +1,5 @@
+import { CborHex } from '../types'
+
 export enum TxBodyKeys {
   INPUTS = 0,
   OUTPUTS = 1,
@@ -278,5 +280,6 @@ export type TxStakepoolRetirementCert = [
 export type TxWithdrawal = Map<Buffer, Lovelace>
 
 export type VotingRegistrationMetaData = Map<number, Map<number, Buffer | BigInt>>
+export type VotingRegistrationMetaDataCborHex = CborHex
 
 export type VotingRegistrationAuxiliaryData = [VotingRegistrationMetaData, []]

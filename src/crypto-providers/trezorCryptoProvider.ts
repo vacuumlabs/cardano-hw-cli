@@ -15,7 +15,7 @@ import {
   _StakingKeyDeregistrationCert,
   _PoolRelay,
   _MultiAsset,
-  VotingRegistrationMetaData,
+  VotingRegistrationMetaDataCborHex,
 } from '../transaction/types'
 import {
   CryptoProvider,
@@ -400,7 +400,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     votePublicKeyHex: VotePublicKeyHex,
     network: Network,
     nonce: BigInt,
-  ): Promise<VotingRegistrationMetaData> => null as any
+  ): Promise<VotingRegistrationMetaDataCborHex> => null as any
 
   const witnessTx = async (
     txAux: _TxAux,
