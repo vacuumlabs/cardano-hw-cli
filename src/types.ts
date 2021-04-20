@@ -30,7 +30,9 @@ export enum CardanoEra {
   MARY = 'Mary',
 }
 
-export type CborHex = HexString
+export type CborHex = string & {
+  __type: 'cborHex';
+}
 
 export type BIP32Path = number[] & { __type: 'bip32path' }
 

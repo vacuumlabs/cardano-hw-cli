@@ -167,11 +167,11 @@ export type _UnsignedTxDecoded = [
   Buffer | null,
 ]
 
-export type SignedTxCborHex = string
+export type SignedTxCborHex = CborHex
 
-export type UnsignedTxCborHex = string
+export type UnsignedTxCborHex = CborHex
 
-export type TxWitnessCborHex = string
+export type TxWitnessCborHex = CborHex
 
 export type _XPubKey = {
   pubKey: Buffer,
