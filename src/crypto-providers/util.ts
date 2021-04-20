@@ -480,7 +480,7 @@ const formatVotingRegistrationMetaData = (
   address: Buffer,
   nonce: BigInt,
   signature: Buffer,
-): VotingRegistrationMetaData => [
+): VotingRegistrationMetaData => (
   new Map<number, Map<number, Buffer | BigInt>>([
     [
       61284,
@@ -497,9 +497,8 @@ const formatVotingRegistrationMetaData = (
         [1, signature],
       ]),
     ],
-  ]),
-  [],
-]
+  ])
+)
 
 export {
   PathTypes,

@@ -142,7 +142,7 @@ export const parseOpCertIssueCounterFile = (path: string): OpCertIssueCounter =>
 }
 
 export const parseVotePubFile = (path: string): VotePublicKeyHex => {
-  const data: string = rw.readFileSync(path, 'utf8')
+  const data: string = rw.readFileSync(path, 'utf8').trim()
   const hexString = bech32.decode(data).data.toString('hex')
   if (isVotePublicKeyHex(hexString)) return bech32.decode(data).data.toString('hex')
   throw Error(Errors.InvalidCatalystVotePublicKey)

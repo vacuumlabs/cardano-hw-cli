@@ -4,13 +4,13 @@ import {
   _TxAux,
   _ShelleyWitness,
   _ByronWitness,
+  VotingRegistrationMetaData,
 } from '../transaction/types'
 import {
   HwSigningData,
   BIP32Path,
   Network,
   Address,
-  CborHex,
   XPubKeyHex,
   VotePublicKeyHex,
 } from '../types'
@@ -44,7 +44,7 @@ export type CryptoProvider = {
     votePublicKeyHex: VotePublicKeyHex,
     network: Network,
     nonce: BigInt,
-  ) => Promise<CborHex>
+  ) => Promise<VotingRegistrationMetaData>
 }
 
 export type _AddressParameters = {

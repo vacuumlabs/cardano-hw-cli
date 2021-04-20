@@ -81,6 +81,7 @@ const enum Errors {
   MissingLedgerAuxiliaryDataSupplement = 'Missing ledger auxiliary data supplement in response.',
   InternalInvalidTypeError = 'Internal invalid type error',
   InvalidCatalystVotePublicKey = 'Invalid catalyst vote public key',
+  AuxSigningFileNotFoundForVotingRewardAddress = 'Voting rewards payment address doesn\'t match with supplied auxliary signing keys',
 }
 
 export {

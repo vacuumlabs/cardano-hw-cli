@@ -26,6 +26,7 @@ import {
 } from './crypto-providers/util'
 import { Errors } from './errors'
 import { parseOpCertIssueCounterFile } from './command-parser/parsers'
+import { encodeCbor } from './util'
 
 const rw = require('rw')
 
@@ -166,7 +167,7 @@ const CommandExecutor = async () => {
       args.nonce,
     )
 
-    rw.writeFileSync(args.outFile, votingRegistrationMetaData, 'utf8')
+    rw.writeFileSync(args.outFile, encodeCbor(votingRegistrationMetaData))
   }
 
   return {

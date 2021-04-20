@@ -245,10 +245,10 @@ export const parserConfig = {
         type: (path: string) => parseHwSigningFile(path),
         help: 'Input filepath of the hardware wallet auxiliary signing file.',
       },
-      '--out-file': {
+      '--metadata-cbor-out-file': {
         required: true,
         dest: 'outFile',
-        help: 'Output filepath.',
+        help: 'Output metadata cbor filepath.',
       },
     },
   },

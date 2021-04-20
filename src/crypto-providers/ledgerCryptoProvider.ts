@@ -30,11 +30,12 @@ import {
   TxRelayTypes,
   TxWitnessKeys,
   _MultiAsset,
+  VotingRegistrationAuxiliaryData,
+  VotingRegistrationMetaData,
 } from '../transaction/types'
 import {
   Address,
   BIP32Path,
-  CborHex,
   HwSigningData,
   Network,
   VotePublicKeyHex,
@@ -541,34 +542,37 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     votePublicKeyHex: VotePublicKeyHex,
     network: Network,
     nonce: BigInt,
-  ): Promise<CborHex> => {
+  ): Promise<VotingRegistrationMetaData> => {
     const { data: address } : { data: Buffer } = bech32.decode(paymentAddressBech32)
     const addressParams = getAddressParameters(auxiliarySigningFiles, address, network)
     if (!addressParams || !addressParams.stakePath || addressParams.address.compare(address)) {
-      throw Error(Errors.InvalidAddressError)
+      throw Error(Errors.AuxSigningFileNotFoundForVotingRewardAddress)
     }
 
     const stakePubHex = extractStakePubKey(addressParams.stakePath, auxiliarySigningFiles)
-    const auxiliaryData = prepareVoteAuxiliaryData(hwStakeSigningFile, votePublicKeyHex, addressParams, nonce)
-    const dummyTx = prepareDummyTx(network, auxiliaryData)
+    const ledgerAuxData = prepareVoteAuxiliaryData(hwStakeSigningFile, votePublicKeyHex, addressParams, nonce)
+    const dummyTx = prepareDummyTx(network, ledgerAuxData)
 
     const response = await ledger.signTransaction(dummyTx)
     if (!response?.auxiliaryDataSupplement) throw Error(Errors.MissingLedgerAuxiliaryDataSupplement)
 
-    const votingRegistrationMetaDataCbor = encodeCbor(formatVotingRegistrationMetaData(
+    const votingRegistrationMetaData = formatVotingRegistrationMetaData(
       Buffer.from(votePublicKeyHex, 'hex'),
       Buffer.from(stakePubHex, 'hex'),
       address,
       nonce,
       Buffer.from(response.auxiliaryDataSupplement.signatureHex, 'hex'),
-    ))
+    )
 
-    const auxiliaryDataHashHex = blake2b(votingRegistrationMetaDataCbor, 32).toString('hex')
+    const auxiliaryData: VotingRegistrationAuxiliaryData = [votingRegistrationMetaData, []]
+    const auxiliaryDataCbor = encodeCbor(auxiliaryData)
+
+    const auxiliaryDataHashHex = blake2b(auxiliaryDataCbor, 32).toString('hex')
     if (response.auxiliaryDataSupplement.auxiliaryDataHashHex !== auxiliaryDataHashHex) {
       throw Error(Errors.MetadataSerializationMismatchError)
     }
 
-    return votingRegistrationMetaDataCbor.toString('hex')
+    return votingRegistrationMetaData
   }
 
   const createWitnesses = async (ledgerWitnesses: LedgerWitness[], signingFiles: HwSigningData[]): Promise<{
