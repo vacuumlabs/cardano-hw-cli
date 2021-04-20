@@ -22,7 +22,12 @@ import {
 import { LedgerCryptoProvider } from './crypto-providers/ledgerCryptoProvider'
 import { TrezorCryptoProvider } from './crypto-providers/trezorCryptoProvider'
 import {
-  validateSigning, validateWitnessing, validateKeyGenInputs, classifyPath, PathTypes,
+  validateSigning,
+  validateWitnessing,
+  validateKeyGenInputs,
+  classifyPath,
+  PathTypes,
+  areHwSigningDataNonByron,
 } from './crypto-providers/util'
 import { Errors } from './errors'
 import { parseOpCertIssueCounterFile } from './command-parser/parsers'
@@ -158,6 +163,10 @@ const CommandExecutor = async () => {
   const createCatalystVotingKeyRegistrationMetadata = async (
     args: ParsedCatalystVotingKeyRegistrationMetadataArguments,
   ) => {
+    if (!areHwSigningDataNonByron([...args.auxiliarySigningKeyData, args.hwStakeSigningFileData])) {
+      throw Error(Errors.ByronSigningFilesFoundInVotingRegistration)
+    }
+
     const votingRegistrationMetaData = await cryptoProvider.signVotingRegistrationMetaData(
       args.auxiliarySigningKeyData,
       args.hwStakeSigningFileData,

@@ -497,6 +497,12 @@ const formatVotingRegistrationMetaData = (
   ])
 )
 
+const areHwSigningDataNonByron = (hwSigningData: HwSigningData[]) => (
+  hwSigningData
+    .map((signingFile) => classifyPath(signingFile.path))
+    .every((pathType) => pathType !== PathTypes.PATH_WALLET_SPENDING_KEY_BYRON)
+)
+
 export {
   PathTypes,
   classifyPath,
@@ -518,4 +524,5 @@ export {
   deviceVersionToStr,
   isDeviceVersionGTE,
   formatVotingRegistrationMetaData,
+  areHwSigningDataNonByron,
 }
