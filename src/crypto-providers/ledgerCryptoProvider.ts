@@ -59,7 +59,7 @@ import {
   getAddressParameters,
   formatVotingRegistrationMetaData,
   destructXPubKeyCborHex,
-  extractStakePubKey,
+  extractStakePubKeyFromHwSigningData,
 } from './util'
 
 const { blake2b, bech32 } = require('cardano-crypto.js')
@@ -545,11 +545,11 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
   ): Promise<VotingRegistrationMetaData> => {
     const { data: address } : { data: Buffer } = bech32.decode(paymentAddressBech32)
     const addressParams = getAddressParameters(auxiliarySigningFiles, address, network)
-    if (!addressParams || !addressParams.stakePath || addressParams.address.compare(address)) {
+    if (!addressParams || addressParams.address.compare(address)) {
       throw Error(Errors.AuxSigningFileNotFoundForVotingRewardAddress)
     }
 
-    const stakePubHex = extractStakePubKey(addressParams.stakePath, auxiliarySigningFiles)
+    const stakePubHex = extractStakePubKeyFromHwSigningData(hwStakeSigningFile)
     const ledgerAuxData = prepareVoteAuxiliaryData(hwStakeSigningFile, votePublicKeyHex, addressParams, nonce)
     const dummyTx = prepareDummyTx(network, ledgerAuxData)
 

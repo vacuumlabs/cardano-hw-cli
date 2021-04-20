@@ -202,11 +202,8 @@ const findSigningPathForKey = (
   return signingFile?.path
 }
 
-const extractStakePubKey = (
-  path: BIP32Path, signingFiles: HwSigningData[],
-): PubKeyHex => {
-  const cborStakeXPubKeyHex = signingFiles.find((signingFile) => signingFile.path === path)?.cborXPubKeyHex
-  if (!cborStakeXPubKeyHex) throw Error(Errors.InvalidHwSigningFileError)
+const extractStakePubKeyFromHwSigningData = (signingFile: HwSigningData): PubKeyHex => {
+  const cborStakeXPubKeyHex = signingFile.cborXPubKeyHex
   const stakePubHex = destructXPubKeyCborHex(cborStakeXPubKeyHex).pubKey.toString('hex')
   if (isPubKeyHex(stakePubHex)) return stakePubHex
   throw Error(Errors.InternalInvalidTypeError)
@@ -511,7 +508,7 @@ export {
   filterSigningFiles,
   findSigningPathForKeyHash,
   findSigningPathForKey,
-  extractStakePubKey,
+  extractStakePubKeyFromHwSigningData,
   encodeAddress,
   getAddressParameters,
   getAddressAttributes,
