@@ -18,10 +18,10 @@ import {
 } from './types'
 
 export const isUint64 = (value: any): value is number => {
-  if (typeof value === 'number' && value > 0) return true
+  if (typeof value === 'number' && value >= 0) return true
   try {
     BigInt(value)
-    return value > 0
+    return value >= 0
   } catch (e) { return false }
 }
 
