@@ -20,18 +20,6 @@ Currently only Ledger supports signing and creating payment/pool witnesses.
 
 These commands create stake pool keys - VRF, KES. The process is similar with the official documentation found [here](https://docs.cardano.org/projects/cardano-node/en/latest/stake-pool-operations/node_keys.html). All of these keys will be required for further steps and for running a block producing node, therefore keep them very secure and do not share them with anyone.
 
-```
-cardano-cli node key-gen-VRF \
---verification-key-file vrf.vkey \
---signing-key-file vrf.skey
-```
-
-```
-cardano-cli node key-gen-KES \
---verification-key-file kes.vkey \
---signing-key-file kes.skey
-```
-
 The first difference is that we don't create `cold.skey` cold key file that usually holds private key, instead we are creating `cold.hwsfile` that contains only public key and mapping for Ledger:
 ```
 cardano-hw-cli node key-gen \
