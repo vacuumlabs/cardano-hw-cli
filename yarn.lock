@@ -214,7 +214,7 @@
   dependencies:
     defer-to-connect "^1.0.1"
 
-"@trezor/blockchain-link@^1.0.15":
+"@trezor/blockchain-link@^1.0.17":
   version "1.0.17"
   resolved "https://registry.yarnpkg.com/@trezor/blockchain-link/-/blockchain-link-1.0.17.tgz#3155b44ee9beb71326986d404385ede673519b3c"
   integrity sha512-o1ZmZVdhXM8K4OY61A6l/pvmasC6OTGDeDliVlVnNdy3eVDVlnEivQVnMD7CvQr0Crxl1Flox0mp90Ljp/DIkA==
@@ -234,32 +234,7 @@
     cross-fetch "^3.0.6"
     runtypes "^5.0.1"
 
-"@trezor/utxo-lib@0.1.1":
-  version "0.1.1"
-  resolved "https://registry.yarnpkg.com/@trezor/utxo-lib/-/utxo-lib-0.1.1.tgz#63cb4b3accc90352a42a1c866fce8bfbb1c94b26"
-  integrity sha512-Wonj9ldKCeoajCV6lSE6+hJ2hdPxmVaysWRO9GxhnKyiOdRhiOIQcdKOiXYqpcxwkIbbL9eLGDg73tfn3MUa6w==
-  dependencies:
-    bech32 "0.0.3"
-    bigi "^1.4.0"
-    bip66 "^1.1.0"
-    bitcoin-ops "^1.3.0"
-    blake2b "https://github.com/BitGo/blake2b#6268e6dd678661e0acc4359e9171b97eb1ebf8ac"
-    bs58check "^2.0.0"
-    create-hash "^1.1.0"
-    create-hmac "^1.1.3"
-    debug "~3.1.0"
-    ecurve "^1.0.0"
-    merkle-lib "^2.0.10"
-    pushdata-bitcoin "^1.0.1"
-    randombytes "^2.0.1"
-    safe-buffer "^5.0.1"
-    typeforce "^1.11.3"
-    varuint-bitcoin "^1.0.4"
-    wif "^2.0.1"
-  optionalDependencies:
-    secp256k1 "^3.5.2"
-
-"@trezor/utxo-lib@^0.1.2":
+"@trezor/utxo-lib@0.1.2", "@trezor/utxo-lib@^0.1.2":
   version "0.1.2"
   resolved "https://registry.yarnpkg.com/@trezor/utxo-lib/-/utxo-lib-0.1.2.tgz#19319a424b0d0c648b0df456f1849eb08697fb44"
   integrity sha512-ONAsg8LAyZY9g6X/qgqloUHwWsqtRmrx2Wt3wkz+7LO2VdE69HktAHWUjJLK9drskNwly3Fp0GKK6ZbbtX+Ghw==
@@ -676,21 +651,15 @@ base@^0.11.1:
     mixin-deep "^1.2.0"
     pascalcase "^0.1.1"
 
-bchaddrjs@0.4.9:
-  version "0.4.9"
-  resolved "https://registry.yarnpkg.com/bchaddrjs/-/bchaddrjs-0.4.9.tgz#c17036bf5bab31bfbb9f3cec432c7c578f0faf46"
-  integrity sha512-Mf5Uf+P452ltYg1b/NncX/eAEKW+iAfUs8rO1mcgro8S+/WG6gRh8OqgBtyCK1jBHViajovWoAG+ZCkKbhZbNg==
+bchaddrjs@^0.5.2:
+  version "0.5.2"
+  resolved "https://registry.yarnpkg.com/bchaddrjs/-/bchaddrjs-0.5.2.tgz#1f52b5077329774e7c82d4882964628106bb11a0"
+  integrity sha512-OO7gIn3m7ea4FVx4cT8gdlWQR2+++EquhdpWQJH9BQjK63tJJ6ngB3QMZDO6DiBoXiIGUsTPHjlrHVxPGcGxLQ==
   dependencies:
-    bs58check "^2.1.2"
-    cashaddrjs "^0.3.12"
-
-bchaddrjs@^0.3.2:
-  version "0.3.2"
-  resolved "https://registry.yarnpkg.com/bchaddrjs/-/bchaddrjs-0.3.2.tgz#62d4915f8f69012b7a16ae9fd0c99eca3a8ccf91"
-  integrity sha512-jpoq2GX6PphcCpuvvrQG4oQmEzn4nGQSm5dT208W72r9GDdbmNPi0hG9TY/dFF3r9sNtdl0qKwNsh8dNL3Q62g==
-  dependencies:
-    bs58check "^2.1.2"
-    cashaddrjs "^0.3.3"
+    bs58check "2.1.2"
+    buffer "^6.0.3"
+    cashaddrjs "0.4.4"
+    stream-browserify "^3.0.0"
 
 bech32@0.0.3:
   version "0.0.3"
@@ -879,7 +848,7 @@ bs58@^4.0.0:
   dependencies:
     base-x "^3.0.2"
 
-bs58check@<3.0.0, bs58check@^2.0.0, bs58check@^2.1.2:
+bs58check@2.1.2, bs58check@<3.0.0, bs58check@^2.0.0:
   version "2.1.2"
   resolved "https://registry.yarnpkg.com/bs58check/-/bs58check-2.1.2.tgz#53b018291228d82a5aa08e7d796fdafda54aebfc"
   integrity sha512-0TS1jicxdU09dwJMNZtVAfzPi6Q6QeN0pM1Fkzrjn+XYHvzMKPU3pHVpva+769iNVSfIYWf7LJ6WR+BuuMf8cA==
@@ -928,6 +897,14 @@ buffer@^5.2.1, buffer@^5.5.0:
   dependencies:
     base64-js "^1.3.1"
     ieee754 "^1.1.13"
+
+buffer@^6.0.3:
+  version "6.0.3"
+  resolved "https://registry.yarnpkg.com/buffer/-/buffer-6.0.3.tgz#2ace578459cc8fbe2a70aaa8f52ee63b6a74c6c6"
+  integrity sha512-FTiCpNxtwiZZHEZbcbTIcZjERVICn9yq/pDFkTl95/AxzD1naBctN7YO68riM/gLSDY7sdrMby8hofADYuuqOA==
+  dependencies:
+    base64-js "^1.3.1"
+    ieee754 "^1.2.1"
 
 bufferview@~1:
   version "1.0.1"
@@ -1016,10 +993,10 @@ cardano-crypto.js@^5.3.6-rc.6:
     borc "^2.1.1"
     pbkdf2 "^3.0.17"
 
-cashaddrjs@^0.3.12, cashaddrjs@^0.3.3:
-  version "0.3.12"
-  resolved "https://registry.yarnpkg.com/cashaddrjs/-/cashaddrjs-0.3.12.tgz#73089588113459741e854aa842db1f7816d8428d"
-  integrity sha512-GdjCYMVwd86HXcFcxyEZQLPLFv8a/u0ccYPsO0PpnUW26LhZzHX9l9QA+DjaeUah7tnebwPs33NWDbbUy8iVYQ==
+cashaddrjs@0.4.4:
+  version "0.4.4"
+  resolved "https://registry.yarnpkg.com/cashaddrjs/-/cashaddrjs-0.4.4.tgz#169f1ae620d325db77700273d972282adeeee331"
+  integrity sha512-xZkuWdNOh0uq/mxJIng6vYWfTowZLd9F4GMAlp2DwFHlcCqCm91NtuAc47RuV4L7r4PYcY5p6Cr2OKNb4hnkWA==
   dependencies:
     big-integer "1.6.36"
 
@@ -2397,13 +2374,13 @@ hash.js@^1.0.0, hash.js@^1.0.3:
     inherits "^2.0.3"
     minimalistic-assert "^1.0.1"
 
-hd-wallet@9.1.0:
-  version "9.1.0"
-  resolved "https://registry.yarnpkg.com/hd-wallet/-/hd-wallet-9.1.0.tgz#0cfdae4e0d7147438c7802fedce29b7d049c0f5f"
-  integrity sha512-Oto94Q1e9C9wPsrxErky8TFoOqERiL6EZEo3jZ3BSPu36hpz1KfsB3MqPorvoOWQt6AjC5FoIy/lIPLx3aDMew==
+hd-wallet@9.1.1:
+  version "9.1.1"
+  resolved "https://registry.yarnpkg.com/hd-wallet/-/hd-wallet-9.1.1.tgz#4a6e49ff09e8cb4bbe0127133cfaf80e24142096"
+  integrity sha512-Z1UhEcFv6aGrPL2fDDkEzO3MwPuiAKbLAs8MSNQ1BxeW9c2HxXjTWMEfx8xhQ0gv10Blf1bmXLm+itOe1+nh6Q==
   dependencies:
-    "@trezor/utxo-lib" "0.1.1"
-    bchaddrjs "^0.3.2"
+    "@trezor/utxo-lib" "0.1.2"
+    bchaddrjs "^0.5.2"
     bignumber.js "^9.0.1"
     queue "^6.0.1"
     socket.io-client "^2.2.0"
@@ -2445,7 +2422,7 @@ https-proxy-agent@^5.0.0:
     agent-base "6"
     debug "4"
 
-ieee754@^1.1.13:
+ieee754@^1.1.13, ieee754@^1.2.1:
   version "1.2.1"
   resolved "https://registry.yarnpkg.com/ieee754/-/ieee754-1.2.1.tgz#8eb7a10a63fff25d15a57b001586d177d1b0d352"
   integrity sha512-dcyqhDvX1C46lXZcVqCpK+FtMRQVdIMN6/Df5js2zouUsqG7I6sFxitIC+7KYK29KdXOLHdu9zL4sFnoVQnqaA==
@@ -2486,7 +2463,7 @@ inflight@^1.0.4:
     once "^1.3.0"
     wrappy "1"
 
-inherits@2, inherits@^2.0.1, inherits@^2.0.3, inherits@^2.0.4, inherits@~2.0.3:
+inherits@2, inherits@^2.0.1, inherits@^2.0.3, inherits@^2.0.4, inherits@~2.0.3, inherits@~2.0.4:
   version "2.0.4"
   resolved "https://registry.yarnpkg.com/inherits/-/inherits-2.0.4.tgz#0fa2c64f932917c3433a0ded55363aae37416b7c"
   integrity sha512-k/vGaX4/Yla3WzyMCvTQOXYeIHvqOKtnqBduzTHpzpQZzAskKMhZ2K+EnBiSM9zGSoIFeMpXKxa4dYeZIQqewQ==
@@ -3810,7 +3787,7 @@ readable-stream@^2.0.0, readable-stream@^2.0.1, readable-stream@^2.0.5, readable
     string_decoder "~1.1.1"
     util-deprecate "~1.0.1"
 
-readable-stream@^3.1.1, readable-stream@^3.4.0, readable-stream@^3.6.0:
+readable-stream@^3.1.1, readable-stream@^3.4.0, readable-stream@^3.5.0, readable-stream@^3.6.0:
   version "3.6.0"
   resolved "https://registry.yarnpkg.com/readable-stream/-/readable-stream-3.6.0.tgz#337bbda3adc0706bd3e024426a286d4b4b2c9198"
   integrity sha512-BViHy7LKeTz4oNnkcLJ+lVSL6vpiFeX6/d3oSH8zCW7UxP2onchk+vTGB143xuFjHS3deTgkKoXXymXqymiIdA==
@@ -4332,6 +4309,14 @@ static-extend@^0.1.1:
     define-property "^0.2.5"
     object-copy "^0.1.0"
 
+stream-browserify@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/stream-browserify/-/stream-browserify-3.0.0.tgz#22b0a2850cdf6503e73085da1fc7b7d0c2122f2f"
+  integrity sha512-H73RAHsVBapbim0tU2JwwOiXUj+fikfiaoYAKHF3VJfA0pe2BCzkhAHBlLG6REzE+2WNZcxOXjK7lkso+9euLA==
+  dependencies:
+    inherits "~2.0.4"
+    readable-stream "^3.5.0"
+
 strict-uri-encode@^1.0.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/strict-uri-encode/-/strict-uri-encode-1.1.0.tgz#279b225df1d582b1f54e65addd4352e18faa0713"
@@ -4589,20 +4574,19 @@ to-regex@^3.0.1, to-regex@^3.0.2:
     regex-not "^1.0.2"
     safe-regex "^1.1.0"
 
-trezor-connect@8.1.22-extended:
-  version "8.1.22-extended"
-  resolved "https://registry.yarnpkg.com/trezor-connect/-/trezor-connect-8.1.22-extended.tgz#121d40c5dc9e25ca6032b5b541681d46d5de9fe6"
-  integrity sha512-j7FrInV+4qaO2Zjxkilkm6iaAYW0DdAEjesS453JlKGTcHsIMztem3k6x6tn00mdaYn4jSPKCTYtLTTy30b2QA==
+"trezor-connect@https://github.com/vacuumlabs/connect/releases/download/8.1.25-catalyst-rc.2-extended/trezor-connect-v8.1.25-catalyst-rc.2-extended.tgz":
+  version "8.1.26-extended"
+  resolved "https://github.com/vacuumlabs/connect/releases/download/8.1.25-catalyst-rc.2-extended/trezor-connect-v8.1.25-catalyst-rc.2-extended.tgz#254857b0ca8f4f184e1d0a7837b8bb64b9639f48"
   dependencies:
     "@babel/runtime" "^7.12.5"
-    "@trezor/blockchain-link" "^1.0.15"
+    "@trezor/blockchain-link" "^1.0.17"
     "@trezor/rollout" "1.0.7"
     "@trezor/utxo-lib" "^0.1.2"
-    bchaddrjs "0.4.9"
+    bchaddrjs "^0.5.2"
     bignumber.js "^9.0.1"
     bowser "^2.11.0"
     events "^3.2.0"
-    hd-wallet "9.1.0"
+    hd-wallet "9.1.1"
     keccak "^3.0.1"
     node-fetch "^2.6.1"
     parse-uri "^1.0.3"
