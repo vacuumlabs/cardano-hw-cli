@@ -9,7 +9,7 @@ export const encodeCbor = (value: any) => {
   return enc.read()
 }
 
-export const removeNullFields = (obj: any) => Object.keys(obj)
+export const removeNullFields = (obj: any): any => Object.keys(obj)
   .filter((key) => obj[key] != null)
   .reduce(
     (acc, key) => {

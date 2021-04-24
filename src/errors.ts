@@ -83,6 +83,7 @@ const enum Errors {
   InvalidCatalystVotePublicKey = 'Invalid catalyst vote public key',
   AuxSigningFileNotFoundForVotingRewardAddress = 'Voting rewards payment address doesn\'t match with supplied auxliary signing keys',
   ByronSigningFilesFoundInVotingRegistration = 'Byron addresses are not allowed for voting registration',
+  TrezorVersionError = 'Failed to retrieve trezor version',
 }
 
 export {
