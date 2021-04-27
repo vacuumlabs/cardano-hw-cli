@@ -155,6 +155,7 @@ describe('Trezor tx signing and witnessing', () => {
   before(async () => {
     cryptoProvider = await TrezorCryptoProvider()
   })
+  // TODO: This causes to run only tx.js and not run votingRegistration.js, removing it causes crashes
   after(async () => {
     process.exit(0)
   })
