@@ -17,6 +17,7 @@ import {
   _PoolRelay,
   _MultiAsset,
   VotingRegistrationMetaDataCborHex,
+  VotingRegistrationMetaData,
 } from '../transaction/types'
 import {
   CryptoProvider,
@@ -50,9 +51,12 @@ import {
   getAddressParameters,
 } from './util'
 import { Errors } from '../errors'
-import { encodeCbor, removeNullFields } from '../util'
+import { decodeCbor, encodeCbor, removeNullFields } from '../util'
 import { TREZOR_VERSIONS } from './constants'
 import { KesVKey, OpCertIssueCounter, SignedOpCertCborHex } from '../opCert/opCert'
+import { parseBIP32Path } from '../command-parser/parsers'
+
+const { bech32 } = require('cardano-crypto.js')
 
 const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
   const initTrezorConnect = async (): Promise<void> => {
@@ -412,6 +416,63 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     return response.payload.serializedTx as SignedTxCborHex
   }
 
+  const prepareVoteAuxiliaryData = (
+    hwStakeSigningFile: HwSigningData,
+    votingPublicKeyHex: VotePublicKeyHex,
+    addressParameters: _AddressParameters,
+    nonce: BigInt,
+  ): TrezorTypes.CardanoAuxiliaryData => ({
+    catalystRegistrationParameters: {
+      votingPublicKey: votingPublicKeyHex,
+      stakingPath: hwStakeSigningFile.path,
+      rewardAddressParameters: {
+        addressType: TrezorEnums.CardanoAddressType.BASE,
+        path: addressParameters.paymentPath,
+        stakingPath: addressParameters.stakePath,
+      },
+      nonce: Number(nonce),
+    },
+  })
+
+  const prepareDummyInput = (): TrezorTypes.CardanoInput => ({
+    path: parseBIP32Path('1852H/1815H/0H/0/0'),
+    prev_hash: '0'.repeat(64),
+    prev_index: 0,
+  })
+
+  const prepareDummyOutput = (): TrezorTypes.CardanoOutput => ({
+    addressParameters: {
+      addressType: TrezorEnums.CardanoAddressType.BASE,
+      path: parseBIP32Path('1852H/1815H/0H/0/0'),
+      stakingPath: parseBIP32Path('1852H/1815H/0H/2/0'),
+    },
+    amount: '1',
+  })
+
+  const prepareDummyTx = (
+    network: Network, auxiliaryData: TrezorTypes.CardanoAuxiliaryData,
+  ): TrezorTypes.CommonParams & TrezorTypes.CardanoSignTransaction => ({
+    protocolMagic: network.protocolMagic,
+    networkId: network.networkId,
+    inputs: [prepareDummyInput()],
+    outputs: [prepareDummyOutput()],
+    fee: '0',
+    ttl: '0',
+    auxiliaryData,
+  })
+
+  const extractTrezorSignedAuxiliaryData = (
+    payload: TrezorTypes.CardanoSignedTx,
+  ): VotingRegistrationMetaData => {
+    try {
+      const { serializedTx } = payload
+      const votingRegistrationMetaData = decodeCbor(serializedTx)[2][0]
+      return votingRegistrationMetaData
+    } catch (e) {
+      throw Error(Errors.MissingAuxiliaryDataSupplement)
+    }
+  }
+
   const signVotingRegistrationMetaData = async (
     auxiliarySigningFiles: HwSigningData[],
     hwStakeSigningFile: HwSigningData,
@@ -419,7 +480,26 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     votePublicKeyHex: VotePublicKeyHex,
     network: Network,
     nonce: BigInt,
-  ): Promise<VotingRegistrationMetaDataCborHex> => null as any
+  ): Promise<VotingRegistrationMetaDataCborHex> => {
+    const { data: address } : { data: Buffer } = bech32.decode(paymentAddressBech32)
+    const addressParams = getAddressParameters(auxiliarySigningFiles, address, network)
+    if (!addressParams || addressParams.address.compare(address)) {
+      throw Error(Errors.AuxSigningFileNotFoundForVotingRewardAddress)
+    }
+
+    const trezorAuxData = prepareVoteAuxiliaryData(hwStakeSigningFile, votePublicKeyHex, addressParams, nonce)
+    const dummyTx = prepareDummyTx(network, trezorAuxData)
+
+    const response = await TrezorConnect.cardanoSignTransaction(dummyTx)
+
+    if (!response.success) {
+      throw Error(response.payload.error)
+    }
+
+    const votingRegistrationMetaData = extractTrezorSignedAuxiliaryData(response.payload)
+
+    return encodeCbor(votingRegistrationMetaData).toString('hex')
+  }
 
   const witnessTx = async (
     txAux: _TxAux,

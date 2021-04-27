@@ -474,7 +474,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
 
   const prepareVoteAuxiliaryData = (
     hwStakeSigningFile: HwSigningData,
-    votingPublicKeyHex: string,
+    votingPublicKeyHex: VotePublicKeyHex,
     addressParameters: _AddressParameters,
     nonce: BigInt,
   ): LedgerTypes.TxAuxiliaryData => ({
@@ -554,7 +554,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     const dummyTx = prepareDummyTx(network, ledgerAuxData)
 
     const response = await ledger.signTransaction(dummyTx)
-    if (!response?.auxiliaryDataSupplement) throw Error(Errors.MissingLedgerAuxiliaryDataSupplement)
+    if (!response?.auxiliaryDataSupplement) throw Error(Errors.MissingAuxiliaryDataSupplement)
 
     const votingRegistrationMetaData = formatVotingRegistrationMetaData(
       Buffer.from(votePublicKeyHex, 'hex'),
