@@ -1,0 +1,6 @@
+{
+    "type": "PaymentHWSigningFileShelley_ed25519",
+    "description": "Payment Hardware Signing File",
+    "path": "1852H/1815H/0H/0/0",
+    "cborXPubKeyHex": "58405d010cf16fdeff40955633d6c565f3844a288a24967cf6b76acbeb271b4f13c1f123474e140a2c360b01f0fa66f2f22e2e965a5b07a80358cf75f77abbd66088"
+}
