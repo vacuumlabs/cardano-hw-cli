@@ -50,7 +50,7 @@ export type CryptoProvider = {
 export type _AddressParameters = {
   address: Buffer,
   addressType: number,
-  paymentPath: BIP32Path,
+  paymentPath?: BIP32Path,
   stakePath?: BIP32Path,
 }
 

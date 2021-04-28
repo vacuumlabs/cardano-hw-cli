@@ -84,6 +84,7 @@ const enum Errors {
   AuxSigningFileNotFoundForVotingRewardAddress = 'Voting rewards payment address doesn\'t match with supplied auxliary signing keys',
   ByronSigningFilesFoundInVotingRegistration = 'Byron addresses are not allowed for voting registration',
   TrezorVersionError = 'Failed to retrieve trezor version',
+  InvalidVotingRegistrationAddressType = 'Voting registration address type must be either BASE or REWARD',
 }
 
 export {

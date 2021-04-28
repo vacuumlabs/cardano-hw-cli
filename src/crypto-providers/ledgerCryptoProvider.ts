@@ -60,6 +60,7 @@ import {
   formatVotingRegistrationMetaData,
   destructXPubKeyCborHex,
   extractStakePubKeyFromHwSigningData,
+  validateVotingRegistrationAddressType,
 } from './util'
 
 const { blake2b, bech32 } = require('cardano-crypto.js')
@@ -157,7 +158,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
       params: {
         type: changeOutput.addressType,
         params: {
-          spendingPath: changeOutput.paymentPath,
+          spendingPath: changeOutput.paymentPath as BIP32Path,
           stakingPath: changeOutput.stakePath,
         },
       },
@@ -478,23 +479,18 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     addressParameters: _AddressParameters,
     nonce: BigInt,
   ): LedgerTypes.TxAuxiliaryData => ({
-    type: LedgerTypes.TxAuxiliaryDataType.TUPLE,
+    type: LedgerTypes.TxAuxiliaryDataType.CATALYST_REGISTRATION,
     params: {
-      metadata: {
-        type: LedgerTypes.TxMetadataType.CATALYST_REGISTRATION,
+      votingPublicKeyHex,
+      stakingPath: hwStakeSigningFile.path,
+      rewardsDestination: {
+        type: addressParameters.addressType,
         params: {
-          votingPublicKeyHex,
-          stakingPath: hwStakeSigningFile.path,
-          rewardsDestination: {
-            type: addressParameters.addressType,
-            params: {
-              spendingPath: addressParameters.paymentPath,
-              stakingPath: addressParameters.stakePath,
-            },
-          },
-          nonce: `${nonce}`,
+          spendingPath: addressParameters.paymentPath as BIP32Path,
+          stakingPath: addressParameters.stakePath as BIP32Path,
         },
       },
+      nonce: `${nonce}`,
     },
   })
 
@@ -526,8 +522,8 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
       network,
       inputs: [prepareDummyInput()],
       outputs: [prepareDummyOutput()],
-      fee: 1,
-      ttl: 1,
+      fee: 0,
+      ttl: 0,
       certificates: null,
       withdrawals: null,
       auxiliaryData,
@@ -549,6 +545,8 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
       throw Error(Errors.AuxSigningFileNotFoundForVotingRewardAddress)
     }
 
+    validateVotingRegistrationAddressType(addressParams.addressType)
+
     const stakePubHex = extractStakePubKeyFromHwSigningData(hwStakeSigningFile)
     const ledgerAuxData = prepareVoteAuxiliaryData(hwStakeSigningFile, votePublicKeyHex, addressParams, nonce)
     const dummyTx = prepareDummyTx(network, ledgerAuxData)
@@ -561,7 +559,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
       Buffer.from(stakePubHex, 'hex'),
       address,
       nonce,
-      Buffer.from(response.auxiliaryDataSupplement.signatureHex, 'hex'),
+      Buffer.from(response.auxiliaryDataSupplement.catalystRegistrationSignatureHex, 'hex'),
     )
 
     const auxiliaryData: VotingRegistrationAuxiliaryData = [votingRegistrationMetaData, []]

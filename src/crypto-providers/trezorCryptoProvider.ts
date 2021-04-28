@@ -178,7 +178,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     amount: lovelaceAmount.toString(),
     addressParameters: {
       addressType: changeAddress.addressType,
-      path: changeAddress.paymentPath,
+      path: changeAddress.paymentPath as BIP32Path,
       stakingPath: changeAddress.stakePath,
     },
     tokenBundle,
@@ -427,7 +427,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
       stakingPath: hwStakeSigningFile.path,
       rewardAddressParameters: {
         addressType: TrezorEnums.CardanoAddressType.BASE,
-        path: addressParameters.paymentPath,
+        path: addressParameters.paymentPath as BIP32Path,
         stakingPath: addressParameters.stakePath,
       },
       nonce: Number(nonce),

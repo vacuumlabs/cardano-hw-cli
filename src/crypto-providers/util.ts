@@ -31,6 +31,7 @@ const {
   packBaseAddress,
   getShelleyAddressNetworkId,
   packEnterpriseAddress,
+  packRewardAddress,
   isValidBootstrapAddress,
   isValidShelleyAddress,
   addressToBuffer,
@@ -342,12 +343,12 @@ const validateKeyGenInputs = (
 }
 
 const _packBootStrapAddress = (
-  file: HwSigningData, network: Network,
+  hwsData: HwSigningData, network: Network,
 ): _AddressParameters => {
-  const { pubKey, chainCode } = destructXPubKeyCborHex(file.cborXPubKeyHex)
+  const { pubKey, chainCode } = destructXPubKeyCborHex(hwsData.cborXPubKeyHex)
   const xPubKey = Buffer.concat([pubKey, chainCode])
   const address: Buffer = packBootstrapAddress(
-    file.path,
+    hwsData.path,
     xPubKey,
     undefined, // passphrase is undefined for derivation scheme v2
     2, // derivation scheme is always 2 for hw wallets
@@ -356,16 +357,16 @@ const _packBootStrapAddress = (
   return {
     address,
     addressType: getAddressType(address),
-    paymentPath: file.path,
+    paymentPath: hwsData.path,
   }
 }
 
 const _packBaseAddress = (
-  changeOutputFiles: HwSigningData[], network: Network,
+  hwsData: HwSigningData[], network: Network,
 ): _AddressParameters | null => {
   const isStakingPath = (path: number[]) => classifyPath(path) === PathTypes.PATH_WALLET_STAKING_KEY
-  const stakePathFile = changeOutputFiles.find(({ path }) => isStakingPath(path))
-  const paymentPathFile = changeOutputFiles.find(({ path }) => !isStakingPath(path))
+  const stakePathFile = hwsData.find(({ path }) => isStakingPath(path))
+  const paymentPathFile = hwsData.find(({ path }) => !isStakingPath(path))
   if (!stakePathFile || !paymentPathFile) return null
 
   const { pubKey: stakePubKey } = destructXPubKeyCborHex(stakePathFile.cborXPubKeyHex)
@@ -384,9 +385,9 @@ const _packBaseAddress = (
 }
 
 const _packEnterpriseAddress = (
-  changeOutputFile: HwSigningData, network: Network,
+  hwsData: HwSigningData, network: Network,
 ): _AddressParameters => {
-  const { pubKey: paymentPubKey } = destructXPubKeyCborHex(changeOutputFile.cborXPubKeyHex)
+  const { pubKey: paymentPubKey } = destructXPubKeyCborHex(hwsData.cborXPubKeyHex)
   const address: Buffer = packEnterpriseAddress(
     getPubKeyBlake2b224Hash(paymentPubKey),
     network.networkId,
@@ -394,7 +395,26 @@ const _packEnterpriseAddress = (
   return {
     address,
     addressType: getAddressType(address),
-    paymentPath: changeOutputFile.path,
+    paymentPath: hwsData.path,
+  }
+}
+
+const _packRewardAddress = (
+  hwsData: HwSigningData[], network: Network,
+): _AddressParameters | null => {
+  const isStakingPath = (path: number[]) => classifyPath(path) === PathTypes.PATH_WALLET_STAKING_KEY
+  const stakePathFile = hwsData.find(({ path }) => isStakingPath(path))
+  if (!stakePathFile) return null
+
+  const { pubKey: stakePubKey } = destructXPubKeyCborHex(stakePathFile.cborXPubKeyHex)
+  const address: Buffer = packRewardAddress(
+    getPubKeyBlake2b224Hash(stakePubKey),
+    network.networkId,
+  )
+  return {
+    address,
+    addressType: getAddressType(address),
+    stakePath: stakePathFile.path,
   }
 }
 
@@ -412,6 +432,8 @@ const getAddressParameters = (
         return _packBaseAddress(hwSigningData, network)
       case AddressTypes.ENTERPRISE:
         return _packEnterpriseAddress(hwSigningData[0], network)
+      case AddressTypes.REWARD:
+        return _packRewardAddress(hwSigningData, network)
       default: return null
     }
   } catch (e) {
@@ -503,6 +525,12 @@ const areHwSigningDataNonByron = (hwSigningData: HwSigningData[]) => (
     .every((pathType) => pathType !== PathTypes.PATH_WALLET_SPENDING_KEY_BYRON)
 )
 
+const validateVotingRegistrationAddressType = (addressType: number) => {
+  if (addressType !== AddressTypes.BASE && addressType !== AddressTypes.REWARD) {
+    throw Error(Errors.InvalidVotingRegistrationAddressType)
+  }
+}
+
 export {
   PathTypes,
   classifyPath,
@@ -525,4 +553,5 @@ export {
   isDeviceVersionGTE,
   formatVotingRegistrationMetaData,
   areHwSigningDataNonByron,
+  validateVotingRegistrationAddressType,
 }
