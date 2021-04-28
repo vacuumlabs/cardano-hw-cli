@@ -49,6 +49,7 @@ import {
   rewardAddressToPubKeyHash,
   isDeviceVersionGTE,
   getAddressParameters,
+  validateVotingRegistrationAddressType,
 } from './util'
 import { Errors } from '../errors'
 import { decodeCbor, encodeCbor, removeNullFields } from '../util'
@@ -421,18 +422,33 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     votingPublicKeyHex: VotePublicKeyHex,
     addressParameters: _AddressParameters,
     nonce: BigInt,
-  ): TrezorTypes.CardanoAuxiliaryData => ({
-    catalystRegistrationParameters: {
-      votingPublicKey: votingPublicKeyHex,
-      stakingPath: hwStakeSigningFile.path,
-      rewardAddressParameters: {
-        addressType: TrezorEnums.CardanoAddressType.BASE,
-        path: addressParameters.paymentPath as BIP32Path,
-        stakingPath: addressParameters.stakePath,
+  ): TrezorTypes.CardanoAuxiliaryData => {
+    const prepareAddressParameters = () => {
+      if (addressParameters.addressType === TrezorEnums.CardanoAddressType.BASE) {
+        return {
+          addressType: addressParameters.addressType,
+          path: addressParameters.paymentPath as BIP32Path,
+          stakingPath: addressParameters.stakePath,
+        }
+      }
+      if (addressParameters.addressType === TrezorEnums.CardanoAddressType.REWARD) {
+        return {
+          addressType: addressParameters.addressType,
+          path: addressParameters.stakePath as BIP32Path,
+        }
+      }
+      throw Error(Errors.InvalidVotingRegistrationAddressType)
+    }
+
+    return {
+      catalystRegistrationParameters: {
+        votingPublicKey: votingPublicKeyHex,
+        stakingPath: hwStakeSigningFile.path,
+        rewardAddressParameters: prepareAddressParameters(),
+        nonce: Number(nonce),
       },
-      nonce: Number(nonce),
-    },
-  })
+    }
+  }
 
   const prepareDummyInput = (): TrezorTypes.CardanoInput => ({
     path: parseBIP32Path('1852H/1815H/0H/0/0'),
@@ -486,6 +502,8 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     if (!addressParams || addressParams.address.compare(address)) {
       throw Error(Errors.AuxSigningFileNotFoundForVotingRewardAddress)
     }
+
+    validateVotingRegistrationAddressType(addressParams.addressType)
 
     const trezorAuxData = prepareVoteAuxiliaryData(hwStakeSigningFile, votePublicKeyHex, addressParams, nonce)
     const dummyTx = prepareDummyTx(network, trezorAuxData)
