@@ -1,5 +1,4 @@
 import TrezorConnect, * as TrezorTypes from 'trezor-connect'
-import * as TrezorEnums from './trezorEnums'
 import {
   SignedTxCborHex,
   _TxAux,
@@ -212,7 +211,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     const path = findSigningPathForKeyHash(cert.pubKeyHash, stakeSigningFiles)
     if (!path) throw Error(Errors.MissingSigningFileForCertificateError)
     return {
-      type: TrezorEnums.CardanoCertificateType.STAKE_REGISTRATION,
+      type: TrezorTypes.CardanoCertificateType.STAKE_REGISTRATION,
       path,
     }
   }
@@ -224,7 +223,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     const path = findSigningPathForKeyHash(cert.pubKeyHash, stakeSigningFiles)
     if (!path) throw Error(Errors.MissingSigningFileForCertificateError)
     return {
-      type: TrezorEnums.CardanoCertificateType.STAKE_DEREGISTRATION,
+      type: TrezorTypes.CardanoCertificateType.STAKE_DEREGISTRATION,
       path,
     }
   }
@@ -235,7 +234,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     const path = findSigningPathForKeyHash(cert.pubKeyHash, stakeSigningFiles)
     if (!path) throw Error(Errors.MissingSigningFileForCertificateError)
     return {
-      type: TrezorEnums.CardanoCertificateType.STAKE_DELEGATION,
+      type: TrezorTypes.CardanoCertificateType.STAKE_DELEGATION,
       path,
       pool: cert.poolHash.toString('hex'),
     }
@@ -296,7 +295,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
       metadata: metadata as TrezorTypes.CardanoPoolMetadata,
     }
     return {
-      type: TrezorEnums.CardanoCertificateType.STAKE_POOL_REGISTRATION,
+      type: TrezorTypes.CardanoCertificateType.STAKE_POOL_REGISTRATION,
       path: null as any, // path can be null here, library type definition is wrong
       poolParameters,
     }
@@ -424,14 +423,14 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     nonce: BigInt,
   ): TrezorTypes.CardanoAuxiliaryData => {
     const prepareAddressParameters = () => {
-      if (addressParameters.addressType === TrezorEnums.CardanoAddressType.BASE) {
+      if (addressParameters.addressType === TrezorTypes.CardanoAddressType.BASE) {
         return {
           addressType: addressParameters.addressType,
           path: addressParameters.paymentPath as BIP32Path,
           stakingPath: addressParameters.stakePath,
         }
       }
-      if (addressParameters.addressType === TrezorEnums.CardanoAddressType.REWARD) {
+      if (addressParameters.addressType === TrezorTypes.CardanoAddressType.REWARD) {
         return {
           addressType: addressParameters.addressType,
           path: addressParameters.stakePath as BIP32Path,
@@ -445,7 +444,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
         votingPublicKey: votingPublicKeyHex,
         stakingPath: hwStakeSigningFile.path,
         rewardAddressParameters: prepareAddressParameters(),
-        nonce: Number(nonce),
+        nonce: `${nonce}`,
       },
     }
   }
@@ -458,7 +457,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
 
   const prepareDummyOutput = (): TrezorTypes.CardanoOutput => ({
     addressParameters: {
-      addressType: TrezorEnums.CardanoAddressType.BASE,
+      addressType: TrezorTypes.CardanoAddressType.BASE,
       path: parseBIP32Path('1852H/1815H/0H/0/0'),
       stakingPath: parseBIP32Path('1852H/1815H/0H/2/0'),
     },

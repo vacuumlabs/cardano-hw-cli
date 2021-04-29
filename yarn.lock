@@ -4574,9 +4574,9 @@ to-regex@^3.0.1, to-regex@^3.0.2:
     regex-not "^1.0.2"
     safe-regex "^1.1.0"
 
-"trezor-connect@https://github.com/vacuumlabs/connect/releases/download/8.1.25-catalyst-rc.2-extended/trezor-connect-v8.1.25-catalyst-rc.2-extended.tgz":
+"trezor-connect@https://github.com/vacuumlabs/connect/releases/download/8.1.27-catalyst-rc.3-extended/trezor-connect-v8.1.27-catalyst-rc.3-extended.tgz":
   version "8.1.26-extended"
-  resolved "https://github.com/vacuumlabs/connect/releases/download/8.1.25-catalyst-rc.2-extended/trezor-connect-v8.1.25-catalyst-rc.2-extended.tgz#254857b0ca8f4f184e1d0a7837b8bb64b9639f48"
+  resolved "https://github.com/vacuumlabs/connect/releases/download/8.1.27-catalyst-rc.3-extended/trezor-connect-v8.1.27-catalyst-rc.3-extended.tgz#da78ef842a522ab572926f678e122c75a67d4962"
   dependencies:
     "@babel/runtime" "^7.12.5"
     "@trezor/blockchain-link" "^1.0.17"
