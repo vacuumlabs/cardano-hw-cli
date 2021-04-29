@@ -168,7 +168,7 @@ describe('Command parser', () => {
       '42',
       '--vote-public-key',
       prefix('vote.pub'),
-      '--payment-address',
+      '--reward-address',
       'adr_test1qq2vzmtlgvjrhkq50rngh8d482zj3l20kyrc6kx4ffl3zfqayfawlf9hwv2fzuygt2km5v92kvf8e3s3mk7ynxw77cwq2glhm4',
       '--stake-signing-key',
       prefix('stake.hwsfile'),
@@ -204,7 +204,7 @@ describe('Command parser', () => {
       },
       nonce: 165564n,
       outFile: 'voting_registration.cbor',
-      paymentAddress: 'adr_test1qq2vzmtlgvjrhkq50rngh8d482zj3l20kyrc6kx4ffl3zfqayfawlf9hwv2fzuygt2km5v92kvf8e3s3mk7ynxw77cwq2glhm4',
+      rewardAddress: 'adr_test1qq2vzmtlgvjrhkq50rngh8d482zj3l20kyrc6kx4ffl3zfqayfawlf9hwv2fzuygt2km5v92kvf8e3s3mk7ynxw77cwq2glhm4',
       votePublicKey: '3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7',
     }
     assert.deepStrictEqual(parsedArgs, expectedResult)

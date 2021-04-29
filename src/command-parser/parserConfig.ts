@@ -221,10 +221,9 @@ export const parserConfig = {
         type: (path: string) => parseVotePubFile(path),
         help: 'Input filepath to vote public key.',
       },
-      // TODO: rename to reward address
-      '--payment-address': {
+      '--reward-address': {
         required: true,
-        dest: 'paymentAddress',
+        dest: 'rewardAddress',
         help: 'Address to receive voting rewards.',
       },
       '--stake-signing-key': {

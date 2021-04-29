@@ -169,7 +169,7 @@ const CommandExecutor = async () => {
     const votingRegistrationMetaData = await cryptoProvider.signVotingRegistrationMetaData(
       args.auxiliarySigningKeyData,
       args.hwStakeSigningFileData,
-      args.paymentAddress,
+      args.rewardAddress,
       args.votePublicKey,
       args.network,
       args.nonce,

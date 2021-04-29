@@ -492,12 +492,12 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
   const signVotingRegistrationMetaData = async (
     auxiliarySigningFiles: HwSigningData[],
     hwStakeSigningFile: HwSigningData,
-    paymentAddressBech32: string,
+    rewardAddressBech32: string,
     votePublicKeyHex: VotePublicKeyHex,
     network: Network,
     nonce: BigInt,
   ): Promise<VotingRegistrationMetaDataCborHex> => {
-    const { data: address } : { data: Buffer } = bech32.decode(paymentAddressBech32)
+    const { data: address } : { data: Buffer } = bech32.decode(rewardAddressBech32)
     const addressParams = getAddressParameters(auxiliarySigningFiles, address, network)
     if (!addressParams || addressParams.address.compare(address)) {
       throw Error(Errors.AuxSigningFileNotFoundForVotingRewardAddress)

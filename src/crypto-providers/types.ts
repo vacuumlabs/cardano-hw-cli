@@ -40,7 +40,7 @@ export type CryptoProvider = {
   signVotingRegistrationMetaData: (
     auxiliarySigningFiles: HwSigningData[],
     hwStakeSigningFile: HwSigningData,
-    paymentAddressBech32: string,
+    rewardAddressBech32: string,
     votePublicKeyHex: VotePublicKeyHex,
     network: Network,
     nonce: BigInt,
