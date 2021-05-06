@@ -77,7 +77,6 @@ const enum Errors {
   AssetAmountParseError = 'Failed to parse transaction, asset amount is not a valid number.',
   PolicyIdParseError = 'Failed to parse transaction, multi asset policy id is not a Buffer.',
   UnsupportedCryptoProviderCall = 'The call is not supported by the chosen crypto provider',
-  TrezorUnsupportedMetaData = 'MetaData are in unsupported format, try using shelley era format instead.',
   MissingAuxiliaryDataSupplement = 'Missing auxiliary data supplement in response.',
   InternalInvalidTypeError = 'Internal invalid type error',
   InvalidCatalystVotePublicKey = 'Invalid catalyst vote public key',

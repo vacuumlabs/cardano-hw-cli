@@ -162,12 +162,12 @@ const CommandExecutor = async () => {
   const createCatalystVotingKeyRegistrationMetadata = async (
     args: ParsedCatalystVotingKeyRegistrationMetadataArguments,
   ) => {
-    if (!areHwSigningDataNonByron([...args.auxiliarySigningKeyData, args.hwStakeSigningFileData])) {
+    if (!areHwSigningDataNonByron([...args.rewardAddressSigningKeyData, args.hwStakeSigningFileData])) {
       throw Error(Errors.ByronSigningFilesFoundInVotingRegistration)
     }
 
     const votingRegistrationMetaData = await cryptoProvider.signVotingRegistrationMetaData(
-      args.auxiliarySigningKeyData,
+      args.rewardAddressSigningKeyData,
       args.hwStakeSigningFileData,
       args.rewardAddress,
       args.votePublicKey,

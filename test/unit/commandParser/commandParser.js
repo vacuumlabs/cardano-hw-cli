@@ -174,9 +174,9 @@ describe('Command parser', () => {
       prefix('stake.hwsfile'),
       '--nonce',
       '165564',
-      '--auxiliary-signing-key',
+      '--reward-address-signing-key',
       prefix('payment.hwsfile'),
-      '--auxiliary-signing-key',
+      '--reward-address-signing-key',
       prefix('stake.hwsfile'),
       '--metadata-cbor-out-file',
       'voting_registration.cbor',
@@ -185,7 +185,7 @@ describe('Command parser', () => {
     const expectedResult = {
       command: CommandType.CATALYST_VOTING_KEY_REGISTRATION_METADATA,
       network: NETWORKS.TESTNET,
-      auxiliarySigningKeyData: [
+      rewardAddressSigningKeyData: [
         {
           type: 0,
           path: [2147485463, 2147485500, 2147483648, 2, 1],

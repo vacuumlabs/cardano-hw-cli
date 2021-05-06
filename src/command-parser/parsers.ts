@@ -145,7 +145,7 @@ export const parseVotePubFile = (path: string): VotePublicKeyHex => {
   const data: string = rw.readFileSync(path, 'utf8').trim()
   try {
     const hexString = bech32.decode(data).data.toString('hex')
-    if (isVotePublicKeyHex(hexString)) return bech32.decode(data).data.toString('hex')
+    if (isVotePublicKeyHex(hexString)) return hexString
   } catch (e) {
     throw Error(Errors.InvalidCatalystVotePublicKey)
   }

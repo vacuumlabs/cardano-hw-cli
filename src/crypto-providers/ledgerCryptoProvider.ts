@@ -172,12 +172,12 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     changeOutputFiles: HwSigningData[],
     network: Network,
   ): LedgerTypes.TxOutput => {
-    const changeAddress = getAddressParameters(changeOutputFiles, output.address, network)
+    const changeAddressParams = getAddressParameters(changeOutputFiles, output.address, network)
     const amount = output.coins
     const tokenBundle = prepareTokenBundle(output.tokenBundle)
 
-    if (changeAddress && !changeAddress.address.compare(output.address)) {
-      return prepareChangeOutput(amount, changeAddress, tokenBundle)
+    if (changeAddressParams && !changeAddressParams.address.compare(output.address)) {
+      return prepareChangeOutput(amount, changeAddressParams, tokenBundle)
     }
     return {
       destination: {
@@ -532,7 +532,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
   })
 
   const signVotingRegistrationMetaData = async (
-    auxiliarySigningFiles: HwSigningData[],
+    rewardAddressSigningFiles: HwSigningData[],
     hwStakeSigningFile: HwSigningData,
     rewardAddressBech32: string,
     votePublicKeyHex: VotePublicKeyHex,
@@ -540,7 +540,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     nonce: BigInt,
   ): Promise<VotingRegistrationMetaDataCborHex> => {
     const { data: address } : { data: Buffer } = bech32.decode(rewardAddressBech32)
-    const addressParams = getAddressParameters(auxiliarySigningFiles, address, network)
+    const addressParams = getAddressParameters(rewardAddressSigningFiles, address, network)
     if (!addressParams || addressParams.address.compare(address)) {
       throw Error(Errors.AuxSigningFileNotFoundForVotingRewardAddress)
     }

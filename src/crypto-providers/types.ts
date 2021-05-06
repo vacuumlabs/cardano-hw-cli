@@ -38,7 +38,7 @@ export type CryptoProvider = {
     signingFile: HwSigningData[],
   ) => Promise<SignedOpCertCborHex>
   signVotingRegistrationMetaData: (
-    auxiliarySigningFiles: HwSigningData[],
+    rewardAddressSigningFiles: HwSigningData[],
     hwStakeSigningFile: HwSigningData,
     rewardAddressBech32: string,
     votePublicKeyHex: VotePublicKeyHex,

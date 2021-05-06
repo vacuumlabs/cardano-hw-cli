@@ -189,12 +189,12 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     network: Network,
     changeOutputFiles: HwSigningData[],
   ): TrezorTypes.CardanoOutput => {
-    const changeAddress = getAddressParameters(changeOutputFiles, output.address, network)
+    const changeAddressParams = getAddressParameters(changeOutputFiles, output.address, network)
     const address = encodeAddress(output.address)
     const tokenBundle = prepareTokenBundle(output.tokenBundle)
 
-    if (changeAddress && !changeAddress.address.compare(output.address)) {
-      return prepareChangeOutput(output.coins, changeAddress, tokenBundle)
+    if (changeAddressParams && !changeAddressParams.address.compare(output.address)) {
+      return prepareChangeOutput(output.coins, changeAddressParams, tokenBundle)
     }
 
     return ({
@@ -339,7 +339,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
   const prepareMetaDataHex = (metaData: Buffer | null): TrezorTypes.CardanoAuxiliaryData | undefined => (
     metaData ? ({
       blob: encodeCbor(metaData).toString('hex'),
-    }) as TrezorTypes.CardanoAuxiliaryData : undefined // Forced cast due to wrong type definition in connect
+    }) : undefined
   )
 
   const ensureFirmwareSupportsParams = (txAux: _TxAux) => {
@@ -367,7 +367,6 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     changeOutputFiles: HwSigningData[],
   ): Promise<SignedTxCborHex> => {
     ensureFirmwareSupportsParams(txAux)
-    // console.log(signingFiles)
     const {
       paymentSigningFiles,
       stakeSigningFiles,
@@ -489,7 +488,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
   }
 
   const signVotingRegistrationMetaData = async (
-    auxiliarySigningFiles: HwSigningData[],
+    rewardAddressSigningFiles: HwSigningData[],
     hwStakeSigningFile: HwSigningData,
     rewardAddressBech32: string,
     votePublicKeyHex: VotePublicKeyHex,
@@ -497,7 +496,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     nonce: BigInt,
   ): Promise<VotingRegistrationMetaDataCborHex> => {
     const { data: address } : { data: Buffer } = bech32.decode(rewardAddressBech32)
-    const addressParams = getAddressParameters(auxiliarySigningFiles, address, network)
+    const addressParams = getAddressParameters(rewardAddressSigningFiles, address, network)
     if (!addressParams || addressParams.address.compare(address)) {
       throw Error(Errors.AuxSigningFileNotFoundForVotingRewardAddress)
     }

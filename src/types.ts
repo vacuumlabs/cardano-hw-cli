@@ -135,10 +135,10 @@ export type ParsedCatalystVotingKeyRegistrationMetadataArguments = {
   command: CommandType.CATALYST_VOTING_KEY_REGISTRATION_METADATA,
   network: Network,
   votePublicKey: VotePublicKeyHex,
-  rewardAddress: string,
   hwStakeSigningFileData: HwSigningData,
+  rewardAddress: string,
   nonce: BigInt,
-  auxiliarySigningKeyData: HwSigningData[],
+  rewardAddressSigningKeyData: HwSigningData[],
   outFile: string,
 }
 

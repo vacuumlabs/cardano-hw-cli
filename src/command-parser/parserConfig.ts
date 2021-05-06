@@ -1,3 +1,4 @@
+/* eslint-disable max-len */
 /* eslint quote-props: ["error", "consistent"] */
 import {
   parseAddressFile,
@@ -221,16 +222,16 @@ export const parserConfig = {
         type: (path: string) => parseVotePubFile(path),
         help: 'Input filepath to vote public key.',
       },
-      '--reward-address': {
-        required: true,
-        dest: 'rewardAddress',
-        help: 'Address to receive voting rewards.',
-      },
       '--stake-signing-key': {
         required: true,
         dest: 'hwStakeSigningFileData',
         type: (path: string) => parseHwSigningFile(path),
-        help: 'Input filepath of the hardware wallet stake signing file.',
+        help: 'Input filepath of the hardware wallet stake signing file, which will be used to to sign the voting registration.',
+      },
+      '--reward-address': {
+        required: true,
+        dest: 'rewardAddress',
+        help: 'Address to receive voting rewards.',
       },
       '--nonce': {
         required: true,
@@ -238,12 +239,12 @@ export const parserConfig = {
         type: (nonce: string) => BigInt(nonce),
         help: 'Nonce',
       },
-      '--auxiliary-signing-key': {
+      '--reward-address-signing-key': {
         action: 'append',
         required: true,
-        dest: 'auxiliarySigningKeyData',
+        dest: 'rewardAddressSigningKeyData',
         type: (path: string) => parseHwSigningFile(path),
-        help: 'Input filepath of the hardware wallet auxiliary signing file.',
+        help: 'Input filepath of the reward address signing file.',
       },
       '--metadata-cbor-out-file': {
         required: true,
