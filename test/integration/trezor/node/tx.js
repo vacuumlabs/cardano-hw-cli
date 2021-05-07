@@ -152,7 +152,9 @@ async function testTxWitnessing(cryptoProvider, transaction) {
 
 describe('Trezor tx signing and witnessing', () => {
   let cryptoProvider
-  before(async () => {
+  // eslint-disable-next-line func-names
+  before(async function () {
+    this.timeout(10000)
     cryptoProvider = await TrezorCryptoProvider()
   })
   // TODO: This causes to run only tx.js and not run votingRegistration.js, removing it causes crashes

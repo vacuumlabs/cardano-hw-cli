@@ -193,7 +193,9 @@ async function testTxWitnessing(cryptoProvider, transaction) {
 
 describe('Ledger tx signing and witnessing', () => {
   let cryptoProvider
-  before(async () => {
+  // eslint-disable-next-line func-names
+  before(async function () {
+    this.timeout(10000)
     cryptoProvider = await LedgerCryptoProvider()
   })
   const txs = Object.entries(transactions)

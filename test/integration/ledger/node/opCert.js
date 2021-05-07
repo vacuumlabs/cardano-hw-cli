@@ -26,7 +26,9 @@ async function testOpCertSigning(cryptoProvider, opCert) {
 
 describe('Ledger operational certificate', () => {
   let cryptoProvider
-  before(async () => {
+  // eslint-disable-next-line func-names
+  before(async function () {
+    this.timeout(10000)
     cryptoProvider = await LedgerCryptoProvider()
   })
   const opCertsToSign = Object.entries(opCerts)

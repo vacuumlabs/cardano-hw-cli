@@ -45,7 +45,9 @@ async function testVotingRegistrationMetaDataSigning(cryptoProvider, votingRegis
 
 describe('Trezor sign voting registration metadata', () => {
   let cryptoProvider
-  before(async () => {
+  // eslint-disable-next-line func-names
+  before(async function () {
+    this.timeout(10000)
     cryptoProvider = await TrezorCryptoProvider()
   })
   after(async () => {
