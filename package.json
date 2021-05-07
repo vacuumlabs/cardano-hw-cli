@@ -17,8 +17,8 @@
     "build-macos": "./scripts/build-common.sh && ./scripts/build-macos.sh && rm _package.json",
     "test-unit": "mocha -r ts-node/register 'test/unit/**/*.js'",
     "test-bin": "yarn build && ./build/linux/archive/cardano-hw-cli/cardano-hw-cli --help",
-    "test-integration-ledger": "mocha -r ts-node/register 'test/integration/ledger/node/**/*.js'",
-    "test-integration-trezor": "mocha -r ts-node/register 'test/integration/trezor/node/**/*.js'",
+    "test-integration-ledger": "mocha -r ts-node/register 'test/integration/ledger/node/**/*.js' --exit",
+    "test-integration-trezor": "mocha -r ts-node/register 'test/integration/trezor/node/**/*.js' --exit",
     "clean": "rm -rf ./dist && rm -rf ./node_modules",
     "nexe": "nexe"
   },

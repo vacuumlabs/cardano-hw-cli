@@ -50,9 +50,6 @@ describe('Trezor sign voting registration metadata', () => {
     this.timeout(10000)
     cryptoProvider = await TrezorCryptoProvider()
   })
-  after(async () => {
-    process.exit(0)
-  })
   const votingRegistrationsToSign = Object.entries(votingRegistrations)
 
   votingRegistrationsToSign.forEach(([votingRegistrationTestName, votingRegistration]) => it(

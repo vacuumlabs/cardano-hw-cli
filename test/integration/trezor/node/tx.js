@@ -157,10 +157,6 @@ describe('Trezor tx signing and witnessing', () => {
     this.timeout(10000)
     cryptoProvider = await TrezorCryptoProvider()
   })
-  // TODO: This causes to run only tx.js and not run votingRegistration.js, removing it causes crashes
-  after(async () => {
-    process.exit(0)
-  })
   const txs = Object.entries(transactions)
   const txsToSign = txs.filter(([, tx]) => !tx.witness)
   txsToSign.forEach(([txType, tx]) => it(
