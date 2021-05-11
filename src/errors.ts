@@ -85,7 +85,8 @@ const enum Errors {
   TrezorVersionError = 'Failed to retrieve trezor version',
   InvalidVotingRegistrationAddressType = 'Voting registration address type must be either BASE or REWARD',
   ScriptWitnessesNotSupported = 'Script witnesses in transaction are not supported',
-  FailedToParseTransaction = 'Failed to parse transaction'
+  FailedToParseTransaction = 'Failed to parse transaction',
+  InvalidTransactionType = 'Invalid transaction type',
 }
 
 export {

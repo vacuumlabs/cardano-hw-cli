@@ -2,7 +2,9 @@ import Ledger, * as LedgerTypes from '@cardano-foundation/ledgerjs-hw-app-cardan
 import { parseBIP32Path } from '../command-parser/parsers'
 import { Errors } from '../errors'
 import { isChainCodeHex, isPubKeyHex, isXPubKeyHex } from '../guards'
-import { KesVKey, OpCertIssueCounter, SignedOpCertCborHex } from '../opCert/opCert'
+import {
+  KesVKey, OpCertIssueCounter, OpCertSigned, SignedOpCertCborHex,
+} from '../opCert/opCert'
 import { TxByronWitness, TxShelleyWitness, TxSigned } from '../transaction/transaction'
 import {
   _Input,
@@ -61,6 +63,7 @@ import {
   destructXPubKeyCborHex,
   extractStakePubKeyFromHwSigningData,
   validateVotingRegistrationAddressType,
+  findSigningPathForKey,
 } from './util'
 
 const { blake2b, bech32 } = require('cardano-crypto.js')
@@ -119,7 +122,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
       return LedgerTypes.TransactionSigningMode.POOL_REGISTRATION_AS_OWNER
     }
 
-    return LedgerTypes.TransactionSigningMode.__RESEVED_POOL_REGISTRATION_AS_OPERATOR
+    return LedgerTypes.TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR
   }
 
   const prepareInput = (
@@ -229,6 +232,52 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     }
   }
 
+  const preparePoolKey = (
+    usecase: LedgerTypes.TransactionSigningMode,
+    poolKeyHash: Buffer,
+    poolKeyPath?: BIP32Path,
+  ): LedgerTypes.PoolKey => {
+    if (usecase === LedgerTypes.TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR) {
+      return {
+        type: LedgerTypes.PoolKeyType.DEVICE_OWNED,
+        params: {
+          path: poolKeyPath as BIP32Path,
+        },
+      }
+    }
+    if (usecase === LedgerTypes.TransactionSigningMode.POOL_REGISTRATION_AS_OWNER) {
+      return {
+        type: LedgerTypes.PoolKeyType.THIRD_PARTY,
+        params: {
+          keyHashHex: poolKeyHash.toString('hex'),
+        },
+      }
+    }
+    throw Error(Errors.InvalidTransactionType)
+  }
+
+  const prepareRewardAccount = (
+    signingFiles: HwSigningData[],
+    rewardAccount: Buffer,
+    network: Network,
+  ): LedgerTypes.PoolRewardAccount => {
+    const addressParams = getAddressParameters(signingFiles, rewardAccount, network)
+    if (addressParams && addressParams.address === rewardAccount) {
+      return {
+        type: LedgerTypes.PoolRewardAccountType.DEVICE_OWNED,
+        params: {
+          path: addressParams.stakePath as BIP32Path,
+        },
+      }
+    }
+    return {
+      type: LedgerTypes.PoolRewardAccountType.THIRD_PARTY,
+      params: {
+        rewardAccountHex: rewardAccount.toString('hex'),
+      },
+    }
+  }
+
   // TODO revisit this
   const preparePoolOwners = (
     usecase: LedgerTypes.TransactionSigningMode,
@@ -287,17 +336,17 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
   }
 
   const prepareStakePoolRegistrationCert = (
-    cert: _StakepoolRegistrationCert, signingFiles: HwSigningData[],
+    cert: _StakepoolRegistrationCert, signingFiles: HwSigningData[], network: Network,
   ): LedgerTypes.Certificate => {
     // if path is given, we are signing as pool operator
     // if keyHashHex is given, we are signing as pool owner
     const poolKeyPath = findSigningPathForKeyHash(cert.poolKeyHash, signingFiles)
 
     const usecase = (poolKeyPath)
-      ? LedgerTypes.TransactionSigningMode.__RESEVED_POOL_REGISTRATION_AS_OPERATOR
+      ? LedgerTypes.TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR
       : LedgerTypes.TransactionSigningMode.POOL_REGISTRATION_AS_OWNER
 
-    const owners: LedgerTypes.PoolOwner[] = (
+    const poolOwners: LedgerTypes.PoolOwner[] = (
       preparePoolOwners(usecase, cert.poolOwnersPubKeyHashes, signingFiles)
     )
 
@@ -309,7 +358,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
       : null
 
     const params: LedgerTypes.PoolRegistrationParams = {
-      poolKeyHashHex: cert.poolKeyHash.toString('hex'),
+      poolKey: preparePoolKey(usecase, cert.poolKeyHash, poolKeyPath),
       vrfKeyHashHex: cert.vrfPubKeyHash.toString('hex'),
       pledge: `${cert.pledge}`,
       cost: `${cert.cost}`,
@@ -317,8 +366,8 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
         numerator: `${cert.margin.numerator}`,
         denominator: `${cert.margin.denominator}`,
       },
-      rewardAccountHex: cert.rewardAccount.toString('hex'),
-      poolOwners: owners,
+      rewardAccount: prepareRewardAccount(signingFiles, cert.rewardAccount, network),
+      poolOwners,
       relays: prepareRelays(cert.relays),
       metadata,
     }
@@ -333,22 +382,21 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     cert: _StakepoolRetirementCert,
     signingFiles: HwSigningData[],
   ): LedgerTypes.Certificate => {
-    throw Error(Errors.UnsupportedCryptoProviderCall)
-    // const poolKeyPath = findSigningPathForKeyHash(cert.poolKeyHash, signingFiles)
-    // if (!poolKeyPath) throw Error(Errors.MissingSigningFileForCertificateError)
-    // const poolRetirementParams: LedgerPoolRetirementParams = {
-    //   poolKeyPath,
-    //   retirementEpochStr: cert.retirementEpoch.toString(),
-    // }
+    const poolKeyPath = findSigningPathForKeyHash(cert.poolKeyHash, signingFiles)
+    if (!poolKeyPath) throw Error(Errors.MissingSigningFileForCertificateError)
+    const poolRetirementParams: LedgerTypes.PoolRetirementParams = {
+      poolKeyPath,
+      retirementEpoch: cert.retirementEpoch.toString(),
+    }
 
-    // return {
-    //   type: cert.type,
-    //   poolRetirementParams,
-    // }
+    return {
+      type: LedgerTypes.CertificateType.STAKE_POOL_RETIREMENT,
+      params: poolRetirementParams,
+    }
   }
 
   const prepareCertificate = (
-    certificate: _Certificate, signingFiles: HwSigningData[],
+    certificate: _Certificate, signingFiles: HwSigningData[], network: Network,
   ): LedgerTypes.Certificate => {
     switch (certificate.type) {
       case TxCertificateKeys.STAKING_KEY_REGISTRATION:
@@ -358,7 +406,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
       case TxCertificateKeys.DELEGATION:
         return prepareDelegationCert(certificate, signingFiles)
       case TxCertificateKeys.STAKEPOOL_REGISTRATION:
-        return prepareStakePoolRegistrationCert(certificate, signingFiles)
+        return prepareStakePoolRegistrationCert(certificate, signingFiles, network)
       case TxCertificateKeys.STAKEPOOL_RETIREMENT:
         return prepareStakePoolRetirementCert(certificate, signingFiles)
       default:
@@ -416,7 +464,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
 
     // TODO revisit, use a switch?
     const usecase = determineUsecase(unsignedTxParsed.certificates, signingFiles)
-    if ((usecase === LedgerTypes.TransactionSigningMode.__RESEVED_POOL_REGISTRATION_AS_OPERATOR)
+    if ((usecase === LedgerTypes.TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR)
       && !isFeatureSupportedForVersion(LedgerCryptoProviderFeature.POOL_REGISTRATION_OPERATOR)
     ) {
       throw Error(Errors.PoolRegistrationAsOperatorNotSupported)
@@ -424,7 +472,6 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
   }
 
   const ledgerSignTx = async (
-    signingMode: LedgerTypes.TransactionSigningMode,
     unsignedTxParsed: _UnsignedTxParsed,
     signingFiles: HwSigningData[],
     network: Network,
@@ -442,7 +489,9 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
       (output) => prepareOutput(output, changeOutputFiles, network),
     )
     const certificates = unsignedTxParsed.certificates.map(
-      (certificate) => prepareCertificate(certificate, [...stakeSigningFiles, ...poolColdSigningFiles]),
+      (certificate) => prepareCertificate(
+        certificate, [...stakeSigningFiles, ...poolColdSigningFiles], network,
+      ),
     )
     const fee = `${unsignedTxParsed.fee}`
     const ttl = prepareTtl(unsignedTxParsed.ttl)
@@ -453,7 +502,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     const auxiliaryData = prepareMetaDataHashHex(unsignedTxParsed.metaDataHash)
 
     const response = await ledger.signTransaction({
-      signingMode,
+      signingMode: usecase,
       tx: {
         network,
         inputs,
@@ -623,7 +672,6 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     changeOutputFiles: HwSigningData[],
   ): Promise<SignedTxCborHex> => {
     const ledgerWitnesses = await ledgerSignTx(
-      LedgerTypes.TransactionSigningMode.ORDINARY_TRANSACTION,
       unsignedTxParsed, signingFiles, network, changeOutputFiles,
     )
     const { byronWitnesses, shelleyWitnesses } = await createWitnesses(ledgerWitnesses, signingFiles)
@@ -637,7 +685,6 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     changeOutputFiles: HwSigningData[],
   ): Promise<Array<_ShelleyWitness | _ByronWitness>> => {
     const ledgerWitnesses = await ledgerSignTx(
-      LedgerTypes.TransactionSigningMode.POOL_REGISTRATION_AS_OWNER,
       unsignedTxParsed, signingFiles, network, changeOutputFiles,
     )
     const { byronWitnesses, shelleyWitnesses } = await createWitnesses(ledgerWitnesses, signingFiles)
@@ -670,28 +717,23 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     issueCounter: OpCertIssueCounter,
     signingFiles: HwSigningData[],
   ): Promise<SignedOpCertCborHex> => {
-    throw Error(Errors.UnsupportedCryptoProviderCall)
     // TODO  something like   ensureFirmwareSupportsParams(txAux, signingFiles)
 
-    // const poolColdKeyPath = findSigningPathForKey(issueCounter.poolColdKey, signingFiles)
+    const poolColdKeyPath = findSigningPathForKey(issueCounter.poolColdKey, signingFiles)
 
-    // const params = [
-    //   kesVKey.toString('hex'),
-    //   kesPeriod.toString(),
-    //   issueCounter.counter.toString(),
-    //   poolColdKeyPath,
-    // ]
+    const { signatureHex } = await ledger.signOperationalCertificate({
+      kesPublicKeyHex: kesVKey.toString('hex'),
+      kesPeriod: kesPeriod.toString(),
+      issueCounter: issueCounter.counter.toString(),
+      coldKeyPath: poolColdKeyPath as BIP32Path,
+    })
 
-    // const { operationalCertificateSignatureHex } = await ledger.signOperationalCertificate(
-    //   ...params,
-    // )
-
-    // return OpCertSigned(
-    //   kesVKey,
-    //   kesPeriod,
-    //   issueCounter,
-    //   Buffer.from(operationalCertificateSignatureHex, 'hex'),
-    // )
+    return OpCertSigned(
+      kesVKey,
+      kesPeriod,
+      issueCounter,
+      Buffer.from(signatureHex, 'hex'),
+    )
   }
 
   return {
