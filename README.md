@@ -48,9 +48,9 @@ cardano-hw-cli transaction witness
 # Show address on device
 ```
 cardano-hw-cli address show 
-  --payment-path PAYMENTPATH    Payment derivation path.
-  --staking-path STAKINGPATH    Stake derivation path.
-  --address-file ADDRESS        Input filepath of the address.
+--payment-path PAYMENTPATH    Payment derivation path.
+--staking-path STAKINGPATH    Stake derivation path.
+--address-file ADDRESS        Input filepath of the address.
 ```
 
 # Issue operational certificate
@@ -61,6 +61,18 @@ cardano-hw-cli node issue-op-cert
 --kes-period UINT64                               Kes period for the certificate.
 --out-file FILE                                   Output filepath for node certificate.
 --hw-signing-file FILE                            Input filepath of the hardware wallet signing file.
+```
+
+# Catalyst voting registration
+```
+cardano-hw-cli catalyst voting-key-registration-metadata
+--mainnet | --testnet-magic NATURAL    Use the mainnet magic id or specify testnet magic id.
+--vote-public-key FILE                 Input filepath of vote public key in ed25519.
+--stake-signing-key FILE               Input filepath of the hardware wallet stake signing file, which will be used to to sign the voting registration.
+--reward-address REWARDADDRESS         Staking address which will receive voting rewards.
+--nonce NONCE                          Current slot number.
+--reward-address-signing-key FILE      Input filepath of the reward address signing files.
+--metadata-cbor-out-file FILE          Output filepath of metadata cbor.
 ```
 
 ## Check app version
