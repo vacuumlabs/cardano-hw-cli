@@ -237,7 +237,7 @@ export const parserConfig = {
         required: true,
         dest: 'nonce',
         type: (nonce: string) => BigInt(nonce),
-        help: 'Nonce',
+        help: 'Current slot number.',
       },
       '--reward-address-signing-key': {
         action: 'append',
