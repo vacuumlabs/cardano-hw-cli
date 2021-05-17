@@ -27,7 +27,7 @@ const votingRegistrations = {
   },
   withTestnetRewardAddress0: {
     network: 'TESTNET',
-    auxiliarySigningFiles: [signingFiles.payment0, signingFiles.stake0],
+    auxiliarySigningFiles: [signingFiles.stake0],
     hwStakeSigningFile: signingFiles.stake0,
     rewardAddressBech32: addresses.testnet.reward0,
     votePublicKeyHex: '3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7',
@@ -36,7 +36,7 @@ const votingRegistrations = {
   },
   withMainnetRewardAddress0: {
     network: 'MAINNET',
-    auxiliarySigningFiles: [signingFiles.payment0, signingFiles.stake0],
+    auxiliarySigningFiles: [signingFiles.stake0],
     hwStakeSigningFile: signingFiles.stake0,
     rewardAddressBech32: addresses.mainnet.reward0,
     votePublicKeyHex: '3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7',
