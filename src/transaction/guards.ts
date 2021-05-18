@@ -104,7 +104,7 @@ export const isTxMultiHostNameRelay = (
   return type === TxRelayTypes.MULTI_HOST_NAME && typeof dnsName === 'string'
 }
 
-const isMargin = (_value: any) => {
+const isPoolMargin = (_value: any) => {
   if (typeof _value !== 'object') return false
   const { tag, value } = _value
   if (!Array.isArray(value)) return false
@@ -142,7 +142,7 @@ export const isStakepoolRegistrationCert = (
     && Buffer.isBuffer(vrfPubKeyHash)
     && isUint64(pledge)
     && isUint64(cost)
-    && isMargin(margin)
+    && isPoolMargin(margin)
     && Buffer.isBuffer(rewardAddress)
     && isArrayOfType<Buffer>(poolOwnersPubKeyHashes, Buffer.isBuffer)
     && Array.isArray(relays)
