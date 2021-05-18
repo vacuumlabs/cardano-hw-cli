@@ -482,10 +482,6 @@ const ipv6ToString = (ipv6: Buffer | undefined): string | undefined => {
 
 const rewardAddressToPubKeyHash = (address: Buffer) => address.slice(1)
 
-const deviceVersionToStr = (
-  deviceVersion: DeviceVersion,
-): string => `${deviceVersion.major}.${deviceVersion.minor}.${deviceVersion.patch}`
-
 const isDeviceVersionGTE = (
   deviceVersion: DeviceVersion,
   thresholdVersion: DeviceVersion,
@@ -556,7 +552,6 @@ export {
   ipv4ToString,
   ipv6ToString,
   rewardAddressToPubKeyHash,
-  deviceVersionToStr,
   isDeviceVersionGTE,
   formatVotingRegistrationMetaData,
   areHwSigningDataNonByron,
