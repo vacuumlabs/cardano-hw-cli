@@ -21,21 +21,11 @@ import {
   _AddressParameters,
 } from './types'
 
+const cardano = require('cardano-crypto.js')
 const {
-  getPubKeyBlake2b224Hash,
   AddressTypes,
   base58,
   bech32,
-  getAddressType,
-  packBootstrapAddress,
-  packBaseAddress,
-  getShelleyAddressNetworkId,
-  packEnterpriseAddress,
-  packRewardAddress,
-  isValidBootstrapAddress,
-  isValidShelleyAddress,
-  addressToBuffer,
-  getBootstrapAddressProtocolMagic,
 } = require('cardano-crypto.js')
 
 enum PathTypes {
@@ -132,7 +122,7 @@ const splitXPubKeyCborHex = (xPubKeyCborHex: XPubKeyCborHex): _XPubKey => {
 }
 
 const encodeAddress = (address: Buffer): string => {
-  const addressType = getAddressType(address)
+  const addressType = cardano.getAddressType(address)
   if (addressType === AddressTypes.BOOTSTRAP) {
     return base58.encode(address)
   }
@@ -142,7 +132,7 @@ const encodeAddress = (address: Buffer): string => {
     [AddressTypes.ENTERPRISE]: 'addr',
     [AddressTypes.REWARD]: 'stake',
   }
-  const isTestnet = getShelleyAddressNetworkId(address) === NetworkIds.TESTNET
+  const isTestnet = cardano.getShelleyAddressNetworkId(address) === NetworkIds.TESTNET
   const addressPrefix = `${addressPrefixes[addressType]}${isTestnet ? '_test' : ''}`
   return bech32.encode(addressPrefix, address)
 }
@@ -186,7 +176,7 @@ const findSigningPathForKeyHash = (
 ): BIP32Path | undefined => {
   const signingFile = signingFiles.find((file) => {
     const { pubKey } = splitXPubKeyCborHex(file.cborXPubKeyHex)
-    const pubKeyHash = getPubKeyBlake2b224Hash(pubKey)
+    const pubKeyHash = cardano.getPubKeyBlake2b224Hash(pubKey)
     return !Buffer.compare(pubKeyHash, certPubKeyHash)
   })
   return signingFile?.path
@@ -347,7 +337,7 @@ const _packBootstrapAddress = (
 ): _AddressParameters => {
   const { pubKey, chainCode } = splitXPubKeyCborHex(paymentSigningFile.cborXPubKeyHex)
   const xPubKey = Buffer.concat([pubKey, chainCode])
-  const address: Buffer = packBootstrapAddress(
+  const address: Buffer = cardano.packBootstrapAddress(
     paymentSigningFile.path,
     xPubKey,
     undefined, // passphrase is undefined for derivation scheme v2
@@ -356,7 +346,7 @@ const _packBootstrapAddress = (
   )
   return {
     address,
-    addressType: getAddressType(address),
+    addressType: cardano.getAddressType(address),
     paymentPath: paymentSigningFile.path,
   }
 }
@@ -366,14 +356,14 @@ const _packBaseAddress = (
 ): _AddressParameters => {
   const { pubKey: stakePubKey } = splitXPubKeyCborHex(stakeSigningFile.cborXPubKeyHex)
   const { pubKey: paymentPubKey } = splitXPubKeyCborHex(paymentSigningFile.cborXPubKeyHex)
-  const address: Buffer = packBaseAddress(
-    getPubKeyBlake2b224Hash(paymentPubKey),
-    getPubKeyBlake2b224Hash(stakePubKey),
+  const address: Buffer = cardano.packBaseAddress(
+    cardano.getPubKeyBlake2b224Hash(paymentPubKey),
+    cardano.getPubKeyBlake2b224Hash(stakePubKey),
     network.networkId,
   )
   return {
     address,
-    addressType: getAddressType(address),
+    addressType: cardano.getAddressType(address),
     paymentPath: paymentSigningFile.path,
     stakePath: stakeSigningFile.path,
   }
@@ -383,13 +373,13 @@ const _packEnterpriseAddress = (
   paymentSigningFile: HwSigningData, network: Network,
 ): _AddressParameters => {
   const { pubKey: paymentPubKey } = splitXPubKeyCborHex(paymentSigningFile.cborXPubKeyHex)
-  const address: Buffer = packEnterpriseAddress(
-    getPubKeyBlake2b224Hash(paymentPubKey),
+  const address: Buffer = cardano.packEnterpriseAddress(
+    cardano.getPubKeyBlake2b224Hash(paymentPubKey),
     network.networkId,
   )
   return {
     address,
-    addressType: getAddressType(address),
+    addressType: cardano.getAddressType(address),
     paymentPath: paymentSigningFile.path,
   }
 }
@@ -398,13 +388,13 @@ const _packRewardAddress = (
   stakeSigningFile: HwSigningData, network: Network,
 ): _AddressParameters => {
   const { pubKey: stakePubKey } = splitXPubKeyCborHex(stakeSigningFile.cborXPubKeyHex)
-  const address: Buffer = packRewardAddress(
-    getPubKeyBlake2b224Hash(stakePubKey),
+  const address: Buffer = cardano.packRewardAddress(
+    cardano.getPubKeyBlake2b224Hash(stakePubKey),
     network.networkId,
   )
   return {
     address,
-    addressType: getAddressType(address),
+    addressType: cardano.getAddressType(address),
     stakePath: stakeSigningFile.path,
   }
 }
@@ -416,7 +406,7 @@ const getAddressParameters = (
 ): _AddressParameters | null => {
   if (hwSigningData == null || hwSigningData.length === 0) return null
   const { paymentSigningFiles, stakeSigningFiles } = filterSigningFiles(hwSigningData)
-  const addressType = getAddressType(address)
+  const addressType = cardano.getAddressType(address)
   const findMatchingAddress = (packedAddresses: (_AddressParameters | null)[]) => packedAddresses.find(
     (packedAddress) => packedAddress && Buffer.compare(packedAddress.address, address) === 0,
   ) || null
@@ -459,18 +449,18 @@ const getAddressParameters = (
 }
 
 const getAddressAttributes = (address: Address) => {
-  const addressBuffer = addressToBuffer(address)
-  const addressType: number = getAddressType(addressBuffer)
+  const addressBuffer = cardano.addressToBuffer(address)
+  const addressType: number = cardano.getAddressType(addressBuffer)
   let protocolMagic: ProtocolMagics
   let networkId: NetworkIds
 
-  if (isValidBootstrapAddress(address)) {
-    protocolMagic = getBootstrapAddressProtocolMagic(addressBuffer)
+  if (cardano.isValidBootstrapAddress(address)) {
+    protocolMagic = cardano.getBootstrapAddressProtocolMagic(addressBuffer)
     networkId = ProtocolMagics.MAINNET === protocolMagic
       ? NetworkIds.MAINNET
       : NetworkIds.TESTNET
-  } else if (isValidShelleyAddress(address)) {
-    networkId = getShelleyAddressNetworkId(addressBuffer)
+  } else if (cardano.isValidShelleyAddress(address)) {
+    networkId = cardano.getShelleyAddressNetworkId(addressBuffer)
     protocolMagic = NetworkIds.MAINNET === networkId
       ? ProtocolMagics.MAINNET
       : ProtocolMagics.TESTNET
