@@ -1,5 +1,8 @@
 # Cardano HW cli tool
+
 Cardano HW CLI tool for signing transaction
+
+The command-line interface is based on the official [Cardano-CLI tool](https://docs.cardano.org/projects/cardano-node/en/latest/reference/cardano-node-cli-reference.html).
 
 # Installation
 Check:
