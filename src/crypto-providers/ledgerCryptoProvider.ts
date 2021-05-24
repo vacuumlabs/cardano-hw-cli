@@ -237,23 +237,24 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     poolKeyHash: Buffer,
     poolKeyPath?: BIP32Path,
   ): LedgerTypes.PoolKey => {
-    if (usecase === LedgerTypes.TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR) {
-      return {
-        type: LedgerTypes.PoolKeyType.DEVICE_OWNED,
-        params: {
-          path: poolKeyPath as BIP32Path,
-        },
-      }
+    switch (usecase) {
+      case LedgerTypes.TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR:
+        return {
+          type: LedgerTypes.PoolKeyType.DEVICE_OWNED,
+          params: {
+            path: poolKeyPath as BIP32Path,
+          },
+        }
+      case LedgerTypes.TransactionSigningMode.POOL_REGISTRATION_AS_OWNER:
+        return {
+          type: LedgerTypes.PoolKeyType.THIRD_PARTY,
+          params: {
+            keyHashHex: poolKeyHash.toString('hex'),
+          },
+        }
+      default:
+        throw Error(Errors.InvalidTransactionType)
     }
-    if (usecase === LedgerTypes.TransactionSigningMode.POOL_REGISTRATION_AS_OWNER) {
-      return {
-        type: LedgerTypes.PoolKeyType.THIRD_PARTY,
-        params: {
-          keyHashHex: poolKeyHash.toString('hex'),
-        },
-      }
-    }
-    throw Error(Errors.InvalidTransactionType)
   }
 
   const prepareRewardAccount = (
