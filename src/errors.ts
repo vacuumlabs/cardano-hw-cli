@@ -87,6 +87,7 @@ const enum Errors {
   ScriptWitnessesNotSupported = 'Script witnesses in transaction are not supported',
   FailedToParseTransaction = 'Failed to parse transaction',
   InvalidTransactionType = 'Invalid transaction type',
+  LedgerSignOperationalCertificateNotSupported = 'Signing operational certificate is not supported with your Ledger Cardano app version, please update your Ledger Cardano app to the lastest version',
 }
 
 export {

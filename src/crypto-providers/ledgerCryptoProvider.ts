@@ -720,7 +720,9 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     issueCounter: OpCertIssueCounter,
     signingFiles: HwSigningData[],
   ): Promise<SignedOpCertCborHex> => {
-    // TODO  something like   ensureFirmwareSupportsParams(txAux, signingFiles)
+    if (!isFeatureSupportedForVersion(LedgerCryptoProviderFeature.SIGN_OPERATIONAL_CERTIFICATE)) {
+      throw Error(Errors.LedgerSignOperationalCertificateNotSupported)
+    }
 
     const poolColdKeyPath = findSigningPathForKey(issueCounter.poolColdKey, signingFiles)
 

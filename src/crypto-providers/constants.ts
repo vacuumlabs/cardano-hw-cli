@@ -25,7 +25,12 @@ export const LEDGER_VERSIONS: { [key in LedgerCryptoProviderFeature]: DeviceVers
   },
   [LedgerCryptoProviderFeature.POOL_REGISTRATION_OPERATOR]: {
     major: 2,
-    minor: 3,
+    minor: 4,
+    patch: 0,
+  },
+  [LedgerCryptoProviderFeature.SIGN_OPERATIONAL_CERTIFICATE]: {
+    major: 2,
+    minor: 4,
     patch: 0,
   },
 }
