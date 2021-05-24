@@ -20,6 +20,9 @@ _cardano_hw_cli_completions()
             if [ "${COMP_WORDS[1]}" = "node" ]; then
                 COMPREPLY=( $(compgen -W "key-gen issue-op-cert" "${COMP_WORDS[2]}") )
             fi
+            if [ "${COMP_WORDS[1]}" = "catalyst" ]; then
+                COMPREPLY=( $(compgen -W "voting-key-registration-metadata" "${COMP_WORDS[2]}") )
+            fi
             ;;
         *)
             if [ "${COMP_WORDS[1]}" = "address" ] && [ "${COMP_WORDS[2]}" = "key-gen" ]; then
@@ -39,6 +42,9 @@ _cardano_hw_cli_completions()
             fi
             if [ "${COMP_WORDS[2]}" = "issue-op-cert" ]; then
                 COMPREPLY=( $(compgen -W "--kes-verification-key-file --kes-period --operational-certificate-issue-counter --hw-signing-file --out-file" -- "${COMP_WORDS[-1]}") )
+            fi
+            if [ "${COMP_WORDS[2]}" = "voting-key-registration-metadata" ]; then
+                COMPREPLY=( $(compgen -W "--mainnet --testnet-magic --vote-public-key --reward-address --stake-signing-key --nonce --auxiliary-signing-key --metadata-cbor-out-file" -- "${COMP_WORDS[-1]}") )
             fi
             ;;
     esac
