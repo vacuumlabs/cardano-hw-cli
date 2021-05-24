@@ -38,6 +38,7 @@ import {
   Lovelace,
   _MultiAsset,
   _Asset,
+  _UnsignedTxDecodedWithScriptWitnesses,
 } from './types'
 
 const parseTxInputs = (
@@ -278,6 +279,20 @@ const parseMetaDataHash = (metaDataHash: any): Buffer | null => {
   return metaDataHash || null
 }
 
+const deconstructUnsignedTxDecoded = (
+  unsignedTxDecoded: _UnsignedTxDecoded | _UnsignedTxDecodedWithScriptWitnesses,
+): _UnsignedTxDecoded => {
+  if (unsignedTxDecoded.length === 2) return unsignedTxDecoded
+  if (unsignedTxDecoded.length === 3) {
+    const [txBody, scriptWitnesses, meta] = unsignedTxDecoded as _UnsignedTxDecodedWithScriptWitnesses
+    if (scriptWitnesses != null && scriptWitnesses?.length > 0) {
+      throw Error(Errors.ScriptWitnessesNotSupported)
+    }
+    return [txBody, meta]
+  }
+  throw Error(Errors.FailedToParseTransaction)
+}
+
 const parseUnsignedTx = ([txBody, meta]: _UnsignedTxDecoded): _UnsignedTxParsed => {
   if (txBody.get(TxBodyKeys.MINT)) {
     throw Error(Errors.MintUnsupportedError)
@@ -310,5 +325,6 @@ const parseUnsignedTx = ([txBody, meta]: _UnsignedTxDecoded): _UnsignedTxParsed 
 }
 
 export {
+  deconstructUnsignedTxDecoded,
   parseUnsignedTx,
 }

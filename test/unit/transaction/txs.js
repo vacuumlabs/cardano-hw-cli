@@ -1,5 +1,65 @@
 /* eslint-disable max-len */
 const transactions = {
+  SimpleTransaction: {
+    unsignedCborHex: '82a40081825820941a33cf9d39bba4102c4eff8bd54efd72cf93e65a023a4475ba48a58fc0de000001818258390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c1a002b2b4b021a00029b75031a00a8474cf6',
+    hashHex: 'ca7b59e959a6a7cf570468438c728c7693bc1582450b89ea095f3d04ae312e6a',
+    parsed: {
+      inputs: [
+        {
+          txHash: Buffer.from('941a33cf9d39bba4102c4eff8bd54efd72cf93e65a023a4475ba48a58fc0de00', 'hex'),
+          outputIndex: 0,
+        },
+      ],
+      outputs: [
+        {
+          address: Buffer.from(
+            '0114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c',
+            'hex',
+          ),
+          coins: BigInt(2829131),
+          tokenBundle: [],
+        },
+      ],
+      fee: BigInt(170869n),
+      ttl: 11028300n,
+      certificates: [],
+      withdrawals: [],
+      metaDataHash: null,
+      mint: null,
+      meta: null,
+      validityIntervalStart: null,
+    },
+  },
+  SimpleTransactionWithEmptyScriptWitnesses: {
+    unsignedCborHex: '83a40081825820941a33cf9d39bba4102c4eff8bd54efd72cf93e65a023a4475ba48a58fc0de000001818258390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c1a002b2b4b021a00029b75031a00a8474c80f6',
+    hashHex: 'ca7b59e959a6a7cf570468438c728c7693bc1582450b89ea095f3d04ae312e6a',
+    parsed: {
+      inputs: [
+        {
+          txHash: Buffer.from('941a33cf9d39bba4102c4eff8bd54efd72cf93e65a023a4475ba48a58fc0de00', 'hex'),
+          outputIndex: 0,
+        },
+      ],
+      outputs: [
+        {
+          address: Buffer.from(
+            '0114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c',
+            'hex',
+          ),
+          coins: BigInt(2829131),
+          tokenBundle: [],
+        },
+      ],
+      fee: BigInt(170869n),
+      ttl: 11028300n,
+      certificates: [],
+      withdrawals: [],
+      metaDataHash: null,
+      mint: null,
+      meta: null,
+      validityIntervalStart: null,
+    },
+  },
   TxWithWithdrawal: {
     /*
     * txBody: a500818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aa

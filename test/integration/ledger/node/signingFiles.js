@@ -70,6 +70,17 @@ const signingFiles = {
     ],
     cborXPubKeyHex: '58403d7e84dca8b4bc322401a2cc814af7c84d2992a22f99554fe340d7df7910768d1e2a47754207da3069f90241fbf3b8742c367e9028e5f3f85ae3660330b4f5b7',
   },
+  payment0account1: {
+    type: 0,
+    path: [
+      1852 + HARDENED_THRESHOLD,
+      1815 + HARDENED_THRESHOLD,
+      1 + HARDENED_THRESHOLD,
+      0,
+      0,
+    ],
+    cborXPubKeyHex: '584066e283c52a7f05ca79db5483380597c0bb01abfb5bd8af27d5ed2487875d3b82f99653db092154b8299299c8b50c4411d1e18d2e5b0c22b17ce73128bfb92c99',
+  },
 }
 
 module.exports = {

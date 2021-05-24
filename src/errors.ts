@@ -84,6 +84,8 @@ const enum Errors {
   ByronSigningFilesFoundInVotingRegistration = 'Byron addresses are not allowed for voting registration',
   TrezorVersionError = 'Failed to retrieve trezor version',
   InvalidVotingRegistrationAddressType = 'Voting registration address type must be either BASE or REWARD',
+  ScriptWitnessesNotSupported = 'Script witnesses in transaction are not supported',
+  FailedToParseTransaction = 'Failed to parse transaction'
 }
 
 export {

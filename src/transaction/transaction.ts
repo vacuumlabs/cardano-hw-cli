@@ -1,4 +1,4 @@
-import { parseUnsignedTx } from './txParser'
+import { deconstructUnsignedTxDecoded, parseUnsignedTx } from './txParser'
 import {
   TxWitnessByron,
   TxWitnessShelley,
@@ -24,7 +24,7 @@ const TxByronWitness = (
 const TxShelleyWitness = (publicKey: Buffer, signature: Buffer): TxWitnessShelley => [publicKey, signature]
 
 const TxAux = (unsignedTxCborHex: UnsignedTxCborHex): _TxAux => {
-  const unsignedTxDecoded = decodeCbor(unsignedTxCborHex)
+  const unsignedTxDecoded = deconstructUnsignedTxDecoded(decodeCbor(unsignedTxCborHex))
   if (!isUnsignedTxDecoded(unsignedTxDecoded)) {
     throw Error(Errors.InvalidTransactionBody)
   } else {

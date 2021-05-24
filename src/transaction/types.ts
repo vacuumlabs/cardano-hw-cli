@@ -167,6 +167,12 @@ export type _UnsignedTxDecoded = [
   Buffer | null,
 ]
 
+export type _UnsignedTxDecodedWithScriptWitnesses = [
+  Map<TxBodyKeys, any>,
+  Array<any>,
+  Buffer | null,
+]
+
 export type SignedTxCborHex = CborHex
 
 export type UnsignedTxCborHex = CborHex
