@@ -179,7 +179,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     const amount = output.coins
     const tokenBundle = prepareTokenBundle(output.tokenBundle)
 
-    if (changeAddressParams && !changeAddressParams.address.compare(output.address)) {
+    if (changeAddressParams) {
       return prepareChangeOutput(amount, changeAddressParams, tokenBundle)
     }
     return {
@@ -263,7 +263,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     network: Network,
   ): LedgerTypes.PoolRewardAccount => {
     const addressParams = getAddressParameters(signingFiles, rewardAccount, network)
-    if (addressParams && addressParams.address === rewardAccount) {
+    if (addressParams) {
       return {
         type: LedgerTypes.PoolRewardAccountType.DEVICE_OWNED,
         params: {
@@ -595,7 +595,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
   ): Promise<VotingRegistrationMetaDataCborHex> => {
     const { data: address } : { data: Buffer } = bech32.decode(rewardAddressBech32)
     const addressParams = getAddressParameters(rewardAddressSigningFiles, address, network)
-    if (!addressParams || addressParams.address.compare(address)) {
+    if (!addressParams) {
       throw Error(Errors.AuxSigningFileNotFoundForVotingRewardAddress)
     }
 

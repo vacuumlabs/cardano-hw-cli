@@ -424,21 +424,26 @@ const getAddressParameters = (
   network: Network,
 ): _AddressParameters | null => {
   const addressType = getAddressType(address)
-  try {
-    switch (addressType) {
-      case AddressTypes.BOOTSTRAP:
-        return _packBootStrapAddress(hwSigningData[0], network)
-      case AddressTypes.BASE:
-        return _packBaseAddress(hwSigningData, network)
-      case AddressTypes.ENTERPRISE:
-        return _packEnterpriseAddress(hwSigningData[0], network)
-      case AddressTypes.REWARD:
-        return _packRewardAddress(hwSigningData, network)
-      default: return null
+  const packAddress = () => {
+    try {
+      switch (addressType) {
+        case AddressTypes.BOOTSTRAP:
+          return _packBootStrapAddress(hwSigningData[0], network)
+        case AddressTypes.BASE:
+          return _packBaseAddress(hwSigningData, network)
+        case AddressTypes.ENTERPRISE:
+          return _packEnterpriseAddress(hwSigningData[0], network)
+        case AddressTypes.REWARD:
+          return _packRewardAddress(hwSigningData, network)
+        default: return null
+      }
+    } catch (e) {
+      return null
     }
-  } catch (e) {
-    return null
   }
+  const packedAddress = packAddress()
+  if (packedAddress && Buffer.compare(packedAddress.address, address) === 0) return packedAddress
+  return null
 }
 
 const getAddressAttributes = (address: Address) => {
