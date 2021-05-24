@@ -7,7 +7,6 @@ import {
   parseBIP32Path,
   parseTxBodyFile,
   parseKesVKeyFile,
-  parseVotePubFile,
 } from './parsers'
 
 const keyGenArgs = {
