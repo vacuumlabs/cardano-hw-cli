@@ -463,12 +463,14 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
       }
     })
 
-    // TODO revisit, use a switch?
-    const usecase = determineUsecase(unsignedTxParsed.certificates, signingFiles)
-    if ((usecase === LedgerTypes.TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR)
-      && !isFeatureSupportedForVersion(LedgerCryptoProviderFeature.POOL_REGISTRATION_OPERATOR)
-    ) {
-      throw Error(Errors.PoolRegistrationAsOperatorNotSupported)
+    const signingMode = determineUsecase(unsignedTxParsed.certificates, signingFiles)
+    switch (signingMode) {
+      case LedgerTypes.TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR:
+        if (!isFeatureSupportedForVersion(LedgerCryptoProviderFeature.POOL_REGISTRATION_OPERATOR)) {
+          throw Error(Errors.PoolRegistrationAsOperatorNotSupported)
+        }
+        break
+      default:
     }
   }
 
