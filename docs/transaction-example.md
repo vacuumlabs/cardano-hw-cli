@@ -8,7 +8,7 @@ Connect your HW wallet to your computer.
 
 ## Get protocol parameters
 ```
-cardano-cli shelley query protocol-parameters \
+cardano-cli query protocol-parameters \
 --mainnet \
 --out-file protocol.json
 ```
@@ -34,7 +34,7 @@ should create `stake.vkey` and `stake.hwsfile` files.
 
 ## Payment address
 ```
-cardano-cli shelley address build \
+cardano-cli address build \
 --payment-verification-key-file payment.vkey \
 --stake-verification-key-file stake.vkey \
 --out-file payment.addr \
@@ -44,7 +44,7 @@ should create `payment.addr` file.
 
 ## Get the transaction hash and index of the UTXO to spend
 ```
-cardano-cli shelley query utxo \
+cardano-cli query utxo \
 --address $(cat payment.addr) \
 --mainnet
 ```
@@ -57,7 +57,8 @@ bc8bf52ea894fb8e442fe3eea628be87d0c9a37baef185b70eb00a5c8a849d3b     0          
 
 ## Draft the transaction
 ```
-cardano-cli shelley transaction build-raw \
+cardano-cli transaction build-raw \
+--mary-era \
 --tx-in bc8bf52ea894fb8e442fe3eea628be87d0c9a37baef185b70eb00a5c8a849d3b#0 \
 --tx-out $(cat payment.addr)+0 \
 --ttl 0 \
@@ -68,7 +69,7 @@ should create `tx.draft` file.
 
 ## Calculate the fee
 ```
-cardano-cli shelley transaction calculate-min-fee \
+cardano-cli transaction calculate-min-fee \
 --tx-body-file tx.draft \
 --tx-in-count 1 \
 --tx-out-count 1 \
@@ -84,7 +85,7 @@ example return:
 
 ## Determine the TTL for the transaction
 ```
-cardano-cli shelley query tip --mainnet
+cardano-cli query tip --mainnet
 ```
 example return:
 ```
@@ -98,7 +99,8 @@ example return:
 ## Build the transaction
 TTL: Add 1000 to `slotNo` from previous call
 ```
-cardano-cli shelley transaction build-raw \
+cardano-cli transaction build-raw \
+--mary-era \
 --tx-in bc8bf52ea894fb8e442fe3eea628be87d0c9a37baef185b70eb00a5c8a849d3b#0 \
 --tx-out $(cat payment.addr)+2316348 \
 --ttl 11123006 \
@@ -118,14 +120,14 @@ should return `tx.signed` file.
 
 ## Submit the transaction
 ```
-cardano-cli shelley transaction submit \
+cardano-cli transaction submit \
 --tx-file tx.signed \
 --mainnet
 ```
 
 ## Check the balances
 ```
-cardano-cli shelley query utxo \
+cardano-cli query utxo \
 --address $(cat payment.addr) \
 --mainnet
 ```
