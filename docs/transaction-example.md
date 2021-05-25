@@ -90,20 +90,22 @@ cardano-cli query tip --mainnet
 example return:
 ```
 {
-  "blockNo": 4818137,
-  "headerHash": "b567ac1a111822d006c61ba955a24167215b1207cab15aed53d68d51244da904",
-  "slotNo": 11122006
+  "epoch": 267,
+  "hash": "e00916594a27203d96c5530a56e188dcd394d6b45d31a76cce82a51ca7dd6a2a",
+  "slot": 27507111,
+  "block": 2610889,
+  "era": "Mary"
 }
 ```
 
 ## Build the transaction
-TTL: Add 1000 to `slotNo` from previous call
+TTL: Add 1000 to `slot` from previous call
 ```
 cardano-cli transaction build-raw \
 --mary-era \
 --tx-in bc8bf52ea894fb8e442fe3eea628be87d0c9a37baef185b70eb00a5c8a849d3b#0 \
 --tx-out $(cat payment.addr)+2316348 \
---ttl 11123006 \
+--ttl 27508111 \
 --fee 170869 \
 --out-file tx.raw
 ```
