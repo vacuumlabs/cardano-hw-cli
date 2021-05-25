@@ -284,11 +284,11 @@ const deconstructUnsignedTxDecoded = (
 ): _UnsignedTxDecoded => {
   if (unsignedTxDecoded.length === 2) return unsignedTxDecoded
   if (unsignedTxDecoded.length === 3) {
-    const [txBody, scriptWitnesses, meta] = unsignedTxDecoded as _UnsignedTxDecodedWithScriptWitnesses
+    const [txBody, scriptWitnesses, metaData] = unsignedTxDecoded as _UnsignedTxDecodedWithScriptWitnesses
     if (scriptWitnesses != null && scriptWitnesses?.length > 0) {
       throw Error(Errors.ScriptWitnessesNotSupported)
     }
-    return [txBody, meta]
+    return [txBody, metaData]
   }
   throw Error(Errors.FailedToParseTransaction)
 }
