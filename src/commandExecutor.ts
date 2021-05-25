@@ -9,7 +9,6 @@ import {
   constructOpCertIssueCounterOutput,
   writeCbor,
 } from './fileWriter'
-import { TxAux } from './transaction/transaction'
 import {
   ParsedShowAddressArguments,
   ParsedAddressKeyGenArguments,
@@ -33,6 +32,7 @@ import {
 } from './crypto-providers/util'
 import { Errors } from './errors'
 import { parseOpCertIssueCounterFile } from './command-parser/parsers'
+import { parseUnsignedTx } from './transaction/txParser'
 
 const promiseTimeout = <T> (promise: Promise<T>, ms: number): Promise<T> => {
   const timeout: Promise<T> = new Promise((resolve, reject) => {
@@ -96,19 +96,19 @@ const CommandExecutor = async () => {
   }
 
   const createSignedTx = async (args: ParsedTransactionSignArguments) => {
-    const txAux = TxAux(args.txBodyFileData.cborHex)
-    validateSigning(txAux, args.hwSigningFileData)
+    const unsignedTxParsed = parseUnsignedTx(args.txBodyFileData.cborHex)
+    validateSigning(unsignedTxParsed, args.hwSigningFileData)
     const signedTx = await cryptoProvider.signTx(
-      txAux, args.hwSigningFileData, args.network, args.changeOutputKeyFileData,
+      unsignedTxParsed, args.hwSigningFileData, args.network, args.changeOutputKeyFileData,
     )
     write(args.outFile, constructSignedTxOutput(args.txBodyFileData.era, signedTx))
   }
 
   const createTxWitness = async (args: ParsedTransactionWitnessArguments) => {
-    const txAux = TxAux(args.txBodyFileData.cborHex)
-    validateWitnessing(txAux, args.hwSigningFileData)
+    const unsignedTxParsed = parseUnsignedTx(args.txBodyFileData.cborHex)
+    validateWitnessing(unsignedTxParsed, args.hwSigningFileData)
     const txWitnesses = await cryptoProvider.witnessTx(
-      txAux, args.hwSigningFileData, args.network, args.changeOutputKeyFileData,
+      unsignedTxParsed, args.hwSigningFileData, args.network, args.changeOutputKeyFileData,
     )
     for (let i = 0; i < txWitnesses.length; i += 1) {
       write(args.outFiles[i], constructTxWitnessOutput(args.txBodyFileData.era, txWitnesses[i]))

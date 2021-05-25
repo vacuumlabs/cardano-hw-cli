@@ -1,10 +1,16 @@
 const assert = require('assert')
-const { TxAux } = require('../../../src/transaction/transaction')
+const { parseUnsignedTx } = require('../../../src/transaction/txParser')
 const { transactions } = require('./txs')
 
 function testTxHashAndParsing(tx) {
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { getId, unsignedTxDecoded, ...parsedTx } = TxAux(tx.unsignedCborHex)
+  const {
+    getId,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    originalTxDecoded,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    unsignedTxDecoded,
+    ...parsedTx
+  } = parseUnsignedTx(tx.unsignedCborHex)
   const txHashHex = getId()
 
   it('Should parse tx', () => {

@@ -2,7 +2,7 @@ import { HARDENED_THRESHOLD } from '../constants'
 import { Errors } from '../errors'
 import { isBIP32Path, isPubKeyHex } from '../guards'
 import {
-  TxCertificateKeys, VotingRegistrationMetaData, _Certificate, _TxAux, _XPubKey,
+  TxCertificateKeys, VotingRegistrationMetaData, _Certificate, _UnsignedTxParsed, _XPubKey,
 } from '../transaction/types'
 import {
   Address,
@@ -219,20 +219,20 @@ const txHasStakePoolRegistrationCert = (
 // validates if the given signing files correspond to the tx body
 // TODO not entirely, e.g. we don't count unique witnesses, and don't verify there is an input included
 const validateTxWithoutPoolRegistration = (
-  txAux: _TxAux, signingFiles: HwSigningData[],
+  unsignedTxParsed: _UnsignedTxParsed, signingFiles: HwSigningData[],
 ): void => {
   const { paymentSigningFiles, stakeSigningFiles, poolColdSigningFiles } = filterSigningFiles(signingFiles)
 
   if (paymentSigningFiles.length === 0) {
     throw Error(Errors.MissingPaymentSigningFileError)
   }
-  if (paymentSigningFiles.length > txAux.inputs.length) {
+  if (paymentSigningFiles.length > unsignedTxParsed.inputs.length) {
     throw Error(Errors.TooManyPaymentSigningFilesError)
   }
 
-  let numStakeWitnesses = txAux.withdrawals.length
+  let numStakeWitnesses = unsignedTxParsed.withdrawals.length
   let numPoolColdWitnesses = 0
-  txAux.certificates.forEach((cert) => {
+  unsignedTxParsed.certificates.forEach((cert) => {
     switch (cert.type) {
       case TxCertificateKeys.STAKING_KEY_REGISTRATION:
       case TxCertificateKeys.STAKING_KEY_DEREGISTRATION:
@@ -266,18 +266,18 @@ const validateTxWithoutPoolRegistration = (
 
 // validates if the given signing files correspond to the tx body
 const validateTxWithPoolRegistration = (
-  txAux: _TxAux, signingFiles: HwSigningData[],
+  unsignedTxParsed: _UnsignedTxParsed, signingFiles: HwSigningData[],
 ): void => {
   const { paymentSigningFiles, stakeSigningFiles, poolColdSigningFiles } = filterSigningFiles(signingFiles)
 
   // TODO needs revisiting, including the error messages
-  if (!txAux.inputs.length) {
+  if (!unsignedTxParsed.inputs.length) {
     throw Error(Errors.MissingInputError)
   }
-  if (txAux.certificates.length !== 1) {
+  if (unsignedTxParsed.certificates.length !== 1) {
     throw Error(Errors.MultipleCertificatesWithPoolRegError)
   }
-  if (txAux.withdrawals.length) {
+  if (unsignedTxParsed.withdrawals.length) {
     throw Error(Errors.WithdrawalIncludedWithPoolRegError)
   }
 
@@ -307,23 +307,23 @@ const validateTxWithPoolRegistration = (
 }
 
 const validateWitnessing = (
-  txAux: _TxAux, signingFiles: HwSigningData[],
+  unsignedTxParsed: _UnsignedTxParsed, signingFiles: HwSigningData[],
 ): void => {
-  if (!txHasStakePoolRegistrationCert(txAux.certificates)) {
+  if (!txHasStakePoolRegistrationCert(unsignedTxParsed.certificates)) {
     throw Error(Errors.CantWitnessTxWithoutPoolRegError)
   }
 
-  validateTxWithPoolRegistration(txAux, signingFiles)
+  validateTxWithPoolRegistration(unsignedTxParsed, signingFiles)
 }
 
 const validateSigning = (
-  txAux: _TxAux, signingFiles: HwSigningData[],
+  unsignedTxParsed: _UnsignedTxParsed, signingFiles: HwSigningData[],
 ): void => {
-  if (txHasStakePoolRegistrationCert(txAux.certificates)) {
+  if (txHasStakePoolRegistrationCert(unsignedTxParsed.certificates)) {
     throw Error(Errors.CantSignTxWithPoolRegError)
   }
 
-  validateTxWithoutPoolRegistration(txAux, signingFiles)
+  validateTxWithoutPoolRegistration(unsignedTxParsed, signingFiles)
 }
 
 const validateKeyGenInputs = (

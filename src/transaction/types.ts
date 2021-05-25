@@ -131,19 +131,6 @@ export type _Withdrawal = {
   coins: Lovelace,
 }
 
-export type _UnsignedTxParsed = {
-  inputs: _Input[],
-  outputs: _Output[],
-  fee: Lovelace,
-  ttl: BigInt | null,
-  certificates: _Certificate[],
-  withdrawals: _Withdrawal[],
-  metaDataHash: Buffer | null,
-  meta: Buffer | null,
-  validityIntervalStart: BigInt | null,
-  mint: _MultiAsset | null,
-}
-
 export type TxWitnessByron = [
   Buffer,
   Buffer,
@@ -167,12 +154,6 @@ export type _UnsignedTxDecoded = [
   Buffer | null,
 ]
 
-export type _UnsignedTxDecodedWithScriptWitnesses = [
-  Map<TxBodyKeys, any>,
-  Array<any>,
-  Buffer | null,
-]
-
 export type SignedTxCborHex = CborHex
 
 export type UnsignedTxCborHex = CborHex
@@ -184,9 +165,20 @@ export type _XPubKey = {
   chainCode: Buffer,
 }
 
-export type _TxAux = _UnsignedTxParsed & {
+export type _UnsignedTxParsed = {
   getId: () => string,
+  originalTxDecoded: any,
   unsignedTxDecoded: _UnsignedTxDecoded,
+  inputs: _Input[],
+  outputs: _Output[],
+  fee: Lovelace,
+  ttl: BigInt | null,
+  certificates: _Certificate[],
+  withdrawals: _Withdrawal[],
+  metaDataHash: Buffer | null,
+  meta: Buffer | null,
+  validityIntervalStart: BigInt | null,
+  mint: _MultiAsset | null,
 }
 
 export type _ByronWitness = {

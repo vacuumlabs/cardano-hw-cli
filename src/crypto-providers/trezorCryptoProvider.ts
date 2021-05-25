@@ -1,7 +1,6 @@
 import TrezorConnect, * as TrezorTypes from 'trezor-connect'
 import {
   SignedTxCborHex,
-  _TxAux,
   _Input,
   _Output,
   _ByronWitness,
@@ -17,6 +16,7 @@ import {
   _MultiAsset,
   VotingRegistrationMetaDataCborHex,
   VotingRegistrationMetaData,
+  _UnsignedTxParsed,
 } from '../transaction/types'
 import {
   CryptoProvider,
@@ -342,17 +342,19 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     }) : undefined
   )
 
-  const ensureFirmwareSupportsParams = (txAux: _TxAux) => {
-    if (txAux.ttl == null && !isFeatureSupportedForVersion(TrezorCryptoProviderFeature.OPTIONAL_TTL)) {
+  const ensureFirmwareSupportsParams = (unsignedTxParsed: _UnsignedTxParsed) => {
+    if (
+      unsignedTxParsed.ttl == null && !isFeatureSupportedForVersion(TrezorCryptoProviderFeature.OPTIONAL_TTL)
+    ) {
       throw Error(Errors.TrezorOptionalTTLNotSupported)
     }
     if (
-      txAux.validityIntervalStart != null
+      unsignedTxParsed.validityIntervalStart != null
       && !isFeatureSupportedForVersion(TrezorCryptoProviderFeature.VALIDITY_INTERVAL_START)
     ) {
       throw Error(Errors.TrezorValidityIntervalStartNotSupported)
     }
-    txAux.outputs.forEach((output) => {
+    unsignedTxParsed.outputs.forEach((output) => {
       const multiAssets: _MultiAsset[] = output.tokenBundle
       if (multiAssets.length > 0 && !isFeatureSupportedForVersion(TrezorCryptoProviderFeature.MULTI_ASSET)) {
         throw Error(Errors.TrezorMultiAssetsNotSupported)
@@ -361,33 +363,33 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
   }
 
   const signTx = async (
-    txAux: _TxAux,
+    unsignedTxParsed: _UnsignedTxParsed,
     signingFiles: HwSigningData[],
     network: Network,
     changeOutputFiles: HwSigningData[],
   ): Promise<SignedTxCborHex> => {
-    ensureFirmwareSupportsParams(txAux)
+    ensureFirmwareSupportsParams(unsignedTxParsed)
     const {
       paymentSigningFiles,
       stakeSigningFiles,
     } = filterSigningFiles(signingFiles)
-    const inputs = txAux.inputs.map(
+    const inputs = unsignedTxParsed.inputs.map(
       (input: _Input, i: number) => prepareInput(input, getSigningPath(paymentSigningFiles, i)),
     )
-    const outputs = txAux.outputs.map(
+    const outputs = unsignedTxParsed.outputs.map(
       (output: _Output) => prepareOutput(output, network, changeOutputFiles),
     )
-    const certificates = txAux.certificates.map(
+    const certificates = unsignedTxParsed.certificates.map(
       (certificate: _Certificate) => prepareCertificate(certificate, stakeSigningFiles),
     )
-    const fee = txAux.fee.toString()
-    const ttl = prepareTtl(txAux.ttl)
-    const validityIntervalStart = prepareValidityIntervalStart(txAux.validityIntervalStart)
-    const withdrawals = txAux.withdrawals.map(
+    const fee = unsignedTxParsed.fee.toString()
+    const ttl = prepareTtl(unsignedTxParsed.ttl)
+    const validityIntervalStart = prepareValidityIntervalStart(unsignedTxParsed.validityIntervalStart)
+    const withdrawals = unsignedTxParsed.withdrawals.map(
       (withdrawal: _Withdrawal) => prepareWithdrawal(withdrawal, stakeSigningFiles),
     )
 
-    const auxiliaryData = prepareMetaDataHex(txAux.meta)
+    const auxiliaryData = prepareMetaDataHex(unsignedTxParsed.meta)
 
     const request: TrezorTypes.CommonParams & TrezorTypes.CardanoSignTransaction = {
       inputs,
@@ -408,7 +410,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     if (!response.success) {
       throw Error(response.payload.error)
     }
-    if (response.payload.hash !== txAux.getId()) {
+    if (response.payload.hash !== unsignedTxParsed.getId()) {
       throw Error(Errors.TxSerializationMismatchError)
     }
 
@@ -518,12 +520,12 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
   }
 
   const witnessTx = async (
-    txAux: _TxAux,
+    unsignedTxParsed: _UnsignedTxParsed,
     signingFiles: HwSigningData[],
     network: Network,
     changeOutputFiles: HwSigningData[],
   ): Promise<Array<_ByronWitness | _ShelleyWitness>> => {
-    const signedTx = await signTx(txAux, signingFiles, network, changeOutputFiles)
+    const signedTx = await signTx(unsignedTxParsed, signingFiles, network, changeOutputFiles)
     return Witness(signedTx)
   }
 

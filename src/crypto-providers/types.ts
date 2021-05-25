@@ -1,10 +1,10 @@
 import { KesVKey, OpCertIssueCounter, SignedOpCertCborHex } from '../opCert/opCert'
 import {
   SignedTxCborHex,
-  _TxAux,
   _ShelleyWitness,
   _ByronWitness,
   VotingRegistrationMetaDataCborHex,
+  _UnsignedTxParsed,
 } from '../transaction/types'
 import {
   HwSigningData,
@@ -19,13 +19,13 @@ export type CryptoProvider = {
   getVersion: () => Promise<string>,
   showAddress: (paymentPath: BIP32Path, stakingPath: BIP32Path, address: Address) => Promise<void>,
   signTx: (
-    txAux: _TxAux,
+    unsignedTxParsed: _UnsignedTxParsed,
     signingFiles: HwSigningData[],
     network: Network,
     changeOutputFiles: HwSigningData[],
   ) => Promise<SignedTxCborHex>,
   witnessTx: (
-    txAux: _TxAux,
+    unsignedTxParsed: _UnsignedTxParsed,
     signingFiles: HwSigningData[],
     network: Network,
     changeOutputFiles: HwSigningData[],

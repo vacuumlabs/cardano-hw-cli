@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
 const assert = require('assert')
-const { TxAux } = require('../../../../src/transaction/transaction')
+const { parseUnsignedTx } = require('../../../../src/transaction/txParser')
 const { LedgerCryptoProvider } = require('../../../../src/crypto-providers/ledgerCryptoProvider')
 const { NETWORKS } = require('../../../../src/constants')
 const { validateSigning, validateWitnessing } = require('../../../../src/crypto-providers/util')
@@ -176,10 +176,10 @@ const transactions = {
   },
 }
 async function testTxSigning(cryptoProvider, transaction) {
-  const txAux = TxAux(transaction.unsignedCborHex)
-  validateSigning(txAux, transaction.hwSigningFiles)
+  const unsignedTxParsed = parseUnsignedTx(transaction.unsignedCborHex)
+  validateSigning(unsignedTxParsed, transaction.hwSigningFiles)
   const signedTxCborHex = await cryptoProvider.signTx(
-    txAux,
+    unsignedTxParsed,
     transaction.hwSigningFiles,
     NETWORKS[transaction.network],
   )
@@ -188,10 +188,10 @@ async function testTxSigning(cryptoProvider, transaction) {
 }
 
 async function testTxWitnessing(cryptoProvider, transaction) {
-  const txAux = TxAux(transaction.unsignedCborHex)
-  validateWitnessing(txAux, transaction.hwSigningFiles)
+  const unsignedTxParsed = parseUnsignedTx(transaction.unsignedCborHex)
+  validateWitnessing(unsignedTxParsed, transaction.hwSigningFiles)
   const witnesses = await cryptoProvider.witnessTx(
-    txAux,
+    unsignedTxParsed,
     transaction.hwSigningFiles,
     NETWORKS[transaction.network],
   )

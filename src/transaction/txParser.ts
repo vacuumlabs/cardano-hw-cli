@@ -13,6 +13,7 @@ import {
   isTxSingleHostNameRelay,
   isTxStakingKeyRegistrationCert,
   isWithdrawalsMap,
+  isUnsignedTxDecoded,
 } from './guards'
 import {
   _Input,
@@ -38,8 +39,11 @@ import {
   Lovelace,
   _MultiAsset,
   _Asset,
-  _UnsignedTxDecodedWithScriptWitnesses,
+  UnsignedTxCborHex,
 } from './types'
+import { decodeCbor, encodeCbor } from '../util'
+
+const { blake2b } = require('cardano-crypto.js')
 
 const parseTxInputs = (
   txInputs: any[],
@@ -279,12 +283,10 @@ const parseMetaDataHash = (metaDataHash: any): Buffer | null => {
   return metaDataHash || null
 }
 
-const deconstructUnsignedTxDecoded = (
-  unsignedTxDecoded: _UnsignedTxDecoded | _UnsignedTxDecodedWithScriptWitnesses,
-): _UnsignedTxDecoded => {
+const deconstructUnsignedTxDecoded = (unsignedTxDecoded: any): _UnsignedTxDecoded => {
   if (unsignedTxDecoded.length === 2) return unsignedTxDecoded
   if (unsignedTxDecoded.length === 3) {
-    const [txBody, scriptWitnesses, metaData] = unsignedTxDecoded as _UnsignedTxDecodedWithScriptWitnesses
+    const [txBody, scriptWitnesses, metaData] = unsignedTxDecoded
     if (scriptWitnesses != null && scriptWitnesses?.length > 0) {
       throw Error(Errors.ScriptWitnessesNotSupported)
     }
@@ -293,38 +295,55 @@ const deconstructUnsignedTxDecoded = (
   throw Error(Errors.FailedToParseTransaction)
 }
 
-const parseUnsignedTx = ([txBody, meta]: _UnsignedTxDecoded): _UnsignedTxParsed => {
-  if (txBody.get(TxBodyKeys.MINT)) {
-    throw Error(Errors.MintUnsupportedError)
-  }
-  const inputs = parseTxInputs(txBody.get(TxBodyKeys.INPUTS))
-  const outputs = parseTxOutputs(txBody.get(TxBodyKeys.OUTPUTS))
-  const fee = parseFee(txBody.get(TxBodyKeys.FEE))
-  const ttl = parseTtl(txBody.get(TxBodyKeys.TTL))
-  const certificates = parseTxCerts(
-    txBody.get(TxBodyKeys.CERTIFICATES) || [],
-  )
-  const withdrawals = parseTxWithdrawals(
-    txBody.get(TxBodyKeys.WITHDRAWALS) || new Map(),
-  )
-  const metaDataHash = parseMetaDataHash(txBody.get(TxBodyKeys.META_DATA_HASH))
-  const validityIntervalStart = parseValidityIntervalStart(txBody.get(TxBodyKeys.VALIDITY_INTERVAL_START))
+const parseUnsignedTx = (unsignedTxCborHex: UnsignedTxCborHex): _UnsignedTxParsed => {
+  const originalTxDecoded = decodeCbor(unsignedTxCborHex)
+  const unsignedTxDecoded = deconstructUnsignedTxDecoded(originalTxDecoded)
+  if (!isUnsignedTxDecoded(unsignedTxDecoded)) {
+    throw Error(Errors.InvalidTransactionBody)
+  } else {
+    const [txBody, meta] = unsignedTxDecoded
+    if (txBody.get(TxBodyKeys.MINT)) {
+      throw Error(Errors.MintUnsupportedError)
+    }
+    const inputs = parseTxInputs(txBody.get(TxBodyKeys.INPUTS))
+    const outputs = parseTxOutputs(txBody.get(TxBodyKeys.OUTPUTS))
+    const fee = parseFee(txBody.get(TxBodyKeys.FEE))
+    const ttl = parseTtl(txBody.get(TxBodyKeys.TTL))
+    const certificates = parseTxCerts(
+      txBody.get(TxBodyKeys.CERTIFICATES) || [],
+    )
+    const withdrawals = parseTxWithdrawals(
+      txBody.get(TxBodyKeys.WITHDRAWALS) || new Map(),
+    )
+    const metaDataHash = parseMetaDataHash(txBody.get(TxBodyKeys.META_DATA_HASH))
+    const validityIntervalStart = parseValidityIntervalStart(txBody.get(TxBodyKeys.VALIDITY_INTERVAL_START))
 
-  return {
-    inputs,
-    outputs,
-    fee,
-    ttl,
-    certificates,
-    withdrawals,
-    metaDataHash,
-    meta,
-    validityIntervalStart,
-    mint: null, // unsupported in current version
+    const getId = (): string => {
+      const encodedTxBody = encodeCbor(txBody)
+      return blake2b(
+        encodedTxBody,
+        32,
+      ).toString('hex')
+    }
+
+    return {
+      getId,
+      originalTxDecoded,
+      unsignedTxDecoded,
+      inputs,
+      outputs,
+      fee,
+      ttl,
+      certificates,
+      withdrawals,
+      metaDataHash,
+      meta,
+      validityIntervalStart,
+      mint: null, // unsupported in current version
+    }
   }
 }
 
 export {
-  deconstructUnsignedTxDecoded,
   parseUnsignedTx,
 }

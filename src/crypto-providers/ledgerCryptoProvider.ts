@@ -8,7 +8,6 @@ import {
   _Input,
   _Output,
   SignedTxCborHex,
-  _TxAux,
   _ByronWitness,
   _ShelleyWitness,
   TxWitnessByron,
@@ -32,6 +31,7 @@ import {
   _MultiAsset,
   VotingRegistrationAuxiliaryData,
   VotingRegistrationMetaDataCborHex,
+  _UnsignedTxParsed,
 } from '../transaction/types'
 import {
   Address,
@@ -393,17 +393,21 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     })
   )
 
-  const ensureFirmwareSupportsParams = (txAux: _TxAux, signingFiles: HwSigningData[]) => {
-    if (txAux.ttl == null && !isFeatureSupportedForVersion(LedgerCryptoProviderFeature.OPTIONAL_TTL)) {
+  const ensureFirmwareSupportsParams = (
+    unsignedTxParsed: _UnsignedTxParsed, signingFiles: HwSigningData[],
+  ) => {
+    if (
+      unsignedTxParsed.ttl == null && !isFeatureSupportedForVersion(LedgerCryptoProviderFeature.OPTIONAL_TTL)
+    ) {
       throw Error(Errors.LedgerOptionalTTLNotSupported)
     }
     if (
-      txAux.validityIntervalStart != null
+      unsignedTxParsed.validityIntervalStart != null
       && !isFeatureSupportedForVersion(LedgerCryptoProviderFeature.VALIDITY_INTERVAL_START)
     ) {
       throw Error(Errors.LedgerValidityIntervalStartNotSupported)
     }
-    txAux.outputs.forEach((output) => {
+    unsignedTxParsed.outputs.forEach((output) => {
       const multiAssets: _MultiAsset[] = output.tokenBundle
       if (multiAssets.length > 0 && !isFeatureSupportedForVersion(LedgerCryptoProviderFeature.MULTI_ASSET)) {
         throw Error(Errors.LedgerMultiAssetsNotSupported)
@@ -411,7 +415,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     })
 
     // TODO revisit, use a switch?
-    const usecase = determineUsecase(txAux.certificates, signingFiles)
+    const usecase = determineUsecase(unsignedTxParsed.certificates, signingFiles)
     if ((usecase === LedgerTypes.TransactionSigningMode.__RESEVED_POOL_REGISTRATION_AS_OPERATOR)
       && !isFeatureSupportedForVersion(LedgerCryptoProviderFeature.POOL_REGISTRATION_OPERATOR)
     ) {
@@ -421,32 +425,32 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
 
   const ledgerSignTx = async (
     signingMode: LedgerTypes.TransactionSigningMode,
-    txAux: _TxAux,
+    unsignedTxParsed: _UnsignedTxParsed,
     signingFiles: HwSigningData[],
     network: Network,
     changeOutputFiles: HwSigningData[],
   ): Promise<LedgerWitness[]> => {
-    ensureFirmwareSupportsParams(txAux, signingFiles)
+    ensureFirmwareSupportsParams(unsignedTxParsed, signingFiles)
     const { paymentSigningFiles, stakeSigningFiles, poolColdSigningFiles } = filterSigningFiles(signingFiles)
 
-    const usecase = determineUsecase(txAux.certificates, signingFiles)
+    const usecase = determineUsecase(unsignedTxParsed.certificates, signingFiles)
 
-    const inputs = txAux.inputs.map(
+    const inputs = unsignedTxParsed.inputs.map(
       (input, i) => prepareInput(usecase, input, getSigningPath(paymentSigningFiles, i)),
     )
-    const outputs = txAux.outputs.map(
+    const outputs = unsignedTxParsed.outputs.map(
       (output) => prepareOutput(output, changeOutputFiles, network),
     )
-    const certificates = txAux.certificates.map(
+    const certificates = unsignedTxParsed.certificates.map(
       (certificate) => prepareCertificate(certificate, [...stakeSigningFiles, ...poolColdSigningFiles]),
     )
-    const fee = `${txAux.fee}`
-    const ttl = prepareTtl(txAux.ttl)
-    const validityIntervalStart = prepareValidityIntervalStart(txAux.validityIntervalStart)
-    const withdrawals = txAux.withdrawals.map(
+    const fee = `${unsignedTxParsed.fee}`
+    const ttl = prepareTtl(unsignedTxParsed.ttl)
+    const validityIntervalStart = prepareValidityIntervalStart(unsignedTxParsed.validityIntervalStart)
+    const withdrawals = unsignedTxParsed.withdrawals.map(
       (withdrawal) => prepareWithdrawal(withdrawal, stakeSigningFiles),
     )
-    const auxiliaryData = prepareMetaDataHashHex(txAux.metaDataHash)
+    const auxiliaryData = prepareMetaDataHashHex(unsignedTxParsed.metaDataHash)
 
     const response = await ledger.signTransaction({
       signingMode,
@@ -463,7 +467,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
       },
     })
 
-    if (response.txHashHex !== txAux.getId()) {
+    if (response.txHashHex !== unsignedTxParsed.getId()) {
       throw Error(Errors.TxSerializationMismatchError)
     }
 
@@ -613,22 +617,28 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
   }
 
   const signTx = async (
-    txAux: _TxAux, signingFiles: HwSigningData[], network: Network, changeOutputFiles: HwSigningData[],
+    unsignedTxParsed: _UnsignedTxParsed,
+    signingFiles: HwSigningData[],
+    network: Network,
+    changeOutputFiles: HwSigningData[],
   ): Promise<SignedTxCborHex> => {
     const ledgerWitnesses = await ledgerSignTx(
       LedgerTypes.TransactionSigningMode.ORDINARY_TRANSACTION,
-      txAux, signingFiles, network, changeOutputFiles,
+      unsignedTxParsed, signingFiles, network, changeOutputFiles,
     )
     const { byronWitnesses, shelleyWitnesses } = await createWitnesses(ledgerWitnesses, signingFiles)
-    return TxSigned(txAux.unsignedTxDecoded, byronWitnesses, shelleyWitnesses)
+    return TxSigned(unsignedTxParsed.unsignedTxDecoded, byronWitnesses, shelleyWitnesses)
   }
 
   const witnessTx = async (
-    txAux: _TxAux, signingFiles: HwSigningData[], network: Network, changeOutputFiles: HwSigningData[],
+    unsignedTxParsed: _UnsignedTxParsed,
+    signingFiles: HwSigningData[],
+    network: Network,
+    changeOutputFiles: HwSigningData[],
   ): Promise<Array<_ShelleyWitness | _ByronWitness>> => {
     const ledgerWitnesses = await ledgerSignTx(
       LedgerTypes.TransactionSigningMode.POOL_REGISTRATION_AS_OWNER,
-      txAux, signingFiles, network, changeOutputFiles,
+      unsignedTxParsed, signingFiles, network, changeOutputFiles,
     )
     const { byronWitnesses, shelleyWitnesses } = await createWitnesses(ledgerWitnesses, signingFiles)
     const _byronWitnesses = byronWitnesses.map((byronWitness) => (
