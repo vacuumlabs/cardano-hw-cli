@@ -7,7 +7,7 @@ CARDANO_HW_CLI_PACKAGE_VERSION=$(cat package.json | grep version | head -1 | awk
 
 PACKAGE='cardano-hw-cli'
 VERSION=$CARDANO_HW_CLI_PACKAGE_VERSION'-1' # majorVersion.minorVersion.patchVersion-packageRevision
-ARCHITECTURE='i386'
+ARCHITECTURE='amd64'
 MAINTAINER='Peter Benc <peter.benc@vacuumlabs.com>, David Tran Duc <david.tran.duc@vacuumlabs.com>'
 DESCRIPTION='Cardano hw cli
  Command line tool for ledger/trezor transaction signing'
