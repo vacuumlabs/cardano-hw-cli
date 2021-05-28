@@ -343,12 +343,12 @@ const validateKeyGenInputs = (
 }
 
 const _packBootStrapAddress = (
-  hwsData: HwSigningData, network: Network,
+  paymentSigningFile: HwSigningData, network: Network,
 ): _AddressParameters => {
-  const { pubKey, chainCode } = destructXPubKeyCborHex(hwsData.cborXPubKeyHex)
+  const { pubKey, chainCode } = destructXPubKeyCborHex(paymentSigningFile.cborXPubKeyHex)
   const xPubKey = Buffer.concat([pubKey, chainCode])
   const address: Buffer = packBootstrapAddress(
-    hwsData.path,
+    paymentSigningFile.path,
     xPubKey,
     undefined, // passphrase is undefined for derivation scheme v2
     2, // derivation scheme is always 2 for hw wallets
@@ -357,20 +357,15 @@ const _packBootStrapAddress = (
   return {
     address,
     addressType: getAddressType(address),
-    paymentPath: hwsData.path,
+    paymentPath: paymentSigningFile.path,
   }
 }
 
 const _packBaseAddress = (
-  hwsData: HwSigningData[], network: Network,
+  paymentSigningFile: HwSigningData, stakeSigningFile: HwSigningData, network: Network,
 ): _AddressParameters | null => {
-  const isStakingPath = (path: number[]) => classifyPath(path) === PathTypes.PATH_WALLET_STAKING_KEY
-  const stakePathFile = hwsData.find(({ path }) => isStakingPath(path))
-  const paymentPathFile = hwsData.find(({ path }) => !isStakingPath(path))
-  if (!stakePathFile || !paymentPathFile) return null
-
-  const { pubKey: stakePubKey } = destructXPubKeyCborHex(stakePathFile.cborXPubKeyHex)
-  const { pubKey: paymentPubKey } = destructXPubKeyCborHex(paymentPathFile.cborXPubKeyHex)
+  const { pubKey: stakePubKey } = destructXPubKeyCborHex(stakeSigningFile.cborXPubKeyHex)
+  const { pubKey: paymentPubKey } = destructXPubKeyCborHex(paymentSigningFile.cborXPubKeyHex)
   const address: Buffer = packBaseAddress(
     getPubKeyBlake2b224Hash(paymentPubKey),
     getPubKeyBlake2b224Hash(stakePubKey),
@@ -379,15 +374,15 @@ const _packBaseAddress = (
   return {
     address,
     addressType: getAddressType(address),
-    paymentPath: paymentPathFile.path,
-    stakePath: stakePathFile.path,
+    paymentPath: paymentSigningFile.path,
+    stakePath: stakeSigningFile.path,
   }
 }
 
 const _packEnterpriseAddress = (
-  hwsData: HwSigningData, network: Network,
+  paymentSigningFile: HwSigningData, network: Network,
 ): _AddressParameters => {
-  const { pubKey: paymentPubKey } = destructXPubKeyCborHex(hwsData.cborXPubKeyHex)
+  const { pubKey: paymentPubKey } = destructXPubKeyCborHex(paymentSigningFile.cborXPubKeyHex)
   const address: Buffer = packEnterpriseAddress(
     getPubKeyBlake2b224Hash(paymentPubKey),
     network.networkId,
@@ -395,18 +390,14 @@ const _packEnterpriseAddress = (
   return {
     address,
     addressType: getAddressType(address),
-    paymentPath: hwsData.path,
+    paymentPath: paymentSigningFile.path,
   }
 }
 
 const _packRewardAddress = (
-  hwsData: HwSigningData[], network: Network,
+  stakeSigningFile: HwSigningData, network: Network,
 ): _AddressParameters | null => {
-  const isStakingPath = (path: number[]) => classifyPath(path) === PathTypes.PATH_WALLET_STAKING_KEY
-  const stakePathFile = hwsData.find(({ path }) => isStakingPath(path))
-  if (!stakePathFile) return null
-
-  const { pubKey: stakePubKey } = destructXPubKeyCborHex(stakePathFile.cborXPubKeyHex)
+  const { pubKey: stakePubKey } = destructXPubKeyCborHex(stakeSigningFile.cborXPubKeyHex)
   const address: Buffer = packRewardAddress(
     getPubKeyBlake2b224Hash(stakePubKey),
     network.networkId,
@@ -414,30 +405,7 @@ const _packRewardAddress = (
   return {
     address,
     addressType: getAddressType(address),
-    stakePath: stakePathFile.path,
-  }
-}
-
-const _packAddress = (
-  hwSigningData: HwSigningData[],
-  address: Buffer,
-  network: Network,
-): _AddressParameters | null => {
-  const addressType = getAddressType(address)
-  try {
-    switch (addressType) {
-      case AddressTypes.BOOTSTRAP:
-        return _packBootStrapAddress(hwSigningData[0], network)
-      case AddressTypes.BASE:
-        return _packBaseAddress(hwSigningData, network)
-      case AddressTypes.ENTERPRISE:
-        return _packEnterpriseAddress(hwSigningData[0], network)
-      case AddressTypes.REWARD:
-        return _packRewardAddress(hwSigningData, network)
-      default: return null
-    }
-  } catch (e) {
-    return null
+    stakePath: stakeSigningFile.path,
   }
 }
 
@@ -446,9 +414,46 @@ const getAddressParameters = (
   address: Buffer,
   network: Network,
 ): _AddressParameters | null => {
-  const packedAddress = _packAddress(hwSigningData, address, network)
-  if (packedAddress && Buffer.compare(packedAddress.address, address) === 0) return packedAddress
-  return null
+  if (hwSigningData == null || hwSigningData.length === 0) return null
+  const { paymentSigningFiles, stakeSigningFiles } = filterSigningFiles(hwSigningData)
+  const addressType = getAddressType(address)
+  const findMatchingAddress = (packedAddresses: (_AddressParameters | null)[]) => packedAddresses.find(
+    (packedAddress) => packedAddress && Buffer.compare(packedAddress.address, address) === 0,
+  ) || null
+
+  try {
+    switch (addressType) {
+      case AddressTypes.BOOTSTRAP:
+        return findMatchingAddress(
+          paymentSigningFiles.map((paymentSigningFile) => _packBootStrapAddress(paymentSigningFile, network)),
+        )
+
+      case AddressTypes.BASE:
+        return findMatchingAddress(
+          paymentSigningFiles.flatMap((paymentSigningFile) => (
+            stakeSigningFiles.map((stakeSigningFile) => (
+              _packBaseAddress(paymentSigningFile, stakeSigningFile, network)
+            ))
+          )),
+        )
+
+      case AddressTypes.ENTERPRISE:
+        return findMatchingAddress(
+          paymentSigningFiles.map((paymentSigningFile) => (
+            _packEnterpriseAddress(paymentSigningFile, network)
+          )),
+        )
+
+      case AddressTypes.REWARD:
+        return findMatchingAddress(
+          stakeSigningFiles.map((stakeSigningFile) => _packRewardAddress(stakeSigningFile, network)),
+        )
+
+      default: return null
+    }
+  } catch (e) {
+    return null
+  }
 }
 
 const getAddressAttributes = (address: Address) => {
