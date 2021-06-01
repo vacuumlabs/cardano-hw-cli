@@ -124,7 +124,7 @@ const classifyPath = (path: number[]) => {
   return PathTypes.PATH_INVALID
 }
 
-const destructXPubKeyCborHex = (xPubKeyCborHex: XPubKeyCborHex): _XPubKey => {
+const splitXPubKeyCborHex = (xPubKeyCborHex: XPubKeyCborHex): _XPubKey => {
   const xPubKeyDecoded = decodeCbor(xPubKeyCborHex)
   const pubKey = xPubKeyDecoded.slice(0, 32)
   const chainCode = xPubKeyDecoded.slice(32, 64)
@@ -185,7 +185,7 @@ const findSigningPathForKeyHash = (
   certPubKeyHash: Buffer, signingFiles: HwSigningData[],
 ): BIP32Path | undefined => {
   const signingFile = signingFiles.find((file) => {
-    const { pubKey } = destructXPubKeyCborHex(file.cborXPubKeyHex)
+    const { pubKey } = splitXPubKeyCborHex(file.cborXPubKeyHex)
     const pubKeyHash = getPubKeyBlake2b224Hash(pubKey)
     return !Buffer.compare(pubKeyHash, certPubKeyHash)
   })
@@ -197,7 +197,7 @@ const findSigningPathForKey = (
   key: Buffer, signingFiles: HwSigningData[],
 ): BIP32Path | undefined => {
   const signingFile = signingFiles.find((file) => {
-    const { pubKey } = destructXPubKeyCborHex(file.cborXPubKeyHex)
+    const { pubKey } = splitXPubKeyCborHex(file.cborXPubKeyHex)
     return !Buffer.compare(pubKey, key)
   })
   return signingFile?.path
@@ -205,7 +205,7 @@ const findSigningPathForKey = (
 
 const extractStakePubKeyFromHwSigningData = (signingFile: HwSigningData): PubKeyHex => {
   const cborStakeXPubKeyHex = signingFile.cborXPubKeyHex
-  const stakePubHex = destructXPubKeyCborHex(cborStakeXPubKeyHex).pubKey.toString('hex')
+  const stakePubHex = splitXPubKeyCborHex(cborStakeXPubKeyHex).pubKey.toString('hex')
   if (isPubKeyHex(stakePubHex)) return stakePubHex
   throw Error(Errors.InternalInvalidTypeError)
 }
@@ -342,10 +342,10 @@ const validateKeyGenInputs = (
   ) throw Error(Errors.InvalidKeyGenInputsError)
 }
 
-const _packBootStrapAddress = (
+const _packBootstrapAddress = (
   paymentSigningFile: HwSigningData, network: Network,
 ): _AddressParameters => {
-  const { pubKey, chainCode } = destructXPubKeyCborHex(paymentSigningFile.cborXPubKeyHex)
+  const { pubKey, chainCode } = splitXPubKeyCborHex(paymentSigningFile.cborXPubKeyHex)
   const xPubKey = Buffer.concat([pubKey, chainCode])
   const address: Buffer = packBootstrapAddress(
     paymentSigningFile.path,
@@ -363,9 +363,9 @@ const _packBootStrapAddress = (
 
 const _packBaseAddress = (
   paymentSigningFile: HwSigningData, stakeSigningFile: HwSigningData, network: Network,
-): _AddressParameters | null => {
-  const { pubKey: stakePubKey } = destructXPubKeyCborHex(stakeSigningFile.cborXPubKeyHex)
-  const { pubKey: paymentPubKey } = destructXPubKeyCborHex(paymentSigningFile.cborXPubKeyHex)
+): _AddressParameters => {
+  const { pubKey: stakePubKey } = splitXPubKeyCborHex(stakeSigningFile.cborXPubKeyHex)
+  const { pubKey: paymentPubKey } = splitXPubKeyCborHex(paymentSigningFile.cborXPubKeyHex)
   const address: Buffer = packBaseAddress(
     getPubKeyBlake2b224Hash(paymentPubKey),
     getPubKeyBlake2b224Hash(stakePubKey),
@@ -382,7 +382,7 @@ const _packBaseAddress = (
 const _packEnterpriseAddress = (
   paymentSigningFile: HwSigningData, network: Network,
 ): _AddressParameters => {
-  const { pubKey: paymentPubKey } = destructXPubKeyCborHex(paymentSigningFile.cborXPubKeyHex)
+  const { pubKey: paymentPubKey } = splitXPubKeyCborHex(paymentSigningFile.cborXPubKeyHex)
   const address: Buffer = packEnterpriseAddress(
     getPubKeyBlake2b224Hash(paymentPubKey),
     network.networkId,
@@ -396,8 +396,8 @@ const _packEnterpriseAddress = (
 
 const _packRewardAddress = (
   stakeSigningFile: HwSigningData, network: Network,
-): _AddressParameters | null => {
-  const { pubKey: stakePubKey } = destructXPubKeyCborHex(stakeSigningFile.cborXPubKeyHex)
+): _AddressParameters => {
+  const { pubKey: stakePubKey } = splitXPubKeyCborHex(stakeSigningFile.cborXPubKeyHex)
   const address: Buffer = packRewardAddress(
     getPubKeyBlake2b224Hash(stakePubKey),
     network.networkId,
@@ -425,7 +425,7 @@ const getAddressParameters = (
     switch (addressType) {
       case AddressTypes.BOOTSTRAP:
         return findMatchingAddress(
-          paymentSigningFiles.map((paymentSigningFile) => _packBootStrapAddress(paymentSigningFile, network)),
+          paymentSigningFiles.map((paymentSigningFile) => _packBootstrapAddress(paymentSigningFile, network)),
         )
 
       case AddressTypes.BASE:
@@ -448,6 +448,8 @@ const getAddressParameters = (
         return findMatchingAddress(
           stakeSigningFiles.map((stakeSigningFile) => _packRewardAddress(stakeSigningFile, network)),
         )
+
+        // TODO: Pointer address
 
       default: return null
     }
@@ -549,7 +551,7 @@ const validateVotingRegistrationAddressType = (addressType: number) => {
 export {
   PathTypes,
   classifyPath,
-  destructXPubKeyCborHex,
+  splitXPubKeyCborHex,
   validateSigning,
   validateWitnessing,
   validateKeyGenInputs,

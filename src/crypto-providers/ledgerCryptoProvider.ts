@@ -60,7 +60,7 @@ import {
   filterSigningFiles,
   getAddressParameters,
   formatVotingRegistrationMetaData,
-  destructXPubKeyCborHex,
+  splitXPubKeyCborHex,
   extractStakePubKeyFromHwSigningData,
   validateVotingRegistrationAddressType,
   findSigningPathForKey,
@@ -108,7 +108,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     }
   }
 
-  const determineUsecase = (certificates: _Certificate[], signingFiles: HwSigningData[]) => {
+  const determineSigningMode = (certificates: _Certificate[], signingFiles: HwSigningData[]) => {
     const poolRegistrationCert = certificates.find(
       (cert) => cert.type === TxCertificateKeys.STAKEPOOL_REGISTRATION,
     ) as _StakepoolRegistrationCert
@@ -126,9 +126,9 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
   }
 
   const prepareInput = (
-    usecase: LedgerTypes.TransactionSigningMode, input: _Input, path: BIP32Path | null,
+    signingMode: LedgerTypes.TransactionSigningMode, input: _Input, path: BIP32Path | null,
   ): LedgerTypes.TxInput => {
-    const pathToUse = (usecase === LedgerTypes.TransactionSigningMode.POOL_REGISTRATION_AS_OWNER)
+    const pathToUse = (signingMode === LedgerTypes.TransactionSigningMode.POOL_REGISTRATION_AS_OWNER)
       ? null // inputs are required to be given without path in this case
       : path
     return {
@@ -233,11 +233,11 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
   }
 
   const preparePoolKey = (
-    usecase: LedgerTypes.TransactionSigningMode,
+    signingMode: LedgerTypes.TransactionSigningMode,
     poolKeyHash: Buffer,
     poolKeyPath?: BIP32Path,
   ): LedgerTypes.PoolKey => {
-    switch (usecase) {
+    switch (signingMode) {
       case LedgerTypes.TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR:
         return {
           type: LedgerTypes.PoolKeyType.DEVICE_OWNED,
@@ -279,15 +279,14 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     }
   }
 
-  // TODO revisit this
   const preparePoolOwners = (
-    usecase: LedgerTypes.TransactionSigningMode,
+    signingMode: LedgerTypes.TransactionSigningMode,
     owners: Buffer[],
     stakeSigningFiles: HwSigningData[],
   ): LedgerTypes.PoolOwner[] => {
     const poolOwners: LedgerTypes.PoolOwner[] = owners.map((owner) => {
       const path = findSigningPathForKeyHash(owner, stakeSigningFiles)
-      return path && (usecase === LedgerTypes.TransactionSigningMode.POOL_REGISTRATION_AS_OWNER)
+      return path && (signingMode === LedgerTypes.TransactionSigningMode.POOL_REGISTRATION_AS_OWNER)
         ? {
           type: LedgerTypes.PoolOwnerType.DEVICE_OWNED,
           params: { stakingPath: path },
@@ -343,12 +342,12 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     // if keyHashHex is given, we are signing as pool owner
     const poolKeyPath = findSigningPathForKeyHash(cert.poolKeyHash, signingFiles)
 
-    const usecase = (poolKeyPath)
+    const signingMode = (poolKeyPath)
       ? LedgerTypes.TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR
       : LedgerTypes.TransactionSigningMode.POOL_REGISTRATION_AS_OWNER
 
     const poolOwners: LedgerTypes.PoolOwner[] = (
-      preparePoolOwners(usecase, cert.poolOwnersPubKeyHashes, signingFiles)
+      preparePoolOwners(signingMode, cert.poolOwnersPubKeyHashes, signingFiles)
     )
 
     const metadata: LedgerTypes.PoolMetadataParams | null = cert.metadata
@@ -359,7 +358,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
       : null
 
     const params: LedgerTypes.PoolRegistrationParams = {
-      poolKey: preparePoolKey(usecase, cert.poolKeyHash, poolKeyPath),
+      poolKey: preparePoolKey(signingMode, cert.poolKeyHash, poolKeyPath),
       vrfKeyHashHex: cert.vrfPubKeyHash.toString('hex'),
       pledge: `${cert.pledge}`,
       cost: `${cert.cost}`,
@@ -463,7 +462,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
       }
     })
 
-    const signingMode = determineUsecase(unsignedTxParsed.certificates, signingFiles)
+    const signingMode = determineSigningMode(unsignedTxParsed.certificates, signingFiles)
     switch (signingMode) {
       case LedgerTypes.TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR:
         if (!isFeatureSupportedForVersion(LedgerCryptoProviderFeature.POOL_REGISTRATION_OPERATOR)) {
@@ -483,10 +482,10 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     ensureFirmwareSupportsParams(unsignedTxParsed, signingFiles)
     const { paymentSigningFiles, stakeSigningFiles, poolColdSigningFiles } = filterSigningFiles(signingFiles)
 
-    const usecase = determineUsecase(unsignedTxParsed.certificates, signingFiles)
+    const signingMode = determineSigningMode(unsignedTxParsed.certificates, signingFiles)
 
     const inputs = unsignedTxParsed.inputs.map(
-      (input, i) => prepareInput(usecase, input, getSigningPath(paymentSigningFiles, i)),
+      (input, i) => prepareInput(signingMode, input, getSigningPath(paymentSigningFiles, i)),
     )
     const outputs = unsignedTxParsed.outputs.map(
       (output) => prepareOutput(output, changeOutputFiles, network),
@@ -505,7 +504,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     const auxiliaryData = prepareMetaDataHashHex(unsignedTxParsed.metaDataHash)
 
     const response = await ledger.signTransaction({
-      signingMode: usecase,
+      signingMode,
       tx: {
         network,
         inputs,
@@ -651,7 +650,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
       .filter((witness) => isByronPath(witness.path))
       .map((witness) => {
         const { cborXPubKeyHex } = getSigningFileDataByPath(witness.path)
-        const { pubKey, chainCode } = destructXPubKeyCborHex(cborXPubKeyHex)
+        const { pubKey, chainCode } = splitXPubKeyCborHex(cborXPubKeyHex)
         return TxByronWitness(pubKey, witness.signature, chainCode, {})
       })
 
@@ -661,7 +660,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
       .filter((witness) => !isByronPath(witness.path))
       .map((witness) => {
         const { cborXPubKeyHex } = getSigningFileDataByPath(witness.path)
-        const { pubKey } = destructXPubKeyCborHex(cborXPubKeyHex)
+        const { pubKey } = splitXPubKeyCborHex(cborXPubKeyHex)
         return TxShelleyWitness(pubKey, witness.signature)
       })
 
