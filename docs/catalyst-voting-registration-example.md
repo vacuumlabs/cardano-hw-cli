@@ -1,3 +1,6 @@
+# Requirements
+Ledger users: Cardano Ledger app versions 2.3.1 and higher is needed in order to register your vote. In order to install app 2.3.1 you need Ledger firmware 2.0.0 or higher. Both these updates can be done in Ledger Live > Manager section. If you don't see the option to update the firmware to 2.0.0, please re-install Ledger Live.
+
 # Create catalyst voting keys
 To get private/public voting key you must use another tool, you can use jcli to generate your private/public voting key:
 ```
