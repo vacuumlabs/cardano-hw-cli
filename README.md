@@ -78,6 +78,8 @@ cardano-hw-cli catalyst voting-key-registration-metadata
 --metadata-cbor-out-file FILE          Output filepath of metadata cbor.
 ```
 
+see [Catalyst voting registration example](docs/catalyst-voting-registration-example.md)
+
 ## Check app version
 ```
 cardano-hw-cli version
@@ -88,9 +90,12 @@ cardano-hw-cli version
 cardano-hw-cli device version
 ```
 
-## Examples
-- https://github.com/vacuumlabs/cardano-hw-cli/blob/develop/docs/delegation-example.md
-- https://github.com/vacuumlabs/cardano-hw-cli/blob/develop/docs/transaction-example.md
+## Examples/Guides
+- [Basic transaction](docs/transaction-example.md)
+- [Stake delegation](docs/delegation-example.md)
+- [Catalyst voting registration](docs/catalyst-voting-registration-example.md)
+- [Stake pool registration](docs/poolRegistration.md)
+- [Public keys bulk export](docs/public-keys-bulk-export-example.md)
 
 # Running from source
 Install node version v12.16.2
