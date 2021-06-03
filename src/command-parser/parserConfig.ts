@@ -220,7 +220,7 @@ export const parserConfig = {
         required: true,
         dest: 'votePublicKey',
         type: (path: string) => parseVotePubFile(path),
-        help: 'Input filepath to vote public key.',
+        help: 'Input filepath to vote public key in ed25519extended.',
       },
       '--stake-signing-key': {
         required: true,

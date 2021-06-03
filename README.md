@@ -70,7 +70,7 @@ cardano-hw-cli node issue-op-cert
 ```
 cardano-hw-cli catalyst voting-key-registration-metadata
 --mainnet | --testnet-magic NATURAL    Use the mainnet magic id or specify testnet magic id.
---vote-public-key FILE                 Input filepath of vote public key in ed25519.
+--vote-public-key FILE                 Input filepath of vote public key in ed25519extended.
 --stake-signing-key FILE               Input filepath of the hardware wallet stake signing file, which will be used to to sign the voting registration.
 --reward-address REWARDADDRESS         Staking address which will receive voting rewards.
 --nonce NONCE                          Current slot number.
