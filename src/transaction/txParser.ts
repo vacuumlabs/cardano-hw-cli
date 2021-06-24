@@ -42,6 +42,8 @@ import {
   _Asset,
   UnsignedTxCborHex,
   _Mint,
+  StakeCredentialsKeys,
+  StakeCredentials,
 } from './types'
 import { decodeCbor, encodeCbor } from '../util'
 
@@ -155,14 +157,37 @@ const parseRelay = (poolRelay: any): _PoolRelay => {
 }
 
 const parseTxCerts = (txCertificates: any[]): _Certificate[] => {
+  const parseStakeCredentials = (stakeCredentials: any): StakeCredentials => {
+    if (Array.isArray(stakeCredentials) && stakeCredentials.length === 2) {
+      if (stakeCredentials[0] === StakeCredentialsKeys.ADDR_KEY_HASH) {
+        return {
+          type: StakeCredentialsKeys.ADDR_KEY_HASH,
+          addrKeyHash: stakeCredentials[1],
+        }
+      }
+      if (stakeCredentials[0] === StakeCredentialsKeys.SCRIPT_HASH) {
+        return {
+          type: StakeCredentialsKeys.SCRIPT_HASH,
+          scriptHash: stakeCredentials[1],
+        }
+      }
+    } else if (Buffer.isBuffer(stakeCredentials)) {
+      return {
+        type: StakeCredentialsKeys.ADDR_KEY_HASH,
+        addrKeyHash: stakeCredentials,
+      }
+    }
+    throw Error(Errors.StakeCredentialsParseError)
+  }
+
   const stakeKeyRegistrationCertParser = (
     txCertificate: any,
   ): _StakingKeyRegistrationCert => {
     if (!isTxStakingKeyRegistrationCert(txCertificate)) {
       throw Error(Errors.TxStakingKeyRegistrationCertParseError)
     }
-    const [type, [, pubKeyHash]] = txCertificate
-    return ({ type, pubKeyHash })
+    const [type, [, stakeCredentials]] = txCertificate
+    return ({ type, stakeCredentials: parseStakeCredentials(stakeCredentials) })
   }
 
   const stakeKeyDeregistrationCertParser = (
@@ -171,8 +196,8 @@ const parseTxCerts = (txCertificates: any[]): _Certificate[] => {
     if (!isStakingKeyDeregistrationCert(txCertificate)) {
       throw Error(Errors.TxStakingKeyDeregistrationCertParseError)
     }
-    const [type, [, pubKeyHash]] = txCertificate
-    return ({ type, pubKeyHash })
+    const [type, [, stakeCredentials]] = txCertificate
+    return ({ type, stakeCredentials: parseStakeCredentials(stakeCredentials) })
   }
 
   const delegationCertParser = (
@@ -181,8 +206,8 @@ const parseTxCerts = (txCertificates: any[]): _Certificate[] => {
     if (!isDelegationCert(txCertificate)) {
       throw Error(Errors.TxDelegationCertParseError)
     }
-    const [type, [, pubKeyHash], poolHash] = txCertificate
-    return ({ type, pubKeyHash, poolHash })
+    const [type, [, stakeCredentials], poolHash] = txCertificate
+    return ({ type, stakeCredentials: parseStakeCredentials(stakeCredentials), poolHash })
   }
 
   const stakepoolRegistrationCertParser = (

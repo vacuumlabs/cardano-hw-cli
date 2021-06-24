@@ -32,6 +32,7 @@ import {
   VotingRegistrationMetaDataCborHex,
   _UnsignedTxParsed,
   TxWitnesses,
+  AddrKeyHash,
 } from '../transaction/types'
 import {
   Address,
@@ -196,7 +197,9 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     cert: _StakingKeyRegistrationCert,
     stakeSigningFiles: HwSigningData[],
   ): LedgerTypes.Certificate => {
-    const path = findSigningPathForKeyHash(cert.pubKeyHash, stakeSigningFiles)
+    const path = findSigningPathForKeyHash(
+      (cert.stakeCredentials as AddrKeyHash).addrKeyHash, stakeSigningFiles,
+    )
     if (!path) throw Error(Errors.MissingSigningFileForCertificateError)
     return {
       type: LedgerTypes.CertificateType.STAKE_REGISTRATION,
@@ -213,7 +216,9 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     cert: _StakingKeyDeregistrationCert,
     stakeSigningFiles: HwSigningData[],
   ): LedgerTypes.Certificate => {
-    const path = findSigningPathForKeyHash(cert.pubKeyHash, stakeSigningFiles)
+    const path = findSigningPathForKeyHash(
+      (cert.stakeCredentials as AddrKeyHash).addrKeyHash, stakeSigningFiles,
+    )
     if (!path) throw Error(Errors.MissingSigningFileForCertificateError)
     return {
       type: LedgerTypes.CertificateType.STAKE_DEREGISTRATION,
@@ -229,7 +234,9 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
   const prepareDelegationCert = (
     cert: _DelegationCert, stakeSigningFiles: HwSigningData[],
   ): LedgerTypes.Certificate => {
-    const path = findSigningPathForKeyHash(cert.pubKeyHash, stakeSigningFiles)
+    const path = findSigningPathForKeyHash(
+      (cert.stakeCredentials as AddrKeyHash).addrKeyHash, stakeSigningFiles,
+    )
     if (!path) throw Error(Errors.MissingSigningFileForCertificateError)
     return {
       type: LedgerTypes.CertificateType.STAKE_DELEGATION,
@@ -541,9 +548,8 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
         auxiliaryData,
         validityIntervalStart,
         mint,
-        additionalWitnessRequests,
       },
-      additionalWitnessPaths: [],
+      additionalWitnessPaths: additionalWitnessRequests,
     })
 
     if (response.txHashHex !== unsignedTxParsed.getId()) {
