@@ -1,4 +1,5 @@
 import Ledger, * as LedgerTypes from '@cardano-foundation/ledgerjs-hw-app-cardano'
+import { StakeCredentialParamsType } from '@cardano-foundation/ledgerjs-hw-app-cardano'
 import { parseBIP32Path } from '../command-parser/parsers'
 import { Errors } from '../errors'
 import { isChainCodeHex, isPubKeyHex, isXPubKeyHex } from '../guards'
@@ -32,6 +33,7 @@ import {
   VotingRegistrationMetaDataCborHex,
   _UnsignedTxParsed,
   TxWitnesses,
+  AddrKeyHash,
 } from '../transaction/types'
 import {
   Address,
@@ -196,11 +198,18 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     cert: _StakingKeyRegistrationCert,
     stakeSigningFiles: HwSigningData[],
   ): LedgerTypes.Certificate => {
-    const path = findSigningPathForKeyHash(cert.pubKeyHash, stakeSigningFiles)
+    const path = findSigningPathForKeyHash(
+      (cert.stakeCredentials as AddrKeyHash).addrKeyHash, stakeSigningFiles,
+    )
     if (!path) throw Error(Errors.MissingSigningFileForCertificateError)
     return {
       type: LedgerTypes.CertificateType.STAKE_REGISTRATION,
-      params: { path },
+      params: {
+        stakeCredential: {
+          type: StakeCredentialParamsType.KEY_PATH,
+          keyPath: path,
+        },
+      },
     }
   }
 
@@ -208,24 +217,36 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     cert: _StakingKeyDeregistrationCert,
     stakeSigningFiles: HwSigningData[],
   ): LedgerTypes.Certificate => {
-    const path = findSigningPathForKeyHash(cert.pubKeyHash, stakeSigningFiles)
+    const path = findSigningPathForKeyHash(
+      (cert.stakeCredentials as AddrKeyHash).addrKeyHash, stakeSigningFiles,
+    )
     if (!path) throw Error(Errors.MissingSigningFileForCertificateError)
     return {
       type: LedgerTypes.CertificateType.STAKE_DEREGISTRATION,
-      params: { path },
+      params: {
+        stakeCredential: {
+          type: StakeCredentialParamsType.KEY_PATH,
+          keyPath: path,
+        },
+      },
     }
   }
 
   const prepareDelegationCert = (
     cert: _DelegationCert, stakeSigningFiles: HwSigningData[],
   ): LedgerTypes.Certificate => {
-    const path = findSigningPathForKeyHash(cert.pubKeyHash, stakeSigningFiles)
+    const path = findSigningPathForKeyHash(
+      (cert.stakeCredentials as AddrKeyHash).addrKeyHash, stakeSigningFiles,
+    )
     if (!path) throw Error(Errors.MissingSigningFileForCertificateError)
     return {
       type: LedgerTypes.CertificateType.STAKE_DELEGATION,
       params: {
         poolKeyHashHex: cert.poolHash.toString('hex'),
-        path,
+        stakeCredential: {
+          type: StakeCredentialParamsType.KEY_PATH,
+          keyPath: path,
+        },
       },
     }
   }
@@ -419,7 +440,10 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     const path = findSigningPathForKeyHash(pubKeyHash, stakeSigningFiles)
     if (!path) throw Error(Errors.MissingSigningFileForWithdrawalError)
     return {
-      path,
+      stakeCredential: {
+        type: StakeCredentialParamsType.KEY_PATH,
+        keyPath: path,
+      },
       amount: `${withdrawal.coins}`,
     }
   }
@@ -525,8 +549,8 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
         auxiliaryData,
         validityIntervalStart,
         mint,
-        additionalWitnessRequests,
       },
+      additionalWitnessPaths: additionalWitnessRequests,
     })
 
     if (response.txHashHex !== unsignedTxParsed.getId()) {
@@ -570,7 +594,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     destination: {
       type: LedgerTypes.TxOutputDestinationType.DEVICE_OWNED,
       params: {
-        type: LedgerTypes.AddressType.BASE,
+        type: LedgerTypes.AddressType.BASE_PAYMENT_KEY_STAKE_KEY,
         params: {
           spendingPath: parseBIP32Path('1852H/1815H/0H/0/0'),
           stakingPath: parseBIP32Path('1852H/1815H/0H/2/0'),
@@ -595,6 +619,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
       auxiliaryData,
       validityIntervalStart: null,
     },
+    additionalWitnessPaths: [],
   })
 
   const signVotingRegistrationMetaData = async (
