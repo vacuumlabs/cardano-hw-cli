@@ -18,6 +18,10 @@ import {
   _UnsignedTxParsed,
   TxWitnesses,
   TxWitnessKeys,
+  AddrKeyHash,
+  StakeCredential,
+  StakeCredentialType,
+  ScriptHash,
 } from '../transaction/types'
 import {
   CryptoProvider,
@@ -52,7 +56,6 @@ import {
   getSigningPath,
   ipv4ToString,
   ipv6ToString,
-  rewardAddressToPubKeyHash,
   isDeviceVersionGTE,
   getAddressParameters,
   validateVotingRegistrationAddressType,
@@ -233,41 +236,53 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     })
   }
 
+  const _prepareCert = (
+    stakeCredential: StakeCredential,
+    stakeSigningFiles: HwSigningData[],
+  ): {path?: string | number[], scriptHash?: string} => {
+    switch (stakeCredential.type) {
+      case (StakeCredentialType.ADDR_KEY_HASH): {
+        const path = findSigningPathForKeyHash(
+          (stakeCredential as AddrKeyHash).addrKeyHash, stakeSigningFiles,
+        )
+        if (!path) throw Error(Errors.MissingSigningFileForCertificateError)
+        return {
+          path,
+        }
+      }
+      case (StakeCredentialType.SCRIPT_HASH): {
+        return {
+          scriptHash: (stakeCredential as ScriptHash).scriptHash.toString('hex'),
+        }
+      }
+      default:
+        throw Error(Errors.Unreachable)
+    }
+  }
+
   const prepareStakingKeyRegistrationCert = (
     cert: _StakingKeyRegistrationCert,
     stakeSigningFiles: HwSigningData[],
-  ): TrezorTypes.CardanoCertificate => {
-    const path = findSigningPathForKeyHash(cert.pubKeyHash, stakeSigningFiles)
-    if (!path) throw Error(Errors.MissingSigningFileForCertificateError)
-    return {
-      type: TrezorTypes.CardanoCertificateType.STAKE_REGISTRATION,
-      path,
-    }
-  }
+  ): TrezorTypes.CardanoCertificate => ({
+    type: TrezorTypes.CardanoCertificateType.STAKE_REGISTRATION,
+    ...(_prepareCert(cert.stakeCredential, stakeSigningFiles)),
+  })
 
   const prepareStakingKeyDeregistrationCert = (
     cert: _StakingKeyDeregistrationCert,
     stakeSigningFiles: HwSigningData[],
-  ): TrezorTypes.CardanoCertificate => {
-    const path = findSigningPathForKeyHash(cert.pubKeyHash, stakeSigningFiles)
-    if (!path) throw Error(Errors.MissingSigningFileForCertificateError)
-    return {
-      type: TrezorTypes.CardanoCertificateType.STAKE_DEREGISTRATION,
-      path,
-    }
-  }
+  ): TrezorTypes.CardanoCertificate => ({
+    type: TrezorTypes.CardanoCertificateType.STAKE_DEREGISTRATION,
+    ...(_prepareCert(cert.stakeCredential, stakeSigningFiles)),
+  })
 
   const prepareDelegationCert = (
     cert: _DelegationCert, stakeSigningFiles: HwSigningData[],
-  ): TrezorTypes.CardanoCertificate => {
-    const path = findSigningPathForKeyHash(cert.pubKeyHash, stakeSigningFiles)
-    if (!path) throw Error(Errors.MissingSigningFileForCertificateError)
-    return {
-      type: TrezorTypes.CardanoCertificateType.STAKE_DELEGATION,
-      path,
-      pool: cert.poolHash.toString('hex'),
-    }
-  }
+  ): TrezorTypes.CardanoCertificate => ({
+    type: TrezorTypes.CardanoCertificateType.STAKE_DELEGATION,
+    ...(_prepareCert(cert.stakeCredential, stakeSigningFiles)),
+    pool: cert.poolHash.toString('hex'),
+  })
 
   const preparePoolOwners = (
     owners: Buffer[], stakeSigningFiles: HwSigningData[],
@@ -349,15 +364,12 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
 
   const prepareWithdrawal = (
     withdrawal: _Withdrawal, stakeSigningFiles: HwSigningData[],
-  ): TrezorTypes.CardanoWithdrawal => {
-    const pubKeyHash = rewardAddressToPubKeyHash(withdrawal.address)
-    const path = findSigningPathForKeyHash(pubKeyHash, stakeSigningFiles)
-    if (!path) throw Error(Errors.MissingSigningFileForWithdrawalError)
-    return {
-      path,
+  ): TrezorTypes.CardanoWithdrawal => (
+    {
       amount: `${withdrawal.coins}`,
+      ...(_prepareCert(withdrawal.stakeCredential, stakeSigningFiles)),
     }
-  }
+  )
 
   const prepareTtl = (ttl: BigInt | null): string | undefined => (ttl != null ? ttl.toString() : undefined)
 
