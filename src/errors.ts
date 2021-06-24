@@ -93,6 +93,7 @@ const enum Errors {
   InvalidScriptHashHex = 'Invalid script hash hex',
   InvalidNativeScriptFile = 'Invalid native script file',
   Unreachable = 'Unreachable code reached',
+  StakeCredentialParseError = 'Failed to parse stake credentials',
 }
 
 export {

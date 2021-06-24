@@ -32,6 +32,10 @@ import {
   VotingRegistrationMetaDataCborHex,
   _UnsignedTxParsed,
   TxWitnesses,
+  AddrKeyHash,
+  ScriptHash,
+  StakeCredential,
+  StakeCredentialType,
 } from '../transaction/types'
 import {
   Address,
@@ -56,7 +60,6 @@ import {
   PathTypes,
   classifyPath,
   getAddressAttributes,
-  rewardAddressToPubKeyHash,
   ipv4ToString,
   ipv6ToString,
   isDeviceVersionGTE,
@@ -204,56 +207,61 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     }
   }
 
+  const _prepareCert = (
+    stakeCredential: StakeCredential,
+    stakeSigningFiles: HwSigningData[],
+  ): LedgerTypes.StakeCredentialParams => {
+    switch (stakeCredential.type) {
+      case (StakeCredentialType.ADDR_KEY_HASH): {
+        const path = findSigningPathForKeyHash(
+          (stakeCredential as AddrKeyHash).addrKeyHash, stakeSigningFiles,
+        )
+        if (!path) throw Error(Errors.MissingSigningFileForCertificateError)
+        return {
+          type: LedgerTypes.StakeCredentialParamsType.KEY_PATH,
+          keyPath: path,
+        }
+      }
+      case (StakeCredentialType.SCRIPT_HASH): {
+        return {
+          type: LedgerTypes.StakeCredentialParamsType.SCRIPT_HASH,
+          scriptHash: (stakeCredential as ScriptHash).scriptHash.toString('hex'),
+        }
+      }
+      default:
+        throw Error(Errors.Unreachable)
+    }
+  }
+
   const prepareStakingKeyRegistrationCert = (
     cert: _StakingKeyRegistrationCert,
     stakeSigningFiles: HwSigningData[],
-  ): LedgerTypes.Certificate => {
-    const path = findSigningPathForKeyHash(cert.pubKeyHash, stakeSigningFiles)
-    if (!path) throw Error(Errors.MissingSigningFileForCertificateError)
-    return {
-      type: LedgerTypes.CertificateType.STAKE_REGISTRATION,
-      params: {
-        stakeCredential: {
-          type: LedgerTypes.StakeCredentialParamsType.KEY_PATH,
-          keyPath: path,
-        },
-      },
-    }
-  }
+  ): LedgerTypes.Certificate => ({
+    type: LedgerTypes.CertificateType.STAKE_REGISTRATION,
+    params: {
+      stakeCredential: _prepareCert(cert.stakeCredential, stakeSigningFiles),
+    },
+  })
 
   const prepareStakingKeyDeregistrationCert = (
     cert: _StakingKeyDeregistrationCert,
     stakeSigningFiles: HwSigningData[],
-  ): LedgerTypes.Certificate => {
-    const path = findSigningPathForKeyHash(cert.pubKeyHash, stakeSigningFiles)
-    if (!path) throw Error(Errors.MissingSigningFileForCertificateError)
-    return {
-      type: LedgerTypes.CertificateType.STAKE_DEREGISTRATION,
-      params: {
-        stakeCredential: {
-          type: LedgerTypes.StakeCredentialParamsType.KEY_PATH,
-          keyPath: path,
-        },
-      },
-    }
-  }
+  ): LedgerTypes.Certificate => ({
+    type: LedgerTypes.CertificateType.STAKE_DEREGISTRATION,
+    params: {
+      stakeCredential: _prepareCert(cert.stakeCredential, stakeSigningFiles),
+    },
+  })
 
   const prepareDelegationCert = (
     cert: _DelegationCert, stakeSigningFiles: HwSigningData[],
-  ): LedgerTypes.Certificate => {
-    const path = findSigningPathForKeyHash(cert.pubKeyHash, stakeSigningFiles)
-    if (!path) throw Error(Errors.MissingSigningFileForCertificateError)
-    return {
-      type: LedgerTypes.CertificateType.STAKE_DELEGATION,
-      params: {
-        poolKeyHashHex: cert.poolHash.toString('hex'),
-        stakeCredential: {
-          type: LedgerTypes.StakeCredentialParamsType.KEY_PATH,
-          keyPath: path,
-        },
-      },
-    }
-  }
+  ): LedgerTypes.Certificate => ({
+    type: LedgerTypes.CertificateType.STAKE_DELEGATION,
+    params: {
+      poolKeyHashHex: cert.poolHash.toString('hex'),
+      stakeCredential: _prepareCert(cert.stakeCredential, stakeSigningFiles),
+    },
+  })
 
   const preparePoolKey = (
     signingMode: LedgerTypes.TransactionSigningMode,
@@ -439,18 +447,12 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
 
   const prepareWithdrawal = (
     withdrawal: _Withdrawal, stakeSigningFiles: HwSigningData[],
-  ): LedgerTypes.Withdrawal => {
-    const pubKeyHash = rewardAddressToPubKeyHash(withdrawal.address)
-    const path = findSigningPathForKeyHash(pubKeyHash, stakeSigningFiles)
-    if (!path) throw Error(Errors.MissingSigningFileForWithdrawalError)
-    return {
-      stakeCredential: {
-        type: LedgerTypes.StakeCredentialParamsType.KEY_PATH,
-        keyPath: path,
-      },
+  ): LedgerTypes.Withdrawal => (
+    {
+      stakeCredential: _prepareCert(withdrawal.stakeCredential, stakeSigningFiles),
       amount: `${withdrawal.coins}`,
     }
-  }
+  )
 
   const prepareTtl = (ttl: BigInt | null): string | null => ttl && ttl.toString()
 
@@ -555,9 +557,8 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
         auxiliaryData,
         validityIntervalStart,
         mint,
-        additionalWitnessRequests,
       },
-      additionalWitnessPaths: [],
+      additionalWitnessPaths: additionalWitnessRequests,
     })
 
     if (response.txHashHex !== unsignedTxParsed.getId()) {

@@ -517,7 +517,7 @@ const ipv6ToString = (ipv6: Buffer | undefined): string | undefined => {
   return ipv6LE ? ipv6LE.join(':') : undefined
 }
 
-const rewardAddressToPubKeyHash = (address: Buffer) => address.slice(1)
+const rewardAddressToStakeCredential = (address: Buffer) => address.slice(1)
 
 const isDeviceVersionGTE = (
   deviceVersion: DeviceVersion,
@@ -613,10 +613,11 @@ export {
   extractStakePubKeyFromHwSigningData,
   encodeAddress,
   getAddressParameters,
+  getAddressType,
   getAddressAttributes,
   ipv4ToString,
   ipv6ToString,
-  rewardAddressToPubKeyHash,
+  rewardAddressToStakeCredential,
   isDeviceVersionGTE,
   formatVotingRegistrationMetaData,
   encodeVotingRegistrationMetaData,

@@ -93,7 +93,10 @@ const transactions = {
       certificates: [],
       withdrawals: [
         {
-          address: Buffer.from('e11d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c', 'hex'),
+          stakeCredential: {
+            type: 0,
+            addrKeyHash: Buffer.from('1d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c', 'hex'),
+          },
           coins: BigInt(111),
         },
       ],
@@ -131,7 +134,10 @@ const transactions = {
       ttl: 10n,
       certificates: [{
         type: 0,
-        pubKeyHash: Buffer.from('1d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c', 'hex'),
+        stakeCredential: {
+          type: 0,
+          addrKeyHash: Buffer.from('1d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c', 'hex'),
+        },
       }],
       withdrawals: [],
       metaDataHash: null,
@@ -169,7 +175,10 @@ const transactions = {
       ttl: 10n,
       certificates: [{
         type: 2,
-        pubKeyHash: Buffer.from('1d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c', 'hex'),
+        stakeCredential: {
+          type: 0,
+          addrKeyHash: Buffer.from('1d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c', 'hex'),
+        },
         poolHash: Buffer.from('f61c42cbf7c8c53af3f520508212ad3e72f674f957fe23ff0acb4973', 'hex'),
       }],
       withdrawals: [],
@@ -207,7 +216,10 @@ const transactions = {
       ttl: 10n,
       certificates: [{
         type: 1,
-        pubKeyHash: Buffer.from('1d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c', 'hex'),
+        stakeCredential: {
+          type: 0,
+          addrKeyHash: Buffer.from('1d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c', 'hex'),
+        },
       }],
       withdrawals: [],
       metaDataHash: null,
