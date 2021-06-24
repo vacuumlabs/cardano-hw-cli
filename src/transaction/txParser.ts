@@ -1,3 +1,4 @@
+import * as Cardano from '@emurgo/cardano-serialization-lib-nodejs'
 import { isArrayOfType } from '../guards'
 import { Errors } from '../errors'
 import {
@@ -42,8 +43,12 @@ import {
   _Asset,
   UnsignedTxCborHex,
   _Mint,
+  StakeCredentialType,
+  StakeCredential,
 } from './types'
 import { decodeCbor, encodeCbor } from '../util'
+import { getAddressType, rewardAddressToStakeCredential } from '../crypto-providers/util'
+import { AddressType } from '../types'
 
 const { blake2b } = require('cardano-crypto.js')
 
@@ -155,14 +160,37 @@ const parseRelay = (poolRelay: any): _PoolRelay => {
 }
 
 const parseTxCerts = (txCertificates: any[]): _Certificate[] => {
+  const parseStakeCredential = (stakeCredential: any): StakeCredential => {
+    if (Array.isArray(stakeCredential) && stakeCredential.length === 2) {
+      if (stakeCredential[0] === StakeCredentialType.ADDR_KEY_HASH) {
+        return {
+          type: StakeCredentialType.ADDR_KEY_HASH,
+          addrKeyHash: stakeCredential[1],
+        }
+      }
+      if (stakeCredential[0] === StakeCredentialType.SCRIPT_HASH) {
+        return {
+          type: StakeCredentialType.SCRIPT_HASH,
+          scriptHash: stakeCredential[1],
+        }
+      }
+    } else if (Buffer.isBuffer(stakeCredential)) {
+      return {
+        type: StakeCredentialType.ADDR_KEY_HASH,
+        addrKeyHash: stakeCredential,
+      }
+    }
+    throw Error(Errors.StakeCredentialParseError)
+  }
+
   const stakeKeyRegistrationCertParser = (
     txCertificate: any,
   ): _StakingKeyRegistrationCert => {
     if (!isTxStakingKeyRegistrationCert(txCertificate)) {
       throw Error(Errors.TxStakingKeyRegistrationCertParseError)
     }
-    const [type, [, pubKeyHash]] = txCertificate
-    return ({ type, pubKeyHash })
+    const [type, stakeCredential] = txCertificate
+    return ({ type, stakeCredential: parseStakeCredential(stakeCredential) })
   }
 
   const stakeKeyDeregistrationCertParser = (
@@ -171,8 +199,8 @@ const parseTxCerts = (txCertificates: any[]): _Certificate[] => {
     if (!isStakingKeyDeregistrationCert(txCertificate)) {
       throw Error(Errors.TxStakingKeyDeregistrationCertParseError)
     }
-    const [type, [, pubKeyHash]] = txCertificate
-    return ({ type, pubKeyHash })
+    const [type, stakeCredential] = txCertificate
+    return ({ type, stakeCredential: parseStakeCredential(stakeCredential) })
   }
 
   const delegationCertParser = (
@@ -181,8 +209,8 @@ const parseTxCerts = (txCertificates: any[]): _Certificate[] => {
     if (!isDelegationCert(txCertificate)) {
       throw Error(Errors.TxDelegationCertParseError)
     }
-    const [type, [, pubKeyHash], poolHash] = txCertificate
-    return ({ type, pubKeyHash, poolHash })
+    const [type, stakeCredential, poolHash] = txCertificate
+    return ({ type, stakeCredential: parseStakeCredential(stakeCredential), poolHash })
   }
 
   const stakepoolRegistrationCertParser = (
@@ -255,11 +283,35 @@ const parseTxCerts = (txCertificates: any[]): _Certificate[] => {
   )
 }
 
+const parseTxWithdrawalRewardAccount = (addressBuffer: Buffer): StakeCredential => {
+  const address = Cardano.Address.from_bytes(addressBuffer)
+  const type = getAddressType(address.to_bytes())
+  switch (type) {
+    case (AddressType.REWARD_KEY): {
+      return {
+        type: StakeCredentialType.ADDR_KEY_HASH,
+        addrKeyHash: rewardAddressToStakeCredential(addressBuffer),
+      }
+    }
+    case (AddressType.REWARD_SCRIPT): {
+      return {
+        type: StakeCredentialType.SCRIPT_HASH,
+        scriptHash: rewardAddressToStakeCredential(addressBuffer),
+      }
+    }
+    default:
+      throw Error(Errors.WithrawalsParseError)
+  }
+}
+
 const parseTxWithdrawals = (withdrawals: any): _Withdrawal[] => {
   if (!isWithdrawalsMap(withdrawals)) {
     throw Error(Errors.WithrawalsParseError)
   }
-  return Array.from(withdrawals).map(([address, coins]): _Withdrawal => ({ address, coins: BigInt(coins) }))
+  return Array.from(withdrawals).map(([rewardAccount, coins]): _Withdrawal => ({
+    stakeCredential: parseTxWithdrawalRewardAccount(rewardAccount),
+    coins: BigInt(coins),
+  }))
 }
 
 const parseFee = (fee: any): Lovelace => {
