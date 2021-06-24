@@ -18,6 +18,11 @@ export const enum TxWitnessKeys {
   BYRON = 2,
 }
 
+export const enum StakeCredentialType {
+  ADDR_KEY_HASH = 0,
+  SCRIPT_HASH = 1,
+}
+
 export const enum TxCertificateKeys {
   STAKING_KEY_REGISTRATION = 0,
   STAKING_KEY_DEREGISTRATION = 1,
@@ -43,20 +48,32 @@ export type _Output = {
   tokenBundle: _MultiAsset[],
 }
 
+export type AddrKeyHash = {
+  type: StakeCredentialType.ADDR_KEY_HASH,
+  addrKeyHash: Buffer,
+}
+
+export type ScriptHash = {
+  type: StakeCredentialType.SCRIPT_HASH,
+  scriptHash: Buffer,
+}
+
+export type StakeCredential = AddrKeyHash | ScriptHash
+
 export type _DelegationCert = {
   type: TxCertificateKeys.DELEGATION,
-  pubKeyHash: Buffer,
+  stakeCredential: StakeCredential,
   poolHash: Buffer,
 }
 
 export type _StakingKeyRegistrationCert = {
   type: TxCertificateKeys.STAKING_KEY_REGISTRATION,
-  pubKeyHash: Buffer,
+  stakeCredential: StakeCredential,
 }
 
 export type _StakingKeyDeregistrationCert = {
   type: TxCertificateKeys.STAKING_KEY_DEREGISTRATION,
-  pubKeyHash: Buffer,
+  stakeCredential: StakeCredential,
 }
 
 export const enum TxRelayTypes {
@@ -128,7 +145,7 @@ export type _Certificate =
   | _StakepoolRetirementCert
 
 export type _Withdrawal = {
-  address: Buffer,
+  stakeCredential: StakeCredential,
   coins: Lovelace,
 }
 
