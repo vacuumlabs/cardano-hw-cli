@@ -143,6 +143,11 @@ export type TxWitnessShelley = [
   Buffer,
 ]
 
+export type TxWitnesses = {
+  byronWitnesses: TxWitnessByron[]
+  shelleyWitnesses: TxWitnessShelley[]
+}
+
 export type _SignedTxDecoded = [
   Map<TxBodyKeys, any>,
   Map<TxWitnessKeys, Array<TxWitnessByron | TxWitnessShelley>>,

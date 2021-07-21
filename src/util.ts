@@ -30,3 +30,7 @@ export const removeNullFields = (obj: any): any => Object.keys(obj)
     },
     {},
   )
+
+export const partition = <T>(array: T[], predicate: (t: T) => boolean): [T[], T[]] => (
+  [array.filter(predicate), array.filter((t) => !predicate(t))]
+)
