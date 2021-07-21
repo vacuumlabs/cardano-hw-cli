@@ -43,7 +43,7 @@
     "cardano-crypto.js": "^5.3.6-rc.6",
     "cbor": "^7.0.4",
     "rw": "1.3.3",
-    "trezor-connect": "https://github.com/vacuumlabs/connect/releases/download/8.1.27-catalyst-rc.3-extended/trezor-connect-v8.1.27-catalyst-rc.3-extended.tgz"
+    "trezor-connect": "https://github.com/vacuumlabs/connect/releases/download/8.1.30-rc.1-tx-streaming-extended/trezor-connect-v8.1.30-rc.1-tx-streaming-extended.tgz"
   },
   "devDependencies": {
     "@typescript-eslint/eslint-plugin": "^4.2.0",
