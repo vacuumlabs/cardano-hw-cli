@@ -16,7 +16,6 @@ import {
   _MultiAsset,
   VotingRegistrationMetaDataCborHex,
   _UnsignedTxParsed,
-  VotingRegistrationAuxiliaryData,
   TxWitnesses,
   TxWitnessKeys,
 } from '../transaction/types'
@@ -34,6 +33,7 @@ import {
 import {
   Address,
   BIP32Path,
+  HexString,
   HwSigningData,
   Network,
   PubKeyHex,
@@ -52,17 +52,16 @@ import {
   isDeviceVersionGTE,
   getAddressParameters,
   validateVotingRegistrationAddressType,
-  formatVotingRegistrationMetaData,
-  extractStakePubKeyFromHwSigningData,
   splitXPubKeyCborHex,
+  encodeVotingRegistrationMetaData,
 } from './util'
 import { Errors } from '../errors'
-import { encodeCbor, partition, removeNullFields } from '../util'
+import { partition, removeNullFields } from '../util'
 import { TREZOR_VERSIONS } from './constants'
 import { KesVKey, OpCertIssueCounter, SignedOpCertCborHex } from '../opCert/opCert'
 import { parseBIP32Path } from '../command-parser/parsers'
 
-const { blake2b, bech32 } = require('cardano-crypto.js')
+const { bech32 } = require('cardano-crypto.js')
 
 const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
   const initTrezorConnect = async (): Promise<void> => {
@@ -594,24 +593,14 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
       throw Error(Errors.MissingCatalystVotingSignature)
     }
 
-    const stakePubHex = extractStakePubKeyFromHwSigningData(hwStakeSigningFile)
-    const votingRegistrationMetaData = formatVotingRegistrationMetaData(
-      Buffer.from(votePublicKeyHex, 'hex'),
-      Buffer.from(stakePubHex, 'hex'),
+    return encodeVotingRegistrationMetaData(
+      hwStakeSigningFile,
+      votePublicKeyHex,
       address,
       nonce,
-      Buffer.from(response.payload.auxiliaryDataSupplement.catalystSignature, 'hex'),
+      response.payload.auxiliaryDataSupplement.auxiliaryDataHash as HexString,
+      response.payload.auxiliaryDataSupplement.catalystSignature as HexString,
     )
-
-    const auxiliaryData: VotingRegistrationAuxiliaryData = [votingRegistrationMetaData, []]
-    const auxiliaryDataCbor = encodeCbor(auxiliaryData)
-
-    const auxiliaryDataHashHex = blake2b(auxiliaryDataCbor, 32).toString('hex')
-    if (response.payload.auxiliaryDataSupplement.auxiliaryDataHash !== auxiliaryDataHashHex) {
-      throw Error(Errors.MetadataSerializationMismatchError)
-    }
-
-    return encodeCbor(votingRegistrationMetaData).toString('hex')
   }
 
   const signOperationalCertificate = async (

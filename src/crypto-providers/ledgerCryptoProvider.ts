@@ -29,7 +29,6 @@ import {
   TxRelayTypes,
   TxWitnessKeys,
   _MultiAsset,
-  VotingRegistrationAuxiliaryData,
   VotingRegistrationMetaDataCborHex,
   _UnsignedTxParsed,
   TxWitnesses,
@@ -37,12 +36,13 @@ import {
 import {
   Address,
   BIP32Path,
+  HexString,
   HwSigningData,
   Network,
   VotePublicKeyHex,
   XPubKeyHex,
 } from '../types'
-import { encodeCbor, partition } from '../util'
+import { partition } from '../util'
 import { LEDGER_VERSIONS } from './constants'
 import { LedgerCryptoProviderFeature, LedgerWitness } from './ledgerTypes'
 import { CryptoProvider, _AddressParameters } from './types'
@@ -58,14 +58,13 @@ import {
   isDeviceVersionGTE,
   filterSigningFiles,
   getAddressParameters,
-  formatVotingRegistrationMetaData,
   splitXPubKeyCborHex,
-  extractStakePubKeyFromHwSigningData,
   validateVotingRegistrationAddressType,
   findSigningPathForKey,
+  encodeVotingRegistrationMetaData,
 } from './util'
 
-const { blake2b, bech32 } = require('cardano-crypto.js')
+const { bech32 } = require('cardano-crypto.js')
 
 const TransportNodeHid = require('@ledgerhq/hw-transport-node-hid').default
 
@@ -607,24 +606,14 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     const response = await ledger.signTransaction(dummyTx)
     if (!response?.auxiliaryDataSupplement) throw Error(Errors.MissingAuxiliaryDataSupplement)
 
-    const stakePubHex = extractStakePubKeyFromHwSigningData(hwStakeSigningFile)
-    const votingRegistrationMetaData = formatVotingRegistrationMetaData(
-      Buffer.from(votePublicKeyHex, 'hex'),
-      Buffer.from(stakePubHex, 'hex'),
+    return encodeVotingRegistrationMetaData(
+      hwStakeSigningFile,
+      votePublicKeyHex,
       address,
       nonce,
-      Buffer.from(response.auxiliaryDataSupplement.catalystRegistrationSignatureHex, 'hex'),
+      response.auxiliaryDataSupplement.auxiliaryDataHashHex as HexString,
+      response.auxiliaryDataSupplement.catalystRegistrationSignatureHex as HexString,
     )
-
-    const auxiliaryData: VotingRegistrationAuxiliaryData = [votingRegistrationMetaData, []]
-    const auxiliaryDataCbor = encodeCbor(auxiliaryData)
-
-    const auxiliaryDataHashHex = blake2b(auxiliaryDataCbor, 32).toString('hex')
-    if (response.auxiliaryDataSupplement.auxiliaryDataHashHex !== auxiliaryDataHashHex) {
-      throw Error(Errors.MetadataSerializationMismatchError)
-    }
-
-    return encodeCbor(votingRegistrationMetaData).toString('hex')
   }
 
   const createWitnesses = (ledgerWitnesses: LedgerWitness[], signingFiles: HwSigningData[]): TxWitnesses => {

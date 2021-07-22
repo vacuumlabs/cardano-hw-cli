@@ -2,20 +2,27 @@ import { HARDENED_THRESHOLD } from '../constants'
 import { Errors } from '../errors'
 import { isBIP32Path, isPubKeyHex } from '../guards'
 import {
-  TxCertificateKeys, VotingRegistrationMetaData, _Certificate, _UnsignedTxParsed, _XPubKey,
+  TxCertificateKeys,
+  VotingRegistrationAuxiliaryData,
+  VotingRegistrationMetaData,
+  _Certificate,
+  _UnsignedTxParsed,
+  _XPubKey,
 } from '../transaction/types'
 import {
   Address,
   BIP32Path,
+  HexString,
   HwSigningData,
   HwSigningType,
   Network,
   NetworkIds,
   ProtocolMagics,
   PubKeyHex,
+  VotePublicKeyHex,
   XPubKeyCborHex,
 } from '../types'
-import { decodeCbor } from '../util'
+import { decodeCbor, encodeCbor } from '../util'
 import {
   DeviceVersion,
   _AddressParameters,
@@ -26,6 +33,7 @@ const {
   AddressTypes,
   base58,
   bech32,
+  blake2b,
 } = require('cardano-crypto.js')
 
 enum PathTypes {
@@ -522,6 +530,33 @@ const formatVotingRegistrationMetaData = (
   ])
 )
 
+const encodeVotingRegistrationMetaData = (
+  hwStakeSigningFile: HwSigningData,
+  votePublicKeyHex: VotePublicKeyHex,
+  address: Buffer,
+  nonce: BigInt,
+  auxiliaryDataHashHex: HexString,
+  catalystRegistrationSignatureHex: HexString,
+) => {
+  const stakePubHex = extractStakePubKeyFromHwSigningData(hwStakeSigningFile)
+  const votingRegistrationMetaData = formatVotingRegistrationMetaData(
+    Buffer.from(votePublicKeyHex, 'hex'),
+    Buffer.from(stakePubHex, 'hex'),
+    address,
+    nonce,
+    Buffer.from(catalystRegistrationSignatureHex, 'hex'),
+  )
+
+  const auxiliaryData: VotingRegistrationAuxiliaryData = [votingRegistrationMetaData, []]
+  const auxiliaryDataCbor = encodeCbor(auxiliaryData)
+
+  if (blake2b(auxiliaryDataCbor, 32).toString('hex') !== auxiliaryDataHashHex) {
+    throw Error(Errors.MetadataSerializationMismatchError)
+  }
+
+  return encodeCbor(votingRegistrationMetaData).toString('hex')
+}
+
 const areHwSigningDataNonByron = (hwSigningData: HwSigningData[]) => (
   hwSigningData
     .map((signingFile) => classifyPath(signingFile.path))
@@ -554,6 +589,7 @@ export {
   rewardAddressToPubKeyHash,
   isDeviceVersionGTE,
   formatVotingRegistrationMetaData,
+  encodeVotingRegistrationMetaData,
   areHwSigningDataNonByron,
   validateVotingRegistrationAddressType,
 }
