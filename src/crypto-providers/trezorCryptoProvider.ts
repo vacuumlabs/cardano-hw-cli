@@ -354,7 +354,9 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     validityIntervalStart != null ? validityIntervalStart.toString() : undefined
   )
 
-  const prepareMetaDataHex = (metaDataHash: Buffer | null): TrezorTypes.CardanoAuxiliaryData | undefined => (
+  const prepareMetaDataHashHex = (
+    metaDataHash: Buffer | null,
+  ): TrezorTypes.CardanoAuxiliaryData | undefined => (
     metaDataHash ? ({
       hash: metaDataHash.toString('hex'),
     }) : undefined
@@ -445,7 +447,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
       (withdrawal: _Withdrawal) => prepareWithdrawal(withdrawal, stakeSigningFiles),
     )
 
-    const auxiliaryData = prepareMetaDataHex(unsignedTxParsed.metaDataHash)
+    const auxiliaryData = prepareMetaDataHashHex(unsignedTxParsed.metaDataHash)
 
     const request: TrezorTypes.CommonParams & TrezorTypes.CardanoSignTransaction = {
       signingMode,
