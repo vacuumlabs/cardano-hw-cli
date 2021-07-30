@@ -33,7 +33,7 @@ cardano-hw-cli key verification-key
 cardano-hw-cli transaction sign
 --tx-body-file FILE                    Input filepath of the TxBody.
 --hw-signing-file FILE                 Input filepath of the hardware wallet signing file (one or more).
---change-output-key-file FILE          Input filepath of the hardware wallet signing file.
+--change-output-key-file FILE          Input filepath of the hardware wallet signing file (so hw cli can match the keys of the change address, if present, and let the device hide it).
 --mainnet | --testnet-magic NATURAL    Use the mainnet magic id or specify testnet magic id.
 --out-file FILE                        Output filepath of the Tx.
 ```
@@ -43,7 +43,7 @@ cardano-hw-cli transaction sign
 cardano-hw-cli transaction witness
 --tx-body-file FILE                    Input filepath of the TxBody.
 --hw-signing-file FILE                 Input filepath of the hardware wallet signing file.
---change-output-key-file FILE          Input filepath of the hardware wallet signing file.
+--change-output-key-file FILE          Input filepath of the hardware wallet signing file (so hw cli can match the keys of the change address, if present, and let the device hide it).
 --mainnet | --testnet-magic NATURAL    Use the mainnet magic id or specify testnet magic id.
 --out-file FILE                        Output filepath of the Tx.
 ```
