@@ -10,6 +10,8 @@ import {
   CardanoEra,
   HwSigningData,
   HwSigningType,
+  NativeScript,
+  NativeScriptType,
   TxBodyData,
   VotePublicKeyHex,
 } from '../types'
@@ -159,4 +161,67 @@ export const parseScriptHashHex = (hashHex: string): string => {
     throw Error(Errors.InvalidScriptHashHex)
   }
   return hashHex
+}
+
+const nativeScriptTypeMap: {[key: string]: NativeScriptType} = {
+  all: NativeScriptType.ALL,
+  any: NativeScriptType.ANY,
+  atLeast: NativeScriptType.N_OF_K,
+  after: NativeScriptType.INVALID_BEFORE,
+  before: NativeScriptType.INVALID_HEREAFTER,
+  sig: NativeScriptType.PUBKEY,
+}
+
+const parseNativeScriptData = (data: any): NativeScript => {
+  if (!data.type || !(data.type in nativeScriptTypeMap)) {
+    throw Error(Errors.InvalidNativeScriptFile)
+  }
+
+  const type = nativeScriptTypeMap[data.type]
+
+  switch (type) {
+    case NativeScriptType.PUBKEY:
+      if (!data.keyHash || typeof data.keyHash !== 'string') {
+        throw Error(Errors.InvalidNativeScriptFile)
+      }
+      return {
+        type,
+        keyHash: data.keyHash,
+      }
+    case NativeScriptType.ALL:
+    case NativeScriptType.ANY:
+      if (!data.scripts || !Array.isArray(data.scripts)) {
+        throw Error(Errors.InvalidNativeScriptFile)
+      }
+      return {
+        type,
+        scripts: data.scripts.map(parseNativeScriptData),
+      }
+    case NativeScriptType.N_OF_K:
+      if (typeof data.required !== 'number' || !data.scripts || !Array.isArray(data.scripts)) {
+        throw Error(Errors.InvalidNativeScriptFile)
+      }
+      return {
+        type,
+        required: data.required,
+        scripts: data.scripts.map(parseNativeScriptData),
+      }
+    case NativeScriptType.INVALID_BEFORE:
+    case NativeScriptType.INVALID_HEREAFTER:
+      if (typeof data.slot !== 'number') {
+        throw Error(Errors.InvalidNativeScriptFile)
+      }
+      return {
+        type,
+        slot: data.slot,
+      }
+    default:
+      throw Error(Errors.Unreachable)
+  }
+}
+
+export const parseNativeScriptFile = (path: string): NativeScript => {
+  const data = JSON.parse(rw.readFileSync(path, 'utf8'))
+
+  return parseNativeScriptData(data)
 }

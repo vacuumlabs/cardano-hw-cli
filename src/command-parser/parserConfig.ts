@@ -9,6 +9,7 @@ import {
   parseKesVKeyFile,
   parseVotePubFile,
   parseScriptHashHex,
+  parseNativeScriptFile,
 } from './parsers'
 
 const keyGenArgs = {
@@ -195,6 +196,21 @@ export const parserConfig = {
         required: true,
         dest: 'outFile',
         help: 'Output filepath.',
+      },
+    },
+    'policyid': {
+      '--script-file': {
+        required: true,
+        type: (path: string) => parseNativeScriptFile(path),
+        dest: 'nativeScript',
+        help: 'Filepath of the script.',
+      },
+      '--hw-signing-file': {
+        dest: 'hwSigningFileData',
+        required: false,
+        action: 'append',
+        type: (path: string) => parseHwSigningFile(path),
+        help: 'Input filepath of the hardware wallet signing file.',
       },
     },
     'witness': {
