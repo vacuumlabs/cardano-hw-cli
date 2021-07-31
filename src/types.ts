@@ -23,6 +23,9 @@ export type XPubKeyCborHex = FixlenHexString<typeof X_PUB_KEY_CBOR_HEX_LENGTH>
 export const VOTE_PUBLIC_KEY_HEX_LENGTH = 32
 export type VotePublicKeyHex = FixlenHexString<typeof VOTE_PUBLIC_KEY_HEX_LENGTH>
 
+export const NATIVE_SCRIPT_HASH_HEX_LENGTH = 28
+export type NativeScriptHashKeyHex = FixlenHexString<typeof NATIVE_SCRIPT_HASH_HEX_LENGTH>
+
 export enum CardanoEra {
   BYRON = 'Byron',
   SHELLEY = 'Shelley',
@@ -107,6 +110,41 @@ export type ParsedTransactionSignArguments = {
   changeOutputKeyFileData: HwSigningData[],
 }
 
+export enum NativeScriptType {
+  PUBKEY,
+  ALL,
+  ANY,
+  N_OF_K,
+  INVALID_BEFORE,
+  INVALID_HEREAFTER,
+}
+
+export type NativeScript = {
+  type: NativeScriptType.PUBKEY,
+  keyHash: string,
+} | {
+  type: NativeScriptType.ALL | NativeScriptType.ANY,
+  scripts: NativeScript[],
+} | {
+  type: NativeScriptType.N_OF_K,
+  required: bigint,
+  scripts: NativeScript[],
+} | {
+  type: NativeScriptType.INVALID_BEFORE | NativeScriptType.INVALID_HEREAFTER,
+  slot: bigint,
+}
+
+export enum NativeScriptDisplayFormat {
+  BECH32,
+  POLICY_ID,
+}
+
+export type ParsedTransactionPolicyIdArguments = {
+  command: CommandType.DERIVE_NATIVE_SCRIPT_HASH,
+  nativeScript: NativeScript,
+  hwSigningFileData: HwSigningData[],
+}
+
 export type ParsedTransactionWitnessArguments = {
   command: CommandType.WITNESS_TRANSACTION,
   network: Network,
@@ -151,6 +189,7 @@ export type ParsedArguments =
   | ParsedAddressKeyGenArguments
   | ParsedVerificationKeyArguments
   | ParsedTransactionSignArguments
+  | ParsedTransactionPolicyIdArguments
   | ParsedTransactionWitnessArguments
   | ParsedNodeKeyGenArguments
   | ParsedOpCertArguments

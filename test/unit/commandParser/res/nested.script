@@ -1,0 +1,55 @@
+{
+    "type": "all",
+    "scripts":
+    [
+      {
+        "type": "sig",
+        "keyHash": "14c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f1124"
+      },
+      {
+        "type": "sig",
+        "keyHash": "c4b9265645fde9536c0795adbcc5291767a0c61fd62448341d7e0386"
+      },
+      {
+        "type": "any",
+        "scripts": 
+        [
+          {
+            "type": "sig",
+            "keyHash": "c4b9265645fde9536c0795adbcc5291767a0c61fd62448341d7e0386"
+          },
+          {
+            "type": "sig",
+            "keyHash": "0241f2d196f52a92fbd2183d03b370c30b6960cfdeae364ffabac889"
+          }
+        ]
+      },
+      {
+        "type": "atLeast",
+        "required": 2,
+        "scripts": 
+        [
+          {
+            "type": "sig",
+            "keyHash": "c4b9265645fde9536c0795adbcc5291767a0c61fd62448341d7e0386"
+          },
+          {
+            "type": "sig",
+            "keyHash": "0241f2d196f52a92fbd2183d03b370c30b6960cfdeae364ffabac889"
+          },
+          {
+            "type": "sig",
+            "keyHash": "cecb1d427c4ae436d28cc0f8ae9bb37501a5b77bcc64cd1693e9ae20"
+          }
+        ]
+      },
+      {
+        "type": "after",
+        "slot": 100
+      },
+      {
+        "type": "before",
+        "slot": 200
+      }
+    ]
+}
