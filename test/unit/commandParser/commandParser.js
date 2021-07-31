@@ -1,7 +1,7 @@
 /* eslint-disable max-len */
 const assert = require('assert')
 const { CommandType, parse } = require('../../../src/command-parser/commandParser')
-const { CardanoEra, HwSigningType } = require('../../../src/types')
+const { CardanoEra, HwSigningType, NativeScriptType } = require('../../../src/types')
 const { NETWORKS } = require('../../../src/constants')
 
 const resFolder = 'test/unit/commandParser/res/'
@@ -206,6 +206,73 @@ describe('Command parser', () => {
       outFile: 'voting_registration.cbor',
       rewardAddress: 'adr_test1qq2vzmtlgvjrhkq50rngh8d482zj3l20kyrc6kx4ffl3zfqayfawlf9hwv2fzuygt2km5v92kvf8e3s3mk7ynxw77cwq2glhm4',
       votePublicKey: '3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7',
+    }
+    assert.deepStrictEqual(parsedArgs, expectedResult)
+  })
+  it('Should parse policy-id command', () => {
+    const args = pad([
+      'transaction',
+      'policyid',
+      '--script-file',
+      prefix('nested.script'),
+    ])
+    const { parsedArgs } = parse(args)
+    const expectedResult = {
+      command: CommandType.DERIVE_NATIVE_SCRIPT_HASH,
+      nativeScript: {
+        type: NativeScriptType.ALL,
+        scripts: [
+          {
+            type: NativeScriptType.PUBKEY,
+            keyHash: '14c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f1124',
+          },
+          {
+            type: NativeScriptType.PUBKEY,
+            keyHash: 'c4b9265645fde9536c0795adbcc5291767a0c61fd62448341d7e0386',
+          },
+          {
+            type: NativeScriptType.ANY,
+            scripts:
+            [
+              {
+                type: NativeScriptType.PUBKEY,
+                keyHash: 'c4b9265645fde9536c0795adbcc5291767a0c61fd62448341d7e0386',
+              },
+              {
+                type: NativeScriptType.PUBKEY,
+                keyHash: '0241f2d196f52a92fbd2183d03b370c30b6960cfdeae364ffabac889',
+              },
+            ],
+          },
+          {
+            type: NativeScriptType.N_OF_K,
+            required: 2,
+            scripts:
+            [
+              {
+                type: NativeScriptType.PUBKEY,
+                keyHash: 'c4b9265645fde9536c0795adbcc5291767a0c61fd62448341d7e0386',
+              },
+              {
+                type: NativeScriptType.PUBKEY,
+                keyHash: '0241f2d196f52a92fbd2183d03b370c30b6960cfdeae364ffabac889',
+              },
+              {
+                type: NativeScriptType.PUBKEY,
+                keyHash: 'cecb1d427c4ae436d28cc0f8ae9bb37501a5b77bcc64cd1693e9ae20',
+              },
+            ],
+          },
+          {
+            type: NativeScriptType.INVALID_BEFORE,
+            slot: 100,
+          },
+          {
+            type: NativeScriptType.INVALID_HEREAFTER,
+            slot: 200,
+          },
+        ],
+      },
     }
     assert.deepStrictEqual(parsedArgs, expectedResult)
   })

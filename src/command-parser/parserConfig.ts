@@ -8,6 +8,7 @@ import {
   parseTxBodyFile,
   parseKesVKeyFile,
   parseVotePubFile,
+  parseScriptFile,
 } from './parsers'
 
 const keyGenArgs = {
@@ -185,6 +186,14 @@ export const parserConfig = {
         required: true,
         dest: 'outFile',
         help: 'Output filepath.',
+      },
+    },
+    'policyid': {
+      '--script-file': {
+        required: true,
+        type: (path: string) => parseScriptFile(path),
+        dest: 'nativeScript',
+        help: 'Filepath of the script.',
       },
     },
     'witness': {

@@ -11,6 +11,7 @@ export enum CommandType {
   VERIFICATION_KEY = 'key.verification-key',
   SIGN_TRANSACTION = 'transaction.sign',
   WITNESS_TRANSACTION = 'transaction.witness',
+  DERIVE_NATIVE_SCRIPT_HASH = 'transaction.policyid',
   SIGN_OPERATIONAL_CERTIFICATE = 'node.issue-op-cert',
   NODE_KEY_GEN = 'node.key-gen',
   CATALYST_VOTING_KEY_REGISTRATION_METADATA = 'catalyst.voting-key-registration-metadata',
