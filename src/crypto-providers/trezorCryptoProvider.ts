@@ -36,6 +36,9 @@ import {
   BIP32Path,
   HexString,
   HwSigningData,
+  NativeScript,
+  NativeScriptDisplayFormat,
+  NativeScriptHashKeyHex,
   Network,
   PubKeyHex,
   VotePublicKeyHex,
@@ -633,6 +636,13 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     throw Error(Errors.UnsupportedCryptoProviderCall)
   }
 
+  const deriveNativeScriptHash = async (
+    _nativeScript: NativeScript,
+    _displayFormat: NativeScriptDisplayFormat,
+  ): Promise<NativeScriptHashKeyHex> => {
+    throw Error(Errors.UnsupportedCryptoProviderCall)
+  }
+
   return {
     getVersion,
     showAddress,
@@ -641,6 +651,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     getXPubKeys,
     signOperationalCertificate,
     signVotingRegistrationMetaData,
+    deriveNativeScriptHash,
   }
 }
 
