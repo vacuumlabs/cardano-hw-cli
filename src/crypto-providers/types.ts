@@ -13,6 +13,9 @@ import {
   Address,
   XPubKeyHex,
   VotePublicKeyHex,
+  NativeScript,
+  NativeScriptHashKeyHex,
+  NativeScriptDisplayFormat,
 } from '../types'
 
 export type CryptoProvider = {
@@ -45,6 +48,10 @@ export type CryptoProvider = {
     network: Network,
     nonce: BigInt,
   ) => Promise<VotingRegistrationMetaDataCborHex>
+  deriveNativeScriptHash: (
+    nativeScript: NativeScript,
+    displayFormat: NativeScriptDisplayFormat,
+  ) => Promise<NativeScriptHashKeyHex>,
 }
 
 export type _AddressParameters = {

@@ -36,7 +36,7 @@ const executeCommand = async (): Promise<void> => {
       await commandExecutor.createSignedTx(parsedArgs)
       break
     case (CommandType.DERIVE_NATIVE_SCRIPT_HASH):
-      console.log(parsedArgs)
+      await commandExecutor.createTxPolicyId(parsedArgs)
       break
     case (CommandType.WITNESS_TRANSACTION):
       await commandExecutor.createTxWitness(parsedArgs)
