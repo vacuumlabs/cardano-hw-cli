@@ -39,6 +39,10 @@ import {
   Address,
   BIP32Path,
   HwSigningData,
+  NativeScript,
+  NativeScriptDisplayFormat,
+  NativeScriptHashKeyHex,
+  NativeScriptType,
   Network,
   VotePublicKeyHex,
   XPubKeyHex,
@@ -758,6 +762,81 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     )
   }
 
+  const nativeScriptToLedgerTypes = (nativeScript: NativeScript): LedgerTypes.NativeScript => {
+    switch (nativeScript.type) {
+      case NativeScriptType.PUBKEY:
+        return {
+          type: LedgerTypes.NativeScriptType.PUBKEY_THIRD_PARTY,
+          params: {
+            keyHashHex: nativeScript.keyHash,
+          },
+        }
+      case NativeScriptType.ALL:
+        return {
+          type: LedgerTypes.NativeScriptType.ALL,
+          params: {
+            scripts: nativeScript.scripts.map(nativeScriptToLedgerTypes),
+          },
+        }
+      case NativeScriptType.ANY:
+        return {
+          type: LedgerTypes.NativeScriptType.ANY,
+          params: {
+            scripts: nativeScript.scripts.map(nativeScriptToLedgerTypes),
+          },
+        }
+      case NativeScriptType.N_OF_K:
+        return {
+          type: LedgerTypes.NativeScriptType.N_OF_K,
+          params: {
+            requiredCount: nativeScript.required,
+            scripts: nativeScript.scripts.map(nativeScriptToLedgerTypes),
+          },
+        }
+      case NativeScriptType.INVALID_BEFORE:
+        return {
+          type: LedgerTypes.NativeScriptType.INVALID_BEFORE,
+          params: {
+            slot: nativeScript.slot,
+          },
+        }
+      case NativeScriptType.INVALID_HEREAFTER:
+        return {
+          type: LedgerTypes.NativeScriptType.INVALID_HEREAFTER,
+          params: {
+            slot: nativeScript.slot,
+          },
+        }
+      default:
+        throw Error(Errors.Unreachable)
+    }
+  }
+
+  const nativeScriptDisplayFormatToLedgerType = (
+    displayFormat: NativeScriptDisplayFormat,
+  ): LedgerTypes.NativeScriptHashDisplayFormat => {
+    switch (displayFormat) {
+      case NativeScriptDisplayFormat.BECH32:
+        return LedgerTypes.NativeScriptHashDisplayFormat.BECH32
+      case NativeScriptDisplayFormat.POLICY_ID:
+        return LedgerTypes.NativeScriptHashDisplayFormat.POLICY_ID
+      default:
+        throw Error(Errors.Unreachable)
+    }
+  }
+
+  const deriveNativeScriptHash = async (
+    nativeScript: NativeScript,
+    displayFormat: NativeScriptDisplayFormat,
+  ): Promise<NativeScriptHashKeyHex> => {
+    const { scriptHashHex } = await ledger.deriveNativeScriptHash({
+      script: nativeScriptToLedgerTypes(nativeScript),
+      displayFormat: nativeScriptDisplayFormatToLedgerType(displayFormat),
+    })
+
+    return scriptHashHex as NativeScriptHashKeyHex
+  }
+
   return {
     getVersion,
     showAddress,
@@ -766,5 +845,6 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     getXPubKeys,
     signOperationalCertificate,
     signVotingRegistrationMetaData,
+    deriveNativeScriptHash,
   }
 }

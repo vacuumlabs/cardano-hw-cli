@@ -132,6 +132,11 @@ export type NativeScript = {
   slot: bigint,
 }
 
+export enum NativeScriptDisplayFormat {
+  BECH32,
+  POLICY_ID,
+}
+
 export type ParsedTransactionPolicyIdArguments = {
   command: CommandType.DERIVE_NATIVE_SCRIPT_HASH,
   nativeScript: NativeScript,

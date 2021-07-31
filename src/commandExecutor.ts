@@ -13,12 +13,14 @@ import {
   ParsedShowAddressArguments,
   ParsedAddressKeyGenArguments,
   ParsedTransactionSignArguments,
+  ParsedTransactionPolicyIdArguments,
   ParsedTransactionWitnessArguments,
   ParsedVerificationKeyArguments,
   ParsedOpCertArguments,
   ParsedNodeKeyGenArguments,
   ParsedCatalystVotingKeyRegistrationMetadataArguments,
   Cbor,
+  NativeScriptDisplayFormat,
 } from './types'
 import { LedgerCryptoProvider } from './crypto-providers/ledgerCryptoProvider'
 import { TrezorCryptoProvider } from './crypto-providers/trezorCryptoProvider'
@@ -104,6 +106,16 @@ const CommandExecutor = async () => {
     write(args.outFile, constructSignedTxOutput(args.txBodyFileData.era, signedTx))
   }
 
+  const createTxPolicyId = async ({ nativeScript }: ParsedTransactionPolicyIdArguments) => {
+    const scriptHashHex = await cryptoProvider.deriveNativeScriptHash(
+      nativeScript,
+      NativeScriptDisplayFormat.POLICY_ID,
+    )
+
+    // eslint-disable-next-line no-console
+    console.log(scriptHashHex)
+  }
+
   const createTxWitness = async (args: ParsedTransactionWitnessArguments) => {
     const unsignedTxParsed = parseUnsignedTx(args.txBodyFileData.cborHex)
     validateWitnessing(unsignedTxParsed, args.hwSigningFileData)
@@ -184,6 +196,7 @@ const CommandExecutor = async () => {
     createSigningKeyFile,
     createVerificationKeyFile,
     createSignedTx,
+    createTxPolicyId,
     createTxWitness,
     createNodeSigningKeyFiles,
     createSignedOperationalCertificate,
