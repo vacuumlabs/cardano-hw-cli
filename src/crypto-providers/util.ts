@@ -176,6 +176,20 @@ const filterSigningFiles = (
   }
 }
 
+const hwSigningFileToPubKeyHash = (signingFile: HwSigningData): Uint8Array => (
+  Cardano.PublicKey.from_bytes(
+    splitXPubKeyCborHex(signingFile.cborXPubKeyHex).pubKey,
+  ).hash().to_bytes()
+)
+
+const findPathForKeyHash = (
+  pubKeyHash: Buffer,
+  signingFiles: HwSigningData[],
+): BIP32Path | undefined => {
+  const signingFile = signingFiles.find((file) => pubKeyHash.equals(hwSigningFileToPubKeyHash(file)))
+  return signingFile?.path
+}
+
 // TOOD rename arguemnt, what about buffer length?
 const findSigningPathForKeyHash = (
   certPubKeyHash: Buffer, signingFiles: HwSigningData[],
@@ -593,6 +607,7 @@ export {
   validateKeyGenInputs,
   getSigningPath,
   filterSigningFiles,
+  findPathForKeyHash,
   findSigningPathForKeyHash,
   findSigningPathForKey,
   extractStakePubKeyFromHwSigningData,

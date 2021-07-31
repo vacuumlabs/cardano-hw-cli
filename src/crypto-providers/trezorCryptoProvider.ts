@@ -35,10 +35,14 @@ import {
   BIP32Path,
   HexString,
   HwSigningData,
+  NativeScript,
+  NativeScriptDisplayFormat,
+  NativeScriptHashKeyHex,
   Network,
   PubKeyHex,
   VotePublicKeyHex,
   XPubKeyHex,
+  NativeScriptType,
 } from '../types'
 import {
   encodeAddress,
@@ -54,6 +58,7 @@ import {
   validateVotingRegistrationAddressType,
   splitXPubKeyCborHex,
   encodeVotingRegistrationMetaData,
+  findPathForKeyHash,
 } from './util'
 import { Errors } from '../errors'
 import { partition, removeNullFields } from '../util'
@@ -618,6 +623,83 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     throw Error(Errors.UnsupportedCryptoProviderCall)
   }
 
+  const nativeScriptToTrezorTypes = (
+    nativeScript: NativeScript,
+    signingFiles: HwSigningData[],
+  ): TrezorTypes.CardanoNativeScript => {
+    switch (nativeScript.type) {
+      case NativeScriptType.PUBKEY: {
+        const path = findPathForKeyHash(Buffer.from(nativeScript.keyHash, 'hex'), signingFiles)
+        if (path) {
+          return {
+            type: TrezorTypes.CardanoNativeScriptType.PUB_KEY,
+            keyPath: path,
+          }
+        }
+        return {
+          type: TrezorTypes.CardanoNativeScriptType.PUB_KEY,
+          keyHash: nativeScript.keyHash,
+        }
+      }
+      case NativeScriptType.ALL:
+        return {
+          type: TrezorTypes.CardanoNativeScriptType.ALL,
+          scripts: nativeScript.scripts.map((s) => nativeScriptToTrezorTypes(s, signingFiles)),
+        }
+      case NativeScriptType.ANY:
+        return {
+          type: TrezorTypes.CardanoNativeScriptType.ANY,
+          scripts: nativeScript.scripts.map((s) => nativeScriptToTrezorTypes(s, signingFiles)),
+        }
+      case NativeScriptType.N_OF_K:
+        return {
+          type: TrezorTypes.CardanoNativeScriptType.N_OF_K,
+          requiredSignaturesCount: Number(nativeScript.required),
+          scripts: nativeScript.scripts.map((s) => nativeScriptToTrezorTypes(s, signingFiles)),
+        }
+      case NativeScriptType.INVALID_BEFORE:
+        return {
+          type: TrezorTypes.CardanoNativeScriptType.INVALID_BEFORE,
+          invalidBefore: nativeScript.slot.toString(10),
+        }
+      case NativeScriptType.INVALID_HEREAFTER:
+        return {
+          type: TrezorTypes.CardanoNativeScriptType.INVALID_HEREAFTER,
+          invalidHereafter: nativeScript.slot.toString(10),
+        }
+      default:
+        throw Error(Errors.Unreachable)
+    }
+  }
+
+  const nativeScriptDisplayFormatToTrezorType = (
+    displayFormat: NativeScriptDisplayFormat,
+  ): TrezorTypes.CardanoNativeScriptHashDisplayFormat => {
+    switch (displayFormat) {
+      case NativeScriptDisplayFormat.BECH32:
+        return TrezorTypes.CardanoNativeScriptHashDisplayFormat.BECH32
+      case NativeScriptDisplayFormat.POLICY_ID:
+        return TrezorTypes.CardanoNativeScriptHashDisplayFormat.POLICY_ID
+      default:
+        throw Error(Errors.Unreachable)
+    }
+  }
+
+  const deriveNativeScriptHash = async (
+    nativeScript: NativeScript,
+    signingFiles: HwSigningData[],
+    displayFormat: NativeScriptDisplayFormat,
+  ): Promise<NativeScriptHashKeyHex> => {
+    const response = await TrezorConnect.cardanoGetNativeScriptHash({
+      script: nativeScriptToTrezorTypes(nativeScript, signingFiles),
+      displayFormat: nativeScriptDisplayFormatToTrezorType(displayFormat),
+    })
+    if (!response.success) {
+      throw Error(response.payload.error)
+    }
+    return response.payload.scriptHash as NativeScriptHashKeyHex
+  }
+
   return {
     getVersion,
     showAddress,
@@ -626,6 +708,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     getXPubKeys,
     signOperationalCertificate,
     signVotingRegistrationMetaData,
+    deriveNativeScriptHash,
   }
 }
 

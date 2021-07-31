@@ -80,6 +80,12 @@ cardano-hw-cli catalyst voting-key-registration-metadata
 
 see [Catalyst voting registration example](docs/catalyst-voting-registration-example.md)
 
+# Policy id generation
+```
+cardano-hw-cli transaction policyid
+--script-file   Path to a native script file
+```
+
 ## Check app version
 ```
 cardano-hw-cli version
