@@ -17,6 +17,10 @@ export const encodeCbor = (value: any) => {
   return enc.read()
 }
 
+export const encodeCborAsync = async (value: any) => {
+  return Encoder.encodeAsync(value)
+}
+
 // Note: Trezor is serializing a transaction internally
 // therefore in the case of having a non-canonical ordering inside a map it would currently fail
 // this issue is solved in https://github.com/trezor/trezor-firmware/pull/1672

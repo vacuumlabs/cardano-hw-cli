@@ -483,7 +483,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
   ): Promise<SignedTxCborHex> => {
     const trezorWitnesses = await trezorSignTx(unsignedTxParsed, signingFiles, network, changeOutputFiles)
     const { byronWitnesses, shelleyWitnesses } = createWitnesses(trezorWitnesses, signingFiles)
-    return TxSigned(unsignedTxParsed.unsignedTxDecoded, byronWitnesses, shelleyWitnesses)
+    return await TxSigned(unsignedTxParsed.unsignedTxDecoded, byronWitnesses, shelleyWitnesses)
   }
 
   const witnessTx = async (

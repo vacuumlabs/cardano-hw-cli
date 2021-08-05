@@ -5,7 +5,7 @@ import {
   SignedTxCborHex,
   TxWitnessKeys,
 } from './types'
-import { encodeCbor } from '../util'
+import { encodeCbor, encodeCborAsync } from '../util'
 
 const TxByronWitness = (
   publicKey: Buffer, signature: Buffer, chaincode: Buffer, addressAttributes: object,
@@ -13,11 +13,11 @@ const TxByronWitness = (
 
 const TxShelleyWitness = (publicKey: Buffer, signature: Buffer): TxWitnessShelley => [publicKey, signature]
 
-const TxSigned = (
+const TxSigned = async (
   unsignedTxDecoded: _UnsignedTxDecoded,
   byronWitnesses: TxWitnessByron[],
   shelleyWitnesses: TxWitnessShelley[],
-): SignedTxCborHex => {
+): Promise<SignedTxCborHex> => {
   const [txBody, meta] = unsignedTxDecoded
   const witnesses = new Map()
   if (shelleyWitnesses.length > 0) {
@@ -26,7 +26,7 @@ const TxSigned = (
   if (byronWitnesses.length > 0) {
     witnesses.set(TxWitnessKeys.BYRON, byronWitnesses)
   }
-  return encodeCbor([txBody, witnesses, meta]).toString('hex')
+  return (await encodeCborAsync([txBody, witnesses, meta])).toString('hex')
 }
 
 export {
