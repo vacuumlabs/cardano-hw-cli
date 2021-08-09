@@ -50,73 +50,54 @@ enum PathTypes {
   // pool cold key in pool registrations and retirements
   PATH_POOL_COLD_KEY,
 
+  // hd wallet account
+  PATH_WALLET_SCRIPT_ACCOUNT,
+
+  // hd wallet script spending key
+  PATH_WALLET_SCRIPT_SPENDING_KEY,
+
+  // hd wallet script staking key
+  PATH_WALLET_SCRIPT_STAKING_KEY,
+
+  // key used for token miting
+  PATH_WALLET_MINTING_KEY,
+
   // not one of the above
   PATH_INVALID,
 }
 
-const classifyPath = (path: number[]) => {
-  if (path.length < 3) return PathTypes.PATH_INVALID
-
+const classifyPath = (path:number[]) => {
   const HD = HARDENED_THRESHOLD
 
-  if (path[0] === 1853 + HD) {
-    // cold keys
-    if (path.length !== 4) return PathTypes.PATH_INVALID
-    if (path[1] !== 1815 + HD) return PathTypes.PATH_INVALID
-    if (path[2] !== 0 + HD) return PathTypes.PATH_INVALID
-    if (path[3] < HD) return PathTypes.PATH_INVALID
+  if (path.length < 3) return PathTypes.PATH_INVALID
+  if (path[1] !== 1815 + HD) return PathTypes.PATH_INVALID
 
-    return PathTypes.PATH_POOL_COLD_KEY
-  }
-
-  if (path[0] === 44 + HD) {
-    if (path[1] !== 1815 + HD) return PathTypes.PATH_INVALID
-
-    if (path.length === 3) {
-      return PathTypes.PATH_WALLET_ACCOUNT
-    }
-
-    if (path.length !== 5) {
-      return PathTypes.PATH_INVALID
-    }
-
-    switch (path[3]) {
-      case 0:
-      case 1:
-        return PathTypes.PATH_WALLET_SPENDING_KEY_BYRON
-
-      default:
-        return PathTypes.PATH_INVALID
-    }
-  }
-
-  if (path[0] === 1852 + HD) {
-    if (path[1] !== 1815 + HD) {
-      return PathTypes.PATH_INVALID
-    }
-
-    if (path.length === 3) {
-      return PathTypes.PATH_WALLET_ACCOUNT
-    }
-
-    if (path.length !== 5) {
-      return PathTypes.PATH_INVALID
-    }
-
-    switch (path[3]) {
-      case 0:
-      case 1:
-        return PathTypes.PATH_WALLET_SPENDING_KEY_SHELLEY
-
-      case 2:
-        if (path[4] === 0) {
-          return PathTypes.PATH_WALLET_STAKING_KEY
-        }
-        return PathTypes.PATH_INVALID
-
-      default:
-        return PathTypes.PATH_INVALID
-    }
+  switch (path[0]) {
+    case 44 + HD:
+      if (path.length === 3) return PathTypes.PATH_WALLET_ACCOUNT
+      if (path.length !== 5) return PathTypes.PATH_INVALID
+      if (path[3] === 0 || path[3] === 1) return PathTypes.PATH_WALLET_SPENDING_KEY_BYRON
+      break
+    case 1852 + HD:
+      if (path.length === 3) return PathTypes.PATH_WALLET_ACCOUNT
+      if (path.length !== 5) return PathTypes.PATH_INVALID
+      if (path[3] === 0 || path[3] === 1) return PathTypes.PATH_WALLET_SPENDING_KEY_SHELLEY
+      if (path[3] === 2 && path[4] === 0) return PathTypes.PATH_WALLET_STAKING_KEY
+      break
+    case 1853 + HD:
+      if (path.length === 4 && path[2] === 0 + HD && path[3] >= HD) return PathTypes.PATH_POOL_COLD_KEY
+      break
+    case 1854 + HD:
+      if (path.length === 3) return PathTypes.PATH_WALLET_SCRIPT_ACCOUNT
+      if (path.length !== 5) return PathTypes.PATH_INVALID
+      if (path[3] === 0) return PathTypes.PATH_WALLET_SCRIPT_SPENDING_KEY
+      if (path[3] === 2 && path[4] === 0) return PathTypes.PATH_WALLET_SCRIPT_STAKING_KEY
+      break
+    case 1855 + HD:
+      if (path.length === 3 && path[2] >= 0 + HD) return PathTypes.PATH_WALLET_MINTING_KEY
+      break
+    default:
+      break
   }
 
   return PathTypes.PATH_INVALID
