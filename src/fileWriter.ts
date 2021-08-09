@@ -75,10 +75,14 @@ const bip32PathLabel = (path: number[]): string => {
     default:
       throw Error('not implemented')
 
+    // TODO GK really for the script and minting? cardano-cli doesn't seem to support other "labels"
     case PathTypes.PATH_WALLET_SPENDING_KEY_SHELLEY:
+    case PathTypes.PATH_WALLET_SCRIPT_SPENDING_KEY:
+    case PathTypes.PATH_WALLET_MINTING_KEY:
       return 'Payment'
 
     case PathTypes.PATH_WALLET_STAKING_KEY:
+    case PathTypes.PATH_WALLET_SCRIPT_STAKING_KEY:
       return 'Stake'
   }
 }
@@ -106,6 +110,15 @@ const verificationKeyDescription = (path: number[]): string => {
 
     case PathTypes.PATH_WALLET_STAKING_KEY:
       return 'Stake Verification Key'
+
+    case PathTypes.PATH_WALLET_SCRIPT_SPENDING_KEY:
+      return 'Script Payment Verification Key'
+
+    case PathTypes.PATH_WALLET_SCRIPT_STAKING_KEY:
+      return 'Script Stake Verification Key'
+
+    case PathTypes.PATH_WALLET_MINTING_KEY:
+      return 'Mint Verification Key'
   }
 }
 
