@@ -202,7 +202,12 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     if (!path) throw Error(Errors.MissingSigningFileForCertificateError)
     return {
       type: LedgerTypes.CertificateType.STAKE_REGISTRATION,
-      params: { path },
+      params: {
+        stakeCredential: {
+          type: LedgerTypes.StakeCredentialParamsType.KEY_PATH,
+          keyPath: path,
+        },
+      },
     }
   }
 
@@ -214,7 +219,12 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     if (!path) throw Error(Errors.MissingSigningFileForCertificateError)
     return {
       type: LedgerTypes.CertificateType.STAKE_DEREGISTRATION,
-      params: { path },
+      params: {
+        stakeCredential: {
+          type: LedgerTypes.StakeCredentialParamsType.KEY_PATH,
+          keyPath: path,
+        },
+      },
     }
   }
 
@@ -227,7 +237,10 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
       type: LedgerTypes.CertificateType.STAKE_DELEGATION,
       params: {
         poolKeyHashHex: cert.poolHash.toString('hex'),
-        path,
+        stakeCredential: {
+          type: LedgerTypes.StakeCredentialParamsType.KEY_PATH,
+          keyPath: path,
+        },
       },
     }
   }
@@ -421,7 +434,10 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     const path = findSigningPathForKeyHash(pubKeyHash, stakeSigningFiles)
     if (!path) throw Error(Errors.MissingSigningFileForWithdrawalError)
     return {
-      path,
+      stakeCredential: {
+        type: LedgerTypes.StakeCredentialParamsType.KEY_PATH,
+        keyPath: path,
+      },
       amount: `${withdrawal.coins}`,
     }
   }
@@ -516,6 +532,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
         auxiliaryData,
         validityIntervalStart,
       },
+      additionalWitnessPaths: [],
     })
 
     if (response.txHashHex !== unsignedTxParsed.getId()) {
@@ -559,7 +576,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     destination: {
       type: LedgerTypes.TxOutputDestinationType.DEVICE_OWNED,
       params: {
-        type: LedgerTypes.AddressType.BASE,
+        type: LedgerTypes.AddressType.BASE_PAYMENT_KEY_STAKE_KEY,
         params: {
           spendingPath: parseBIP32Path('1852H/1815H/0H/0/0'),
           stakingPath: parseBIP32Path('1852H/1815H/0H/2/0'),
@@ -584,6 +601,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
       auxiliaryData,
       validityIntervalStart: null,
     },
+    additionalWitnessPaths: [],
   })
 
   const signVotingRegistrationMetaData = async (
