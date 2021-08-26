@@ -25,9 +25,10 @@ const transactions = {
       certificates: [],
       withdrawals: [],
       metaDataHash: null,
-      mint: null,
+      mint: [],
       meta: null,
       validityIntervalStart: null,
+      scriptWitnesses: [],
     },
   },
   SimpleTransactionWithEmptyScriptWitnesses: {
@@ -55,9 +56,10 @@ const transactions = {
       certificates: [],
       withdrawals: [],
       metaDataHash: null,
-      mint: null,
+      mint: [],
       meta: null,
       validityIntervalStart: null,
+      scriptWitnesses: [],
     },
   },
   TxWithWithdrawal: {
@@ -96,9 +98,10 @@ const transactions = {
         },
       ],
       metaDataHash: null,
-      mint: null,
+      mint: [],
       meta: null,
       validityIntervalStart: null,
+      scriptWitnesses: [],
     },
   },
   TxWithRegistrationCertificate: {
@@ -132,9 +135,10 @@ const transactions = {
       }],
       withdrawals: [],
       metaDataHash: null,
-      mint: null,
+      mint: [],
       meta: null,
       validityIntervalStart: null,
+      scriptWitnesses: [],
     },
   },
   TxWithDelegationCertificate: {
@@ -170,9 +174,10 @@ const transactions = {
       }],
       withdrawals: [],
       metaDataHash: null,
-      mint: null,
+      mint: [],
       meta: null,
       validityIntervalStart: null,
+      scriptWitnesses: [],
     },
   },
   TxWithDeregistrationCertificate: {
@@ -206,9 +211,10 @@ const transactions = {
       }],
       withdrawals: [],
       metaDataHash: null,
-      mint: null,
+      mint: [],
       meta: null,
       validityIntervalStart: null,
+      scriptWitnesses: [],
     },
   },
   TxWithMetaData: {
@@ -239,9 +245,10 @@ const transactions = {
       certificates: [],
       withdrawals: [],
       metaDataHash: Buffer.from('deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef', 'hex'),
+      mint: [],
       meta: null,
       validityIntervalStart: null,
-      mint: null,
+      scriptWitnesses: [],
     },
   },
   TxWithPoolRegistrationCertficate: {
@@ -310,9 +317,10 @@ const transactions = {
       ],
       withdrawals: [],
       metaDataHash: null,
-      mint: null,
+      mint: [],
       meta: null,
       validityIntervalStart: null,
+      scriptWitnesses: [],
     },
   },
   TxWithPoolRetirementCertificate: {
@@ -344,9 +352,10 @@ const transactions = {
       }],
       withdrawals: [],
       metaDataHash: null,
-      mint: null,
+      mint: [],
       meta: null,
       validityIntervalStart: null,
+      scriptWitnesses: [],
     },
   },
   TxWithMultiAssets: {
@@ -406,9 +415,114 @@ const transactions = {
       certificates: [],
       withdrawals: [],
       metaDataHash: null,
-      mint: null,
+      mint: [],
       meta: null,
       validityIntervalStart: 9030000n,
+      scriptWitnesses: [],
+    },
+  },
+  TxWithMint: {
+    /*
+    * txBody: a400818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018182583901eb0baa5e570cffbe2934db29df0b6a3d7c0430ee65d4c3a7ab2fefb91bc428e4720702ebd5dab4fb175324c192dc9bb76cc5da956e3c8dff821a001e8480a1581c0d63e8d2c5a00cbcffbdf9112487c443466e1ea7d8c834df5ac5c425a14874657374436f696e1a0078386202182a09a1581c0d63e8d2c5a00cbcffbdf9112487c443466e1ea7d8c834df5ac5c425a24874657374436f696e1a007838624875657374436f696e3a00783861
+    */
+    unsignedCborHex: '83a400818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018182583901eb0baa5e570cffbe2934db29df0b6a3d7c0430ee65d4c3a7ab2fefb91bc428e4720702ebd5dab4fb175324c192dc9bb76cc5da956e3c8dff821a001e8480a1581c0d63e8d2c5a00cbcffbdf9112487c443466e1ea7d8c834df5ac5c425a14874657374436f696e1a0078386202182a09a1581c0d63e8d2c5a00cbcffbdf9112487c443466e1ea7d8c834df5ac5c425a24874657374436f696e1a007838624875657374436f696e3a007838619f8201858200581cc4b9265645fde9536c0795adbcc5291767a0c61fd62448341d7e03868202828200581cc4b9265645fde9536c0795adbcc5291767a0c61fd62448341d7e03868200581c0241f2d196f52a92fbd2183d03b370c30b6960cfdeae364ffabac889830302838200581cc4b9265645fde9536c0795adbcc5291767a0c61fd62448341d7e03868200581c0241f2d196f52a92fbd2183d03b370c30b6960cfdeae364ffabac8898200581ccecb1d427c4ae436d28cc0f8ae9bb37501a5b77bcc64cd1693e9ae2082041864820518c8fff6',
+    hashHex: '3b2af509c0c52f728714afe2ca15c3965c03e775bca3a9279fb24a2e5c746f0d',
+    parsed: {
+      inputs: [
+        {
+          txHash: Buffer.from('3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7', 'hex'),
+          outputIndex: 0,
+        },
+      ],
+      outputs: [
+        {
+          address: Buffer.from('01eb0baa5e570cffbe2934db29df0b6a3d7c0430ee65d4c3a7ab2fefb91bc428e4720702ebd5dab4fb175324c192dc9bb76cc5da956e3c8dff', 'hex'),
+          coins: 2000000n,
+          tokenBundle: [
+            {
+              policyId: Buffer.from('0d63e8d2c5a00cbcffbdf9112487c443466e1ea7d8c834df5ac5c425', 'hex'),
+              assets: [
+                {
+                  assetName: Buffer.from('74657374436f696e', 'hex'),
+                  amount: 7878754n,
+                },
+              ],
+            },
+          ],
+        },
+      ],
+      fee: 42n,
+      ttl: null,
+      certificates: [],
+      withdrawals: [],
+      metaDataHash: null,
+      mint: [
+        {
+          policyId: Buffer.from('0d63e8d2c5a00cbcffbdf9112487c443466e1ea7d8c834df5ac5c425', 'hex'),
+          assets: [
+            {
+              assetName: Buffer.from('74657374436f696e', 'hex'),
+              amount: 7878754n,
+            },
+            {
+              assetName: Buffer.from('75657374436f696e', 'hex'),
+              amount: -7878754n,
+            },
+          ],
+        },
+      ],
+      meta: null,
+      validityIntervalStart: null,
+      scriptWitnesses: [
+        [
+          1,
+          [
+            [
+              0,
+              Buffer.from('c4b9265645fde9536c0795adbcc5291767a0c61fd62448341d7e0386', 'hex'),
+            ],
+            [
+              2,
+              [
+                [
+                  0,
+                  Buffer.from('c4b9265645fde9536c0795adbcc5291767a0c61fd62448341d7e0386', 'hex'),
+                ],
+                [
+                  0,
+                  Buffer.from('0241f2d196f52a92fbd2183d03b370c30b6960cfdeae364ffabac889', 'hex'),
+                ],
+              ],
+            ],
+            [
+              3,
+              2,
+              [
+                [
+                  0,
+                  Buffer.from('c4b9265645fde9536c0795adbcc5291767a0c61fd62448341d7e0386', 'hex'),
+                ],
+                [
+                  0,
+                  Buffer.from('0241f2d196f52a92fbd2183d03b370c30b6960cfdeae364ffabac889', 'hex'),
+                ],
+                [
+                  0,
+                  Buffer.from('cecb1d427c4ae436d28cc0f8ae9bb37501a5b77bcc64cd1693e9ae20', 'hex'),
+                ],
+              ],
+            ],
+            [
+              4,
+              100,
+            ],
+            [
+              5,
+              200,
+            ],
+          ],
+        ],
+      ],
     },
   },
 }

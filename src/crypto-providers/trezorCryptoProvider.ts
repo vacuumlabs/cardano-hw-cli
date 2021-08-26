@@ -176,11 +176,13 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
 
   const prepareTokenBundle = (
     multiAssets: _MultiAsset[],
+    isMint: boolean,
   ): TrezorTypes.CardanoAssetGroup[] => multiAssets.map(({ policyId, assets }) => {
-    const tokenAmounts = assets.map(({ assetName, amount }) => ({
+    const tokenAmounts = assets.map(({ assetName, amount }) => (removeNullFields({
       assetNameBytes: assetName.toString('hex'),
-      amount: amount.toString(),
-    }))
+      amount: !isMint ? amount.toString() : undefined,
+      mintAmount: isMint ? amount.toString() : undefined,
+    })))
     return {
       policyId: policyId.toString('hex'),
       tokenAmounts,
@@ -208,7 +210,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
   ): TrezorTypes.CardanoOutput => {
     const changeAddressParams = getAddressParameters(changeOutputFiles, output.address, network)
     const address = encodeAddress(output.address)
-    const tokenBundle = prepareTokenBundle(output.tokenBundle)
+    const tokenBundle = prepareTokenBundle(output.tokenBundle, false)
 
     if (changeAddressParams) {
       return prepareChangeOutput(output.coins, changeAddressParams, tokenBundle)
@@ -361,6 +363,10 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     }) : undefined
   )
 
+  const prepareAdditionalWitnessRequests = (
+    mintSigningFiles: HwSigningData[],
+  ) => mintSigningFiles.map((f) => f.path)
+
   const ensureFirmwareSupportsParams = (unsignedTxParsed: _UnsignedTxParsed) => {
     if (
       unsignedTxParsed.ttl == null && !isFeatureSupportedForVersion(TrezorCryptoProviderFeature.OPTIONAL_TTL)
@@ -426,7 +432,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     changeOutputFiles: HwSigningData[],
   ): Promise<TrezorTypes.CardanoSignedTxWitness[]> => {
     ensureFirmwareSupportsParams(unsignedTxParsed)
-    const { paymentSigningFiles, stakeSigningFiles } = filterSigningFiles(signingFiles)
+    const { paymentSigningFiles, stakeSigningFiles, mintSigningFiles } = filterSigningFiles(signingFiles)
 
     const signingMode = determineSigningMode(unsignedTxParsed.certificates, signingFiles)
 
@@ -448,6 +454,11 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
 
     const auxiliaryData = prepareMetaDataHashHex(unsignedTxParsed.metaDataHash)
 
+    let mint
+    if (unsignedTxParsed.mint) mint = prepareTokenBundle(unsignedTxParsed.mint, true)
+
+    const additionalWitnessRequests = prepareAdditionalWitnessRequests(mintSigningFiles)
+
     const request: TrezorTypes.CommonParams & TrezorTypes.CardanoSignTransaction = {
       signingMode,
       inputs,
@@ -460,6 +471,8 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
       certificates,
       withdrawals,
       auxiliaryData,
+      mint,
+      additionalWitnessRequests,
     }
 
     // TODO: removeNullFields shouldn't be necessary, remove when fixed in trezor connect
@@ -521,7 +534,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
       if (addressParameters.addressType === TrezorTypes.CardanoAddressType.REWARD) {
         return {
           addressType: addressParameters.addressType,
-          path: addressParameters.stakePath as BIP32Path,
+          stakingPath: addressParameters.stakePath as BIP32Path,
         }
       }
       throw Error(Errors.InvalidVotingRegistrationAddressType)

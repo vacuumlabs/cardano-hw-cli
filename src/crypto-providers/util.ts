@@ -141,7 +141,8 @@ const filterSigningFiles = (
 ): {
     paymentSigningFiles: HwSigningData[],
     stakeSigningFiles: HwSigningData[],
-    poolColdSigningFiles: HwSigningData[]
+    poolColdSigningFiles: HwSigningData[],
+    mintSigningFiles: HwSigningData[],
 } => {
   const paymentSigningFiles = signingFiles.filter(
     (signingFile) => signingFile.type === HwSigningType.Payment,
@@ -152,10 +153,14 @@ const filterSigningFiles = (
   const poolColdSigningFiles = signingFiles.filter(
     (signingFile) => signingFile.type === HwSigningType.PoolCold,
   )
+  const mintSigningFiles = signingFiles.filter(
+    (signingFile) => signingFile.type === HwSigningType.Mint,
+  )
   return {
     paymentSigningFiles,
     stakeSigningFiles,
     poolColdSigningFiles,
+    mintSigningFiles,
   }
 }
 
@@ -204,9 +209,6 @@ const validateTxWithoutPoolRegistration = (
 
   if (paymentSigningFiles.length === 0) {
     throw Error(Errors.MissingPaymentSigningFileError)
-  }
-  if (paymentSigningFiles.length > unsignedTxParsed.inputs.length) {
-    throw Error(Errors.TooManyPaymentSigningFilesError)
   }
 
   let numStakeWitnesses = unsignedTxParsed.withdrawals.length
