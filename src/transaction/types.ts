@@ -14,6 +14,7 @@ export enum TxBodyKeys {
 
 export const enum TxWitnessKeys {
   SHELLEY = 0,
+  NATIVE_SCRIPTS = 1,
   BYRON = 2,
 }
 
@@ -131,6 +132,8 @@ export type _Withdrawal = {
   coins: Lovelace,
 }
 
+export type _Mint = _MultiAsset[]
+
 export type TxWitnessByron = [
   Buffer,
   Buffer,
@@ -154,10 +157,11 @@ export type _SignedTxDecoded = [
   Buffer | null,
 ]
 
-export type _UnsignedTxDecoded = [
-  Map<TxBodyKeys, any>,
-  Buffer | null,
-]
+export type _UnsignedTxDecoded = {
+  txBody: Map<TxBodyKeys, any>,
+  scriptWitnesses: any[],
+  meta: Buffer | null,
+}
 
 export type SignedTxCborHex = CborHex
 
@@ -183,7 +187,8 @@ export type _UnsignedTxParsed = {
   metaDataHash: Buffer | null,
   meta: Buffer | null,
   validityIntervalStart: BigInt | null,
-  mint: _MultiAsset | null,
+  mint: _Mint | null,
+  scriptWitnesses: any[],
 }
 
 export type _ByronWitness = {
@@ -281,6 +286,8 @@ export type TxStakepoolRetirementCert = [
 ]
 
 export type TxWithdrawal = Map<Buffer, Lovelace>
+
+export type TxMint = TxMultiAsset[]
 
 export type VotingRegistrationMetaData = Map<number, Map<number, Buffer | BigInt>>
 export type VotingRegistrationMetaDataCborHex = CborHex
