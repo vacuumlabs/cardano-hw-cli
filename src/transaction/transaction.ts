@@ -18,10 +18,13 @@ const TxSigned = (
   byronWitnesses: TxWitnessByron[],
   shelleyWitnesses: TxWitnessShelley[],
 ): SignedTxCborHex => {
-  const [txBody, meta] = unsignedTxDecoded
+  const { txBody, nativeScriptWitnesses, meta } = unsignedTxDecoded
   const witnesses = new Map()
   if (shelleyWitnesses.length > 0) {
     witnesses.set(TxWitnessKeys.SHELLEY, shelleyWitnesses)
+  }
+  if (nativeScriptWitnesses && nativeScriptWitnesses.length > 0) {
+    witnesses.set(TxWitnessKeys.NATIVE_SCRIPTS, nativeScriptWitnesses)
   }
   if (byronWitnesses.length > 0) {
     witnesses.set(TxWitnessKeys.BYRON, byronWitnesses)

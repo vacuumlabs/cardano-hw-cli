@@ -14,6 +14,7 @@ import {
   isTxStakingKeyRegistrationCert,
   isWithdrawalsMap,
   isUnsignedTxDecoded,
+  isInt64,
 } from './guards'
 import {
   _Input,
@@ -40,6 +41,7 @@ import {
   _MultiAsset,
   _Asset,
   UnsignedTxCborHex,
+  _Mint,
 } from './types'
 import { decodeCbor, encodeCbor } from '../util'
 
@@ -54,7 +56,7 @@ const parseTxInputs = (
   return txInputs.map(([txHash, outputIndex]): _Input => ({ txHash, outputIndex }))
 }
 
-const parseAssets = (assets: any): _Asset[] => {
+const parseAssets = (assets: any, isMint:Boolean): _Asset[] => {
   if (!(assets instanceof Map)) {
     throw Error(Errors.TxAssetParseError)
   }
@@ -62,15 +64,20 @@ const parseAssets = (assets: any): _Asset[] => {
     if (!Buffer.isBuffer(assetName)) {
       throw Error(Errors.AssetNameParseError)
     }
-    // TODO: is lovelace is not the best name since its not a lovelace
-    if (!isUint64(amount)) {
-      throw Error(Errors.AssetAmountParseError)
+    if (isUint64(amount)) {
+      return { assetName, amount: BigInt(amount) }
     }
-    return { assetName, amount: BigInt(amount) }
+    if (isInt64(amount)) {
+      if (!isMint) {
+        throw Error(Errors.AssetAmountParseError)
+      }
+      return { assetName, amount: BigInt(amount) }
+    }
+    throw Error(Errors.AssetAmountParseError)
   })
 }
 
-const parseMultiAsset = (multiAsset: any): _MultiAsset[] => {
+const parseMultiAsset = (multiAsset: any, isMint: Boolean): _MultiAsset[] => {
   if (!(multiAsset instanceof Map)) {
     throw Error(Errors.TxMultiAssetParseError)
   }
@@ -78,7 +85,7 @@ const parseMultiAsset = (multiAsset: any): _MultiAsset[] => {
     if (!Buffer.isBuffer(policyId)) {
       throw Error(Errors.PolicyIdParseError)
     }
-    return { policyId, assets: parseAssets(assets) }
+    return { policyId, assets: parseAssets(assets, isMint) }
   })
 }
 
@@ -95,7 +102,7 @@ const parseTxOutputs = (txOutputs: any[]): _Output[] => {
     if (!isUint64(coins)) {
       throw Error(Errors.TxOutputParseCoinError)
     }
-    return { coins: BigInt(coins), tokenBundle: parseMultiAsset(multiAsset) }
+    return { coins: BigInt(coins), tokenBundle: parseMultiAsset(multiAsset, false) }
   }
 
   return txOutputs.map(([address, amount]): _Output => ({ address, ...parseAmount(amount) }))
@@ -283,14 +290,16 @@ const parseMetaDataHash = (metaDataHash: any): Buffer | null => {
   return metaDataHash || null
 }
 
+const parseTxMint = (mint: any): _Mint => parseMultiAsset(mint, true)
+
 const deconstructUnsignedTxDecoded = (unsignedTxDecoded: any): _UnsignedTxDecoded => {
-  if (unsignedTxDecoded.length === 2) return unsignedTxDecoded
+  if (unsignedTxDecoded.length === 2) {
+    const [txBody, meta] = unsignedTxDecoded
+    return { txBody, meta, nativeScriptWitnesses: [] }
+  }
   if (unsignedTxDecoded.length === 3) {
-    const [txBody, scriptWitnesses, metaData] = unsignedTxDecoded
-    if (scriptWitnesses != null && scriptWitnesses?.length > 0) {
-      throw Error(Errors.ScriptWitnessesNotSupported)
-    }
-    return [txBody, metaData]
+    const [txBody, nativeScriptWitnesses, meta] = unsignedTxDecoded
+    return { txBody, nativeScriptWitnesses, meta }
   }
   throw Error(Errors.FailedToParseTransaction)
 }
@@ -301,10 +310,7 @@ const parseUnsignedTx = (unsignedTxCborHex: UnsignedTxCborHex): _UnsignedTxParse
   if (!isUnsignedTxDecoded(unsignedTxDecoded)) {
     throw Error(Errors.InvalidTransactionBody)
   } else {
-    const [txBody, meta] = unsignedTxDecoded
-    if (txBody.get(TxBodyKeys.MINT)) {
-      throw Error(Errors.MintUnsupportedError)
-    }
+    const { txBody, nativeScriptWitnesses, meta } = unsignedTxDecoded
     const inputs = parseTxInputs(txBody.get(TxBodyKeys.INPUTS))
     const outputs = parseTxOutputs(txBody.get(TxBodyKeys.OUTPUTS))
     const fee = parseFee(txBody.get(TxBodyKeys.FEE))
@@ -317,6 +323,7 @@ const parseUnsignedTx = (unsignedTxCborHex: UnsignedTxCborHex): _UnsignedTxParse
     )
     const metaDataHash = parseMetaDataHash(txBody.get(TxBodyKeys.META_DATA_HASH))
     const validityIntervalStart = parseValidityIntervalStart(txBody.get(TxBodyKeys.VALIDITY_INTERVAL_START))
+    const mint = parseTxMint(txBody.get(TxBodyKeys.MINT) || new Map())
 
     const getId = (): string => {
       const encodedTxBody = encodeCbor(txBody)
@@ -339,7 +346,8 @@ const parseUnsignedTx = (unsignedTxCborHex: UnsignedTxCborHex): _UnsignedTxParse
       metaDataHash,
       meta,
       validityIntervalStart,
-      mint: null, // unsupported in current version
+      mint,
+      nativeScriptWitnesses,
     }
   }
 }
