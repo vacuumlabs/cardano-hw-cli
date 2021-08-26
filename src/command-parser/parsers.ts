@@ -17,6 +17,7 @@ import {
 } from '../types'
 import { KesVKey, OpCertIssueCounter } from '../opCert/opCert'
 import { decodeCbor } from '../util'
+import { classifyPath, PathTypes } from '../crypto-providers/util'
 
 const { bech32 } = require('cardano-crypto.js')
 const rw = require('rw')
@@ -41,8 +42,12 @@ export const parseBIP32Path = (
   throw Error(Errors.InvalidPathError)
 }
 
-export const parseFileTypeMagic = (fileTypeMagic: string, path: string) => {
+export const parseFileTypeMagic = (fileTypeMagic: string, pathType: PathTypes) => {
   if (fileTypeMagic.startsWith('Payment')) {
+    // TODO cardano-cli doesn't support 'Mint' prefix now, but maybe it will
+    if (pathType === PathTypes.PATH_WALLET_MINTING_KEY) {
+      return HwSigningType.Mint
+    }
     return HwSigningType.Payment
   }
 
@@ -63,7 +68,7 @@ export const parseHwSigningFile = (path: string): HwSigningData => {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { type: fileTypeMagic, description, ...parsedData } = data
 
-  const result = { type: parseFileTypeMagic(fileTypeMagic, path), ...parsedData }
+  const result = { type: parseFileTypeMagic(fileTypeMagic, classifyPath(data.path)), ...parsedData }
   if (isHwSigningData(result)) {
     return result
   }

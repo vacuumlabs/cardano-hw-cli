@@ -25,6 +25,17 @@ export const isUint64 = (value: any): value is number => {
   } catch (e) { return false }
 }
 
+export const MIN_INT_64_STR = '-9223372036854775808'
+export const MAX_INT_64_STR = '9223372036854775807'
+
+export const isInt64 = (value: any): value is number => {
+  if (typeof value === 'number') return true
+  try {
+    const bigIntValue = BigInt(value)
+    return BigInt(MIN_INT_64_STR) < bigIntValue && bigIntValue < BigInt(MAX_INT_64_STR)
+  } catch (e) { return false }
+}
+
 export const isTxInput = (
   value: any,
 ): value is TxInput => {
@@ -169,8 +180,8 @@ export const isStakepoolRetirementCert = (
 export const isUnsignedTxDecoded = (
   value: any,
 ): value is _UnsignedTxDecoded => {
-  if (Array.isArray(value)) {
-    const txBody = value[0]
+  const { txBody } = value
+  if (txBody) {
     const validKeys = Object.values(TxBodyKeys).filter(Number.isInteger) as number[]
     const txBodyKeys: number[] = Array.from(txBody.keys())
     return txBodyKeys.every((key) => validKeys.includes(key))
