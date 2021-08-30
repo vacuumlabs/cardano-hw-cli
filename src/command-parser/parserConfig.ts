@@ -9,6 +9,7 @@ import {
   parseKesVKeyFile,
   parseVotePubFile,
   parseScriptFile,
+  parseScriptHashHex,
 } from './parsers'
 
 const keyGenArgs = {
@@ -161,15 +162,24 @@ export const parserConfig = {
 
     'show': { // hw-specific subpath
       '--payment-path': {
-        required: true,
         type: (path: string) => parseBIP32Path(path),
         dest: 'paymentPath',
-        help: 'Payment derivation path.',
+        help: 'Payment derivation path. (specify only path or script hash)',
+      },
+      '--payment-script-hash': {
+        type: (hashHex: string) => parseScriptHashHex(hashHex),
+        dest: 'paymentScriptHash',
+        help: 'Payment derivation script hash in hex format.',
       },
       '--staking-path': {
         type: (path: string) => parseBIP32Path(path),
         dest: 'stakingPath',
-        help: 'Stake derivation path.',
+        help: 'Stake derivation path. (specify only path or script hash)',
+      },
+      '--staking-script-hash': {
+        type: (hashHex: string) => parseScriptHashHex(hashHex),
+        dest: 'stakingScriptHash',
+        help: 'Stake derivation script hash in hex format',
       },
       '--address-file': {
         required: true,
