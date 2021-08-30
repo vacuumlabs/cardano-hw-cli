@@ -47,16 +47,15 @@
   resolved "https://registry.yarnpkg.com/@calebboyd/semaphore/-/semaphore-1.3.1.tgz#4faa403d12f80e5d5c1d6e0d7916d048b6fa79cb"
   integrity sha512-17z9me12RgAEcMhIgR7f+BiXKbzwF9p1VraI69OxrUUSWGuSMOyOTEHQNVtMKuVrkEDVD0/Av5uiGZPBMYZljw==
 
-"@cardano-foundation/ledgerjs-hw-app-cardano@^3.2.1":
-  version "3.2.1"
-  resolved "https://registry.yarnpkg.com/@cardano-foundation/ledgerjs-hw-app-cardano/-/ledgerjs-hw-app-cardano-3.2.1.tgz#7c7539003eb9b60da33600715b03ac529738fe4b"
-  integrity sha512-qdYeXWDzHE6zEaQeajrKvop9D9mzGDta3OdzlYkFvjiMM0lr/VBLIkhPOd5t6I2vv/LnkhAY8izziVa+my+ifA==
+"@cardano-foundation/ledgerjs-hw-app-cardano@./ledgerjs-cardano-shelley-7c36783.tar.gz":
+  version "4.0.0"
+  resolved "./ledgerjs-cardano-shelley-7c36783.tar.gz#e4864aa9017cce4f849e96a15f6c7e0058c3a733"
   dependencies:
     "@ledgerhq/hw-transport" "^5.12.0"
     "@types/ledgerhq__hw-transport" "^4.21.3"
     base-x "^3.0.5"
     bech32 "^1.1.4"
-    node-int64 "^0.4.0"
+    int64-buffer "^1.0.1"
 
 "@cto.af/textdecoder@^0.0.0":
   version "0.0.0"
@@ -215,11 +214,6 @@
   resolved "https://registry.yarnpkg.com/@sindresorhus/is/-/is-0.7.0.tgz#9a06f4f137ee84d7df0460c1fdb1135ffa6c50fd"
   integrity sha512-ONhaKPIufzzrlNbqtWFFd+jlnemX6lJAgq9ZeiZtS7I1PIf/la7CW4m83rTXRnVnsMbW2k56pGYu7AUFJD9Pow==
 
-"@sovpro/delimited-stream@^1.1.0":
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/@sovpro/delimited-stream/-/delimited-stream-1.1.0.tgz#4334bba7ee241036e580fdd99c019377630d26b4"
-  integrity sha512-kQpk267uxB19X3X2T1mvNMjyvIEonpNSHrMlK5ZaBU6aZxw7wPbpgKJOjHN3+/GPVpXgAV9soVT2oyHpLkLtyw==
-
 "@szmarczak/http-timer@^1.1.2":
   version "1.1.2"
   resolved "https://registry.yarnpkg.com/@szmarczak/http-timer/-/http-timer-1.1.2.tgz#b1665e2c461a2cd92f4c1bbf50d5454de0d4b421"
@@ -238,6 +232,11 @@
     ripple-lib "1.8.2"
     tiny-worker "^2.3.0"
     ws "^7.4.0"
+
+"@trezor/connect-common@^0.0.2":
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/@trezor/connect-common/-/connect-common-0.0.2.tgz#d2bb1e90de6be2895b7f44215f09b52db361aaf4"
+  integrity sha512-b0R/HfA10mH2CR0BoPkKUs/2TC5Bf4MSGBFRF+1Q4tluQfSRzongQEZivg09vbBQEZBD1Ora3Oikn74zqsW4Aw==
 
 "@trezor/rollout@^1.2.0":
   version "1.2.0"
@@ -756,9 +755,9 @@ bl@^4.0.3:
   dependencies:
     nanoassert "^1.0.0"
 
-"blake2b@git+https://github.com/BitGo/blake2b.git#6268e6dd678661e0acc4359e9171b97eb1ebf8ac":
+"blake2b@https://github.com/BitGo/blake2b#6268e6dd678661e0acc4359e9171b97eb1ebf8ac":
   version "2.1.3"
-  resolved "git+https://github.com/BitGo/blake2b.git#6268e6dd678661e0acc4359e9171b97eb1ebf8ac"
+  resolved "https://github.com/BitGo/blake2b#6268e6dd678661e0acc4359e9171b97eb1ebf8ac"
   dependencies:
     blake2b-wasm "https://github.com/BitGo/blake2b-wasm#193cdb71656c1a6c7f89b05d0327bb9b758d071b"
     nanoassert "^1.0.0"
@@ -784,19 +783,6 @@ borc@^2.1.1, borc@^2.1.2:
     ieee754 "^1.1.13"
     iso-url "~0.4.7"
     json-text-sequence "~0.1.0"
-    readable-stream "^3.6.0"
-
-borc@^3.0.0:
-  version "3.0.0"
-  resolved "https://registry.yarnpkg.com/borc/-/borc-3.0.0.tgz#49ada1be84de86f57bb1bb89789f34c186dfa4fe"
-  integrity sha512-ec4JmVC46kE0+layfnwM3l15O70MlFiEbmQHY/vpqIKiUtPVntv4BY4NVnz3N4vb21edV3mY97XVckFvYHWF9g==
-  dependencies:
-    bignumber.js "^9.0.0"
-    buffer "^6.0.3"
-    commander "^2.15.0"
-    ieee754 "^1.1.13"
-    iso-url "^1.1.5"
-    json-text-sequence "~0.3.0"
     readable-stream "^3.6.0"
 
 bowser@^2.11.0:
@@ -1025,6 +1011,11 @@ caw@^2.0.1:
     isurl "^1.0.0-alpha5"
     tunnel-agent "^0.6.0"
     url-to-options "^1.0.1"
+
+cbor-web@^7.0.6:
+  version "7.0.6"
+  resolved "https://registry.yarnpkg.com/cbor-web/-/cbor-web-7.0.6.tgz#6e23a0c58db4c38e485e395de511b9e2f628961c"
+  integrity sha512-A6ZH12jcDJG9PS7StugO78G+ok23SAjxMugGInPBy4IItiH6hYzybi6HQkGjWw9jBEGQpIBkleB2mizxYZIpLw==
 
 cbor@^7.0.4:
   version "7.0.4"
@@ -2504,6 +2495,11 @@ int64-buffer@0.99.1007:
   resolved "https://registry.yarnpkg.com/int64-buffer/-/int64-buffer-0.99.1007.tgz#211ea089a2fdb960070a2e77cd6d17dc456a5220"
   integrity sha512-XDBEu44oSTqlvCSiOZ/0FoUkpWu/vwjJLGSKDabNISPQNZ5wub1FodGHBljRsrR0IXRPq7SslshZYMuA55CgTQ==
 
+int64-buffer@^1.0.1:
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/int64-buffer/-/int64-buffer-1.0.1.tgz#c78d841b444cadf036cd04f8683696c740f15dca"
+  integrity sha512-+3azY4pXrjAupJHU1V9uGERWlhoqNswJNji6aD/02xac7oxol508AsMC5lxKhEqyZeDFy3enq5OGWXF4u75hiw==
+
 internal-slot@^1.0.3:
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/internal-slot/-/internal-slot-1.0.3.tgz#7347e307deeea2faac2ac6205d4bc7d34967f59c"
@@ -2770,11 +2766,6 @@ isexe@^2.0.0:
   resolved "https://registry.yarnpkg.com/isexe/-/isexe-2.0.0.tgz#e8fbf374dc556ff8947a10dcb0572d633f2cfa10"
   integrity sha1-6PvzdNxVb/iUehDcsFctYz8s+hA=
 
-iso-url@^1.1.5:
-  version "1.1.5"
-  resolved "https://registry.yarnpkg.com/iso-url/-/iso-url-1.1.5.tgz#875a0f2bf33fa1fc200f8d89e3f49eee57a8f0d9"
-  integrity sha512-+3JqoKdBTGmyv9vOkS6b9iHhvK34UajfTibrH/1HOK8TI7K2VsM0qOCd+aJdWKtSOA8g3PqZfcwDmnR0p3klqQ==
-
 iso-url@~0.4.7:
   version "0.4.7"
   resolved "https://registry.yarnpkg.com/iso-url/-/iso-url-0.4.7.tgz#de7e48120dae46921079fe78f325ac9e9217a385"
@@ -2853,13 +2844,6 @@ json-text-sequence@~0.1.0:
   integrity sha1-py8hfcSvxGKf/1/rME3BvVGi89I=
   dependencies:
     delimit-stream "0.1.0"
-
-json-text-sequence@~0.3.0:
-  version "0.3.0"
-  resolved "https://registry.yarnpkg.com/json-text-sequence/-/json-text-sequence-0.3.0.tgz#6603e0ee45da41f949669fd18744b97fb209e6ce"
-  integrity sha512-7khKIYPKwXQem4lWXfpIN/FEnhztCeRPSxH4qm3fVlqulwujrRDD54xAwDDn/qVKpFtV550+QAkcWJcufzqQuA==
-  dependencies:
-    "@sovpro/delimited-stream" "^1.1.0"
 
 json5@^1.0.1:
   version "1.0.1"
@@ -3307,11 +3291,6 @@ node-hid@1.3.0:
     nan "^2.14.0"
     node-abi "^2.18.0"
     prebuild-install "^5.3.4"
-
-node-int64@^0.4.0:
-  version "0.4.0"
-  resolved "https://registry.yarnpkg.com/node-int64/-/node-int64-0.4.0.tgz#87a9065cdb355d3182d8f94ce11188b825c68a3b"
-  integrity sha1-h6kGXNs1XTGC2PlM4RGIuCXGijs=
 
 nofilter@^2.0.3:
   version "2.0.3"
@@ -4646,18 +4625,19 @@ to-regex@^3.0.1, to-regex@^3.0.2:
     regex-not "^1.0.2"
     safe-regex "^1.1.0"
 
-"trezor-connect@https://github.com/vacuumlabs/connect/releases/download/8.1.30-rc.1-tx-streaming-extended/trezor-connect-v8.1.30-rc.1-tx-streaming-extended.tgz":
-  version "8.1.30-rc.1-tx-streaming"
-  resolved "https://github.com/vacuumlabs/connect/releases/download/8.1.30-rc.1-tx-streaming-extended/trezor-connect-v8.1.30-rc.1-tx-streaming-extended.tgz#abbdfff7b0fd06128d82469e511c802cae51721b"
+trezor-connect@./trezor-connect-v8.1.51-beta.6.tgz:
+  version "8.1.51-beta.6"
+  resolved "./trezor-connect-v8.1.51-beta.6.tgz#198dc900fbbf05dce5f67a51fae34e5e112a620f"
   dependencies:
     "@babel/runtime" "^7.12.5"
     "@trezor/blockchain-link" "^1.0.17"
+    "@trezor/connect-common" "^0.0.2"
     "@trezor/rollout" "^1.2.0"
     "@trezor/utxo-lib" "^0.1.2"
     bchaddrjs "^0.5.2"
     bignumber.js "^9.0.1"
-    borc "^3.0.0"
     bowser "^2.11.0"
+    cbor-web "^7.0.6"
     events "^3.2.0"
     hd-wallet "9.1.2"
     keccak "^3.0.1"
