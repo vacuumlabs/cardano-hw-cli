@@ -90,6 +90,7 @@ const enum Errors {
   LedgerSignOperationalCertificateNotSupported = 'Signing operational certificate is not supported with your Ledger Cardano app version, please update your Ledger Cardano app to the lastest version',
   InvalidNativeScriptFile = 'Invalid native script file',
   Unreachable = 'Unreachable code reached',
+  InvalidScriptHashHex = 'Invalid script hash hex'
 }
 
 export {

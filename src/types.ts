@@ -67,7 +67,9 @@ export type ParsedDeviceVersionArguments = {
 export type ParsedShowAddressArguments = {
   command: CommandType.SHOW_ADDRESS,
   paymentPath: BIP32Path,
+  paymentScriptHash: string,
   stakingPath: BIP32Path,
+  stakingScriptHash: string,
   address: Address,
 }
 

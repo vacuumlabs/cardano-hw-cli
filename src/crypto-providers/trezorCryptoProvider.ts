@@ -39,6 +39,7 @@ import {
   Network,
   VotePublicKeyHex,
   XPubKeyHex,
+  AddressType,
 } from '../types'
 import {
   encodeAddress,
@@ -116,9 +117,21 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
   ): boolean => TREZOR_VERSIONS[feature] && isDeviceVersionGTE(deviceVersion, TREZOR_VERSIONS[feature])
 
   const showAddress = async (
-    paymentPath: BIP32Path, stakingPath: BIP32Path, address: Address,
+    paymentPath: BIP32Path,
+    _paymentScriptHash: string,
+    stakingPath: BIP32Path,
+    _stakingScriptHash: string,
+    address: Address,
   ): Promise<void> => {
     const { addressType, networkId, protocolMagic } = getAddressAttributes(address)
+    // TODO: Trezor support for multisig addresses
+    if (addressType in [
+      AddressType.BASE_PAYMENT_KEY_STAKE_SCRIPT,
+      AddressType.BASE_PAYMENT_SCRIPT_STAKE_KEY,
+      AddressType.BASE_PAYMENT_SCRIPT_STAKE_SCRIPT,
+    ]) {
+      throw Error(Errors.UnsupportedCryptoProviderCall)
+    }
     const addressParameters = {
       addressType,
       path: paymentPath,

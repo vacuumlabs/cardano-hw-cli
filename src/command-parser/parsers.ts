@@ -216,3 +216,12 @@ export const parseScriptFile = (path: string): NativeScript => {
 
   return parseScriptData(data)
 }
+
+const SCRIPT_HASH_LENGTH = 28
+
+export const parseScriptHashHex = (hashHex: string): string => {
+  if (!/^[0-9a-fA-F]*$/.test(hashHex) || hashHex.length !== SCRIPT_HASH_LENGTH * 2) {
+    throw Error(Errors.InvalidScriptHashHex)
+  }
+  return hashHex
+}
