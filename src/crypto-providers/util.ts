@@ -1,3 +1,4 @@
+import * as Cardano from '@emurgo/cardano-serialization-lib-nodejs'
 import { HARDENED_THRESHOLD } from '../constants'
 import { Errors } from '../errors'
 import { isBIP32Path, isPubKeyHex } from '../guards'
@@ -6,6 +7,7 @@ import {
 } from '../transaction/types'
 import {
   Address,
+  AddressType,
   BIP32Path,
   HwSigningData,
   HwSigningType,
@@ -448,25 +450,46 @@ const getAddressParameters = (
   }
 }
 
-const getAddressAttributes = (address: Address) => {
-  const addressBuffer = cardano.addressToBuffer(address)
-  const addressType: number = cardano.getAddressType(addressBuffer)
-  let protocolMagic: ProtocolMagics
-  let networkId: NetworkIds
+const getAddressType = (address: Cardano.Address): number => {
+  // eslint-disable-next-line no-bitwise
+  const type = address.to_bytes()[0] >> 4
+  if (!(type in AddressType)) {
+    throw Error(Errors.InvalidAddressError)
+  }
+  return type
+}
 
-  if (cardano.isValidBootstrapAddress(address)) {
-    protocolMagic = cardano.getBootstrapAddressProtocolMagic(addressBuffer)
-    networkId = ProtocolMagics.MAINNET === protocolMagic
-      ? NetworkIds.MAINNET
-      : NetworkIds.TESTNET
-  } else if (cardano.isValidShelleyAddress(address)) {
-    networkId = cardano.getShelleyAddressNetworkId(addressBuffer)
-    protocolMagic = NetworkIds.MAINNET === networkId
+const getAddressAttributes = (addressStr: Address): {
+  addressType: number,
+  networkId: number,
+  protocolMagic: number,
+} => {
+  let address: Cardano.ByronAddress | Cardano.Address
+  try {
+    // first check if the address can be decoded as a Byron address
+    address = Cardano.ByronAddress.from_base58(addressStr)
+  } catch (_e) {
+    // if not try to work with it as a Shelley address
+    address = Cardano.Address.from_bech32(addressStr)
+  }
+
+  if (address instanceof Cardano.ByronAddress) {
+    return {
+      addressType: AddressType.BYRON,
+      networkId: address.network_id(),
+      protocolMagic: address.byron_protocol_magic(),
+    }
+  } if (address instanceof Cardano.Address) {
+    const protocolMagic = address.network_id() === NetworkIds.MAINNET
       ? ProtocolMagics.MAINNET
       : ProtocolMagics.TESTNET
-  } else throw Error(Errors.InvalidAddressError)
-
-  return { addressType, networkId, protocolMagic }
+    return {
+      addressType: getAddressType(address),
+      networkId: address.network_id(),
+      protocolMagic,
+    }
+  }
+  throw Error(Errors.InvalidAddressError)
 }
 
 const ipv4ToString = (ipv4: Buffer | undefined): string | undefined => {

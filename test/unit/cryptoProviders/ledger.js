@@ -1,47 +1,87 @@
 const assert = require('assert')
 const { HARDENED_THRESHOLD } = require('../../../src/constants')
-const { classifyPath, PathTypes } = require('../../../src/crypto-providers/util')
+const { AddressType, NetworkIds, ProtocolMagics } = require('../../../src/types')
+const { classifyPath, getAddressAttributes, PathTypes } = require('../../../src/crypto-providers/util')
 
 describe('Test util', () => {
-  it('Classify Byron wallet address path', () => {
-    const HD = HARDENED_THRESHOLD
+  describe('Classify path', () => {
+    it('Byron wallet address path', () => {
+      const HD = HARDENED_THRESHOLD
 
-    assert.deepStrictEqual(
-      classifyPath([44 + HD, 1815 + HD, 0 + HD, 0, 0]),
-      PathTypes.PATH_WALLET_SPENDING_KEY_BYRON,
-    )
+      assert.deepStrictEqual(
+        classifyPath([44 + HD, 1815 + HD, 0 + HD, 0, 0]),
+        PathTypes.PATH_WALLET_SPENDING_KEY_BYRON,
+      )
 
-    assert.deepStrictEqual(
-      classifyPath([44 + HD, 1815 + HD, 0 + HD, 0]),
-      PathTypes.PATH_INVALID,
-    )
+      assert.deepStrictEqual(
+        classifyPath([44 + HD, 1815 + HD, 0 + HD, 0]),
+        PathTypes.PATH_INVALID,
+      )
+    })
+
+    it('Shelley wallet address path', () => {
+      const HD = HARDENED_THRESHOLD
+
+      assert.deepStrictEqual(
+        classifyPath([1852 + HD, 1815 + HD, 0 + HD, 1, 5]),
+        PathTypes.PATH_WALLET_SPENDING_KEY_SHELLEY,
+      )
+
+      assert.deepStrictEqual(
+        classifyPath([1852 + HD, 1815 + HD, 0 + HD, 3, 0]),
+        PathTypes.PATH_INVALID,
+      )
+    })
+
+    it('Staking path', () => {
+      const HD = HARDENED_THRESHOLD
+
+      assert.deepStrictEqual(
+        classifyPath([1852 + HD, 1815 + HD, 1 + HD, 2, 0]),
+        PathTypes.PATH_WALLET_STAKING_KEY,
+      )
+
+      assert.deepStrictEqual(
+        classifyPath([1852 + HD, 1815 + HD, 3 + HD, 2, 1]),
+        PathTypes.PATH_INVALID,
+      )
+    })
   })
 
-  it('Classify Shelley wallet address path', () => {
-    const HD = HARDENED_THRESHOLD
+  describe('Gets correct address attributes', () => {
+    it('Byron address', () => {
+      assert.deepStrictEqual(
+        getAddressAttributes('Ae2tdPwUPEZELF6oijm8VFmhWpujnNzyG2zCf4RxfhmWqQKHo2drRD5Uhah'),
+        {
+          addressType: AddressType.BYRON,
+          networkId: NetworkIds.MAINNET,
+          protocolMagic: ProtocolMagics.MAINNET,
+        },
+      )
+    })
 
-    assert.deepStrictEqual(
-      classifyPath([1852 + HD, 1815 + HD, 0 + HD, 1, 5]),
-      PathTypes.PATH_WALLET_SPENDING_KEY_SHELLEY,
-    )
+    it('Shelley address (testnet, payment key, staking key)', () => {
+      assert.deepStrictEqual(
+        // eslint-disable-next-line max-len
+        getAddressAttributes('addr_test1qpd9xypc9xnnstp2kas3r7mf7ylxn4sksfxxypvwgnc63vcayfawlf9hwv2fzuygt2km5v92kvf8e3s3mk7ynxw77cwq9nnhk4'),
+        {
+          addressType: AddressType.BASE_PAYMENT_KEY_STAKE_KEY,
+          networkId: NetworkIds.TESTNET,
+          protocolMagic: ProtocolMagics.TESTNET,
+        },
+      )
+    })
 
-    assert.deepStrictEqual(
-      classifyPath([1852 + HD, 1815 + HD, 0 + HD, 3, 0]),
-      PathTypes.PATH_INVALID,
-    )
-  })
-
-  it('Classify staking path', () => {
-    const HD = HARDENED_THRESHOLD
-
-    assert.deepStrictEqual(
-      classifyPath([1852 + HD, 1815 + HD, 1 + HD, 2, 0]),
-      PathTypes.PATH_WALLET_STAKING_KEY,
-    )
-
-    assert.deepStrictEqual(
-      classifyPath([1852 + HD, 1815 + HD, 3 + HD, 2, 1]),
-      PathTypes.PATH_INVALID,
-    )
+    it('Shelley address (mainnet, payment script, staking script)', () => {
+      assert.deepStrictEqual(
+        // eslint-disable-next-line max-len
+        getAddressAttributes('addr1x96vdmkys5w64dkvjv5rkpkh837wrmxvyrm0n07mw9dqtu6jms758dkjge0fvyyuuadtvx47t6wpmz3unnn0lz36755qp6mwvr'),
+        {
+          addressType: AddressType.BASE_PAYMENT_SCRIPT_STAKE_SCRIPT,
+          networkId: NetworkIds.MAINNET,
+          protocolMagic: ProtocolMagics.MAINNET,
+        },
+      )
+    })
   })
 })
