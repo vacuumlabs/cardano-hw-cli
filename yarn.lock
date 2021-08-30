@@ -62,6 +62,11 @@
   resolved "https://registry.yarnpkg.com/@cto.af/textdecoder/-/textdecoder-0.0.0.tgz#e1e8d84c936c30a0f4619971f19ca41941af9fdc"
   integrity sha512-sJpx3F5xcVV/9jNYJQtvimo4Vfld/nD3ph+ZWtQzZ03Zo8rJC7QKQTRcIGS13Rcz80DwFNthCWMrd58vpY4ZAQ==
 
+"@emurgo/cardano-serialization-lib-nodejs@^8.0.0":
+  version "8.0.0"
+  resolved "https://registry.yarnpkg.com/@emurgo/cardano-serialization-lib-nodejs/-/cardano-serialization-lib-nodejs-8.0.0.tgz#9666c4fe4afc08df53cb4a9d12c19fe91112e9b5"
+  integrity sha512-GHN1w1B//JwLRKr3/VE5xTGpY3Nof0FnZ6pMvxYaZ8LbXHlW7vfcqzz/5cEc2m1oyULzdCPQm8/8u5I9VTvJlg==
+
 "@eslint/eslintrc@^0.4.0":
   version "0.4.0"
   resolved "https://registry.yarnpkg.com/@eslint/eslintrc/-/eslintrc-0.4.0.tgz#99cc0a0584d72f1df38b900fb062ba995f395547"
