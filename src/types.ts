@@ -64,7 +64,9 @@ export type ParsedDeviceVersionArguments = {
 export type ParsedShowAddressArguments = {
   command: CommandType.SHOW_ADDRESS,
   paymentPath: BIP32Path,
+  paymentScriptHash: string,
   stakingPath: BIP32Path,
+  stakingScriptHash: string,
   address: Address,
 }
 
@@ -182,3 +184,18 @@ export type OutputData =
   | OpCertIssueCounterOutput
 
 export type Cbor = Buffer & { __type: 'cbor' }
+
+// Address type as defined in the Cardano CDDL
+export enum AddressType {
+    BASE_PAYMENT_KEY_STAKE_KEY = 0b0000,
+    BASE_PAYMENT_SCRIPT_STAKE_KEY = 0b0001,
+    BASE_PAYMENT_KEY_STAKE_SCRIPT = 0b0010,
+    BASE_PAYMENT_SCRIPT_STAKE_SCRIPT = 0b0011,
+    POINTER_KEY = 0b0100,
+    POINTER_SCRIPT = 0b0101,
+    ENTERPRISE_KEY = 0b0110,
+    ENTERPRISE_SCRIPT = 0b0111,
+    BYRON = 0b1000,
+    REWARD_KEY = 0b1110,
+    REWARD_SCRIPT = 0b1111,
+}

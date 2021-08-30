@@ -1,3 +1,4 @@
+import * as Cardano from '@emurgo/cardano-serialization-lib-nodejs'
 import { HARDENED_THRESHOLD } from '../constants'
 import { Errors } from '../errors'
 import { isBIP32Path, isPubKeyHex } from '../guards'
@@ -11,6 +12,7 @@ import {
 } from '../transaction/types'
 import {
   Address,
+  AddressType,
   BIP32Path,
   HexString,
   HwSigningData,
@@ -110,16 +112,31 @@ const splitXPubKeyCborHex = (xPubKeyCborHex: XPubKeyCborHex): _XPubKey => {
   return { pubKey, chainCode }
 }
 
+const getAddressType = (address: Uint8Array): AddressType => {
+  // eslint-disable-next-line no-bitwise
+  const type = address[0] >> 4
+  if (!(type in AddressType)) {
+    throw Error(Errors.InvalidAddressError)
+  }
+  return type
+}
+
 const encodeAddress = (address: Buffer): string => {
-  const addressType = cardano.getAddressType(address)
-  if (addressType === AddressTypes.BOOTSTRAP) {
+  const addressType = getAddressType(address)
+  if (addressType === AddressType.BYRON) {
     return base58.encode(address)
   }
-  const addressPrefixes: {[key: number]: string} = {
-    [AddressTypes.BASE]: 'addr',
-    [AddressTypes.POINTER]: 'addr',
-    [AddressTypes.ENTERPRISE]: 'addr',
-    [AddressTypes.REWARD]: 'stake',
+  const addressPrefixes: Omit<Record<AddressType, string>, AddressType.BYRON> = {
+    [AddressType.BASE_PAYMENT_KEY_STAKE_KEY]: 'addr',
+    [AddressType.BASE_PAYMENT_SCRIPT_STAKE_KEY]: 'addr',
+    [AddressType.BASE_PAYMENT_KEY_STAKE_SCRIPT]: 'addr',
+    [AddressType.BASE_PAYMENT_SCRIPT_STAKE_SCRIPT]: 'addr',
+    [AddressType.POINTER_KEY]: 'addr',
+    [AddressType.POINTER_SCRIPT]: 'addr',
+    [AddressType.ENTERPRISE_KEY]: 'addr',
+    [AddressType.ENTERPRISE_SCRIPT]: 'addr',
+    [AddressType.REWARD_KEY]: 'stake',
+    [AddressType.REWARD_SCRIPT]: 'stake',
   }
   const isTestnet = cardano.getShelleyAddressNetworkId(address) === NetworkIds.TESTNET
   const addressPrefix = `${addressPrefixes[addressType]}${isTestnet ? '_test' : ''}`
@@ -335,7 +352,7 @@ const _packBootstrapAddress = (
   )
   return {
     address,
-    addressType: cardano.getAddressType(address),
+    addressType: getAddressType(address),
     paymentPath: paymentSigningFile.path,
   }
 }
@@ -352,7 +369,7 @@ const _packBaseAddress = (
   )
   return {
     address,
-    addressType: cardano.getAddressType(address),
+    addressType: getAddressType(address),
     paymentPath: paymentSigningFile.path,
     stakePath: stakeSigningFile.path,
   }
@@ -368,7 +385,7 @@ const _packEnterpriseAddress = (
   )
   return {
     address,
-    addressType: cardano.getAddressType(address),
+    addressType: getAddressType(address),
     paymentPath: paymentSigningFile.path,
   }
 }
@@ -383,7 +400,7 @@ const _packRewardAddress = (
   )
   return {
     address,
-    addressType: cardano.getAddressType(address),
+    addressType: getAddressType(address),
     stakePath: stakeSigningFile.path,
   }
 }
@@ -395,19 +412,22 @@ const getAddressParameters = (
 ): _AddressParameters | null => {
   if (hwSigningData == null || hwSigningData.length === 0) return null
   const { paymentSigningFiles, stakeSigningFiles } = filterSigningFiles(hwSigningData)
-  const addressType = cardano.getAddressType(address)
+  const addressType = getAddressType(address)
   const findMatchingAddress = (packedAddresses: (_AddressParameters | null)[]) => packedAddresses.find(
     (packedAddress) => packedAddress && Buffer.compare(packedAddress.address, address) === 0,
   ) || null
 
   try {
     switch (addressType) {
-      case AddressTypes.BOOTSTRAP:
+      case AddressType.BYRON:
         return findMatchingAddress(
           paymentSigningFiles.map((paymentSigningFile) => _packBootstrapAddress(paymentSigningFile, network)),
         )
 
-      case AddressTypes.BASE:
+      case AddressType.BASE_PAYMENT_KEY_STAKE_KEY:
+      case AddressType.BASE_PAYMENT_KEY_STAKE_SCRIPT:
+      case AddressType.BASE_PAYMENT_SCRIPT_STAKE_KEY:
+      case AddressType.BASE_PAYMENT_SCRIPT_STAKE_SCRIPT:
         return findMatchingAddress(
           paymentSigningFiles.flatMap((paymentSigningFile) => (
             stakeSigningFiles.map((stakeSigningFile) => (
@@ -416,14 +436,16 @@ const getAddressParameters = (
           )),
         )
 
-      case AddressTypes.ENTERPRISE:
+      case AddressType.ENTERPRISE_KEY:
+      case AddressType.ENTERPRISE_SCRIPT:
         return findMatchingAddress(
           paymentSigningFiles.map((paymentSigningFile) => (
             _packEnterpriseAddress(paymentSigningFile, network)
           )),
         )
 
-      case AddressTypes.REWARD:
+      case AddressType.REWARD_KEY:
+      case AddressType.REWARD_SCRIPT:
         return findMatchingAddress(
           stakeSigningFiles.map((stakeSigningFile) => _packRewardAddress(stakeSigningFile, network)),
         )
@@ -437,25 +459,37 @@ const getAddressParameters = (
   }
 }
 
-const getAddressAttributes = (address: Address) => {
-  const addressBuffer = cardano.addressToBuffer(address)
-  const addressType: number = cardano.getAddressType(addressBuffer)
-  let protocolMagic: ProtocolMagics
-  let networkId: NetworkIds
+const getAddressAttributes = (addressStr: Address): {
+  addressType: number,
+  networkId: number,
+  protocolMagic: number,
+} => {
+  let address: Cardano.ByronAddress | Cardano.Address
+  try {
+    // first check if the address can be decoded as a Byron address
+    address = Cardano.ByronAddress.from_base58(addressStr)
+  } catch (_e) {
+    // if not try to work with it as a Shelley address
+    address = Cardano.Address.from_bech32(addressStr)
+  }
 
-  if (cardano.isValidBootstrapAddress(address)) {
-    protocolMagic = cardano.getBootstrapAddressProtocolMagic(addressBuffer)
-    networkId = ProtocolMagics.MAINNET === protocolMagic
-      ? NetworkIds.MAINNET
-      : NetworkIds.TESTNET
-  } else if (cardano.isValidShelleyAddress(address)) {
-    networkId = cardano.getShelleyAddressNetworkId(addressBuffer)
-    protocolMagic = NetworkIds.MAINNET === networkId
+  if (address instanceof Cardano.ByronAddress) {
+    return {
+      addressType: AddressType.BYRON,
+      networkId: address.network_id(),
+      protocolMagic: address.byron_protocol_magic(),
+    }
+  } if (address instanceof Cardano.Address) {
+    const protocolMagic = address.network_id() === NetworkIds.MAINNET
       ? ProtocolMagics.MAINNET
       : ProtocolMagics.TESTNET
-  } else throw Error(Errors.InvalidAddressError)
-
-  return { addressType, networkId, protocolMagic }
+    return {
+      addressType: getAddressType(address.to_bytes()),
+      networkId: address.network_id(),
+      protocolMagic,
+    }
+  }
+  throw Error(Errors.InvalidAddressError)
 }
 
 const ipv4ToString = (ipv4: Buffer | undefined): string | undefined => {

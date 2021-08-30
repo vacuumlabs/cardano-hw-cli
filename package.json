@@ -36,6 +36,7 @@
   "dependencies": {
     "@babel/runtime": "^7.11.2",
     "@cardano-foundation/ledgerjs-hw-app-cardano": "https://github.com/vacuumlabs/ledgerjs-cardano-shelley/releases/download/v4.0.0-multisig-rc5/cardano-foundation-ledgerjs-hw-app-cardano-v4.0.0-rc5.tgz",
+    "@emurgo/cardano-serialization-lib-nodejs": "^8.0.0",
     "@ledgerhq/hw-transport-node-hid": "^5.25.0",
     "argparse": "^2.0.1",
     "bignumber": "^1.1.0",

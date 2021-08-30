@@ -17,7 +17,13 @@ import {
 
 export type CryptoProvider = {
   getVersion: () => Promise<string>,
-  showAddress: (paymentPath: BIP32Path, stakingPath: BIP32Path, address: Address) => Promise<void>,
+  showAddress: (
+    paymentPath: BIP32Path,
+    paymentScriptHash: string,
+    stakingPath: BIP32Path,
+    stakingScriptHash: string,
+    address: Address,
+  ) => Promise<void>,
   signTx: (
     unsignedTxParsed: _UnsignedTxParsed,
     signingFiles: HwSigningData[],
