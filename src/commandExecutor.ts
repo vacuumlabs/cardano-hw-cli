@@ -68,11 +68,19 @@ const CommandExecutor = async () => {
   const printDeviceVersion = async () => console.log(await cryptoProvider.getVersion())
 
   const showAddress = async (
-    { paymentPath, stakingPath, address }: ParsedShowAddressArguments,
+    {
+      paymentPath, paymentScriptHash, stakingPath, stakingScriptHash, address,
+    }: ParsedShowAddressArguments,
   ) => {
     // eslint-disable-next-line no-console
     console.log(`address: ${address}`)
-    return cryptoProvider.showAddress(paymentPath, stakingPath, address)
+    return cryptoProvider.showAddress(
+      paymentPath,
+      paymentScriptHash,
+      stakingPath,
+      stakingScriptHash,
+      address,
+    )
   }
 
   const createSigningKeyFile = async (

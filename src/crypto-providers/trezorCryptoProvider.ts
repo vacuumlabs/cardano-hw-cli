@@ -118,13 +118,19 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
   ): boolean => TREZOR_VERSIONS[feature] && isDeviceVersionGTE(deviceVersion, TREZOR_VERSIONS[feature])
 
   const showAddress = async (
-    paymentPath: BIP32Path, stakingPath: BIP32Path, address: Address,
+    paymentPath: BIP32Path,
+    paymentScriptHash: string,
+    stakingPath: BIP32Path,
+    stakingScriptHash: string,
+    address: Address,
   ): Promise<void> => {
     const { addressType, networkId, protocolMagic } = getAddressAttributes(address)
     const addressParameters = {
       addressType,
       path: paymentPath,
+      paymentScriptHash: paymentScriptHash || '',
       stakingPath,
+      stakingScriptHash: stakingScriptHash || '',
     }
     const response = await TrezorConnect.cardanoGetAddress({
       addressParameters,
@@ -207,7 +213,6 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     changeOutputFiles: HwSigningData[],
   ): TrezorTypes.CardanoOutput => {
     const changeAddressParams = getAddressParameters(changeOutputFiles, output.address, network)
-    const address = encodeAddress(output.address)
     const tokenBundle = prepareTokenBundle(output.tokenBundle)
 
     if (changeAddressParams) {
@@ -215,7 +220,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     }
 
     return ({
-      address,
+      address: encodeAddress(output.address),
       amount: output.coins.toString(),
       tokenBundle,
     })
