@@ -84,10 +84,15 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
   ): boolean => LEDGER_VERSIONS[feature] && isDeviceVersionGTE(deviceVersion, LEDGER_VERSIONS[feature])
 
   const showAddress = async (
-    paymentPath: BIP32Path, stakingPath: BIP32Path, address: Address,
+    paymentPath: BIP32Path,
+    paymentScriptHash: string,
+    stakingPath: BIP32Path,
+    stakingScriptHash: string,
+    address: Address,
   ): Promise<void> => {
     try {
       const { addressType, networkId, protocolMagic } = getAddressAttributes(address)
+
       await ledger.showAddress({
         network: {
           protocolMagic,
@@ -97,7 +102,9 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
           type: addressType,
           params: {
             spendingPath: paymentPath,
+            spendingScriptHash: paymentScriptHash,
             stakingPath,
+            stakingScriptHash,
           },
         },
       })
