@@ -44,7 +44,6 @@ import {
   VotePublicKeyHex,
   XPubKeyHex,
   NativeScriptType,
-  AddressType,
 } from '../types'
 import {
   encodeAddress,
@@ -125,24 +124,18 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
 
   const showAddress = async (
     paymentPath: BIP32Path,
-    _paymentScriptHash: string,
+    paymentScriptHash: string,
     stakingPath: BIP32Path,
-    _stakingScriptHash: string,
+    stakingScriptHash: string,
     address: Address,
   ): Promise<void> => {
     const { addressType, networkId, protocolMagic } = getAddressAttributes(address)
-    // TODO: Trezor support for multisig addresses
-    if (addressType in [
-      AddressType.BASE_PAYMENT_KEY_STAKE_SCRIPT,
-      AddressType.BASE_PAYMENT_SCRIPT_STAKE_KEY,
-      AddressType.BASE_PAYMENT_SCRIPT_STAKE_SCRIPT,
-    ]) {
-      throw Error(Errors.UnsupportedCryptoProviderCall)
-    }
     const addressParameters = {
       addressType,
       path: paymentPath,
+      paymentScriptHash: paymentScriptHash || '',
       stakingPath,
+      stakingScriptHash: stakingScriptHash || '',
     }
     const response = await TrezorConnect.cardanoGetAddress({
       addressParameters,
