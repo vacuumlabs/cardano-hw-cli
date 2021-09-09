@@ -541,8 +541,10 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     )
     const auxiliaryData = prepareMetaDataHashHex(unsignedTxParsed.metaDataHash)
 
-    let mint
-    if (unsignedTxParsed.mint) mint = prepareTokenBundle(unsignedTxParsed.mint)
+    // Ledger expect to receive either a `null` mint field, or a non-empty array
+    const mint = (Array.isArray(unsignedTxParsed.mint) && unsignedTxParsed.mint.length > 0)
+      ? prepareTokenBundle(unsignedTxParsed.mint)
+      : null
 
     const additionalWitnessRequests = prepareAdditionalWitnessRequests(mintSigningFiles)
 
