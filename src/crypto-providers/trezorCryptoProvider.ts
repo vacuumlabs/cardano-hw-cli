@@ -56,7 +56,6 @@ import {
   getSigningPath,
   ipv4ToString,
   ipv6ToString,
-  rewardAddressToPubKeyHash,
   isDeviceVersionGTE,
   getAddressParameters,
   validateVotingRegistrationAddressType,
@@ -366,15 +365,12 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
 
   const prepareWithdrawal = (
     withdrawal: _Withdrawal, stakeSigningFiles: HwSigningData[],
-  ): TrezorTypes.CardanoWithdrawal => {
-    const pubKeyHash = rewardAddressToPubKeyHash(withdrawal.address)
-    const path = findSigningPathForKeyHash(pubKeyHash, stakeSigningFiles)
-    if (!path) throw Error(Errors.MissingSigningFileForWithdrawalError)
-    return {
-      path,
+  ): TrezorTypes.CardanoWithdrawal => (
+    {
       amount: `${withdrawal.coins}`,
+      ...(_prepareStakingKeyOrScriptCert(withdrawal.stakeCredential, stakeSigningFiles)),
     }
-  }
+  )
 
   const prepareTtl = (ttl: BigInt | null): string | undefined => (ttl != null ? ttl.toString() : undefined)
 

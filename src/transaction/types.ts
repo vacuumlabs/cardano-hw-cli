@@ -145,7 +145,7 @@ export type _Certificate =
   | _StakepoolRetirementCert
 
 export type _Withdrawal = {
-  address: Buffer,
+  stakeCredential: StakeCredentials,
   coins: Lovelace,
 }
 

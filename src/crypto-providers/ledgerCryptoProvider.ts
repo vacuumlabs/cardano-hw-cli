@@ -60,7 +60,6 @@ import {
   PathTypes,
   classifyPath,
   getAddressAttributes,
-  rewardAddressToPubKeyHash,
   ipv4ToString,
   ipv6ToString,
   isDeviceVersionGTE,
@@ -447,18 +446,12 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
 
   const prepareWithdrawal = (
     withdrawal: _Withdrawal, stakeSigningFiles: HwSigningData[],
-  ): LedgerTypes.Withdrawal => {
-    const pubKeyHash = rewardAddressToPubKeyHash(withdrawal.address)
-    const path = findSigningPathForKeyHash(pubKeyHash, stakeSigningFiles)
-    if (!path) throw Error(Errors.MissingSigningFileForWithdrawalError)
-    return {
-      stakeCredential: {
-        type: LedgerTypes.StakeCredentialParamsType.KEY_PATH,
-        keyPath: path,
-      },
+  ): LedgerTypes.Withdrawal => (
+    {
+      stakeCredential: _prepareStakingKeyOrScriptCert(withdrawal.stakeCredential, stakeSigningFiles),
       amount: `${withdrawal.coins}`,
     }
-  }
+  )
 
   const prepareTtl = (ttl: BigInt | null): string | null => ttl && ttl.toString()
 

@@ -1,3 +1,4 @@
+import * as Cardano from '@emurgo/cardano-serialization-lib-nodejs'
 import { isArrayOfType } from '../guards'
 import { Errors } from '../errors'
 import {
@@ -46,6 +47,8 @@ import {
   StakeCredentials,
 } from './types'
 import { decodeCbor, encodeCbor } from '../util'
+import { getAddressType, rewardAddressToPubKeyHash } from '../crypto-providers/util'
+import { AddressType } from '../types'
 
 const { blake2b } = require('cardano-crypto.js')
 
@@ -280,11 +283,35 @@ const parseTxCerts = (txCertificates: any[]): _Certificate[] => {
   )
 }
 
+const parseTxWithdrawalRewardAccount = (addressBuffer: Buffer): StakeCredentials => {
+  const address = Cardano.Address.from_bytes(addressBuffer)
+  const type = getAddressType(address)
+  switch (type) {
+    case (AddressType.REWARD_KEY): {
+      return {
+        type: StakeCredentialsKeys.ADDR_KEY_HASH,
+        addrKeyHash: rewardAddressToPubKeyHash(addressBuffer),
+      }
+    }
+    case (AddressType.REWARD_SCRIPT): {
+      return {
+        type: StakeCredentialsKeys.SCRIPT_HASH,
+        scriptHash: addressBuffer,
+      }
+    }
+    default:
+      throw Error(Errors.WithrawalsParseError)
+  }
+}
+
 const parseTxWithdrawals = (withdrawals: any): _Withdrawal[] => {
   if (!isWithdrawalsMap(withdrawals)) {
     throw Error(Errors.WithrawalsParseError)
   }
-  return Array.from(withdrawals).map(([address, coins]): _Withdrawal => ({ address, coins: BigInt(coins) }))
+  return Array.from(withdrawals).map(([rewardAccount, coins]): _Withdrawal => ({
+    stakeCredential: parseTxWithdrawalRewardAccount(rewardAccount),
+    coins: BigInt(coins),
+  }))
 }
 
 const parseFee = (fee: any): Lovelace => {

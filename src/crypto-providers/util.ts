@@ -589,6 +589,7 @@ export {
   extractStakePubKeyFromHwSigningData,
   encodeAddress,
   getAddressParameters,
+  getAddressType,
   getAddressAttributes,
   ipv4ToString,
   ipv6ToString,

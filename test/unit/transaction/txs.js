@@ -93,7 +93,10 @@ const transactions = {
       certificates: [],
       withdrawals: [
         {
-          address: Buffer.from('e11d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c', 'hex'),
+          stakeCredential: {
+            type: 0,
+            addrKeyHash: Buffer.from('1d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c', 'hex'),
+          },
           coins: BigInt(111),
         },
       ],
