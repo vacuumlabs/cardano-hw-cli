@@ -160,6 +160,7 @@ const filterSigningFiles = (
     stakeSigningFiles: HwSigningData[],
     poolColdSigningFiles: HwSigningData[],
     mintSigningFiles: HwSigningData[],
+    multisigSigningFiles: HwSigningData[],
 } => {
   const paymentSigningFiles = signingFiles.filter(
     (signingFile) => signingFile.type === HwSigningType.Payment,
@@ -173,11 +174,15 @@ const filterSigningFiles = (
   const mintSigningFiles = signingFiles.filter(
     (signingFile) => signingFile.type === HwSigningType.Mint,
   )
+  const multisigSigningFiles = signingFiles.filter(
+    (signingFile) => signingFile.type === HwSigningType.MultiSig,
+  )
   return {
     paymentSigningFiles,
     stakeSigningFiles,
     poolColdSigningFiles,
     mintSigningFiles,
+    multisigSigningFiles,
   }
 }
 
@@ -236,9 +241,14 @@ const txHasStakePoolRegistrationCert = (
 const validateTxWithoutPoolRegistration = (
   unsignedTxParsed: _UnsignedTxParsed, signingFiles: HwSigningData[],
 ): void => {
-  const { paymentSigningFiles, stakeSigningFiles, poolColdSigningFiles } = filterSigningFiles(signingFiles)
+  const {
+    paymentSigningFiles, stakeSigningFiles, poolColdSigningFiles, multisigSigningFiles,
+  } = filterSigningFiles(signingFiles)
 
-  if (paymentSigningFiles.length === 0) {
+  const paymentWithMultisigSigningFiles = paymentSigningFiles.concat(multisigSigningFiles)
+  const stakeWithMultisigSigningFiles = stakeSigningFiles.concat(multisigSigningFiles)
+
+  if (paymentWithMultisigSigningFiles.length === 0) {
     throw Error(Errors.MissingPaymentSigningFileError)
   }
 
@@ -261,10 +271,10 @@ const validateTxWithoutPoolRegistration = (
     }
   })
 
-  if (numStakeWitnesses > 0 && (stakeSigningFiles.length === 0)) {
+  if (numStakeWitnesses > 0 && (stakeWithMultisigSigningFiles.length === 0)) {
     throw Error(Errors.MissingStakeSigningFileError)
   }
-  if (stakeSigningFiles.length > numStakeWitnesses) {
+  if (stakeWithMultisigSigningFiles.length > numStakeWitnesses) {
     throw Error(Errors.TooManyStakeSigningFilesError)
   }
 
@@ -280,7 +290,12 @@ const validateTxWithoutPoolRegistration = (
 const validateTxWithPoolRegistration = (
   unsignedTxParsed: _UnsignedTxParsed, signingFiles: HwSigningData[],
 ): void => {
-  const { paymentSigningFiles, stakeSigningFiles, poolColdSigningFiles } = filterSigningFiles(signingFiles)
+  const {
+    paymentSigningFiles, stakeSigningFiles, poolColdSigningFiles, multisigSigningFiles,
+  } = filterSigningFiles(signingFiles)
+
+  const paymentWithMultisigSigningFiles = paymentSigningFiles.concat(multisigSigningFiles)
+  const stakeWithMultisigSigningFiles = stakeSigningFiles.concat(multisigSigningFiles)
 
   // TODO needs revisiting, including the error messages
   if (!unsignedTxParsed.inputs.length) {
@@ -301,18 +316,18 @@ const validateTxWithPoolRegistration = (
 
   if (isOperator) {
     // pool operator
-    if (stakeSigningFiles.length > 0) {
+    if (stakeWithMultisigSigningFiles.length > 0) {
       throw Error(Errors.TooManyStakeSigningFilesError)
     }
   } else {
     // pool owner
-    if (paymentSigningFiles.length > 0) {
+    if (paymentWithMultisigSigningFiles.length > 0) {
       throw Error(Errors.TooManyPaymentFilesWithPoolRegError)
     }
-    if (stakeSigningFiles.length === 0) {
+    if (stakeWithMultisigSigningFiles.length === 0) {
       throw Error(Errors.MissingStakeSigningFileError)
     }
-    if (stakeSigningFiles.length > 1) {
+    if (stakeWithMultisigSigningFiles.length > 1) {
       throw Error(Errors.TooManyStakeSigningFilesError)
     }
   }
