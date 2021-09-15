@@ -48,6 +48,10 @@ export const parseFileTypeMagic = (fileTypeMagic: string, pathType: PathTypes) =
     if (pathType === PathTypes.PATH_WALLET_MINTING_KEY) {
       return HwSigningType.Mint
     }
+    if (pathType === PathTypes.PATH_WALLET_SCRIPT_ACCOUNT
+      || pathType === PathTypes.PATH_WALLET_SPENDING_KEY_MULTISIG) {
+      return HwSigningType.MultiSig
+    }
     return HwSigningType.Payment
   }
 
@@ -56,6 +60,9 @@ export const parseFileTypeMagic = (fileTypeMagic: string, pathType: PathTypes) =
   }
 
   if (fileTypeMagic.startsWith('Stake')) {
+    if (pathType === PathTypes.PATH_WALLET_STAKING_KEY_MULTISIG) {
+      return HwSigningType.MultiSig
+    }
     return HwSigningType.Stake
   }
 
