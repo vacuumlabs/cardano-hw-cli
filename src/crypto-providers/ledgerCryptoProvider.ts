@@ -70,6 +70,7 @@ import {
   findSigningPathForKey,
   encodeVotingRegistrationMetaData,
   findPathForKeyHash,
+  isMultisigTransaction,
 } from './util'
 
 const { bech32 } = require('cardano-crypto.js')
@@ -121,21 +122,26 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     }
   }
 
-  const determineSigningMode = (certificates: _Certificate[], signingFiles: HwSigningData[]) => {
-    const poolRegistrationCert = certificates.find(
+  const determineSigningMode = (
+    unsignedTxParsed: _UnsignedTxParsed,
+    signingFiles: HwSigningData[],
+  ): LedgerTypes.TransactionSigningMode => {
+    const poolRegistrationCert = unsignedTxParsed.certificates.find(
       (cert) => cert.type === TxCertificateKeys.STAKEPOOL_REGISTRATION,
     ) as _StakepoolRegistrationCert
 
-    if (!poolRegistrationCert) {
-      return LedgerTypes.TransactionSigningMode.ORDINARY_TRANSACTION
+    if (poolRegistrationCert) {
+      const poolKeyPath = findSigningPathForKeyHash(poolRegistrationCert.poolKeyHash, signingFiles)
+      if (!poolKeyPath) {
+        return LedgerTypes.TransactionSigningMode.POOL_REGISTRATION_AS_OWNER
+      }
+
+      return LedgerTypes.TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR
     }
 
-    const poolKeyPath = findSigningPathForKeyHash(poolRegistrationCert.poolKeyHash, signingFiles)
-    if (!poolKeyPath) {
-      return LedgerTypes.TransactionSigningMode.POOL_REGISTRATION_AS_OWNER
-    }
-
-    return LedgerTypes.TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR
+    return isMultisigTransaction(signingFiles)
+      ? LedgerTypes.TransactionSigningMode.MULTISIG_TRANSACTION
+      : LedgerTypes.TransactionSigningMode.ORDINARY_TRANSACTION
   }
 
   const prepareInput = (
@@ -495,7 +501,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
       }
     })
 
-    const signingMode = determineSigningMode(unsignedTxParsed.certificates, signingFiles)
+    const signingMode = determineSigningMode(unsignedTxParsed, signingFiles)
     switch (signingMode) {
       case LedgerTypes.TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR:
         if (!isFeatureSupportedForVersion(LedgerCryptoProviderFeature.POOL_REGISTRATION_OPERATOR)) {
@@ -517,7 +523,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
       paymentSigningFiles, stakeSigningFiles, poolColdSigningFiles, mintSigningFiles, multisigSigningFiles,
     } = filterSigningFiles(signingFiles)
 
-    const signingMode = determineSigningMode(unsignedTxParsed.certificates, signingFiles)
+    const signingMode = determineSigningMode(unsignedTxParsed, signingFiles)
 
     const inputs = unsignedTxParsed.inputs.map(
       (input, i) => prepareInput(signingMode, input, getSigningPath(paymentSigningFiles, i)),
