@@ -189,7 +189,7 @@ const parseTxCerts = (txCertificates: any[]): _Certificate[] => {
     if (!isTxStakingKeyRegistrationCert(txCertificate)) {
       throw Error(Errors.TxStakingKeyRegistrationCertParseError)
     }
-    const [type, [, stakeCredentials]] = txCertificate
+    const [type, stakeCredentials] = txCertificate
     return ({ type, stakeCredentials: parseStakeCredentials(stakeCredentials) })
   }
 
@@ -199,7 +199,7 @@ const parseTxCerts = (txCertificates: any[]): _Certificate[] => {
     if (!isStakingKeyDeregistrationCert(txCertificate)) {
       throw Error(Errors.TxStakingKeyDeregistrationCertParseError)
     }
-    const [type, [, stakeCredentials]] = txCertificate
+    const [type, stakeCredentials] = txCertificate
     return ({ type, stakeCredentials: parseStakeCredentials(stakeCredentials) })
   }
 
@@ -209,7 +209,7 @@ const parseTxCerts = (txCertificates: any[]): _Certificate[] => {
     if (!isDelegationCert(txCertificate)) {
       throw Error(Errors.TxDelegationCertParseError)
     }
-    const [type, [, stakeCredentials], poolHash] = txCertificate
+    const [type, stakeCredentials, poolHash] = txCertificate
     return ({ type, stakeCredentials: parseStakeCredentials(stakeCredentials), poolHash })
   }
 
@@ -296,7 +296,7 @@ const parseTxWithdrawalRewardAccount = (addressBuffer: Buffer): StakeCredentials
     case (AddressType.REWARD_SCRIPT): {
       return {
         type: StakeCredentialsKeys.SCRIPT_HASH,
-        scriptHash: addressBuffer,
+        scriptHash: rewardAddressToPubKeyHash(addressBuffer),
       }
     }
     default:

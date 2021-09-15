@@ -242,7 +242,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
   const _prepareStakingKeyOrScriptCert = (
     stakeCredentials: StakeCredentials,
     stakeSigningFiles: HwSigningData[],
-  ): {path: string | number[], scriptHash?: string} => {
+  ): {path?: string | number[], scriptHash?: string} => {
     switch (stakeCredentials.type) {
       case (StakeCredentialsKeys.ADDR_KEY_HASH): {
         const path = findSigningPathForKeyHash(
@@ -255,7 +255,6 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
       }
       case (StakeCredentialsKeys.SCRIPT_HASH): {
         return {
-          path: [],
           scriptHash: (stakeCredentials as ScriptHash).scriptHash.toString('hex'),
         }
       }
@@ -391,7 +390,8 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
 
   const prepareAdditionalWitnessRequests = (
     mintSigningFiles: HwSigningData[],
-  ) => mintSigningFiles.map((f) => f.path)
+    multiSigSigningFiles: HwSigningData[],
+  ) => mintSigningFiles.map((f) => f.path).concat(multiSigSigningFiles.map((f) => f.path))
 
   const ensureFirmwareSupportsParams = (unsignedTxParsed: _UnsignedTxParsed) => {
     if (
@@ -458,7 +458,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     changeOutputFiles: HwSigningData[],
   ): Promise<TrezorTypes.CardanoSignedTxWitness[]> => {
     ensureFirmwareSupportsParams(unsignedTxParsed)
-    const { paymentSigningFiles, stakeSigningFiles, mintSigningFiles } = filterSigningFiles(signingFiles)
+    const { paymentSigningFiles, stakeSigningFiles, mintSigningFiles, multisigSigningFiles } = filterSigningFiles(signingFiles)
 
     const signingMode = determineSigningMode(unsignedTxParsed, signingFiles)
 
@@ -483,7 +483,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     let mint
     if (unsignedTxParsed.mint) mint = prepareTokenBundle(unsignedTxParsed.mint, true)
 
-    const additionalWitnessRequests = prepareAdditionalWitnessRequests(mintSigningFiles)
+    const additionalWitnessRequests = prepareAdditionalWitnessRequests(mintSigningFiles, multisigSigningFiles)
 
     const request: TrezorTypes.CommonParams & TrezorTypes.CardanoSignTransaction = {
       signingMode,
@@ -503,6 +503,8 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
 
     // TODO: removeNullFields shouldn't be necessary, remove when fixed in trezor connect
     const response = await TrezorConnect.cardanoSignTransaction(removeNullFields(request))
+
+    console.log({r: JSON.stringify(response)})
 
     if (!response.success) {
       throw Error(response.payload.error)

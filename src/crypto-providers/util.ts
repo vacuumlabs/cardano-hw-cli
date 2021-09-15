@@ -150,6 +150,7 @@ const filterSigningFiles = (
     stakeSigningFiles: HwSigningData[],
     poolColdSigningFiles: HwSigningData[],
     mintSigningFiles: HwSigningData[],
+    multisigSigningFiles: HwSigningData[],
 } => {
   const paymentSigningFiles = signingFiles.filter(
     (signingFile) => signingFile.type === HwSigningType.Payment,
@@ -163,11 +164,15 @@ const filterSigningFiles = (
   const mintSigningFiles = signingFiles.filter(
     (signingFile) => signingFile.type === HwSigningType.Mint,
   )
+  const multisigSigningFiles = signingFiles.filter(
+    (signingFile) => signingFile.type === HwSigningType.MultiSig,
+  )
   return {
     paymentSigningFiles,
     stakeSigningFiles,
     poolColdSigningFiles,
     mintSigningFiles,
+    multisigSigningFiles,
   }
 }
 
@@ -212,9 +217,9 @@ const txHasStakePoolRegistrationCert = (
 const validateTxWithoutPoolRegistration = (
   unsignedTxParsed: _UnsignedTxParsed, signingFiles: HwSigningData[],
 ): void => {
-  const { paymentSigningFiles, stakeSigningFiles, poolColdSigningFiles } = filterSigningFiles(signingFiles)
+  const { paymentSigningFiles, stakeSigningFiles, poolColdSigningFiles, multisigSigningFiles } = filterSigningFiles(signingFiles)
 
-  if (paymentSigningFiles.length === 0) {
+  if (paymentSigningFiles.length === 0 && multisigSigningFiles.length === 0) {
     throw Error(Errors.MissingPaymentSigningFileError)
   }
 
