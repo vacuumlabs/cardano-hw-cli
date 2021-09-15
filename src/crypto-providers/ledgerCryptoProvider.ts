@@ -471,7 +471,8 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
 
   const prepareAdditionalWitnessRequests = (
     mintSigningFiles: HwSigningData[],
-  ) => mintSigningFiles.map((f) => f.path)
+    multisigSigningFiles: HwSigningData[],
+  ) => mintSigningFiles.map((f) => f.path).concat(multisigSigningFiles.map((f) => f.path))
 
   const ensureFirmwareSupportsParams = (
     unsignedTxParsed: _UnsignedTxParsed, signingFiles: HwSigningData[],
@@ -513,7 +514,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
   ): Promise<LedgerWitness[]> => {
     ensureFirmwareSupportsParams(unsignedTxParsed, signingFiles)
     const {
-      paymentSigningFiles, stakeSigningFiles, poolColdSigningFiles, mintSigningFiles,
+      paymentSigningFiles, stakeSigningFiles, poolColdSigningFiles, mintSigningFiles, multisigSigningFiles,
     } = filterSigningFiles(signingFiles)
 
     const signingMode = determineSigningMode(unsignedTxParsed.certificates, signingFiles)
@@ -526,7 +527,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     )
     const certificates = unsignedTxParsed.certificates.map(
       (certificate) => prepareCertificate(
-        certificate, [...stakeSigningFiles, ...poolColdSigningFiles], network,
+        certificate, [...stakeSigningFiles, ...poolColdSigningFiles, ...multisigSigningFiles], network,
       ),
     )
     const fee = `${unsignedTxParsed.fee}`
@@ -542,7 +543,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
       ? prepareTokenBundle(unsignedTxParsed.mint)
       : null
 
-    const additionalWitnessRequests = prepareAdditionalWitnessRequests(mintSigningFiles)
+    const additionalWitnessRequests = prepareAdditionalWitnessRequests(mintSigningFiles, multisigSigningFiles)
 
     const response = await ledger.signTransaction({
       signingMode,

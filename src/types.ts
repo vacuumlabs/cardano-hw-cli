@@ -40,7 +40,7 @@ export type CborHex = string & {
 export type BIP32Path = number[] & { __type: 'bip32path' }
 
 export enum HwSigningType {
-  Payment, Stake, PoolCold, Mint
+  Payment, Stake, PoolCold, Mint, MultiSig
 }
 
 export type HwSigningData = {
