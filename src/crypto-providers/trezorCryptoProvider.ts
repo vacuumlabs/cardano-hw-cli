@@ -62,6 +62,7 @@ import {
   splitXPubKeyCborHex,
   encodeVotingRegistrationMetaData,
   findPathForKeyHash,
+  isMultisigTransaction,
 } from './util'
 import { Errors } from '../errors'
 import { partition, removeNullFields } from '../util'
@@ -170,8 +171,10 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     return payload.map((result) => result.publicKey as XPubKeyHex)
   }
 
-  const determineSigningMode = (certificates: _Certificate[], signingFiles: HwSigningData[]) => {
-    const poolRegistrationCert = certificates.find(
+  const determineSigningMode = (
+    unsignedTxParsed: _UnsignedTxParsed, signingFiles: HwSigningData[],
+  ): TrezorTypes.CardanoTxSigningMode => {
+    const poolRegistrationCert = unsignedTxParsed.certificates.find(
       (cert) => cert.type === TxCertificateKeys.STAKEPOOL_REGISTRATION,
     ) as _StakepoolRegistrationCert
 
@@ -179,7 +182,9 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
       return TrezorTypes.CardanoTxSigningMode.POOL_REGISTRATION_AS_OWNER
     }
 
-    return TrezorTypes.CardanoTxSigningMode.ORDINARY_TRANSACTION
+    return isMultisigTransaction(signingFiles)
+      ? TrezorTypes.CardanoTxSigningMode.MULTISIG_TRANSACTION
+      : TrezorTypes.CardanoTxSigningMode.ORDINARY_TRANSACTION
   }
 
   const prepareInput = (input: _Input, path: BIP32Path | null): TrezorTypes.CardanoInput => ({
@@ -459,7 +464,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
       paymentSigningFiles, stakeSigningFiles, mintSigningFiles, multisigSigningFiles,
     } = filterSigningFiles(signingFiles)
 
-    const signingMode = determineSigningMode(unsignedTxParsed.certificates, signingFiles)
+    const signingMode = determineSigningMode(unsignedTxParsed, signingFiles)
 
     const inputs = unsignedTxParsed.inputs.map(
       (input: _Input, i: number) => prepareInput(input, getSigningPath(paymentSigningFiles, i)),

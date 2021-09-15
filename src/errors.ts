@@ -94,6 +94,9 @@ const enum Errors {
   InvalidNativeScriptFile = 'Invalid native script file',
   Unreachable = 'Unreachable code reached',
   StakeCredentialParseError = 'Failed to parse stake credentials',
+  ScriptStakeCredentialInOrdinaryTx = 'Script stake credential used in an ordinary transaction',
+  KeyHashStakeCredentialInMultisigTx = 'Address key hash stake credential used in a multisig transaction',
+  MixedOrdinaryAndMultisigSigningFiles = 'Mixed ordinary and multisig signing files',
 }
 
 export {
