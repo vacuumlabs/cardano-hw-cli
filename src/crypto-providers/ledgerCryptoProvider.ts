@@ -69,6 +69,7 @@ import {
   validateVotingRegistrationAddressType,
   findSigningPathForKey,
   encodeVotingRegistrationMetaData,
+  hasSomeScriptHashStakeCredentials,
 } from './util'
 
 const { bech32 } = require('cardano-crypto.js')
@@ -120,13 +121,18 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     }
   }
 
-  const determineSigningMode = (certificates: _Certificate[], signingFiles: HwSigningData[]) => {
-    const poolRegistrationCert = certificates.find(
+  const determineSigningMode = (
+    unsignedTxParsed: _UnsignedTxParsed,
+    signingFiles: HwSigningData[],
+  ) => {
+    const poolRegistrationCert = unsignedTxParsed.certificates.find(
       (cert) => cert.type === TxCertificateKeys.STAKEPOOL_REGISTRATION,
     ) as _StakepoolRegistrationCert
 
     if (!poolRegistrationCert) {
-      return LedgerTypes.TransactionSigningMode.ORDINARY_TRANSACTION
+      return hasSomeScriptHashStakeCredentials(unsignedTxParsed)
+        ? LedgerTypes.TransactionSigningMode.SCRIPT_TRANSACTION
+        : LedgerTypes.TransactionSigningMode.ORDINARY_TRANSACTION
     }
 
     const poolKeyPath = findSigningPathForKeyHash(poolRegistrationCert.poolKeyHash, signingFiles)
@@ -493,7 +499,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
       }
     })
 
-    const signingMode = determineSigningMode(unsignedTxParsed.certificates, signingFiles)
+    const signingMode = determineSigningMode(unsignedTxParsed, signingFiles)
     switch (signingMode) {
       case LedgerTypes.TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR:
         if (!isFeatureSupportedForVersion(LedgerCryptoProviderFeature.POOL_REGISTRATION_OPERATOR)) {
@@ -515,7 +521,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
       paymentSigningFiles, stakeSigningFiles, poolColdSigningFiles, mintSigningFiles,
     } = filterSigningFiles(signingFiles)
 
-    const signingMode = determineSigningMode(unsignedTxParsed.certificates, signingFiles)
+    const signingMode = determineSigningMode(unsignedTxParsed, signingFiles)
 
     const inputs = unsignedTxParsed.inputs.map(
       (input, i) => prepareInput(signingMode, input, getSigningPath(paymentSigningFiles, i)),

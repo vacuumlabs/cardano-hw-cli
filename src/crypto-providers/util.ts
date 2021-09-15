@@ -3,11 +3,16 @@ import { HARDENED_THRESHOLD } from '../constants'
 import { Errors } from '../errors'
 import { isBIP32Path, isPubKeyHex } from '../guards'
 import {
+  StakeCredentialsKeys,
   TxCertificateKeys,
   VotingRegistrationAuxiliaryData,
   VotingRegistrationMetaData,
   _Certificate,
+  _DelegationCert,
+  _StakingKeyDeregistrationCert,
+  _StakingKeyRegistrationCert,
   _UnsignedTxParsed,
+  _Withdrawal,
   _XPubKey,
 } from '../transaction/types'
 import {
@@ -575,6 +580,29 @@ const validateVotingRegistrationAddressType = (addressType: number) => {
   }
 }
 
+const certificatesContainScriptHashStakeCredentials = (certificates: _Certificate[]) => (
+  (certificates.filter((cert) => cert.type in [
+    TxCertificateKeys.DELEGATION,
+    TxCertificateKeys.STAKING_KEY_REGISTRATION,
+    TxCertificateKeys.STAKING_KEY_DEREGISTRATION,
+  ]) as (
+      _DelegationCert |
+      _StakingKeyRegistrationCert |
+      _StakingKeyDeregistrationCert
+    )[]).some(
+    (cert) => cert.stakeCredentials.type === StakeCredentialsKeys.SCRIPT_HASH,
+  )
+)
+
+const withdrawalsContainScriptHashStakeCredentials = (withdrawals: _Withdrawal[]) => withdrawals.some(
+  (withdrawal) => withdrawal.stakeCredential.type === StakeCredentialsKeys.SCRIPT_HASH,
+)
+
+const hasSomeScriptHashStakeCredentials = (unsignedTxParsed: _UnsignedTxParsed) => (
+  certificatesContainScriptHashStakeCredentials(unsignedTxParsed.certificates)
+  || withdrawalsContainScriptHashStakeCredentials(unsignedTxParsed.withdrawals)
+)
+
 export {
   PathTypes,
   classifyPath,
@@ -599,4 +627,5 @@ export {
   encodeVotingRegistrationMetaData,
   areHwSigningDataNonByron,
   validateVotingRegistrationAddressType,
+  hasSomeScriptHashStakeCredentials,
 }
