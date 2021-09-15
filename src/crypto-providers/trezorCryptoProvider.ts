@@ -387,7 +387,8 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
 
   const prepareAdditionalWitnessRequests = (
     mintSigningFiles: HwSigningData[],
-  ) => mintSigningFiles.map((f) => f.path)
+    multiSigSigningFiles: HwSigningData[],
+  ) => mintSigningFiles.map((f) => f.path).concat(multiSigSigningFiles.map((f) => f.path))
 
   const ensureFirmwareSupportsParams = (unsignedTxParsed: _UnsignedTxParsed) => {
     if (
@@ -454,7 +455,9 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     changeOutputFiles: HwSigningData[],
   ): Promise<TrezorTypes.CardanoSignedTxWitness[]> => {
     ensureFirmwareSupportsParams(unsignedTxParsed)
-    const { paymentSigningFiles, stakeSigningFiles, mintSigningFiles } = filterSigningFiles(signingFiles)
+    const {
+      paymentSigningFiles, stakeSigningFiles, mintSigningFiles, multisigSigningFiles,
+    } = filterSigningFiles(signingFiles)
 
     const signingMode = determineSigningMode(unsignedTxParsed.certificates, signingFiles)
 
@@ -478,7 +481,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
 
     const mint = unsignedTxParsed.mint ? prepareTokenBundle(unsignedTxParsed.mint, true) : undefined
 
-    const additionalWitnessRequests = prepareAdditionalWitnessRequests(mintSigningFiles)
+    const additionalWitnessRequests = prepareAdditionalWitnessRequests(mintSigningFiles, multisigSigningFiles)
 
     const request: TrezorTypes.CommonParams & TrezorTypes.CardanoSignTransaction = {
       signingMode,

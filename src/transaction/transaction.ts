@@ -1,3 +1,4 @@
+import { isEqual, uniqWith } from 'lodash'
 import {
   TxWitnessByron,
   TxWitnessShelley,
@@ -24,7 +25,8 @@ const TxSigned = (
     witnesses.set(TxWitnessKeys.SHELLEY, shelleyWitnesses)
   }
   if (nativeScriptWitnesses && nativeScriptWitnesses.length > 0) {
-    witnesses.set(TxWitnessKeys.NATIVE_SCRIPTS, nativeScriptWitnesses)
+    // cardano-cli deduplicates the script witnesses before adding them to the signed transaction
+    witnesses.set(TxWitnessKeys.NATIVE_SCRIPTS, uniqWith(nativeScriptWitnesses, isEqual))
   }
   if (byronWitnesses.length > 0) {
     witnesses.set(TxWitnessKeys.BYRON, byronWitnesses)
