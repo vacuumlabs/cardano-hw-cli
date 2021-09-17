@@ -300,8 +300,12 @@ const validateTxWithPoolRegistration = (
 }
 
 const validateWitnessing = (
-  unsignedTxParsed: _UnsignedTxParsed, signingFiles: HwSigningData[],
+  unsignedTxParsed: _UnsignedTxParsed, signingFiles: HwSigningData[], network: Network,
 ): void => {
+  if (unsignedTxParsed.networkId !== network.networkId) {
+    throw Error(Errors.NetworkIdMismatchError)
+  }
+
   if (!txHasStakePoolRegistrationCert(unsignedTxParsed.certificates)) {
     throw Error(Errors.CantWitnessTxWithoutPoolRegError)
   }
@@ -310,8 +314,12 @@ const validateWitnessing = (
 }
 
 const validateSigning = (
-  unsignedTxParsed: _UnsignedTxParsed, signingFiles: HwSigningData[],
+  unsignedTxParsed: _UnsignedTxParsed, signingFiles: HwSigningData[], network: Network,
 ): void => {
+  if (unsignedTxParsed.networkId !== network.networkId) {
+    throw Error(Errors.NetworkIdMismatchError)
+  }
+
   if (txHasStakePoolRegistrationCert(unsignedTxParsed.certificates)) {
     throw Error(Errors.CantSignTxWithPoolRegError)
   }

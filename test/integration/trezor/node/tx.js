@@ -9,10 +9,10 @@ const { signingFiles } = require('./signingFiles')
 
 const transactions = {
   withInputAndOutput: {
-    // 97e0928d7f82f75e2917fddd07eeaaffaf2037ef07c9e1b0284337a3cfe4adcb
-    unsignedCborHex: '82a4008182582066001e24baf17637192d3a91c418cf4ed3c8053e333d0c35bd388deb2fa89c92000181825839013fc4aa3daffa8cc5275cd2d095a461c05903bae76aa9a5f7999613c58636aa540280a200e32f45e98013c24218a1a4996504634150dc55381a002b8a44021a0002b473031a00a2d750f6',
+    // 4a2b292d3dcc38b8930920b599ea6be9a4e3e9ae64fdc6ce8dd562d30a92fc9c
+    unsignedCborHex: '82a5008182582066001e24baf17637192d3a91c418cf4ed3c8053e333d0c35bd388deb2fa89c92000181825839013fc4aa3daffa8cc5275cd2d095a461c05903bae76aa9a5f7999613c58636aa540280a200e32f45e98013c24218a1a4996504634150dc55381a002b8a44021a0002b473031a00a2d7500f01f6',
     hwSigningFiles: [signingFiles.payment0],
-    signedTxCborHex: '83a4008182582066001e24baf17637192d3a91c418cf4ed3c8053e333d0c35bd388deb2fa89c92000181825839013fc4aa3daffa8cc5275cd2d095a461c05903bae76aa9a5f7999613c58636aa540280a200e32f45e98013c24218a1a4996504634150dc55381a002b8a44021a0002b473031a00a2d750a100818258205d010cf16fdeff40955633d6c565f3844a288a24967cf6b76acbeb271b4f13c158408141385df82ac9baa1699a2f3c0aff8eb1a0db3bf937e7c6942b20b00add410c3fac56c63d07a65e5d797f6c684c10e84e39ef412c775d7d98b353cb00231404f6',
+    signedTxCborHex: '83a5008182582066001e24baf17637192d3a91c418cf4ed3c8053e333d0c35bd388deb2fa89c92000181825839013fc4aa3daffa8cc5275cd2d095a461c05903bae76aa9a5f7999613c58636aa540280a200e32f45e98013c24218a1a4996504634150dc55381a002b8a44021a0002b473031a00a2d7500f01a100818258205d010cf16fdeff40955633d6c565f3844a288a24967cf6b76acbeb271b4f13c15840b301456c7cfb1a6bf4a2b6a579cd41029aa735ad118ce88a9f218cbc3920e787521acc113d045a966b733a70abbe53d9775ea3a3db5d52673fccdbaa966cb20ef6',
     network: 'MAINNET',
   },
   withDelegation: {
@@ -135,24 +135,26 @@ const transactions = {
 }
 
 async function testTxSigning(cryptoProvider, transaction) {
+  const network = NETWORKS[transaction.network]
   const unsignedTxParsed = parseUnsignedTx(transaction.unsignedCborHex)
-  validateSigning(unsignedTxParsed, transaction.hwSigningFiles)
+  validateSigning(unsignedTxParsed, transaction.hwSigningFiles, network)
   const signedTxCborHex = await cryptoProvider.signTx(
     unsignedTxParsed,
     transaction.hwSigningFiles,
-    NETWORKS[transaction.network],
+    network,
     [],
   )
   assert.deepStrictEqual(signedTxCborHex, transaction.signedTxCborHex)
 }
 
 async function testTxWitnessing(cryptoProvider, transaction) {
+  const network = NETWORKS[transaction.network]
   const unsignedTxParsed = parseUnsignedTx(transaction.unsignedCborHex)
-  validateWitnessing(unsignedTxParsed, transaction.hwSigningFiles)
+  validateWitnessing(unsignedTxParsed, transaction.hwSigningFiles, network)
   const witness = await cryptoProvider.witnessTx(
     unsignedTxParsed,
     transaction.hwSigningFiles,
-    NETWORKS[transaction.network],
+    network,
   )
   assert.deepStrictEqual(witness, transaction.witness)
 }

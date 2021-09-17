@@ -107,7 +107,7 @@ const CommandExecutor = async () => {
 
   const createSignedTx = async (args: ParsedTransactionSignArguments) => {
     const unsignedTxParsed = parseUnsignedTx(args.txBodyFileData.cborHex)
-    validateSigning(unsignedTxParsed, args.hwSigningFileData)
+    validateSigning(unsignedTxParsed, args.hwSigningFileData, args.network)
     const signedTx = await cryptoProvider.signTx(
       unsignedTxParsed, args.hwSigningFileData, args.network, args.changeOutputKeyFileData,
     )
@@ -126,7 +126,7 @@ const CommandExecutor = async () => {
 
   const createTxWitness = async (args: ParsedTransactionWitnessArguments) => {
     const unsignedTxParsed = parseUnsignedTx(args.txBodyFileData.cborHex)
-    validateWitnessing(unsignedTxParsed, args.hwSigningFileData)
+    validateWitnessing(unsignedTxParsed, args.hwSigningFileData, args.network)
     const txWitnesses = await cryptoProvider.witnessTx(
       unsignedTxParsed, args.hwSigningFileData, args.network, args.changeOutputKeyFileData,
     )

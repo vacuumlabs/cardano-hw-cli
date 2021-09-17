@@ -93,7 +93,9 @@ const enum Errors {
   StakeCredentialsParseError = 'Failed to parse stake credentials',
   InvalidNativeScriptFile = 'Invalid native script file',
   Unreachable = 'Unreachable code reached',
-  InvalidScriptHashHex = 'Invalid script hash hex'
+  InvalidScriptHashHex = 'Invalid script hash hex',
+  NetworkIdParseError = 'Failed to parse transaction, network id is not a number',
+  NetworkIdMismatchError = 'Network id in transaction doesn\'t match with supplied network',
 }
 
 export {

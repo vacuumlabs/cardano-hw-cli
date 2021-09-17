@@ -344,6 +344,14 @@ const parseMetaDataHash = (metaDataHash: any): Buffer | null => {
 
 const parseTxMint = (mint: any): _Mint => parseMultiAsset(mint, true)
 
+const parseNetworkId = (networkId: any): number => {
+  const parsedNetworkId = parseInt(networkId, 10)
+  if (Number.isNaN(parsedNetworkId)) {
+    throw Error(Errors.NetworkIdParseError)
+  }
+  return parsedNetworkId
+}
+
 const deconstructUnsignedTxDecoded = (unsignedTxDecoded: any): _UnsignedTxDecoded => {
   if (unsignedTxDecoded.length === 2) {
     const [txBody, meta] = unsignedTxDecoded
@@ -376,6 +384,7 @@ const parseUnsignedTx = (unsignedTxCborHex: UnsignedTxCborHex): _UnsignedTxParse
     const metaDataHash = parseMetaDataHash(txBody.get(TxBodyKeys.META_DATA_HASH))
     const validityIntervalStart = parseValidityIntervalStart(txBody.get(TxBodyKeys.VALIDITY_INTERVAL_START))
     const mint = parseTxMint(txBody.get(TxBodyKeys.MINT) || new Map())
+    const networkId = parseNetworkId(txBody.get(TxBodyKeys.NETWORK_ID))
 
     const getId = (): string => {
       const encodedTxBody = encodeCbor(txBody)
@@ -400,6 +409,7 @@ const parseUnsignedTx = (unsignedTxCborHex: UnsignedTxCborHex): _UnsignedTxParse
       validityIntervalStart,
       mint,
       scriptWitnesses,
+      networkId,
     }
   }
 }

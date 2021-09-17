@@ -10,6 +10,7 @@ export enum TxBodyKeys {
   META_DATA_HASH = 7,
   VALIDITY_INTERVAL_START = 8,
   MINT = 9, // unsupported in current version
+  NETWORK_ID = 15,
 }
 
 export const enum TxWitnessKeys {
@@ -206,6 +207,7 @@ export type _UnsignedTxParsed = {
   validityIntervalStart: BigInt | null,
   mint: _Mint | null,
   scriptWitnesses: any[],
+  networkId: number,
 }
 
 export type _ByronWitness = {
