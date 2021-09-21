@@ -146,6 +146,15 @@ const signingFiles = {
     ],
     cborXPubKeyHex: '5840b9de636bf236e5543377e4b4d6b63613f188fb65b83b8a61c4b68be0c196c3d83545aee9b82476574ff115aa1c7ab688c24b4bca687af4bb79129e4fcea066da',
   },
+  mint1: {
+    type: HwSigningType.Mint,
+    path: [
+      1855 + HARDENED_THRESHOLD,
+      1815 + HARDENED_THRESHOLD,
+      1 + HARDENED_THRESHOLD,
+    ],
+    cborXPubKeyHex: '5840f87ee3ee2316d92f73dca6112a197340a1eae157574765099dd631132818bc1587110ea86e1a14dec1cb234a179c2b5caba823b4812da2a5c431c695b17982ac',
+  },
 }
 
 module.exports = {
