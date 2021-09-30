@@ -646,10 +646,10 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
   }
 
   const signOperationalCertificate = async (
-    kesVKey: KesVKey,
-    kesPeriod: BigInt,
-    issueCounter: OpCertIssueCounter,
-    signingFile: HwSigningData[],
+    _kesVKey: KesVKey,
+    _kesPeriod: BigInt,
+    _issueCounter: OpCertIssueCounter,
+    _signingFile: HwSigningData[],
   ): Promise<SignedOpCertCborHex> => {
     // TODO is this the right way to deal with this?
     throw Error(Errors.UnsupportedCryptoProviderCall)
