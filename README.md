@@ -83,8 +83,11 @@ see [Catalyst voting registration example](docs/catalyst-voting-registration-exa
 # Policy id generation
 ```
 cardano-hw-cli transaction policyid
---script-file   Path to a native script file
+--script-file      Path to a native script file
+--hw-signing-file  Input filepath of the hardware wallet signing file
 ```
+
+see [Policy id](docs/token-minting.md#policy-id)
 
 ## Check app version
 ```
