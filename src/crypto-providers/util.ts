@@ -246,12 +246,13 @@ const validateTxWithoutPoolRegistration = (
   unsignedTxParsed: _UnsignedTxParsed, signingFiles: HwSigningData[],
 ): void => {
   const {
-    paymentSigningFiles, stakeSigningFiles, poolColdSigningFiles,
+    paymentSigningFiles, stakeSigningFiles, poolColdSigningFiles, mintSigningFiles, multisigSigningFiles,
   } = filterSigningFiles(signingFiles)
 
-  if (paymentSigningFiles.length === 0) {
+  if (paymentSigningFiles.length === 0 && mintSigningFiles.length === 0) {
     throw Error(Errors.MissingPaymentSigningFileError)
   }
+
 
   let numStakeWitnesses = unsignedTxParsed.withdrawals.length
   let numPoolColdWitnesses = 0
