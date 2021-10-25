@@ -5,10 +5,10 @@ Cardano in the Shelley era supports creating multisig transactions, transactions
 Before we create the transaction itself we will create a multisig address first. We will create a payment native script and a stake native script from which we will then assemble the address. More information about native scripts can be found in the [CIP-1854](https://github.com/cardano-foundation/CIPs/blob/master/CIP-1854/CIP-1854.md).
 
 ### Public keys
-To create a multisig address you need a payment native script and a staking native script. All public keys used inside the scripts need to be derived using the `1854H` paths.
+To create a multisig address you need a payment native script and a stake native script. All public keys used inside the scripts need to be derived using the `1854H` paths.
 
 #### Payment key
-The derivation path is described in the [CIP-1854](https://github.com/cardano-foundation/CIPs/blob/master/CIP-1854/CIP-1854.md), but it is similar to the `1852H` derivation path, but beginning with `1854H` instead. We can generate the payment key like this:
+The derivation path is described in [CIP-1854](https://github.com/cardano-foundation/CIPs/blob/master/CIP-1854/CIP-1854.md), but it is similar to the `1852H` derivation path, but beginning with `1854H` instead. We can generate the payment key like this:
 ```sh
 cardano-hw-cli address key-gen \
 --path 1854H/1815H/0H/0/0 \
@@ -16,8 +16,8 @@ cardano-hw-cli address key-gen \
 --hw-signing-file payment-hw.hwsfile
 ```
 
-#### Staking key
-The staking key has the role `2`, as is the case with `1852H` keys:
+#### Stake key
+The stake key has the role `2`, as is the case with `1852H` keys:
 ```sh
 cardano-hw-cli address key-gen \
 --path 1854H/1815H/0H/2/0 \
@@ -53,7 +53,7 @@ EOF
 ```
 
 #### Stake script
-The staking native script will be a simple `sig` (pubkey hash) native script:
+The stake native script will be a simple `sig` (pubkey hash) native script:
 ```sh
 cat >stake.script <<EOF
 {
@@ -101,7 +101,7 @@ cardano-cli transaction build-raw \
 --tx-in "94461e17271b4a108f679eb7b6947aea29573296a5edca635d583fb40785e05d#0" \
 --tx-in-script-file payment.script \
 --tx-out "$(cat payment.addr)"+0 \
---fee 0
+--fee 0 \
 --out-file tx.draft
 ```
 
@@ -140,12 +140,13 @@ cardano-cli transaction build-raw \
 --tx-in "94461e17271b4a108f679eb7b6947aea29573296a5edca635d583fb40785e05d#0" \
 --tx-in-script-file payment.script \
 --tx-out "$(cat payment.addr)"+999805346 \
---fee 194654
+--fee 194654 \
 --out-file tx.raw
 ```
+At this point, the native script is present in the transaction witness set - now we only need to add the witnesses with signatures.
 
 ### Signing the transaction
-Because we need two witnesses, one from the key from hardware wallet and one from the key from `cardano-cli` we will create them separately and afterwards assemble them together to create a signed transaction.
+Because we need two witnesses, one from the key from hardware wallet and one from the key from `cardano-cli`, we will create them separately and afterwards assemble them together to create a signed transaction.
 ```sh
 cardano-hw-cli transaction witness \
 --tx-body-file tx.raw \
