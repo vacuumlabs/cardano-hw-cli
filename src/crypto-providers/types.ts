@@ -18,6 +18,20 @@ import {
   NativeScriptDisplayFormat,
 } from '../types'
 
+export enum SigningMode {
+  ORDINARY_TRANSACTION,
+  POOL_REGISTRATION_AS_OWNER,
+  POOL_REGISTRATION_AS_OPERATOR,
+  MULTISIG_TRANSACTION,
+}
+
+export type SigningParameters = {
+  signingMode: SigningMode,
+  unsignedTxParsed: _UnsignedTxParsed,
+  hwSigningFileData: HwSigningData[],
+  network: Network,
+}
+
 export type CryptoProvider = {
   getVersion: () => Promise<string>,
   showAddress: (
@@ -28,15 +42,11 @@ export type CryptoProvider = {
     address: Address,
   ) => Promise<void>,
   signTx: (
-    unsignedTxParsed: _UnsignedTxParsed,
-    signingFiles: HwSigningData[],
-    network: Network,
+    params: SigningParameters,
     changeOutputFiles: HwSigningData[],
   ) => Promise<SignedTxCborHex>,
   witnessTx: (
-    unsignedTxParsed: _UnsignedTxParsed,
-    signingFiles: HwSigningData[],
-    network: Network,
+    params: SigningParameters,
     changeOutputFiles: HwSigningData[],
   ) => Promise<Array<_ShelleyWitness | _ByronWitness>>,
   getXPubKeys: (paths: BIP32Path[]) => Promise<XPubKeyHex[]>,

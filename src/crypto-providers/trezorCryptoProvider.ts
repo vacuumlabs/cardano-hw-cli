@@ -27,6 +27,8 @@ import {
   CryptoProvider,
   DeviceVersion,
   _AddressParameters,
+  SigningMode,
+  SigningParameters,
 } from './types'
 import { TrezorCryptoProviderFeature } from './trezorTypes'
 import {
@@ -62,7 +64,6 @@ import {
   splitXPubKeyCborHex,
   encodeVotingRegistrationMetaData,
   findPathForKeyHash,
-  isMultisigTransaction,
 } from './util'
 import { Errors } from '../errors'
 import { partition, removeNullFields } from '../util'
@@ -169,22 +170,6 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
       throw Error(Errors.TrezorXPubKeyCancelled)
     }
     return payload.map((result) => result.publicKey as XPubKeyHex)
-  }
-
-  const determineSigningMode = (
-    unsignedTxParsed: _UnsignedTxParsed, signingFiles: HwSigningData[],
-  ): TrezorTypes.CardanoTxSigningMode => {
-    const poolRegistrationCert = unsignedTxParsed.certificates.find(
-      (cert) => cert.type === TxCertificateKeys.STAKEPOOL_REGISTRATION,
-    ) as _StakepoolRegistrationCert
-
-    if (poolRegistrationCert) {
-      return TrezorTypes.CardanoTxSigningMode.POOL_REGISTRATION_AS_OWNER
-    }
-
-    return isMultisigTransaction(signingFiles)
-      ? TrezorTypes.CardanoTxSigningMode.MULTISIG_TRANSACTION
-      : TrezorTypes.CardanoTxSigningMode.ORDINARY_TRANSACTION
   }
 
   const prepareInput = (input: _Input, path: BIP32Path | null): TrezorTypes.CardanoInput => ({
@@ -453,18 +438,35 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     })
   }
 
+  const signingModeToTrezorType = (
+    signingMode: SigningMode,
+  ): TrezorTypes.CardanoTxSigningMode => {
+    switch (signingMode) {
+      case SigningMode.ORDINARY_TRANSACTION:
+        return TrezorTypes.CardanoTxSigningMode.ORDINARY_TRANSACTION
+      case SigningMode.POOL_REGISTRATION_AS_OWNER:
+        return TrezorTypes.CardanoTxSigningMode.POOL_REGISTRATION_AS_OWNER
+      case SigningMode.POOL_REGISTRATION_AS_OPERATOR:
+        throw Error(Errors.TrezorPoolRegistrationAsOperatorNotSupported)
+      case SigningMode.MULTISIG_TRANSACTION:
+        return TrezorTypes.CardanoTxSigningMode.MULTISIG_TRANSACTION
+      default:
+        throw Error(Errors.Unreachable)
+    }
+  }
+
   const trezorSignTx = async (
-    unsignedTxParsed: _UnsignedTxParsed,
-    signingFiles: HwSigningData[],
-    network: Network,
+    params: SigningParameters,
     changeOutputFiles: HwSigningData[],
   ): Promise<TrezorTypes.CardanoSignedTxWitness[]> => {
-    ensureFirmwareSupportsParams(unsignedTxParsed)
+    ensureFirmwareSupportsParams(params.unsignedTxParsed)
+
+    const {
+      signingMode, unsignedTxParsed, hwSigningFileData, network,
+    } = params
     const {
       paymentSigningFiles, stakeSigningFiles, mintSigningFiles, multisigSigningFiles,
-    } = filterSigningFiles(signingFiles)
-
-    const signingMode = determineSigningMode(unsignedTxParsed, signingFiles)
+    } = filterSigningFiles(hwSigningFileData)
 
     const inputs = unsignedTxParsed.inputs.map(
       (input: _Input, i: number) => prepareInput(input, getSigningPath(paymentSigningFiles, i)),
@@ -489,7 +491,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     const additionalWitnessRequests = prepareAdditionalWitnessRequests(mintSigningFiles, multisigSigningFiles)
 
     const request: TrezorTypes.CommonParams & TrezorTypes.CardanoSignTransaction = {
-      signingMode,
+      signingMode: signingModeToTrezorType(signingMode),
       inputs,
       outputs,
       protocolMagic: network.protocolMagic,
@@ -519,24 +521,20 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
   }
 
   const signTx = async (
-    unsignedTxParsed: _UnsignedTxParsed,
-    signingFiles: HwSigningData[],
-    network: Network,
+    params: SigningParameters,
     changeOutputFiles: HwSigningData[],
   ): Promise<SignedTxCborHex> => {
-    const trezorWitnesses = await trezorSignTx(unsignedTxParsed, signingFiles, network, changeOutputFiles)
-    const { byronWitnesses, shelleyWitnesses } = createWitnesses(trezorWitnesses, signingFiles)
-    return TxSigned(unsignedTxParsed.unsignedTxDecoded, byronWitnesses, shelleyWitnesses)
+    const trezorWitnesses = await trezorSignTx(params, changeOutputFiles)
+    const { byronWitnesses, shelleyWitnesses } = createWitnesses(trezorWitnesses, params.hwSigningFileData)
+    return TxSigned(params.unsignedTxParsed.unsignedTxDecoded, byronWitnesses, shelleyWitnesses)
   }
 
   const witnessTx = async (
-    unsignedTxParsed: _UnsignedTxParsed,
-    signingFiles: HwSigningData[],
-    network: Network,
+    params: SigningParameters,
     changeOutputFiles: HwSigningData[],
   ): Promise<Array<_ByronWitness | _ShelleyWitness>> => {
-    const ledgerWitnesses = await trezorSignTx(unsignedTxParsed, signingFiles, network, changeOutputFiles)
-    const { byronWitnesses, shelleyWitnesses } = await createWitnesses(ledgerWitnesses, signingFiles)
+    const trezorWitnesses = await trezorSignTx(params, changeOutputFiles)
+    const { byronWitnesses, shelleyWitnesses } = createWitnesses(trezorWitnesses, params.hwSigningFileData)
     const _byronWitnesses = byronWitnesses.map((byronWitness) => (
       { key: TxWitnessKeys.BYRON, data: byronWitness }
     ) as _ByronWitness)

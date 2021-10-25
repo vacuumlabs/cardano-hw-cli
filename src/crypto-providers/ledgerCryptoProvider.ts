@@ -30,7 +30,6 @@ import {
   TxWitnessKeys,
   _MultiAsset,
   VotingRegistrationMetaDataCborHex,
-  _UnsignedTxParsed,
   TxWitnesses,
   AddrKeyHash,
   ScriptHash,
@@ -53,7 +52,9 @@ import {
 import { partition } from '../util'
 import { LEDGER_VERSIONS } from './constants'
 import { LedgerCryptoProviderFeature, LedgerWitness } from './ledgerTypes'
-import { CryptoProvider, _AddressParameters } from './types'
+import {
+  CryptoProvider, _AddressParameters, SigningMode, SigningParameters,
+} from './types'
 import {
   findSigningPathForKeyHash,
   getSigningPath,
@@ -70,7 +71,6 @@ import {
   findSigningPathForKey,
   encodeVotingRegistrationMetaData,
   findPathForKeyHash,
-  isMultisigTransaction,
 } from './util'
 
 const { bech32 } = require('cardano-crypto.js')
@@ -122,32 +122,10 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     }
   }
 
-  const determineSigningMode = (
-    unsignedTxParsed: _UnsignedTxParsed,
-    signingFiles: HwSigningData[],
-  ): LedgerTypes.TransactionSigningMode => {
-    const poolRegistrationCert = unsignedTxParsed.certificates.find(
-      (cert) => cert.type === TxCertificateKeys.STAKEPOOL_REGISTRATION,
-    ) as _StakepoolRegistrationCert
-
-    if (poolRegistrationCert) {
-      const poolKeyPath = findSigningPathForKeyHash(poolRegistrationCert.poolKeyHash, signingFiles)
-      if (!poolKeyPath) {
-        return LedgerTypes.TransactionSigningMode.POOL_REGISTRATION_AS_OWNER
-      }
-
-      return LedgerTypes.TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR
-    }
-
-    return isMultisigTransaction(signingFiles)
-      ? LedgerTypes.TransactionSigningMode.MULTISIG_TRANSACTION
-      : LedgerTypes.TransactionSigningMode.ORDINARY_TRANSACTION
-  }
-
   const prepareInput = (
-    signingMode: LedgerTypes.TransactionSigningMode, input: _Input, path: BIP32Path | null,
+    signingMode: SigningMode, input: _Input, path: BIP32Path | null,
   ): LedgerTypes.TxInput => {
-    const pathToUse = (signingMode === LedgerTypes.TransactionSigningMode.POOL_REGISTRATION_AS_OWNER)
+    const pathToUse = (signingMode === SigningMode.POOL_REGISTRATION_AS_OWNER)
       ? null // inputs are required to be given without path in this case
       : path
     return {
@@ -270,19 +248,19 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
   })
 
   const preparePoolKey = (
-    signingMode: LedgerTypes.TransactionSigningMode,
+    signingMode: SigningMode,
     poolKeyHash: Buffer,
     poolKeyPath?: BIP32Path,
   ): LedgerTypes.PoolKey => {
     switch (signingMode) {
-      case LedgerTypes.TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR:
+      case SigningMode.POOL_REGISTRATION_AS_OPERATOR:
         return {
           type: LedgerTypes.PoolKeyType.DEVICE_OWNED,
           params: {
             path: poolKeyPath as BIP32Path,
           },
         }
-      case LedgerTypes.TransactionSigningMode.POOL_REGISTRATION_AS_OWNER:
+      case SigningMode.POOL_REGISTRATION_AS_OWNER:
         return {
           type: LedgerTypes.PoolKeyType.THIRD_PARTY,
           params: {
@@ -317,13 +295,13 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
   }
 
   const preparePoolOwners = (
-    signingMode: LedgerTypes.TransactionSigningMode,
+    signingMode: SigningMode,
     owners: Buffer[],
     stakeSigningFiles: HwSigningData[],
   ): LedgerTypes.PoolOwner[] => {
     const poolOwners: LedgerTypes.PoolOwner[] = owners.map((owner) => {
       const path = findSigningPathForKeyHash(owner, stakeSigningFiles)
-      return path && (signingMode === LedgerTypes.TransactionSigningMode.POOL_REGISTRATION_AS_OWNER)
+      return path && (signingMode === SigningMode.POOL_REGISTRATION_AS_OWNER)
         ? {
           type: LedgerTypes.PoolOwnerType.DEVICE_OWNED,
           params: { stakingPath: path },
@@ -373,15 +351,14 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
   }
 
   const prepareStakePoolRegistrationCert = (
-    cert: _StakepoolRegistrationCert, signingFiles: HwSigningData[], network: Network,
+    cert: _StakepoolRegistrationCert,
+    signingFiles: HwSigningData[],
+    network: Network,
+    signingMode: SigningMode,
   ): LedgerTypes.Certificate => {
     // if path is given, we are signing as pool operator
     // if keyHashHex is given, we are signing as pool owner
     const poolKeyPath = findSigningPathForKeyHash(cert.poolKeyHash, signingFiles)
-
-    const signingMode = (poolKeyPath)
-      ? LedgerTypes.TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR
-      : LedgerTypes.TransactionSigningMode.POOL_REGISTRATION_AS_OWNER
 
     const poolOwners: LedgerTypes.PoolOwner[] = (
       preparePoolOwners(signingMode, cert.poolOwnersPubKeyHashes, signingFiles)
@@ -433,7 +410,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
   }
 
   const prepareCertificate = (
-    certificate: _Certificate, signingFiles: HwSigningData[], network: Network,
+    certificate: _Certificate, signingFiles: HwSigningData[], network: Network, signingMode: SigningMode,
   ): LedgerTypes.Certificate => {
     switch (certificate.type) {
       case TxCertificateKeys.STAKING_KEY_REGISTRATION:
@@ -443,7 +420,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
       case TxCertificateKeys.DELEGATION:
         return prepareDelegationCert(certificate, signingFiles)
       case TxCertificateKeys.STAKEPOOL_REGISTRATION:
-        return prepareStakePoolRegistrationCert(certificate, signingFiles, network)
+        return prepareStakePoolRegistrationCert(certificate, signingFiles, network, signingMode)
       case TxCertificateKeys.STAKEPOOL_RETIREMENT:
         return prepareStakePoolRetirementCert(certificate, signingFiles)
       default:
@@ -481,29 +458,32 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
   ) => mintSigningFiles.map((f) => f.path).concat(multisigSigningFiles.map((f) => f.path))
 
   const ensureFirmwareSupportsParams = (
-    unsignedTxParsed: _UnsignedTxParsed, signingFiles: HwSigningData[],
+    params: SigningParameters,
   ) => {
     if (
-      unsignedTxParsed.ttl == null && !isFeatureSupportedForVersion(LedgerCryptoProviderFeature.OPTIONAL_TTL)
+      params.unsignedTxParsed.ttl == null
+      && !isFeatureSupportedForVersion(LedgerCryptoProviderFeature.OPTIONAL_TTL)
     ) {
       throw Error(Errors.LedgerOptionalTTLNotSupported)
     }
     if (
-      unsignedTxParsed.validityIntervalStart != null
+      params.unsignedTxParsed.validityIntervalStart != null
       && !isFeatureSupportedForVersion(LedgerCryptoProviderFeature.VALIDITY_INTERVAL_START)
     ) {
       throw Error(Errors.LedgerValidityIntervalStartNotSupported)
     }
-    unsignedTxParsed.outputs.forEach((output) => {
+    params.unsignedTxParsed.outputs.forEach((output) => {
       const multiAssets: _MultiAsset[] = output.tokenBundle
-      if (multiAssets.length > 0 && !isFeatureSupportedForVersion(LedgerCryptoProviderFeature.MULTI_ASSET)) {
+      if (
+        multiAssets.length > 0
+        && !isFeatureSupportedForVersion(LedgerCryptoProviderFeature.MULTI_ASSET)
+      ) {
         throw Error(Errors.LedgerMultiAssetsNotSupported)
       }
     })
 
-    const signingMode = determineSigningMode(unsignedTxParsed, signingFiles)
-    switch (signingMode) {
-      case LedgerTypes.TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR:
+    switch (params.signingMode) {
+      case SigningMode.POOL_REGISTRATION_AS_OPERATOR:
         if (!isFeatureSupportedForVersion(LedgerCryptoProviderFeature.POOL_REGISTRATION_OPERATOR)) {
           throw Error(Errors.PoolRegistrationAsOperatorNotSupported)
         }
@@ -512,18 +492,35 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     }
   }
 
+  const signingModeToLedgerType = (
+    signingMode: SigningMode,
+  ): LedgerTypes.TransactionSigningMode => {
+    switch (signingMode) {
+      case SigningMode.ORDINARY_TRANSACTION:
+        return LedgerTypes.TransactionSigningMode.ORDINARY_TRANSACTION
+      case SigningMode.POOL_REGISTRATION_AS_OWNER:
+        return LedgerTypes.TransactionSigningMode.POOL_REGISTRATION_AS_OWNER
+      case SigningMode.POOL_REGISTRATION_AS_OPERATOR:
+        return LedgerTypes.TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR
+      case SigningMode.MULTISIG_TRANSACTION:
+        return LedgerTypes.TransactionSigningMode.MULTISIG_TRANSACTION
+      default:
+        throw Error(Errors.Unreachable)
+    }
+  }
+
   const ledgerSignTx = async (
-    unsignedTxParsed: _UnsignedTxParsed,
-    signingFiles: HwSigningData[],
-    network: Network,
+    params: SigningParameters,
     changeOutputFiles: HwSigningData[],
   ): Promise<LedgerWitness[]> => {
-    ensureFirmwareSupportsParams(unsignedTxParsed, signingFiles)
+    ensureFirmwareSupportsParams(params)
+
+    const {
+      signingMode, unsignedTxParsed, hwSigningFileData, network,
+    } = params
     const {
       paymentSigningFiles, stakeSigningFiles, poolColdSigningFiles, mintSigningFiles, multisigSigningFiles,
-    } = filterSigningFiles(signingFiles)
-
-    const signingMode = determineSigningMode(unsignedTxParsed, signingFiles)
+    } = filterSigningFiles(hwSigningFileData)
 
     const inputs = unsignedTxParsed.inputs.map(
       (input, i) => prepareInput(signingMode, input, getSigningPath(paymentSigningFiles, i)),
@@ -533,7 +530,10 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     )
     const certificates = unsignedTxParsed.certificates.map(
       (certificate) => prepareCertificate(
-        certificate, [...stakeSigningFiles, ...poolColdSigningFiles, ...multisigSigningFiles], network,
+        certificate,
+        [...stakeSigningFiles, ...poolColdSigningFiles, ...multisigSigningFiles],
+        network,
+        signingMode,
       ),
     )
     const fee = `${unsignedTxParsed.fee}`
@@ -552,7 +552,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     const additionalWitnessRequests = prepareAdditionalWitnessRequests(mintSigningFiles, multisigSigningFiles)
 
     const response = await ledger.signTransaction({
-      signingMode,
+      signingMode: signingModeToLedgerType(signingMode),
       tx: {
         network,
         inputs,
@@ -709,24 +709,20 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
   }
 
   const signTx = async (
-    unsignedTxParsed: _UnsignedTxParsed,
-    signingFiles: HwSigningData[],
-    network: Network,
+    params: SigningParameters,
     changeOutputFiles: HwSigningData[],
   ): Promise<SignedTxCborHex> => {
-    const ledgerWitnesses = await ledgerSignTx(unsignedTxParsed, signingFiles, network, changeOutputFiles)
-    const { byronWitnesses, shelleyWitnesses } = createWitnesses(ledgerWitnesses, signingFiles)
-    return TxSigned(unsignedTxParsed.unsignedTxDecoded, byronWitnesses, shelleyWitnesses)
+    const ledgerWitnesses = await ledgerSignTx(params, changeOutputFiles)
+    const { byronWitnesses, shelleyWitnesses } = createWitnesses(ledgerWitnesses, params.hwSigningFileData)
+    return TxSigned(params.unsignedTxParsed.unsignedTxDecoded, byronWitnesses, shelleyWitnesses)
   }
 
   const witnessTx = async (
-    unsignedTxParsed: _UnsignedTxParsed,
-    signingFiles: HwSigningData[],
-    network: Network,
+    params: SigningParameters,
     changeOutputFiles: HwSigningData[],
   ): Promise<Array<_ShelleyWitness | _ByronWitness>> => {
-    const ledgerWitnesses = await ledgerSignTx(unsignedTxParsed, signingFiles, network, changeOutputFiles)
-    const { byronWitnesses, shelleyWitnesses } = await createWitnesses(ledgerWitnesses, signingFiles)
+    const ledgerWitnesses = await ledgerSignTx(params, changeOutputFiles)
+    const { byronWitnesses, shelleyWitnesses } = createWitnesses(ledgerWitnesses, params.hwSigningFileData)
     const _byronWitnesses = byronWitnesses.map((byronWitness) => (
       { key: TxWitnessKeys.BYRON, data: byronWitness }
     ) as _ByronWitness)
