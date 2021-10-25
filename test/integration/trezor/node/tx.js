@@ -3,7 +3,11 @@ const assert = require('assert')
 const { parseUnsignedTx } = require('../../../../src/transaction/txParser')
 const { TrezorCryptoProvider } = require('../../../../src/crypto-providers/trezorCryptoProvider')
 const { NETWORKS } = require('../../../../src/constants')
-const { validateSigning, validateWitnessing } = require('../../../../src/crypto-providers/util')
+const {
+  determineSigningMode,
+  validateSigning,
+  validateWitnessing,
+} = require('../../../../src/crypto-providers/util')
 
 const { signingFiles } = require('./signingFiles')
 
@@ -176,24 +180,29 @@ const transactions = {
 
 async function testTxSigning(cryptoProvider, transaction) {
   const unsignedTxParsed = parseUnsignedTx(transaction.unsignedCborHex)
-  validateSigning(unsignedTxParsed, transaction.hwSigningFiles)
-  const signedTxCborHex = await cryptoProvider.signTx(
+  const signingMode = determineSigningMode(unsignedTxParsed, transaction.hwSigningFiles)
+  const signingParameters = {
+    signingMode,
     unsignedTxParsed,
-    transaction.hwSigningFiles,
-    NETWORKS[transaction.network],
-    [],
-  )
+    hwSigningFileData: transaction.hwSigningFiles,
+    network: NETWORKS[transaction.network],
+  }
+  validateSigning(unsignedTxParsed, transaction.hwSigningFiles)
+  const signedTxCborHex = await cryptoProvider.signTx(signingParameters, [])
   assert.deepStrictEqual(signedTxCborHex, transaction.signedTxCborHex)
 }
 
 async function testTxWitnessing(cryptoProvider, transaction) {
   const unsignedTxParsed = parseUnsignedTx(transaction.unsignedCborHex)
-  validateWitnessing(unsignedTxParsed, transaction.hwSigningFiles)
-  const witness = await cryptoProvider.witnessTx(
+  const signingMode = determineSigningMode(unsignedTxParsed, transaction.hwSigningFiles)
+  const signingParameters = {
+    signingMode,
     unsignedTxParsed,
-    transaction.hwSigningFiles,
-    NETWORKS[transaction.network],
-  )
+    hwSigningFileData: transaction.hwSigningFiles,
+    network: NETWORKS[transaction.network],
+  }
+  validateWitnessing(unsignedTxParsed, transaction.hwSigningFiles)
+  const witness = await cryptoProvider.witnessTx(signingParameters, [])
   assert.deepStrictEqual(witness, transaction.witness)
 }
 
