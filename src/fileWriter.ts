@@ -75,7 +75,8 @@ const bip32PathLabel = (path: number[]): string => {
     default:
       throw Error('not implemented')
 
-    // TODO GK really for the script and minting? cardano-cli doesn't seem to support other "labels"
+    // TODO GK Is this the correct label for multisig and minting keys?
+    //         So far cardano-cli doesn't seem to support other "labels"
     case PathTypes.PATH_WALLET_SPENDING_KEY_SHELLEY:
     case PathTypes.PATH_WALLET_SPENDING_KEY_MULTISIG:
     case PathTypes.PATH_WALLET_MINTING_KEY:
@@ -89,9 +90,10 @@ const bip32PathLabel = (path: number[]): string => {
 
 const verificationKeyType = (path: number[]): string => {
   const pathType = classifyPath(path)
-  const isShelleyEnvelope = pathType === PathTypes.PATH_WALLET_SPENDING_KEY_SHELLEY
+  const isShelleyEnvelope = pathType === PathTypes.PATH_WALLET_ACCOUNT
+    || pathType === PathTypes.PATH_WALLET_SPENDING_KEY_SHELLEY
     || pathType === PathTypes.PATH_WALLET_STAKING_KEY
-    || pathType === PathTypes.PATH_WALLET_SCRIPT_ACCOUNT
+    || pathType === PathTypes.PATH_WALLET_ACCOUNT_MULTISIG
     || pathType === PathTypes.PATH_WALLET_SPENDING_KEY_MULTISIG
     || pathType === PathTypes.PATH_WALLET_STAKING_KEY_MULTISIG
     || pathType === PathTypes.PATH_WALLET_MINTING_KEY
