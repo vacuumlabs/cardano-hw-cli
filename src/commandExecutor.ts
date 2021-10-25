@@ -31,6 +31,7 @@ import {
   classifyPath,
   PathTypes,
   areHwSigningDataNonByron,
+  determineSigningMode,
 } from './crypto-providers/util'
 import { Errors } from './errors'
 import { parseOpCertIssueCounterFile } from './command-parser/parsers'
@@ -107,10 +108,14 @@ const CommandExecutor = async () => {
 
   const createSignedTx = async (args: ParsedTransactionSignArguments) => {
     const unsignedTxParsed = parseUnsignedTx(args.txBodyFileData.cborHex)
+    const signingParameters = {
+      signingMode: determineSigningMode(unsignedTxParsed, args.hwSigningFileData),
+      unsignedTxParsed,
+      hwSigningFileData: args.hwSigningFileData,
+      network: args.network,
+    }
     validateSigning(unsignedTxParsed, args.hwSigningFileData)
-    const signedTx = await cryptoProvider.signTx(
-      unsignedTxParsed, args.hwSigningFileData, args.network, args.changeOutputKeyFileData,
-    )
+    const signedTx = await cryptoProvider.signTx(signingParameters, args.changeOutputKeyFileData)
     write(args.outFile, constructSignedTxOutput(args.txBodyFileData.era, signedTx))
   }
 
@@ -127,10 +132,14 @@ const CommandExecutor = async () => {
 
   const createTxWitness = async (args: ParsedTransactionWitnessArguments) => {
     const unsignedTxParsed = parseUnsignedTx(args.txBodyFileData.cborHex)
+    const signingParameters = {
+      signingMode: determineSigningMode(unsignedTxParsed, args.hwSigningFileData),
+      unsignedTxParsed,
+      hwSigningFileData: args.hwSigningFileData,
+      network: args.network,
+    }
     validateWitnessing(unsignedTxParsed, args.hwSigningFileData)
-    const txWitnesses = await cryptoProvider.witnessTx(
-      unsignedTxParsed, args.hwSigningFileData, args.network, args.changeOutputKeyFileData,
-    )
+    const txWitnesses = await cryptoProvider.witnessTx(signingParameters, args.changeOutputKeyFileData)
     for (let i = 0; i < txWitnesses.length; i += 1) {
       write(args.outFiles[i], constructTxWitnessOutput(args.txBodyFileData.era, txWitnesses[i]))
     }
