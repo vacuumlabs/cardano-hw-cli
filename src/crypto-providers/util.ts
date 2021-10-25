@@ -9,6 +9,7 @@ import {
   VotingRegistrationMetaData,
   _Certificate,
   _DelegationCert,
+  _StakepoolRegistrationCert,
   _StakingKeyDeregistrationCert,
   _StakingKeyRegistrationCert,
   _UnsignedTxParsed,
@@ -32,6 +33,7 @@ import { decodeCbor, encodeCbor } from '../util'
 import {
   DeviceVersion,
   _AddressParameters,
+  SigningMode,
 } from './types'
 
 const cardanoCrypto = require('cardano-crypto.js')
@@ -411,6 +413,25 @@ const validateSigning = (
   validateOrdinaryTxWithoutPoolRegistration(unsignedTxParsed, signingFiles)
 }
 
+const determineSigningMode = (
+  unsignedTxParsed: _UnsignedTxParsed, signingFiles: HwSigningData[],
+): SigningMode => {
+  const poolRegistrationCert = unsignedTxParsed.certificates.find(
+    (cert) => cert.type === TxCertificateKeys.STAKEPOOL_REGISTRATION,
+  ) as _StakepoolRegistrationCert | undefined
+
+  if (poolRegistrationCert) {
+    const poolKeyPath = findSigningPathForKeyHash(poolRegistrationCert.poolKeyHash, signingFiles)
+    return poolKeyPath
+      ? SigningMode.POOL_REGISTRATION_AS_OPERATOR
+      : SigningMode.POOL_REGISTRATION_AS_OWNER
+  }
+
+  return isMultisigTransaction(signingFiles)
+    ? SigningMode.MULTISIG_TRANSACTION
+    : SigningMode.ORDINARY_TRANSACTION
+}
+
 const validateKeyGenInputs = (
   paths: BIP32Path[],
   hwSigningFiles: string[],
@@ -698,4 +719,5 @@ export {
   areHwSigningDataNonByron,
   validateVotingRegistrationAddressType,
   isMultisigTransaction,
+  determineSigningMode,
 }
