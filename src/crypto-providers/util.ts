@@ -413,9 +413,11 @@ const getAddressParameters = (
   if (hwSigningData == null || hwSigningData.length === 0) return null
   const { paymentSigningFiles, stakeSigningFiles } = filterSigningFiles(hwSigningData)
   const addressType = getAddressType(address)
-  const findMatchingAddress = (packedAddresses: (_AddressParameters | null)[]) => packedAddresses.find(
-    (packedAddress) => packedAddress && Buffer.compare(packedAddress.address, address) === 0,
-  ) || null
+  const findMatchingAddress = (packedAddresses: (_AddressParameters | null)[]) => (
+    (packedAddresses.filter((packedAddress) => packedAddress) as _AddressParameters[]).find(
+      (packedAddress) => address.equals(packedAddress.address),
+    ) || null
+  )
 
   try {
     switch (addressType) {
@@ -425,9 +427,7 @@ const getAddressParameters = (
         )
 
       case AddressType.BASE_PAYMENT_KEY_STAKE_KEY:
-      case AddressType.BASE_PAYMENT_KEY_STAKE_SCRIPT:
       case AddressType.BASE_PAYMENT_SCRIPT_STAKE_KEY:
-      case AddressType.BASE_PAYMENT_SCRIPT_STAKE_SCRIPT:
         return findMatchingAddress(
           paymentSigningFiles.flatMap((paymentSigningFile) => (
             stakeSigningFiles.map((stakeSigningFile) => (
@@ -437,7 +437,6 @@ const getAddressParameters = (
         )
 
       case AddressType.ENTERPRISE_KEY:
-      case AddressType.ENTERPRISE_SCRIPT:
         return findMatchingAddress(
           paymentSigningFiles.map((paymentSigningFile) => (
             _packEnterpriseAddress(paymentSigningFile, network)
@@ -445,7 +444,6 @@ const getAddressParameters = (
         )
 
       case AddressType.REWARD_KEY:
-      case AddressType.REWARD_SCRIPT:
         return findMatchingAddress(
           stakeSigningFiles.map((stakeSigningFile) => _packRewardAddress(stakeSigningFile, network)),
         )
