@@ -31,6 +31,7 @@ export enum CardanoEra {
   SHELLEY = 'Shelley',
   ALLEGRA = 'Allegra',
   MARY = 'Mary',
+  ALONZO = 'Alonzo',
 }
 
 export type CborHex = string & {
