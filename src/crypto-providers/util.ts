@@ -50,8 +50,8 @@ enum PathTypes {
   // pool cold key in pool registrations and retirements
   PATH_POOL_COLD_KEY,
 
-  // hd wallet account
-  PATH_WALLET_SCRIPT_ACCOUNT,
+  // hd wallet multisig account
+  PATH_WALLET_ACCOUNT_MULTISIG,
 
   // hd wallet multisig spending key
   PATH_WALLET_SPENDING_KEY_MULTISIG,
@@ -88,7 +88,7 @@ const classifyPath = (path:number[]) => {
       if (path.length === 4 && path[2] === 0 + HD && path[3] >= HD) return PathTypes.PATH_POOL_COLD_KEY
       break
     case 1854 + HD:
-      if (path.length === 3) return PathTypes.PATH_WALLET_SCRIPT_ACCOUNT
+      if (path.length === 3) return PathTypes.PATH_WALLET_ACCOUNT_MULTISIG
       if (path.length !== 5) return PathTypes.PATH_INVALID
       if (path[3] === 0) return PathTypes.PATH_WALLET_SPENDING_KEY_MULTISIG
       if (path[3] === 2) return PathTypes.PATH_WALLET_STAKING_KEY_MULTISIG
