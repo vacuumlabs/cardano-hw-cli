@@ -36,6 +36,7 @@ const cardanoEraToSignedType: {[key in CardanoEra]: string} = {
   [CardanoEra.SHELLEY]: 'TxSignedShelley',
   [CardanoEra.ALLEGRA]: 'Tx AllegraEra',
   [CardanoEra.MARY]: 'Tx MaryEra',
+  [CardanoEra.ALONZO]: 'Tx AlonzoEra',
 }
 
 const constructSignedTxOutput = (era: CardanoEra, signedTxCborHex: SignedTxCborHex): SignedTxOutput => ({
@@ -49,6 +50,7 @@ const cardanoEraToWitnessType: {[key in CardanoEra]: string} = {
   [CardanoEra.SHELLEY]: 'TxWitnessShelley',
   [CardanoEra.ALLEGRA]: 'TxWitness AllegraEra',
   [CardanoEra.MARY]: 'TxWitness MaryEra',
+  [CardanoEra.ALONZO]: 'TxWitness AlonzoEra',
 }
 
 const constructTxWitnessOutput = (
