@@ -42,33 +42,41 @@ export const parseBIP32Path = (
   throw Error(Errors.InvalidPathError)
 }
 
-export const parseFileTypeMagic = (fileTypeMagic: string, pathType: PathTypes) => {
+export const parseFileTypeMagic = (fileTypeMagic: string, pathType: PathTypes): HwSigningType => {
   // cardano-cli only distinguish 3 categories, payment, pool cold and stake keys
   // to keep things simple, any other key is bundled into the "payment" category
   // to keep things more generic
-  if (fileTypeMagic.startsWith(PathLabel.PAYMENT)) {
-    if (pathType === PathTypes.PATH_WALLET_MINTING_KEY) {
+  const fileTypeStartsWith = (label: PathLabel) => {
+    if (!fileTypeMagic.startsWith(label)) {
+      throw Error(Errors.InvalidFileTypeError)
+    }
+  }
+
+  switch (pathType) {
+    case PathTypes.PATH_WALLET_ACCOUNT_MULTISIG:
+    case PathTypes.PATH_WALLET_SPENDING_KEY_MULTISIG:
+      fileTypeStartsWith(PathLabel.PAYMENT)
+      return HwSigningType.MultiSig
+    case PathTypes.PATH_WALLET_STAKING_KEY_MULTISIG:
+      fileTypeStartsWith(PathLabel.STAKE)
+      return HwSigningType.MultiSig
+    case PathTypes.PATH_WALLET_ACCOUNT:
+    case PathTypes.PATH_WALLET_SPENDING_KEY_BYRON:
+    case PathTypes.PATH_WALLET_SPENDING_KEY_SHELLEY:
+      fileTypeStartsWith(PathLabel.PAYMENT)
+      return HwSigningType.Payment
+    case PathTypes.PATH_WALLET_STAKING_KEY:
+      fileTypeStartsWith(PathLabel.STAKE)
+      return HwSigningType.Stake
+    case PathTypes.PATH_WALLET_MINTING_KEY:
+      fileTypeStartsWith(PathLabel.PAYMENT)
       return HwSigningType.Mint
-    }
-    if (pathType === PathTypes.PATH_WALLET_ACCOUNT_MULTISIG
-      || pathType === PathTypes.PATH_WALLET_SPENDING_KEY_MULTISIG) {
-      return HwSigningType.MultiSig
-    }
-    return HwSigningType.Payment
+    case PathTypes.PATH_POOL_COLD_KEY:
+      fileTypeStartsWith(PathLabel.POOL_COLD)
+      return HwSigningType.PoolCold
+    default:
+      throw Error(Errors.InvalidFileTypeError)
   }
-
-  if (fileTypeMagic.startsWith(PathLabel.POOL_COLD)) {
-    return HwSigningType.PoolCold
-  }
-
-  if (fileTypeMagic.startsWith(PathLabel.STAKE)) {
-    if (pathType === PathTypes.PATH_WALLET_STAKING_KEY_MULTISIG) {
-      return HwSigningType.MultiSig
-    }
-    return HwSigningType.Stake
-  }
-
-  throw Error(Errors.InvalidFileTypeError)
 }
 
 export const parseHwSigningFile = (path: string): HwSigningData => {
