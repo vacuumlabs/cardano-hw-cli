@@ -39,7 +39,7 @@ const executeCommand = async (): Promise<void> => {
       await commandExecutor.createTxPolicyId(parsedArgs)
       break
     case (CommandType.WITNESS_TRANSACTION):
-      await commandExecutor.createTxWitness(parsedArgs)
+      await commandExecutor.createTxWitnesses(parsedArgs)
       break
     case (CommandType.NODE_KEY_GEN):
       await commandExecutor.createNodeSigningKeyFiles(parsedArgs)
