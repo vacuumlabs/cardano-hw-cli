@@ -1,5 +1,5 @@
 import fsPath from 'path'
-import { HARDENED_THRESHOLD, NETWORKS } from '../constants'
+import { HARDENED_THRESHOLD, NETWORKS, PathLabel } from '../constants'
 import {
   isBIP32Path, isCborHex, isHwSigningData, isTxBodyData, isVotePublicKeyHex,
 } from '../guards'
@@ -46,7 +46,7 @@ export const parseFileTypeMagic = (fileTypeMagic: string, pathType: PathTypes) =
   // cardano-cli only distinguish 3 categories, payment, pool cold and stake keys
   // to keep things simple, any other key is bundled into the "payment" category
   // to keep things more generic
-  if (fileTypeMagic.startsWith('Payment')) {
+  if (fileTypeMagic.startsWith(PathLabel.PAYMENT)) {
     if (pathType === PathTypes.PATH_WALLET_MINTING_KEY) {
       return HwSigningType.Mint
     }
@@ -57,11 +57,11 @@ export const parseFileTypeMagic = (fileTypeMagic: string, pathType: PathTypes) =
     return HwSigningType.Payment
   }
 
-  if (fileTypeMagic.startsWith('StakePool')) { // TODO this string should be a symbolic constant, occurs twice
+  if (fileTypeMagic.startsWith(PathLabel.POOL_COLD)) {
     return HwSigningType.PoolCold
   }
 
-  if (fileTypeMagic.startsWith('Stake')) {
+  if (fileTypeMagic.startsWith(PathLabel.STAKE)) {
     if (pathType === PathTypes.PATH_WALLET_STAKING_KEY_MULTISIG) {
       return HwSigningType.MultiSig
     }

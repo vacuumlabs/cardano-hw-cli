@@ -12,3 +12,9 @@ export const NETWORKS: {[key: string]: Network} = {
 }
 
 export const HARDENED_THRESHOLD = 0x80000000
+
+export enum PathLabel {
+  PAYMENT = 'Payment',
+  STAKE = 'Stake',
+  POOL_COLD = 'StakePool',
+}
