@@ -1,4 +1,4 @@
-import { HARDENED_THRESHOLD } from './constants'
+import { HARDENED_THRESHOLD, PathLabel } from './constants'
 import { classifyPath, PathTypes } from './crypto-providers/util'
 import { OpCertIssueCounter, SignedOpCertCborHex } from './opCert/opCert'
 import {
@@ -64,27 +64,22 @@ const constructBIP32PathOutput = (path: BIP32Path): string => path
   .map((value) => (value >= HARDENED_THRESHOLD ? `${value - HARDENED_THRESHOLD}H` : `${value}`))
   .join('/')
 
-const bip32PathLabel = (path: number[]): string => {
+const bip32PathLabel = (path: number[]): PathLabel => {
   switch (classifyPath(path)) {
     case PathTypes.PATH_POOL_COLD_KEY:
-      return 'StakePool'
+      return PathLabel.POOL_COLD
 
-    case PathTypes.PATH_WALLET_SPENDING_KEY_BYRON:
-    case PathTypes.PATH_WALLET_ACCOUNT:
-    case PathTypes.PATH_INVALID:
-    default:
-      throw Error('not implemented')
-
-    // TODO GK Is this the correct label for multisig and minting keys?
-    //         So far cardano-cli doesn't seem to support other "labels"
     case PathTypes.PATH_WALLET_SPENDING_KEY_SHELLEY:
     case PathTypes.PATH_WALLET_SPENDING_KEY_MULTISIG:
     case PathTypes.PATH_WALLET_MINTING_KEY:
-      return 'Payment'
+      return PathLabel.PAYMENT
 
     case PathTypes.PATH_WALLET_STAKING_KEY:
     case PathTypes.PATH_WALLET_STAKING_KEY_MULTISIG:
-      return 'Stake'
+      return PathLabel.STAKE
+
+    default:
+      throw Error('not implemented')
   }
 }
 
