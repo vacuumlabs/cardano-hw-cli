@@ -3,7 +3,6 @@ import { HARDENED_THRESHOLD } from '../constants'
 import { Errors } from '../errors'
 import { isBIP32Path, isPubKeyHex } from '../guards'
 import {
-  StakeCredentialType,
   TxCertificateKeys,
   VotingRegistrationAuxiliaryData,
   VotingRegistrationMetaData,
@@ -233,110 +232,8 @@ const extractStakePubKeyFromHwSigningData = (signingFile: HwSigningData): PubKey
   throw Error(Errors.InternalInvalidTypeError)
 }
 
-const txHasStakePoolRegistrationCert = (
-  certs: _Certificate[],
-): boolean => certs.some(
-  ({ type }) => type === TxCertificateKeys.STAKEPOOL_REGISTRATION,
-)
-
-// validates if the given signing files correspond to the tx body
-// TODO not entirely, e.g. we don't count unique witnesses, and don't verify there is an input included
-const validateOrdinaryTxWithoutPoolRegistration = (
-  unsignedTxParsed: _UnsignedTxParsed, signingFiles: HwSigningData[],
-): void => {
-  const {
-    paymentSigningFiles, stakeSigningFiles, poolColdSigningFiles,
-  } = filterSigningFiles(signingFiles)
-
-  if (paymentSigningFiles.length === 0) {
-    throw Error(Errors.MissingPaymentSigningFileError)
-  }
-
-  let numStakeWitnesses = unsignedTxParsed.withdrawals.length
-  let numPoolColdWitnesses = 0
-  unsignedTxParsed.certificates.forEach((cert) => {
-    switch (cert.type) {
-      case TxCertificateKeys.STAKING_KEY_REGISTRATION:
-      case TxCertificateKeys.STAKING_KEY_DEREGISTRATION:
-      case TxCertificateKeys.DELEGATION:
-        numStakeWitnesses += 1
-        break
-
-      case TxCertificateKeys.STAKEPOOL_RETIREMENT:
-        numPoolColdWitnesses += 1
-        break
-
-      default:
-        break
-    }
-  })
-
-  if (numStakeWitnesses > 0 && (stakeSigningFiles.length === 0)) {
-    throw Error(Errors.MissingStakeSigningFileError)
-  }
-  if (stakeSigningFiles.length > numStakeWitnesses) {
-    throw Error(Errors.TooManyStakeSigningFilesError)
-  }
-
-  if (numPoolColdWitnesses > 0 && (poolColdSigningFiles.length === 0)) {
-    throw Error(Errors.MissingPoolColdSigningFileError)
-  }
-  if (poolColdSigningFiles.length > numPoolColdWitnesses) {
-    throw Error(Errors.TooManyPoolColdSigningFilesError)
-  }
-}
-
-// validates if the given signing files correspond to the tx body
-const validateOrdinaryTxWithPoolRegistration = (
-  unsignedTxParsed: _UnsignedTxParsed, signingFiles: HwSigningData[],
-): void => {
-  const {
-    paymentSigningFiles, stakeSigningFiles, poolColdSigningFiles,
-  } = filterSigningFiles(signingFiles)
-
-  // TODO needs revisiting, including the error messages
-  if (!unsignedTxParsed.inputs.length) {
-    throw Error(Errors.MissingInputError)
-  }
-  if (unsignedTxParsed.certificates.length !== 1) {
-    throw Error(Errors.MultipleCertificatesWithPoolRegError)
-  }
-  if (unsignedTxParsed.withdrawals.length) {
-    throw Error(Errors.WithdrawalIncludedWithPoolRegError)
-  }
-
-  if (poolColdSigningFiles.length > 1) {
-    throw Error(Errors.TooManyPoolColdSigningFilesError)
-  }
-
-  const isOperator = (poolColdSigningFiles.length > 0)
-
-  if (isOperator) {
-    // pool operator
-    if (stakeSigningFiles.length > 0) {
-      throw Error(Errors.TooManyStakeSigningFilesError)
-    }
-  } else {
-    // pool owner
-    if (paymentSigningFiles.length > 0) {
-      throw Error(Errors.TooManyPaymentFilesWithPoolRegError)
-    }
-    if (stakeSigningFiles.length === 0) {
-      throw Error(Errors.MissingStakeSigningFileError)
-    }
-    if (stakeSigningFiles.length > 1) {
-      throw Error(Errors.TooManyStakeSigningFilesError)
-    }
-  }
-}
-
 const hasMultisigSigningFile = (signingFiles: HwSigningData[]): boolean => (
   signingFiles.some((signingFile) => signingFile.type === HwSigningType.MultiSig)
-)
-
-const isMultisigTransaction = (signingFiles: HwSigningData[]): boolean => (
-  // We classify tx as multisig if it contains a multisig signing file
-  hasMultisigSigningFile(signingFiles)
 )
 
 const certificatesWithStakeCredentials = (certificates: _Certificate[]): (
@@ -347,71 +244,6 @@ const certificatesWithStakeCredentials = (certificates: _Certificate[]): (
     TxCertificateKeys.STAKING_KEY_DEREGISTRATION,
   ]) as (_DelegationCert | _StakingKeyRegistrationCert | _StakingKeyDeregistrationCert)[]
 )
-
-const validateOrdinaryTx = (
-  unsignedTxParsed: _UnsignedTxParsed, signingFiles: HwSigningData[],
-): void => {
-  // We require ordinary transactions to use certificates and withdrawals
-  // only with AddrKeyHash stake credentials
-  if (
-    !certificatesWithStakeCredentials(unsignedTxParsed.certificates).every(
-      (cert) => cert.stakeCredential.type === StakeCredentialType.ADDR_KEY_HASH,
-    )
-    || !unsignedTxParsed.withdrawals.every(
-      (withdrawal) => withdrawal.stakeCredential.type === StakeCredentialType.ADDR_KEY_HASH,
-    )
-  ) {
-    throw Error(Errors.ScriptStakeCredentialInOrdinaryTx)
-  }
-  if (hasMultisigSigningFile(signingFiles)) {
-    throw Error(Errors.MixedOrdinaryAndMultisigSigningFiles)
-  }
-}
-
-const validateMultisigTx = (unsignedTxParsed: _UnsignedTxParsed): void => {
-  // We require multisig transactions to use certificates and withdrawals
-  // only with ScriptHash stake credentials
-  if (
-    !certificatesWithStakeCredentials(unsignedTxParsed.certificates).every(
-      (cert) => cert.stakeCredential.type === StakeCredentialType.SCRIPT_HASH,
-    )
-    || !unsignedTxParsed.withdrawals.every(
-      (withdrawal) => withdrawal.stakeCredential.type === StakeCredentialType.SCRIPT_HASH,
-    )
-  ) {
-    throw Error(Errors.KeyHashStakeCredentialInMultisigTx)
-  }
-}
-
-const validateWitnessing = (
-  unsignedTxParsed: _UnsignedTxParsed, signingFiles: HwSigningData[],
-): void => {
-  if (isMultisigTransaction(signingFiles)) {
-    validateMultisigTx(unsignedTxParsed)
-    return
-  }
-  validateOrdinaryTx(unsignedTxParsed, signingFiles)
-  if (txHasStakePoolRegistrationCert(unsignedTxParsed.certificates)) {
-    validateOrdinaryTxWithPoolRegistration(unsignedTxParsed, signingFiles)
-  } else {
-    validateOrdinaryTxWithoutPoolRegistration(unsignedTxParsed, signingFiles)
-  }
-}
-
-const validateSigning = (
-  unsignedTxParsed: _UnsignedTxParsed, signingFiles: HwSigningData[],
-): void => {
-  if (isMultisigTransaction(signingFiles)) {
-    validateMultisigTx(unsignedTxParsed)
-    return
-  }
-  validateOrdinaryTx(unsignedTxParsed, signingFiles)
-  if (txHasStakePoolRegistrationCert(unsignedTxParsed.certificates)) {
-    throw Error(Errors.CantSignTxWithPoolRegError)
-  }
-
-  validateOrdinaryTxWithoutPoolRegistration(unsignedTxParsed, signingFiles)
-}
 
 const determineSigningMode = (
   unsignedTxParsed: _UnsignedTxParsed, signingFiles: HwSigningData[],
@@ -427,7 +259,7 @@ const determineSigningMode = (
       : SigningMode.POOL_REGISTRATION_AS_OWNER
   }
 
-  return isMultisigTransaction(signingFiles)
+  return hasMultisigSigningFile(signingFiles)
     ? SigningMode.MULTISIG_TRANSACTION
     : SigningMode.ORDINARY_TRANSACTION
 }
@@ -697,8 +529,6 @@ export {
   PathTypes,
   classifyPath,
   splitXPubKeyCborHex,
-  validateSigning,
-  validateWitnessing,
   validateKeyGenInputs,
   getSigningPath,
   filterSigningFiles,
@@ -718,6 +548,7 @@ export {
   encodeVotingRegistrationMetaData,
   areHwSigningDataNonByron,
   validateVotingRegistrationAddressType,
-  isMultisigTransaction,
+  certificatesWithStakeCredentials,
+  hasMultisigSigningFile,
   determineSigningMode,
 }

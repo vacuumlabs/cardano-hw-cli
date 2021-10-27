@@ -25,8 +25,6 @@ import {
 import { LedgerCryptoProvider } from './crypto-providers/ledgerCryptoProvider'
 import { TrezorCryptoProvider } from './crypto-providers/trezorCryptoProvider'
 import {
-  validateSigning,
-  validateWitnessing,
   validateKeyGenInputs,
   classifyPath,
   PathTypes,
@@ -36,6 +34,7 @@ import {
 import { Errors } from './errors'
 import { parseOpCertIssueCounterFile } from './command-parser/parsers'
 import { parseUnsignedTx } from './transaction/txParser'
+import { validateSigning, validateWitnessing } from './crypto-providers/signingValidation'
 
 const promiseTimeout = <T> (promise: Promise<T>, ms: number): Promise<T> => {
   const timeout: Promise<T> = new Promise((resolve, reject) => {
@@ -114,7 +113,7 @@ const CommandExecutor = async () => {
       hwSigningFileData: args.hwSigningFileData,
       network: args.network,
     }
-    validateSigning(unsignedTxParsed, args.hwSigningFileData)
+    validateSigning(signingParameters)
     const signedTx = await cryptoProvider.signTx(signingParameters, args.changeOutputKeyFileData)
     write(args.outFile, constructSignedTxOutput(args.txBodyFileData.era, signedTx))
   }
@@ -130,7 +129,7 @@ const CommandExecutor = async () => {
     console.log(scriptHashHex)
   }
 
-  const createTxWitness = async (args: ParsedTransactionWitnessArguments) => {
+  const createTxWitnesses = async (args: ParsedTransactionWitnessArguments) => {
     const unsignedTxParsed = parseUnsignedTx(args.txBodyFileData.cborHex)
     const signingParameters = {
       signingMode: determineSigningMode(unsignedTxParsed, args.hwSigningFileData),
@@ -138,7 +137,7 @@ const CommandExecutor = async () => {
       hwSigningFileData: args.hwSigningFileData,
       network: args.network,
     }
-    validateWitnessing(unsignedTxParsed, args.hwSigningFileData)
+    validateWitnessing(signingParameters)
     const txWitnesses = await cryptoProvider.witnessTx(signingParameters, args.changeOutputKeyFileData)
     for (let i = 0; i < txWitnesses.length; i += 1) {
       write(args.outFiles[i], constructTxWitnessOutput(args.txBodyFileData.era, txWitnesses[i]))
@@ -215,7 +214,7 @@ const CommandExecutor = async () => {
     createVerificationKeyFile,
     createSignedTx,
     createTxPolicyId,
-    createTxWitness,
+    createTxWitnesses,
     createNodeSigningKeyFiles,
     createSignedOperationalCertificate,
     createCatalystVotingKeyRegistrationMetadata,

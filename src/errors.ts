@@ -26,6 +26,8 @@ const enum Errors {
   TooManyPaymentSigningFilesError = 'Too many payment signing files',
   TooManyStakeSigningFilesError = 'Too many stake signing files',
   TooManyPoolColdSigningFilesError = 'Too many pool cold key signing files',
+  TooManyMintSigningFilesError = 'Too many mint signing files',
+  TooManyMultisigSigningFilesError = 'Too many multisig signing files',
   MissingInputError = 'Missing input',
   MissingOutputError = 'Missing output',
   TrezorError = 'Trezor operation failed, please make sure you are using the latest version of Trezor firmware',
@@ -96,7 +98,6 @@ const enum Errors {
   StakeCredentialParseError = 'Failed to parse stake credentials',
   ScriptStakeCredentialInOrdinaryTx = 'Script stake credential used in an ordinary transaction',
   KeyHashStakeCredentialInMultisigTx = 'Address key hash stake credential used in a multisig transaction',
-  MixedOrdinaryAndMultisigSigningFiles = 'Mixed ordinary and multisig signing files',
   TrezorPoolRegistrationAsOperatorNotSupported = 'Trezor does not support signing pool registration certificate as operator',
 }
 
