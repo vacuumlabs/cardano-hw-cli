@@ -213,7 +213,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     }
   }
 
-  const _prepareCert = (
+  const _prepareStakeCredential = (
     stakeCredential: StakeCredential,
     stakeSigningFiles: HwSigningData[],
   ): LedgerTypes.StakeCredentialParams => {
@@ -239,23 +239,23 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     }
   }
 
-  const prepareStakingKeyRegistrationCert = (
+  const prepareStakeKeyRegistrationCert = (
     cert: _StakingKeyRegistrationCert,
     stakeSigningFiles: HwSigningData[],
   ): LedgerTypes.Certificate => ({
     type: LedgerTypes.CertificateType.STAKE_REGISTRATION,
     params: {
-      stakeCredential: _prepareCert(cert.stakeCredential, stakeSigningFiles),
+      stakeCredential: _prepareStakeCredential(cert.stakeCredential, stakeSigningFiles),
     },
   })
 
-  const prepareStakingKeyDeregistrationCert = (
+  const prepareStakeKeyDeregistrationCert = (
     cert: _StakingKeyDeregistrationCert,
     stakeSigningFiles: HwSigningData[],
   ): LedgerTypes.Certificate => ({
     type: LedgerTypes.CertificateType.STAKE_DEREGISTRATION,
     params: {
-      stakeCredential: _prepareCert(cert.stakeCredential, stakeSigningFiles),
+      stakeCredential: _prepareStakeCredential(cert.stakeCredential, stakeSigningFiles),
     },
   })
 
@@ -265,7 +265,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     type: LedgerTypes.CertificateType.STAKE_DELEGATION,
     params: {
       poolKeyHashHex: cert.poolHash.toString('hex'),
-      stakeCredential: _prepareCert(cert.stakeCredential, stakeSigningFiles),
+      stakeCredential: _prepareStakeCredential(cert.stakeCredential, stakeSigningFiles),
     },
   })
 
@@ -437,9 +437,9 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
   ): LedgerTypes.Certificate => {
     switch (certificate.type) {
       case TxCertificateKeys.STAKING_KEY_REGISTRATION:
-        return prepareStakingKeyRegistrationCert(certificate, signingFiles)
+        return prepareStakeKeyRegistrationCert(certificate, signingFiles)
       case TxCertificateKeys.STAKING_KEY_DEREGISTRATION:
-        return prepareStakingKeyDeregistrationCert(certificate, signingFiles)
+        return prepareStakeKeyDeregistrationCert(certificate, signingFiles)
       case TxCertificateKeys.DELEGATION:
         return prepareDelegationCert(certificate, signingFiles)
       case TxCertificateKeys.STAKEPOOL_REGISTRATION:
@@ -455,7 +455,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     withdrawal: _Withdrawal, stakeSigningFiles: HwSigningData[],
   ): LedgerTypes.Withdrawal => (
     {
-      stakeCredential: _prepareCert(withdrawal.stakeCredential, stakeSigningFiles),
+      stakeCredential: _prepareStakeCredential(withdrawal.stakeCredential, stakeSigningFiles),
       amount: `${withdrawal.coins}`,
     }
   )
