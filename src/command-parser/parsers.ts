@@ -43,8 +43,10 @@ export const parseBIP32Path = (
 }
 
 export const parseFileTypeMagic = (fileTypeMagic: string, pathType: PathTypes) => {
+  // cardano-cli only distinguish 3 categories, payment, pool cold and stake keys
+  // to keep things simple, any other key is bundled into the "payment" category
+  // to keep things more generic
   if (fileTypeMagic.startsWith('Payment')) {
-    // TODO cardano-cli doesn't support 'Mint' prefix now, but maybe it will
     if (pathType === PathTypes.PATH_WALLET_MINTING_KEY) {
       return HwSigningType.Mint
     }
