@@ -3,11 +3,8 @@ const assert = require('assert')
 const { parseUnsignedTx } = require('../../../../src/transaction/txParser')
 const { LedgerCryptoProvider } = require('../../../../src/crypto-providers/ledgerCryptoProvider')
 const { NETWORKS } = require('../../../../src/constants')
-const {
-  determineSigningMode,
-  validateSigning,
-  validateWitnessing,
-} = require('../../../../src/crypto-providers/util')
+const { determineSigningMode } = require('../../../../src/crypto-providers/util')
+const { validateSigning, validateWitnessing } = require('../../../../src/crypto-providers/signingValidation')
 
 const { signingFiles } = require('./signingFiles')
 
@@ -264,7 +261,7 @@ async function testTxSigning(cryptoProvider, transaction) {
     hwSigningFileData: transaction.hwSigningFiles,
     network: NETWORKS[transaction.network],
   }
-  validateSigning(unsignedTxParsed, transaction.hwSigningFiles)
+  validateSigning(signingParameters)
   const signedTxCborHex = await cryptoProvider.signTx(signingParameters, [])
   assert.deepStrictEqual(signedTxCborHex, transaction.signedTxCborHex)
 }
@@ -278,7 +275,7 @@ async function testTxWitnessing(cryptoProvider, transaction) {
     hwSigningFileData: transaction.hwSigningFiles,
     network: NETWORKS[transaction.network],
   }
-  validateWitnessing(unsignedTxParsed, transaction.hwSigningFiles)
+  validateWitnessing(signingParameters)
   const witnesses = await cryptoProvider.witnessTx(signingParameters, [])
   assert.deepStrictEqual(witnesses, transaction.witnesses)
 }
