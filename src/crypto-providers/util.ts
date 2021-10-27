@@ -242,7 +242,7 @@ const txHasStakePoolRegistrationCert = (
 
 // validates if the given signing files correspond to the tx body
 // TODO not entirely, e.g. we don't count unique witnesses, and don't verify there is an input included
-const validateTxWithoutPoolRegistration = (
+const validateOrdinaryTxWithoutPoolRegistration = (
   unsignedTxParsed: _UnsignedTxParsed, signingFiles: HwSigningData[],
 ): void => {
   const {
@@ -288,7 +288,7 @@ const validateTxWithoutPoolRegistration = (
 }
 
 // validates if the given signing files correspond to the tx body
-const validateTxWithPoolRegistration = (
+const validateOrdinaryTxWithPoolRegistration = (
   unsignedTxParsed: _UnsignedTxParsed, signingFiles: HwSigningData[],
 ): void => {
   const {
@@ -394,9 +394,9 @@ const validateWitnessing = (
   }
   validateOrdinaryTx(unsignedTxParsed, signingFiles)
   if (txHasStakePoolRegistrationCert(unsignedTxParsed.certificates)) {
-    validateTxWithPoolRegistration(unsignedTxParsed, signingFiles)
+    validateOrdinaryTxWithPoolRegistration(unsignedTxParsed, signingFiles)
   } else {
-    validateTxWithoutPoolRegistration(unsignedTxParsed, signingFiles)
+    validateOrdinaryTxWithoutPoolRegistration(unsignedTxParsed, signingFiles)
   }
 }
 
@@ -412,7 +412,7 @@ const validateSigning = (
     throw Error(Errors.CantSignTxWithPoolRegError)
   }
 
-  validateTxWithoutPoolRegistration(unsignedTxParsed, signingFiles)
+  validateOrdinaryTxWithoutPoolRegistration(unsignedTxParsed, signingFiles)
 }
 
 const validateKeyGenInputs = (
