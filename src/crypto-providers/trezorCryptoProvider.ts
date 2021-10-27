@@ -241,10 +241,10 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     })
   }
 
-  const _prepareCert = (
+  const _prepareStakeCredential = (
     stakeCredential: StakeCredential,
     stakeSigningFiles: HwSigningData[],
-  ): {path?: string | number[], scriptHash?: string} => {
+  ): {path: string | number[]} | {scriptHash: string} => {
     switch (stakeCredential.type) {
       case (StakeCredentialType.ADDR_KEY_HASH): {
         const path = findSigningPathForKeyHash(
@@ -265,27 +265,27 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     }
   }
 
-  const prepareStakingKeyRegistrationCert = (
+  const prepareStakeKeyRegistrationCert = (
     cert: _StakingKeyRegistrationCert,
     stakeSigningFiles: HwSigningData[],
   ): TrezorTypes.CardanoCertificate => ({
     type: TrezorTypes.CardanoCertificateType.STAKE_REGISTRATION,
-    ...(_prepareCert(cert.stakeCredential, stakeSigningFiles)),
+    ...(_prepareStakeCredential(cert.stakeCredential, stakeSigningFiles)),
   })
 
-  const prepareStakingKeyDeregistrationCert = (
+  const prepareStakeKeyDeregistrationCert = (
     cert: _StakingKeyDeregistrationCert,
     stakeSigningFiles: HwSigningData[],
   ): TrezorTypes.CardanoCertificate => ({
     type: TrezorTypes.CardanoCertificateType.STAKE_DEREGISTRATION,
-    ...(_prepareCert(cert.stakeCredential, stakeSigningFiles)),
+    ...(_prepareStakeCredential(cert.stakeCredential, stakeSigningFiles)),
   })
 
   const prepareDelegationCert = (
     cert: _DelegationCert, stakeSigningFiles: HwSigningData[],
   ): TrezorTypes.CardanoCertificate => ({
     type: TrezorTypes.CardanoCertificateType.STAKE_DELEGATION,
-    ...(_prepareCert(cert.stakeCredential, stakeSigningFiles)),
+    ...(_prepareStakeCredential(cert.stakeCredential, stakeSigningFiles)),
     pool: cert.poolHash.toString('hex'),
   })
 
@@ -355,9 +355,9 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
   ): TrezorTypes.CardanoCertificate => {
     switch (certificate.type) {
       case TxCertificateKeys.STAKING_KEY_REGISTRATION:
-        return prepareStakingKeyRegistrationCert(certificate, stakeSigningFiles)
+        return prepareStakeKeyRegistrationCert(certificate, stakeSigningFiles)
       case TxCertificateKeys.STAKING_KEY_DEREGISTRATION:
-        return prepareStakingKeyDeregistrationCert(certificate, stakeSigningFiles)
+        return prepareStakeKeyDeregistrationCert(certificate, stakeSigningFiles)
       case TxCertificateKeys.DELEGATION:
         return prepareDelegationCert(certificate, stakeSigningFiles)
       case TxCertificateKeys.STAKEPOOL_REGISTRATION:
@@ -372,7 +372,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
   ): TrezorTypes.CardanoWithdrawal => (
     {
       amount: `${withdrawal.coins}`,
-      ...(_prepareCert(withdrawal.stakeCredential, stakeSigningFiles)),
+      ...(_prepareStakeCredential(withdrawal.stakeCredential, stakeSigningFiles)),
     }
   )
 
