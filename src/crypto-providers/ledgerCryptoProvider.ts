@@ -169,16 +169,17 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
 
   const prepareOutput = (
     output: _Output,
-    changeOutputFiles: HwSigningData[],
     network: Network,
+    changeOutputFiles: HwSigningData[],
+    signingMode: SigningMode,
   ): LedgerTypes.TxOutput => {
     const changeAddressParams = getAddressParameters(changeOutputFiles, output.address, network)
-    const amount = output.coins
     const tokenBundle = prepareTokenBundle(output.tokenBundle)
 
-    if (changeAddressParams) {
-      return prepareChangeOutput(amount, changeAddressParams, tokenBundle)
+    if (changeAddressParams && signingMode === SigningMode.ORDINARY_TRANSACTION) {
+      return prepareChangeOutput(output.coins, changeAddressParams, tokenBundle)
     }
+
     return {
       destination: {
         type: LedgerTypes.TxOutputDestinationType.THIRD_PARTY,
@@ -526,7 +527,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
       (input, i) => prepareInput(signingMode, input, getSigningPath(paymentSigningFiles, i)),
     )
     const outputs = unsignedTxParsed.outputs.map(
-      (output) => prepareOutput(output, changeOutputFiles, network),
+      (output) => prepareOutput(output, network, changeOutputFiles, signingMode),
     )
     const certificates = unsignedTxParsed.certificates.map(
       (certificate) => prepareCertificate(

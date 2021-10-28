@@ -211,11 +211,12 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     output: _Output,
     network: Network,
     changeOutputFiles: HwSigningData[],
+    signingMode: SigningMode,
   ): TrezorTypes.CardanoOutput => {
     const changeAddressParams = getAddressParameters(changeOutputFiles, output.address, network)
     const tokenBundle = prepareTokenBundle(output.tokenBundle, false)
 
-    if (changeAddressParams) {
+    if (changeAddressParams && signingMode === SigningMode.ORDINARY_TRANSACTION) {
       return prepareChangeOutput(output.coins, changeAddressParams, tokenBundle)
     }
 
@@ -472,7 +473,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
       (input: _Input, i: number) => prepareInput(input, getSigningPath(paymentSigningFiles, i)),
     )
     const outputs = unsignedTxParsed.outputs.map(
-      (output: _Output) => prepareOutput(output, network, changeOutputFiles),
+      (output: _Output) => prepareOutput(output, network, changeOutputFiles, signingMode),
     )
     const certificates = unsignedTxParsed.certificates.map(
       (certificate: _Certificate) => prepareCertificate(certificate, stakeSigningFiles),
