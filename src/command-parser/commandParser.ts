@@ -1,4 +1,4 @@
-import { ArgumentParser } from 'argparse'
+import { ArgumentGroup, ArgumentParser, SubParser } from 'argparse'
 import { ParsedArguments } from '../types'
 import { parserConfig } from './parserConfig'
 
@@ -16,36 +16,29 @@ export enum CommandType {
   CATALYST_VOTING_KEY_REGISTRATION_METADATA = 'catalyst.voting-key-registration-metadata',
 }
 
-const makeParser = () => {
-  const initParser = (parser: ArgumentParser, config: any) => {
-    const isCommand = (str: string) => !str.startsWith('--')
-    const commandType = (parent: string, current: string) => (parent ? `${parent}.${current}` : current)
-    parser.set_defaults({ parser })
-    const subparsers = parser.add_subparsers()
+const initParser = (parser: ArgumentParser | ArgumentGroup, config: any): void => {
+  const MUTUALLY_EXCLUSIVE_GROUP_KEY = '_mutually-exclusive-group'
+  const isMutuallyExclusiveGroup = (str: string) => str.startsWith(MUTUALLY_EXCLUSIVE_GROUP_KEY)
+  const isOneOfGroupRequired = (str: string) => str.startsWith(`${MUTUALLY_EXCLUSIVE_GROUP_KEY}-required`)
+  const isCommand = (str: string) => !str.startsWith('--') && !isMutuallyExclusiveGroup(str)
+  const commandType = (parent: string, current: string) => (parent ? `${parent}.${current}` : current)
 
-    Object.keys(config).reduce((acc, key) => {
-      if (isCommand(key)) {
-        const subparser = acc.add_parser(key)
-        subparser.set_defaults({ command: commandType(parser.get_default('command'), key) })
-        initParser(subparser, config[key])
-      } else {
-        parser.add_argument(key, config[key])
-      }
-      return acc
-    }, subparsers)
-
-    return parser
-  }
-
-  return initParser(new ArgumentParser(
-    {
-      description: 'Command line tool for ledger/trezor transaction signing',
-      prog: 'cardano-hw-cli',
-    },
-  ), parserConfig)
+  const subparsers = 'add_subparsers' in parser ? parser.add_subparsers() : null
+  Object.keys(config).forEach((key) => {
+    if (isCommand(key)) {
+      const subparser = (subparsers as SubParser).add_parser(key)
+      subparser.set_defaults({ command: commandType(parser.get_default('command'), key) })
+      initParser(subparser, config[key])
+    } else if (isMutuallyExclusiveGroup(key)) {
+      const group = parser.add_mutually_exclusive_group({ required: isOneOfGroupRequired(key) })
+      initParser(group, config[key])
+    } else {
+      parser.add_argument(key, config[key])
+    }
+  })
 }
 
-const preProcessArgs = (inputArgs: string[]) => {
+const preProcessArgs = (inputArgs: string[]): string[] => {
   // First 2 args are node version and script name
   const commandArgs = inputArgs.slice(2)
   if (commandArgs[0] === 'shelley') {
@@ -55,6 +48,11 @@ const preProcessArgs = (inputArgs: string[]) => {
 }
 
 export const parse = (inputArgs: string[]): { parser: ArgumentParser, parsedArgs: ParsedArguments } => {
-  const { parser, ...parsedArgs } = makeParser().parse_args(preProcessArgs(inputArgs))
+  const parser = new ArgumentParser({
+    description: 'Command line tool for ledger/trezor transaction signing',
+    prog: 'cardano-hw-cli',
+  })
+  initParser(parser, parserConfig)
+  const { ...parsedArgs } = parser.parse_args(preProcessArgs(inputArgs))
   return { parser, parsedArgs }
 }
