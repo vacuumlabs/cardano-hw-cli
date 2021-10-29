@@ -1,6 +1,6 @@
 {
   "type": "PaymentHWSigningFileShelley_ed25519",
   "description": "Hardware wallet extended payment ",
-  "path": "1815H/1852H/0H/2/1",
+  "path": "1852H/1815H/0H/0/0",
   "cborXPubKeyHex": "5880e0d9c2e5b...7277e7db"
 }
