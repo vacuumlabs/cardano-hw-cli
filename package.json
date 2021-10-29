@@ -48,6 +48,7 @@
     "trezor-connect": "https://github.com/vacuumlabs/connect/releases/download/8.2.2-rc.1-multisig/trezor-connect-v8.2.2-rc.1-multisig-extended.tgz"
   },
   "devDependencies": {
+    "@types/argparse": "^2.0.10",
     "@typescript-eslint/eslint-plugin": "^4.2.0",
     "@typescript-eslint/parser": "^4.2.0",
     "eslint": "^7.9.0",
