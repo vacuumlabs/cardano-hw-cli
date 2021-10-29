@@ -1,6 +1,6 @@
 {
   "type": "PaymentHWSigningFileShelley_ed25519",
   "description": "placeholder",
-  "path": "1815H/1852H/0H/2/1",
+  "path": "1852H/1815H/0H/0/0",
   "cborXPubKeyHex": "placeholder"
 }

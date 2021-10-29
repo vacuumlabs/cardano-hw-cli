@@ -15,7 +15,7 @@ describe('Command parser', () => {
       'address',
       'key-gen',
       '--path',
-      '1852H/1815H/0H/2/1',
+      '1852H/1815H/0H/0/0',
       '--verification-key-file',
       prefix('payment.vkey'),
       '--hw-signing-file',
@@ -24,7 +24,7 @@ describe('Command parser', () => {
     const { parsedArgs } = parse(args)
     const expectedResult = {
       command: CommandType.ADDRESS_KEY_GEN,
-      paths: [[2147485500, 2147485463, 2147483648, 2, 1]],
+      paths: [[2147485500, 2147485463, 2147483648, 0, 0]],
       hwSigningFiles: ['test/unit/commandParser/res/payment.hwsfile'],
       verificationKeyFiles: ['test/unit/commandParser/res/payment.vkey'],
     }
@@ -46,7 +46,7 @@ describe('Command parser', () => {
       command: CommandType.VERIFICATION_KEY,
       hwSigningFileData: {
         type: HwSigningType.Payment,
-        path: [2147485463, 2147485500, 2147483648, 2, 1],
+        path: [2147485500, 2147485463, 2147483648, 0, 0],
         cborXPubKeyHex: '5880e0d9c2e5b...7277e7db',
       },
       verificationKeyFile: 'test/unit/commandParser/res/payment.vkey',
@@ -79,7 +79,7 @@ describe('Command parser', () => {
       hwSigningFileData: [
         {
           type: 0,
-          path: [2147485463, 2147485500, 2147483648, 2, 1],
+          path: [2147485500, 2147485463, 2147483648, 0, 0],
           cborXPubKeyHex: '5880e0d9c2e5b...7277e7db',
         },
       ],
@@ -114,7 +114,7 @@ describe('Command parser', () => {
       },
       hwSigningFileData: [{
         type: 0,
-        path: [2147485463, 2147485500, 2147483648, 2, 1],
+        path: [2147485500, 2147485463, 2147483648, 0, 0],
         cborXPubKeyHex: '5880e0d9c2e5b...7277e7db',
       }],
       outFiles: ['test/unit/commandParser/res/witness.out'],
@@ -148,13 +148,13 @@ describe('Command parser', () => {
       },
       hwSigningFileData: [{
         type: 0,
-        path: [2147485463, 2147485500, 2147483648, 2, 1],
+        path: [2147485500, 2147485463, 2147483648, 0, 0],
         cborXPubKeyHex: '5880e0d9c2e5b...7277e7db',
       }],
       outFile: 'test/unit/commandParser/res/tx.signed',
       changeOutputKeyFileData: [{
         type: 0,
-        path: [2147485463, 2147485500, 2147483648, 2, 1],
+        path: [2147485500, 2147485463, 2147483648, 0, 0],
         cborXPubKeyHex: '5880e0d9c2e5b...7277e7db',
       }],
     }
@@ -188,7 +188,7 @@ describe('Command parser', () => {
       rewardAddressSigningKeyData: [
         {
           type: 0,
-          path: [2147485463, 2147485500, 2147483648, 2, 1],
+          path: [2147485500, 2147485463, 2147483648, 0, 0],
           cborXPubKeyHex: '5880e0d9c2e5b...7277e7db',
         },
         {
