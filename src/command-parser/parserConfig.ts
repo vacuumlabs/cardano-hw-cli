@@ -130,6 +130,13 @@ const opCertSigningArgs = {
   },
 }
 
+// If you want to define a group of mutually exclusive CLI arguments (eg. see address.show below),
+// bundle these arguments under a key prefixed with '_mutually-exclusive-group'. Several such groups
+// may be present next to each other, an optional key suffix can be added to enable this (JS objects
+// cannot have duplicate keys).
+// If you want argparse to ensure that one of the arguments is present, use
+// '_mutually-exclusive-group-required' prefix instead.
+
 // based on cardano-cli interface
 // https://docs.cardano.org/projects/cardano-node/en/latest/reference/cardano-node-cli-reference.html
 export const parserConfig = {
@@ -161,25 +168,29 @@ export const parserConfig = {
     'key-gen': keyGenArgs,
 
     'show': { // hw-specific subpath
-      '--payment-path': {
-        type: (path: string) => parseBIP32Path(path),
-        dest: 'paymentPath',
-        help: 'Payment derivation path. (specify only path or script hash)',
+      '_mutually-exclusive-group-required-payment': {
+        '--payment-path': {
+          type: (path: string) => parseBIP32Path(path),
+          dest: 'paymentPath',
+          help: 'Payment derivation path. Either this or payment script hash has to be specified.',
+        },
+        '--payment-script-hash': {
+          type: (hashHex: string) => parseScriptHashHex(hashHex),
+          dest: 'paymentScriptHash',
+          help: 'Payment derivation script hash in hex format.',
+        },
       },
-      '--payment-script-hash': {
-        type: (hashHex: string) => parseScriptHashHex(hashHex),
-        dest: 'paymentScriptHash',
-        help: 'Payment derivation script hash in hex format.',
-      },
-      '--staking-path': {
-        type: (path: string) => parseBIP32Path(path),
-        dest: 'stakingPath',
-        help: 'Stake derivation path. (specify only path or script hash)',
-      },
-      '--staking-script-hash': {
-        type: (hashHex: string) => parseScriptHashHex(hashHex),
-        dest: 'stakingScriptHash',
-        help: 'Stake derivation script hash in hex format',
+      '_mutually-exclusive-group-required-staking': {
+        '--staking-path': {
+          type: (path: string) => parseBIP32Path(path),
+          dest: 'stakingPath',
+          help: 'Stake derivation path. Either this or staking script hash has to be specified.',
+        },
+        '--staking-script-hash': {
+          type: (hashHex: string) => parseScriptHashHex(hashHex),
+          dest: 'stakingScriptHash',
+          help: 'Stake derivation script hash in hex format',
+        },
       },
       '--address-file': {
         required: true,

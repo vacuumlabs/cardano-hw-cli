@@ -9,6 +9,30 @@ const prefix = (filename) => `${resFolder}${filename}`
 const pad = (args) => [undefined, undefined, ...args]
 
 describe('Command parser', () => {
+  it('Should parse address show command', () => {
+    const args = pad([
+      'shelley',
+      'address',
+      'show',
+      '--payment-path',
+      '1852H/1815H/0H/0/0',
+      '--staking-script-hash',
+      '14c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f1124',
+      '--address-file',
+      prefix('payment.addr'),
+    ])
+    const { parsedArgs } = parse(args)
+    const expectedResult = {
+      command: CommandType.SHOW_ADDRESS,
+      paymentPath: [2147485500, 2147485463, 2147483648, 0, 0],
+      paymentScriptHash: undefined,
+      stakingPath: undefined,
+      stakingScriptHash: '14c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f1124',
+      address: 'addr1qxq0nckg3ekgzuqg7w5p9mvgnd9ym28qh5grlph8xd2z92sj922xhxkn6twlq2wn4q50q352annk3903tj00h45mgfmsl3s9zt',
+    }
+    assert.deepStrictEqual(parsedArgs, expectedResult)
+  })
+
   it('Should parse key-gen command', () => {
     const args = pad([
       'shelley',

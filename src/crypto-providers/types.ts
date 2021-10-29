@@ -10,12 +10,12 @@ import {
   HwSigningData,
   BIP32Path,
   Network,
-  Address,
   XPubKeyHex,
   VotePublicKeyHex,
   NativeScript,
   NativeScriptHashKeyHex,
   NativeScriptDisplayFormat,
+  ParsedShowAddressArguments,
 } from '../types'
 
 export enum SigningMode {
@@ -35,11 +35,7 @@ export type SigningParameters = {
 export type CryptoProvider = {
   getVersion: () => Promise<string>,
   showAddress: (
-    paymentPath: BIP32Path,
-    paymentScriptHash: string,
-    stakingPath: BIP32Path,
-    stakingScriptHash: string,
-    address: Address,
+    args: ParsedShowAddressArguments,
   ) => Promise<void>,
   signTx: (
     params: SigningParameters,
