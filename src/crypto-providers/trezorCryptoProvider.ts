@@ -37,7 +37,6 @@ import {
   TxSigned,
 } from '../transaction/transaction'
 import {
-  Address,
   BIP32Path,
   HexString,
   HwSigningData,
@@ -49,6 +48,7 @@ import {
   VotePublicKeyHex,
   XPubKeyHex,
   NativeScriptType,
+  ParsedShowAddressArguments,
 } from '../types'
 import {
   encodeAddress,
@@ -128,22 +128,20 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
   ): boolean => TREZOR_VERSIONS[feature] && isDeviceVersionGTE(deviceVersion, TREZOR_VERSIONS[feature])
 
   const showAddress = async (
-    paymentPath: BIP32Path,
-    paymentScriptHash: string,
-    stakingPath: BIP32Path,
-    stakingScriptHash: string,
-    address: Address,
+    {
+      paymentPath, paymentScriptHash, stakingPath, stakingScriptHash, address,
+    }: ParsedShowAddressArguments,
   ): Promise<void> => {
     const { addressType, networkId, protocolMagic } = getAddressAttributes(address)
-    const addressParameters = {
-      addressType,
-      path: paymentPath,
-      paymentScriptHash: paymentScriptHash || '',
-      stakingPath,
-      stakingScriptHash: stakingScriptHash || '',
-    }
+
     const response = await TrezorConnect.cardanoGetAddress({
-      addressParameters,
+      addressParameters: {
+        addressType,
+        path: paymentPath || '',
+        paymentScriptHash: paymentScriptHash || '',
+        stakingPath: stakingPath || '',
+        stakingScriptHash: stakingScriptHash || '',
+      },
       networkId,
       protocolMagic,
       showOnTrezor: true,

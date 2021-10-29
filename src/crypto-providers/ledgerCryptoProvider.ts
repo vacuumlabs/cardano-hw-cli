@@ -37,7 +37,6 @@ import {
   StakeCredentialType,
 } from '../transaction/types'
 import {
-  Address,
   BIP32Path,
   HexString,
   HwSigningData,
@@ -46,6 +45,7 @@ import {
   NativeScriptHashKeyHex,
   NativeScriptType,
   Network,
+  ParsedShowAddressArguments,
   VotePublicKeyHex,
   XPubKeyHex,
 } from '../types'
@@ -93,11 +93,9 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
   ): boolean => LEDGER_VERSIONS[feature] && isDeviceVersionGTE(deviceVersion, LEDGER_VERSIONS[feature])
 
   const showAddress = async (
-    paymentPath: BIP32Path,
-    paymentScriptHash: string,
-    stakingPath: BIP32Path,
-    stakingScriptHash: string,
-    address: Address,
+    {
+      paymentPath, paymentScriptHash, stakingPath, stakingScriptHash, address,
+    }: ParsedShowAddressArguments,
   ): Promise<void> => {
     try {
       const { addressType, networkId, protocolMagic } = getAddressAttributes(address)

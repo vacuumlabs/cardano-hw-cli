@@ -65,6 +65,8 @@ export type ParsedDeviceVersionArguments = {
   command: CommandType.DEVICE_VERSION,
 }
 
+// only one of paymentPath vs. paymentScriptHash and stakingPath vs. stakingScriptHash
+// should be present (the result of parse() complies to this)
 export type ParsedShowAddressArguments = {
   command: CommandType.SHOW_ADDRESS,
   paymentPath: BIP32Path,
