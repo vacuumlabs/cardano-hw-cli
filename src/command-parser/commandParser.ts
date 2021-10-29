@@ -1,7 +1,6 @@
+import { ArgumentParser } from 'argparse'
 import { ParsedArguments } from '../types'
 import { parserConfig } from './parserConfig'
-
-const { ArgumentParser } = require('argparse')
 
 export enum CommandType {
   APP_VERSION = 'version',
@@ -18,7 +17,7 @@ export enum CommandType {
 }
 
 const makeParser = () => {
-  const initParser = (parser: any, config: any) => {
+  const initParser = (parser: ArgumentParser, config: any) => {
     const isCommand = (str: string) => !str.startsWith('--')
     const commandType = (parent: string, current: string) => (parent ? `${parent}.${current}` : current)
     parser.set_defaults({ parser })
@@ -55,7 +54,7 @@ const preProcessArgs = (inputArgs: string[]) => {
   return commandArgs
 }
 
-export const parse = (inputArgs: string[]): { parser: any, parsedArgs: ParsedArguments } => {
+export const parse = (inputArgs: string[]): { parser: ArgumentParser, parsedArgs: ParsedArguments } => {
   const { parser, ...parsedArgs } = makeParser().parse_args(preProcessArgs(inputArgs))
   return { parser, parsedArgs }
 }
