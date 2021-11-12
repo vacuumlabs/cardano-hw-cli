@@ -1,4 +1,4 @@
-import * as Cardano from '@emurgo/cardano-serialization-lib-nodejs'
+import * as cardanoSerialization from '@emurgo/cardano-serialization-lib-nodejs'
 import { HARDENED_THRESHOLD } from '../constants'
 import { Errors } from '../errors'
 import { isBIP32Path, isPubKeyHex } from '../guards'
@@ -34,7 +34,7 @@ import {
   _AddressParameters,
 } from './types'
 
-const cardano = require('cardano-crypto.js')
+const cardanoCrypto = require('cardano-crypto.js')
 const {
   AddressTypes,
   base58,
@@ -142,7 +142,7 @@ const encodeAddress = (address: Buffer): string => {
     [AddressType.REWARD_KEY]: 'stake',
     [AddressType.REWARD_SCRIPT]: 'stake',
   }
-  const isTestnet = cardano.getShelleyAddressNetworkId(address) === NetworkIds.TESTNET
+  const isTestnet = cardanoCrypto.getShelleyAddressNetworkId(address) === NetworkIds.TESTNET
   const addressPrefix = `${addressPrefixes[addressType]}${isTestnet ? '_test' : ''}`
   return bech32.encode(addressPrefix, address)
 }
@@ -191,7 +191,7 @@ const filterSigningFiles = (
 }
 
 const hwSigningFileToPubKeyHash = (signingFile: HwSigningData): Uint8Array => (
-  Cardano.PublicKey.from_bytes(
+  cardanoSerialization.PublicKey.from_bytes(
     splitXPubKeyCborHex(signingFile.cborXPubKeyHex).pubKey,
   ).hash().to_bytes()
 )
@@ -210,7 +210,7 @@ const findSigningPathForKeyHash = (
 ): BIP32Path | undefined => {
   const signingFile = signingFiles.find((file) => {
     const { pubKey } = splitXPubKeyCborHex(file.cborXPubKeyHex)
-    const pubKeyHash = cardano.getPubKeyBlake2b224Hash(pubKey)
+    const pubKeyHash = cardanoCrypto.getPubKeyBlake2b224Hash(pubKey)
     return !Buffer.compare(pubKeyHash, certPubKeyHash)
   })
   return signingFile?.path
@@ -436,7 +436,7 @@ const _packBootstrapAddress = (
 ): _AddressParameters => {
   const { pubKey, chainCode } = splitXPubKeyCborHex(paymentSigningFile.cborXPubKeyHex)
   const xPubKey = Buffer.concat([pubKey, chainCode])
-  const address: Buffer = cardano.packBootstrapAddress(
+  const address: Buffer = cardanoCrypto.packBootstrapAddress(
     paymentSigningFile.path,
     xPubKey,
     undefined, // passphrase is undefined for derivation scheme v2
@@ -455,9 +455,9 @@ const _packBaseAddress = (
 ): _AddressParameters => {
   const { pubKey: stakePubKey } = splitXPubKeyCborHex(stakeSigningFile.cborXPubKeyHex)
   const { pubKey: paymentPubKey } = splitXPubKeyCborHex(paymentSigningFile.cborXPubKeyHex)
-  const address: Buffer = cardano.packBaseAddress(
-    cardano.getPubKeyBlake2b224Hash(paymentPubKey),
-    cardano.getPubKeyBlake2b224Hash(stakePubKey),
+  const address: Buffer = cardanoCrypto.packBaseAddress(
+    cardanoCrypto.getPubKeyBlake2b224Hash(paymentPubKey),
+    cardanoCrypto.getPubKeyBlake2b224Hash(stakePubKey),
     network.networkId,
   )
   return {
@@ -472,8 +472,8 @@ const _packEnterpriseAddress = (
   paymentSigningFile: HwSigningData, network: Network,
 ): _AddressParameters => {
   const { pubKey: paymentPubKey } = splitXPubKeyCborHex(paymentSigningFile.cborXPubKeyHex)
-  const address: Buffer = cardano.packEnterpriseAddress(
-    cardano.getPubKeyBlake2b224Hash(paymentPubKey),
+  const address: Buffer = cardanoCrypto.packEnterpriseAddress(
+    cardanoCrypto.getPubKeyBlake2b224Hash(paymentPubKey),
     network.networkId,
   )
   return {
@@ -487,8 +487,8 @@ const _packRewardAddress = (
   stakeSigningFile: HwSigningData, network: Network,
 ): _AddressParameters => {
   const { pubKey: stakePubKey } = splitXPubKeyCborHex(stakeSigningFile.cborXPubKeyHex)
-  const address: Buffer = cardano.packRewardAddress(
-    cardano.getPubKeyBlake2b224Hash(stakePubKey),
+  const address: Buffer = cardanoCrypto.packRewardAddress(
+    cardanoCrypto.getPubKeyBlake2b224Hash(stakePubKey),
     network.networkId,
   )
   return {
@@ -555,22 +555,22 @@ const getAddressAttributes = (addressStr: Address): {
   networkId: number,
   protocolMagic: number,
 } => {
-  let address: Cardano.ByronAddress | Cardano.Address
+  let address: cardanoSerialization.ByronAddress | cardanoSerialization.Address
   try {
     // first check if the address can be decoded as a Byron address
-    address = Cardano.ByronAddress.from_base58(addressStr)
+    address = cardanoSerialization.ByronAddress.from_base58(addressStr)
   } catch (_e) {
     // if not try to work with it as a Shelley address
-    address = Cardano.Address.from_bech32(addressStr)
+    address = cardanoSerialization.Address.from_bech32(addressStr)
   }
 
-  if (address instanceof Cardano.ByronAddress) {
+  if (address instanceof cardanoSerialization.ByronAddress) {
     return {
       addressType: AddressType.BYRON,
       networkId: address.network_id(),
       protocolMagic: address.byron_protocol_magic(),
     }
-  } if (address instanceof Cardano.Address) {
+  } if (address instanceof cardanoSerialization.Address) {
     const protocolMagic = address.network_id() === NetworkIds.MAINNET
       ? ProtocolMagics.MAINNET
       : ProtocolMagics.TESTNET
