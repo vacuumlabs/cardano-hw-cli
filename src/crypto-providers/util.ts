@@ -72,7 +72,7 @@ enum PathTypes {
   PATH_INVALID,
 }
 
-const classifyPath = (path:number[]) => {
+const classifyPath = (path: number[]): PathTypes => {
   const HD = HARDENED_THRESHOLD
 
   if (path.length < 3) return PathTypes.PATH_INVALID
@@ -337,19 +337,18 @@ const isMultisigTransaction = (signingFiles: HwSigningData[]): boolean => (
   hasMultisigSigningFile(signingFiles)
 )
 
-const certificatesWithStakeCredentials = (certificates: _Certificate[]) => (
+const certificatesWithStakeCredentials = (certificates: _Certificate[]): (
+    _DelegationCert | _StakingKeyRegistrationCert | _StakingKeyDeregistrationCert)[] => (
   certificates.filter((cert) => cert.type in [
     TxCertificateKeys.DELEGATION,
     TxCertificateKeys.STAKING_KEY_REGISTRATION,
     TxCertificateKeys.STAKING_KEY_DEREGISTRATION,
-  ]) as (
-    _DelegationCert |
-    _StakingKeyRegistrationCert |
-    _StakingKeyDeregistrationCert
-  )[]
+  ]) as (_DelegationCert | _StakingKeyRegistrationCert | _StakingKeyDeregistrationCert)[]
 )
 
-const validateOrdinaryTx = (unsignedTxParsed: _UnsignedTxParsed, signingFiles: HwSigningData[]) => {
+const validateOrdinaryTx = (
+  unsignedTxParsed: _UnsignedTxParsed, signingFiles: HwSigningData[],
+): void => {
   // We require ordinary transactions to use certificates and withdrawals
   // only with AddrKeyHash stake credentials
   if (
@@ -367,7 +366,7 @@ const validateOrdinaryTx = (unsignedTxParsed: _UnsignedTxParsed, signingFiles: H
   }
 }
 
-const validateMultisigTx = (unsignedTxParsed: _UnsignedTxParsed) => {
+const validateMultisigTx = (unsignedTxParsed: _UnsignedTxParsed): void => {
   // We require multisig transactions to use certificates and withdrawals
   // only with ScriptHash stake credentials
   if (
@@ -660,13 +659,13 @@ const encodeVotingRegistrationMetaData = (
   return encodeCbor(votingRegistrationMetaData).toString('hex')
 }
 
-const areHwSigningDataNonByron = (hwSigningData: HwSigningData[]) => (
+const areHwSigningDataNonByron = (hwSigningData: HwSigningData[]): boolean => (
   hwSigningData
     .map((signingFile) => classifyPath(signingFile.path))
     .every((pathType) => pathType !== PathTypes.PATH_WALLET_SPENDING_KEY_BYRON)
 )
 
-const validateVotingRegistrationAddressType = (addressType: number) => {
+const validateVotingRegistrationAddressType = (addressType: number): void => {
   if (addressType !== AddressTypes.BASE && addressType !== AddressTypes.REWARD) {
     throw Error(Errors.InvalidVotingRegistrationAddressType)
   }
