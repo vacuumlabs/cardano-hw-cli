@@ -46,7 +46,7 @@ export const parseFileTypeMagic = (fileTypeMagic: string, pathType: PathTypes): 
   // cardano-cli only distinguish 3 categories, payment, pool cold and stake keys
   // to keep things simple, any other key is bundled into the "payment" category
   // to keep things more generic
-  const fileTypeStartsWith = (label: PathLabel) => {
+  const checkFileTypeStartsWith = (label: PathLabel) => {
     if (!fileTypeMagic.startsWith(label)) {
       throw Error(Errors.InvalidFileTypeError)
     }
@@ -55,24 +55,24 @@ export const parseFileTypeMagic = (fileTypeMagic: string, pathType: PathTypes): 
   switch (pathType) {
     case PathTypes.PATH_WALLET_ACCOUNT_MULTISIG:
     case PathTypes.PATH_WALLET_SPENDING_KEY_MULTISIG:
-      fileTypeStartsWith(PathLabel.PAYMENT)
+      checkFileTypeStartsWith(PathLabel.PAYMENT)
       return HwSigningType.MultiSig
     case PathTypes.PATH_WALLET_STAKING_KEY_MULTISIG:
-      fileTypeStartsWith(PathLabel.STAKE)
+      checkFileTypeStartsWith(PathLabel.STAKE)
       return HwSigningType.MultiSig
     case PathTypes.PATH_WALLET_ACCOUNT:
     case PathTypes.PATH_WALLET_SPENDING_KEY_BYRON:
     case PathTypes.PATH_WALLET_SPENDING_KEY_SHELLEY:
-      fileTypeStartsWith(PathLabel.PAYMENT)
+      checkFileTypeStartsWith(PathLabel.PAYMENT)
       return HwSigningType.Payment
     case PathTypes.PATH_WALLET_STAKING_KEY:
-      fileTypeStartsWith(PathLabel.STAKE)
+      checkFileTypeStartsWith(PathLabel.STAKE)
       return HwSigningType.Stake
     case PathTypes.PATH_WALLET_MINTING_KEY:
-      fileTypeStartsWith(PathLabel.PAYMENT)
+      checkFileTypeStartsWith(PathLabel.PAYMENT)
       return HwSigningType.Mint
     case PathTypes.PATH_POOL_COLD_KEY:
-      fileTypeStartsWith(PathLabel.POOL_COLD)
+      checkFileTypeStartsWith(PathLabel.POOL_COLD)
       return HwSigningType.PoolCold
     default:
       throw Error(Errors.InvalidFileTypeError)
