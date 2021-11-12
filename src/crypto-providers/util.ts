@@ -377,7 +377,7 @@ const validateMultisigTx = (unsignedTxParsed: _UnsignedTxParsed): void => {
       (withdrawal) => withdrawal.stakeCredential.type === StakeCredentialType.SCRIPT_HASH,
     )
   ) {
-    throw Error(Errors.NonScriptStakeCredentialInMultisigTx)
+    throw Error(Errors.KeyHashStakeCredentialInMultisigTx)
   }
 }
 

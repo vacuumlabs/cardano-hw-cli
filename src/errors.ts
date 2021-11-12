@@ -95,7 +95,7 @@ const enum Errors {
   Unreachable = 'Unreachable code reached',
   StakeCredentialParseError = 'Failed to parse stake credentials',
   ScriptStakeCredentialInOrdinaryTx = 'Script stake credential used in an ordinary transaction',
-  NonScriptStakeCredentialInMultisigTx = 'Address key hash stake credential used in a multisig transaction',
+  KeyHashStakeCredentialInMultisigTx = 'Address key hash stake credential used in a multisig transaction',
   MixedOrdinaryAndMultisigSigningFiles = 'Mixed ordinary and multisig signing files',
 }
 
