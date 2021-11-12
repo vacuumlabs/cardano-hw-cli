@@ -195,6 +195,8 @@ const nativeScriptTypeMap: {[key: string]: NativeScriptType} = {
 }
 
 const parseNativeScriptData = (data: any): NativeScript => {
+  const isCorrectNumber = (n: any): boolean => typeof n === 'number' && n >= 0 && n <= Number.MAX_SAFE_INTEGER
+
   if (!data.type || !(data.type in nativeScriptTypeMap)) {
     throw Error(Errors.InvalidNativeScriptFile)
   }
@@ -220,7 +222,7 @@ const parseNativeScriptData = (data: any): NativeScript => {
         scripts: data.scripts.map(parseNativeScriptData),
       }
     case NativeScriptType.N_OF_K:
-      if (typeof data.required !== 'number' || !data.scripts || !Array.isArray(data.scripts)) {
+      if (!isCorrectNumber(data.required) || !data.scripts || !Array.isArray(data.scripts)) {
         throw Error(Errors.InvalidNativeScriptFile)
       }
       return {
@@ -230,7 +232,7 @@ const parseNativeScriptData = (data: any): NativeScript => {
       }
     case NativeScriptType.INVALID_BEFORE:
     case NativeScriptType.INVALID_HEREAFTER:
-      if (typeof data.slot !== 'number') {
+      if (!isCorrectNumber(data.slot)) {
         throw Error(Errors.InvalidNativeScriptFile)
       }
       return {
