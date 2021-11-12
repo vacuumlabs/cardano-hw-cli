@@ -427,7 +427,7 @@ const validateKeyGenInputs = (
   ) throw Error(Errors.InvalidKeyGenInputsError)
 }
 
-const _packBootstrapAddress = (
+const _packByronAddress = (
   paymentSigningFile: HwSigningData, network: Network,
 ): _AddressParameters => {
   const { pubKey, chainCode } = splitXPubKeyCborHex(paymentSigningFile.cborXPubKeyHex)
@@ -449,8 +449,8 @@ const _packBootstrapAddress = (
 const _packBaseAddress = (
   paymentSigningFile: HwSigningData, stakeSigningFile: HwSigningData, network: Network,
 ): _AddressParameters => {
-  const { pubKey: stakePubKey } = splitXPubKeyCborHex(stakeSigningFile.cborXPubKeyHex)
   const { pubKey: paymentPubKey } = splitXPubKeyCborHex(paymentSigningFile.cborXPubKeyHex)
+  const { pubKey: stakePubKey } = splitXPubKeyCborHex(stakeSigningFile.cborXPubKeyHex)
   const address: Buffer = cardanoCrypto.packBaseAddress(
     cardanoCrypto.getPubKeyBlake2b224Hash(paymentPubKey),
     cardanoCrypto.getPubKeyBlake2b224Hash(stakePubKey),
@@ -499,7 +499,7 @@ const getAddressParameters = (
   address: Buffer,
   network: Network,
 ): _AddressParameters | null => {
-  if (hwSigningData == null || hwSigningData.length === 0) return null
+  if (hwSigningData.length === 0) return null
   const { paymentSigningFiles, stakeSigningFiles } = filterSigningFiles(hwSigningData)
   const addressType = getAddressType(address)
   const findMatchingAddress = (packedAddresses: (_AddressParameters | null)[]) => (
@@ -512,11 +512,10 @@ const getAddressParameters = (
     switch (addressType) {
       case AddressType.BYRON:
         return findMatchingAddress(
-          paymentSigningFiles.map((paymentSigningFile) => _packBootstrapAddress(paymentSigningFile, network)),
+          paymentSigningFiles.map((paymentSigningFile) => _packByronAddress(paymentSigningFile, network)),
         )
 
       case AddressType.BASE_PAYMENT_KEY_STAKE_KEY:
-      case AddressType.BASE_PAYMENT_SCRIPT_STAKE_KEY:
         return findMatchingAddress(
           paymentSigningFiles.flatMap((paymentSigningFile) => (
             stakeSigningFiles.map((stakeSigningFile) => (
@@ -524,6 +523,8 @@ const getAddressParameters = (
             ))
           )),
         )
+        // Note: BASE addresses containing a script hash cannot be constructed from hwSigningData this way.
+        // However, hw wallets will show them anyway, so let's just send them as address bytes.
 
       case AddressType.ENTERPRISE_KEY:
         return findMatchingAddress(
