@@ -505,6 +505,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     }
 
     // TODO: removeNullFields shouldn't be necessary, remove when fixed in trezor connect
+    // https://github.com/trezor/connect/issues/770
     const response = await TrezorConnect.cardanoSignTransaction(removeNullFields(request))
 
     if (!response.success) {
