@@ -1,4 +1,4 @@
-import * as Cardano from '@emurgo/cardano-serialization-lib-nodejs'
+import * as cardanoSerialization from '@emurgo/cardano-serialization-lib-nodejs'
 import { isArrayOfType } from '../guards'
 import { Errors } from '../errors'
 import {
@@ -284,7 +284,7 @@ const parseTxCerts = (txCertificates: any[]): _Certificate[] => {
 }
 
 const parseTxWithdrawalRewardAccount = (addressBuffer: Buffer): StakeCredential => {
-  const address = Cardano.Address.from_bytes(addressBuffer)
+  const address = cardanoSerialization.Address.from_bytes(addressBuffer)
   const type = getAddressType(address.to_bytes())
   switch (type) {
     case (AddressType.REWARD_KEY): {
