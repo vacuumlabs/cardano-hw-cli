@@ -197,32 +197,29 @@ const hwSigningFileToPubKeyHash = (signingFile: HwSigningData): Uint8Array => (
 )
 
 const findPathForKeyHash = (
-  pubKeyHash: Buffer,
-  signingFiles: HwSigningData[],
+  keyHash: Buffer, signingFiles: HwSigningData[],
 ): BIP32Path | undefined => {
-  const signingFile = signingFiles.find((file) => pubKeyHash.equals(hwSigningFileToPubKeyHash(file)))
+  const signingFile = signingFiles.find((file) => keyHash.equals(hwSigningFileToPubKeyHash(file)))
   return signingFile?.path
 }
 
-// TOOD rename arguemnt, what about buffer length?
 const findSigningPathForKeyHash = (
-  certPubKeyHash: Buffer, signingFiles: HwSigningData[],
+  keyHash: Buffer, signingFiles: HwSigningData[],
 ): BIP32Path | undefined => {
   const signingFile = signingFiles.find((file) => {
     const { pubKey } = splitXPubKeyCborHex(file.cborXPubKeyHex)
     const pubKeyHash = cardanoCrypto.getPubKeyBlake2b224Hash(pubKey)
-    return !Buffer.compare(pubKeyHash, certPubKeyHash)
+    return keyHash.equals(pubKeyHash)
   })
   return signingFile?.path
 }
 
-// TOOD rename arguemnt, what about buffer length?
 const findSigningPathForKey = (
   key: Buffer, signingFiles: HwSigningData[],
 ): BIP32Path | undefined => {
   const signingFile = signingFiles.find((file) => {
     const { pubKey } = splitXPubKeyCborHex(file.cborXPubKeyHex)
-    return !Buffer.compare(pubKey, key)
+    return key.equals(pubKey)
   })
   return signingFile?.path
 }
