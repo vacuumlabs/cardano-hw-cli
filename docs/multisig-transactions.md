@@ -143,6 +143,7 @@ cardano-cli transaction build-raw \
 --fee 194654 \
 --out-file tx.raw
 ```
+At this point, the native script is present in the transaction witness set - now we only need to add the witnesses with signatures.
 
 ### Signing the transaction
 Because we need two witnesses, one from the key from hardware wallet and one from the key from `cardano-cli`, we will create them separately and afterwards assemble them together to create a signed transaction.
