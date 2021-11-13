@@ -50,7 +50,7 @@ cardano-hw-cli transaction witness
 
 # Show address on device
 ```
-cardano-hw-cli address show 
+cardano-hw-cli address show
 --payment-path PAYMENTPATH    Payment derivation path.
 --staking-path STAKINGPATH    Stake derivation path.
 --address-file ADDRESS        Input filepath of the address.
@@ -107,9 +107,9 @@ cardano-hw-cli device version
 - [Public keys bulk export](docs/public-keys-bulk-export-example.md)
 
 # Running from source
-Install node version v12.16.2
+Install node version v12.19.1
 ```
-nvm i v12.16.2
+nvm i v12.19.1
 ```
 
 Install yarn:
@@ -133,9 +133,9 @@ yarn dev ...
 ```
 
 # Building from source
-Install node version v12.16.2
+Install node version v12.19.1
 ```
-nvm i v12.16.2
+nvm i v12.19.1
 ```
 
 Install yarn:
