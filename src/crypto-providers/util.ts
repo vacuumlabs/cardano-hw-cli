@@ -1,17 +1,25 @@
 import * as cardanoSerialization from '@emurgo/cardano-serialization-lib-nodejs'
+import {
+  RewardAccount,
+  StakeCredential,
+  StakeCredentialType,
+  TransactionBody,
+  encodeTxBody,
+  CertificateType,
+  PoolRegistrationCertificate,
+  Certificate,
+  StakeRegistrationCertificate,
+  StakeDeregistrationCertificate,
+  StakeDelegationCertificate,
+  AddressKeyHash,
+  ScriptHash,
+} from 'cardano-hw-interop-lib'
 import { HARDENED_THRESHOLD } from '../constants'
 import { Errors } from '../errors'
 import { isBIP32Path, isPubKeyHex } from '../guards'
 import {
-  TxCertificateKeys,
   VotingRegistrationAuxiliaryData,
   VotingRegistrationMetaData,
-  _Certificate,
-  _DelegationCert,
-  _StakepoolRegistrationCert,
-  _StakingKeyDeregistrationCert,
-  _StakingKeyRegistrationCert,
-  _UnsignedTxParsed,
   _XPubKey,
 } from '../transaction/types'
 import {
@@ -236,24 +244,24 @@ const hasMultisigSigningFile = (signingFiles: HwSigningData[]): boolean => (
   signingFiles.some((signingFile) => signingFile.type === HwSigningType.MultiSig)
 )
 
-const certificatesWithStakeCredentials = (certificates: _Certificate[]): (
-    _DelegationCert | _StakingKeyRegistrationCert | _StakingKeyDeregistrationCert)[] => (
+const certificatesWithStakeCredentials = (certificates: Certificate[]): (
+    StakeRegistrationCertificate | StakeDeregistrationCertificate | StakeDelegationCertificate)[] => (
   certificates.filter((cert) => cert.type in [
-    TxCertificateKeys.DELEGATION,
-    TxCertificateKeys.STAKING_KEY_REGISTRATION,
-    TxCertificateKeys.STAKING_KEY_DEREGISTRATION,
-  ]) as (_DelegationCert | _StakingKeyRegistrationCert | _StakingKeyDeregistrationCert)[]
+    CertificateType.STAKE_REGISTRATION,
+    CertificateType.STAKE_DEREGISTRATION,
+    CertificateType.STAKE_DELEGATION,
+  ]) as (StakeRegistrationCertificate | StakeDeregistrationCertificate | StakeDelegationCertificate)[]
 )
 
 const determineSigningMode = (
-  unsignedTxParsed: _UnsignedTxParsed, signingFiles: HwSigningData[],
+  txBody: TransactionBody, signingFiles: HwSigningData[],
 ): SigningMode => {
-  const poolRegistrationCert = unsignedTxParsed.certificates.find(
-    (cert) => cert.type === TxCertificateKeys.STAKEPOOL_REGISTRATION,
-  ) as _StakepoolRegistrationCert | undefined
+  const poolRegistrationCert = txBody.certificates?.find(
+    (cert) => cert.type === CertificateType.POOL_REGISTRATION,
+  ) as PoolRegistrationCertificate | undefined
 
   if (poolRegistrationCert) {
-    const poolKeyPath = findSigningPathForKeyHash(poolRegistrationCert.poolKeyHash, signingFiles)
+    const poolKeyPath = findSigningPathForKeyHash(poolRegistrationCert.poolParams.operator, signingFiles)
     return poolKeyPath
       ? SigningMode.POOL_REGISTRATION_AS_OPERATOR
       : SigningMode.POOL_REGISTRATION_AS_OWNER
@@ -433,18 +441,36 @@ const getAddressAttributes = (addressStr: Address): {
   throw Error(Errors.InvalidAddressError)
 }
 
-const ipv4ToString = (ipv4: Buffer | undefined): string | undefined => {
+const ipv4ToString = (ipv4: Buffer | null | undefined): string | undefined => {
   if (!ipv4) return undefined
   return new Uint8Array(ipv4).join('.')
 }
-const ipv6ToString = (ipv6: Buffer | undefined): string | undefined => {
+const ipv6ToString = (ipv6: Buffer | null | undefined): string | undefined => {
   if (!ipv6) return undefined
   // concats the little endians to Buffer and divides the hex string to foursomes
   const ipv6LE = Buffer.from(ipv6).swap32().toString('hex').match(/.{1,4}/g)
   return ipv6LE ? ipv6LE.join(':') : undefined
 }
 
-const rewardAddressToStakeCredential = (address: Buffer) => address.slice(1)
+const rewardAccountToStakeCredential = (address: RewardAccount): StakeCredential => {
+  const type = getAddressType(address)
+  switch (type) {
+    case (AddressType.REWARD_KEY): {
+      return {
+        type: StakeCredentialType.ADDRESS_KEY_HASH,
+        hash: address.slice(1) as AddressKeyHash,
+      }
+    }
+    case (AddressType.REWARD_SCRIPT): {
+      return {
+        type: StakeCredentialType.SCRIPT_HASH,
+        hash: address.slice(1) as ScriptHash,
+      }
+    }
+    default:
+      throw Error(Errors.InvalidAddressError)
+  }
+}
 
 const isDeviceVersionGTE = (
   deviceVersion: DeviceVersion,
@@ -525,6 +551,10 @@ const validateVotingRegistrationAddressType = (addressType: number): void => {
   }
 }
 
+const getTxBodyHash = (txBody: TransactionBody): string => (
+  blake2b(encodeTxBody(txBody), 32).toString('hex')
+)
+
 export {
   PathTypes,
   classifyPath,
@@ -542,7 +572,7 @@ export {
   getAddressAttributes,
   ipv4ToString,
   ipv6ToString,
-  rewardAddressToStakeCredential,
+  rewardAccountToStakeCredential,
   isDeviceVersionGTE,
   formatVotingRegistrationMetaData,
   encodeVotingRegistrationMetaData,
@@ -551,4 +581,5 @@ export {
   certificatesWithStakeCredentials,
   hasMultisigSigningFile,
   determineSigningMode,
+  getTxBodyHash,
 }

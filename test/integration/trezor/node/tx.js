@@ -1,9 +1,9 @@
 /* eslint-disable max-len */
 const assert = require('assert')
-const { parseUnsignedTx } = require('../../../../src/transaction/txParser')
+const { parseRawTx } = require('cardano-hw-interop-lib')
 const { TrezorCryptoProvider } = require('../../../../src/crypto-providers/trezorCryptoProvider')
 const { NETWORKS } = require('../../../../src/constants')
-const { determineSigningMode } = require('../../../../src/crypto-providers/util')
+const { determineSigningMode, getTxBodyHash } = require('../../../../src/crypto-providers/util')
 const { validateSigning, validateWitnessing } = require('../../../../src/crypto-providers/signingValidation')
 
 const { signingFiles } = require('./signingFiles')
@@ -176,11 +176,12 @@ const transactions = {
 }
 
 async function testTxSigning(cryptoProvider, transaction) {
-  const unsignedTxParsed = parseUnsignedTx(transaction.unsignedCborHex)
-  const signingMode = determineSigningMode(unsignedTxParsed, transaction.hwSigningFiles)
+  const rawTx = parseRawTx(transaction.unsignedCborHex)
+  const signingMode = determineSigningMode(rawTx.body, transaction.hwSigningFiles)
   const signingParameters = {
     signingMode,
-    unsignedTxParsed,
+    rawTx,
+    txBodyHashHex: getTxBodyHash(rawTx.body),
     hwSigningFileData: transaction.hwSigningFiles,
     network: NETWORKS[transaction.network],
   }
@@ -190,11 +191,12 @@ async function testTxSigning(cryptoProvider, transaction) {
 }
 
 async function testTxWitnessing(cryptoProvider, transaction) {
-  const unsignedTxParsed = parseUnsignedTx(transaction.unsignedCborHex)
-  const signingMode = determineSigningMode(unsignedTxParsed, transaction.hwSigningFiles)
+  const rawTx = parseRawTx(transaction.unsignedCborHex)
+  const signingMode = determineSigningMode(rawTx.body, transaction.hwSigningFiles)
   const signingParameters = {
     signingMode,
-    unsignedTxParsed,
+    rawTx,
+    txBodyHashHex: getTxBodyHash(rawTx.body),
     hwSigningFileData: transaction.hwSigningFiles,
     network: NETWORKS[transaction.network],
   }

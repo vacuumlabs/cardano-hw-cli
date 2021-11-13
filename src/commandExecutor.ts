@@ -1,3 +1,9 @@
+import {
+  validateRawTx,
+  parseRawTx,
+  transformRawTx,
+  RawTransaction,
+} from 'cardano-hw-interop-lib'
 import { CryptoProvider } from './crypto-providers/types'
 import {
   constructSignedTxOutput,
@@ -21,6 +27,7 @@ import {
   ParsedCatalystVotingKeyRegistrationMetadataArguments,
   Cbor,
   NativeScriptDisplayFormat,
+  CborHex,
 } from './types'
 import { LedgerCryptoProvider } from './crypto-providers/ledgerCryptoProvider'
 import { TrezorCryptoProvider } from './crypto-providers/trezorCryptoProvider'
@@ -30,10 +37,10 @@ import {
   PathTypes,
   areHwSigningDataNonByron,
   determineSigningMode,
+  getTxBodyHash,
 } from './crypto-providers/util'
 import { Errors } from './errors'
 import { parseOpCertIssueCounterFile } from './command-parser/parsers'
-import { parseUnsignedTx } from './transaction/txParser'
 import { validateSigning, validateWitnessing } from './crypto-providers/signingValidation'
 
 const promiseTimeout = <T> (promise: Promise<T>, ms: number): Promise<T> => {
@@ -95,11 +102,31 @@ const CommandExecutor = async () => {
     ))
   }
 
+  const _validateAndParseRawTx = (rawTxCborHex: CborHex): RawTransaction => {
+    const rawTxCbor = Buffer.from(rawTxCborHex, 'hex')
+    const validationErrors = validateRawTx(rawTxCbor)
+    validationErrors.forEach((validationError) => {
+      if (!validationError.fixable) {
+        throw Error(validationError.reason)
+      }
+    })
+    if (validationErrors.length !== 0) {
+      // eslint-disable-next-line no-console
+      console.log('Note: following errors in the transaction will be fixed:')
+      validationErrors.forEach((validationError) => {
+        // eslint-disable-next-line no-console
+        console.log(`${validationError.reason} (${validationError.position})`)
+      })
+    }
+    return transformRawTx(parseRawTx(rawTxCbor))
+  }
+
   const createSignedTx = async (args: ParsedTransactionSignArguments) => {
-    const unsignedTxParsed = parseUnsignedTx(args.txBodyFileData.cborHex)
+    const rawTx = _validateAndParseRawTx(args.txBodyFileData.cborHex)
     const signingParameters = {
-      signingMode: determineSigningMode(unsignedTxParsed, args.hwSigningFileData),
-      unsignedTxParsed,
+      signingMode: determineSigningMode(rawTx.body, args.hwSigningFileData),
+      rawTx,
+      txBodyHashHex: getTxBodyHash(rawTx.body),
       hwSigningFileData: args.hwSigningFileData,
       network: args.network,
     }
@@ -120,10 +147,11 @@ const CommandExecutor = async () => {
   }
 
   const createTxWitnesses = async (args: ParsedTransactionWitnessArguments) => {
-    const unsignedTxParsed = parseUnsignedTx(args.txBodyFileData.cborHex)
+    const rawTx = _validateAndParseRawTx(args.txBodyFileData.cborHex)
     const signingParameters = {
-      signingMode: determineSigningMode(unsignedTxParsed, args.hwSigningFileData),
-      unsignedTxParsed,
+      signingMode: determineSigningMode(rawTx.body, args.hwSigningFileData),
+      rawTx,
+      txBodyHashHex: getTxBodyHash(rawTx.body),
       hwSigningFileData: args.hwSigningFileData,
       network: args.network,
     }
