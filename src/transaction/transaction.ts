@@ -1,8 +1,8 @@
 import { isEqual, uniqWith } from 'lodash'
+import { encodeSignedTx, RawTransaction } from 'cardano-hw-interop-lib'
 import {
   TxWitnessByron,
   TxWitnessShelley,
-  _UnsignedTxDecoded,
   SignedTxCborHex,
   TxWitnessKeys,
 } from './types'
@@ -15,23 +15,24 @@ const TxByronWitness = (
 const TxShelleyWitness = (publicKey: Buffer, signature: Buffer): TxWitnessShelley => [publicKey, signature]
 
 const TxSigned = (
-  unsignedTxDecoded: _UnsignedTxDecoded,
+  rawTx: RawTransaction,
   byronWitnesses: TxWitnessByron[],
   shelleyWitnesses: TxWitnessShelley[],
 ): SignedTxCborHex => {
-  const { txBody, nativeScriptWitnesses, meta } = unsignedTxDecoded
-  const witnesses = new Map()
+  const { body, nativeScriptWitnesses, auxiliaryData } = rawTx
+  const nativeScriptWitnessList = nativeScriptWitnesses as any[] | undefined
+  const witnessSet = new Map()
   if (shelleyWitnesses.length > 0) {
-    witnesses.set(TxWitnessKeys.SHELLEY, shelleyWitnesses)
+    witnessSet.set(TxWitnessKeys.SHELLEY, shelleyWitnesses)
   }
-  if (nativeScriptWitnesses && nativeScriptWitnesses.length > 0) {
+  if (nativeScriptWitnessList?.length) {
     // cardano-cli deduplicates the script witnesses before adding them to the signed transaction
-    witnesses.set(TxWitnessKeys.NATIVE_SCRIPTS, uniqWith(nativeScriptWitnesses, isEqual))
+    witnessSet.set(TxWitnessKeys.NATIVE_SCRIPTS, uniqWith(nativeScriptWitnessList, isEqual))
   }
   if (byronWitnesses.length > 0) {
-    witnesses.set(TxWitnessKeys.BYRON, byronWitnesses)
+    witnessSet.set(TxWitnessKeys.BYRON, byronWitnesses)
   }
-  return encodeCbor([txBody, witnesses, meta]).toString('hex')
+  return encodeSignedTx({ body, witnessSet, auxiliaryData }).toString('hex') as SignedTxCborHex
 }
 
 export {

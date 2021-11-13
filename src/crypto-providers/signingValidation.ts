@@ -1,8 +1,8 @@
-import { Errors } from '../errors'
 import {
-  TxCertificateKeys,
-  _UnsignedTxParsed,
-} from '../transaction/types'
+  CertificateType,
+  TransactionBody,
+} from 'cardano-hw-interop-lib'
+import { Errors } from '../errors'
 import {
   SigningMode,
   SigningParameters,
@@ -11,23 +11,23 @@ import {
   filterSigningFiles,
 } from './util'
 
-const _countWitnessableItems = (unsignedTxParsed: _UnsignedTxParsed) => {
+const _countWitnessableItems = (txBody: TransactionBody) => {
   // we count stake registrations separately because they don't necessarily require a staking witness
   let numStakeRegistrationItems = 0
-  let numStakeOtherItems = unsignedTxParsed.withdrawals.length
+  let numStakeOtherItems = txBody.withdrawals?.length || 0
   let numPoolColdItems = 0
-  unsignedTxParsed.certificates.forEach((cert) => {
+  txBody.certificates?.forEach((cert) => {
     switch (cert.type) {
-      case TxCertificateKeys.STAKING_KEY_REGISTRATION:
+      case CertificateType.STAKE_REGISTRATION:
         numStakeRegistrationItems += 1
         break
 
-      case TxCertificateKeys.STAKING_KEY_DEREGISTRATION:
-      case TxCertificateKeys.DELEGATION:
+      case CertificateType.STAKE_DEREGISTRATION:
+      case CertificateType.STAKE_DELEGATION:
         numStakeOtherItems += 1
         break
 
-      case TxCertificateKeys.STAKEPOOL_RETIREMENT:
+      case CertificateType.POOL_RETIREMENT:
         numPoolColdItems += 1
         break
 
@@ -43,12 +43,12 @@ const validateOrdinaryWitnesses = (params: SigningParameters) => {
     poolColdSigningFiles, mintSigningFiles, multisigSigningFiles,
   } = filterSigningFiles(params.hwSigningFileData)
 
-  const { numPoolColdItems } = _countWitnessableItems(params.unsignedTxParsed)
+  const { numPoolColdItems } = _countWitnessableItems(params.rawTx.body)
 
   if (numPoolColdItems === 0 && poolColdSigningFiles.length > 0) {
     throw Error(Errors.TooManyPoolColdSigningFilesError)
   }
-  if (!params.unsignedTxParsed.mint && mintSigningFiles.length > 0) {
+  if (!params.rawTx.body.mint?.length && mintSigningFiles.length > 0) {
     throw Error(Errors.TooManyMintSigningFilesError)
   }
   if (multisigSigningFiles.length > 0) {
@@ -71,7 +71,7 @@ const validateOrdinarySigning = (params: SigningParameters) => {
 
   const {
     numStakeOtherItems, numPoolColdItems,
-  } = _countWitnessableItems(params.unsignedTxParsed)
+  } = _countWitnessableItems(params.rawTx.body)
 
   if (numStakeOtherItems > 0 && (stakeSigningFiles.length === 0)) {
     throw Error(Errors.MissingStakeSigningFileError)
@@ -145,7 +145,7 @@ const validateMultisigWitnesses = (params: SigningParameters) => {
   if (poolColdSigningFiles.length > 0) {
     throw Error(Errors.TooManyPoolColdSigningFilesError)
   }
-  if (!params.unsignedTxParsed.mint && mintSigningFiles.length > 0) {
+  if (!params.rawTx.body.mint?.length && mintSigningFiles.length > 0) {
     throw Error(Errors.TooManyMintSigningFilesError)
   }
 }
@@ -157,7 +157,7 @@ const validateMultisigSigning = (params: SigningParameters) => {
 
 const validateWitnessing = (params: SigningParameters): void => {
   // verifies whether the tx and signing files correspond to to each other and to the signing mode
-  if (params.unsignedTxParsed.inputs.length === 0) {
+  if (params.rawTx.body.inputs.length === 0) {
     throw Error(Errors.MissingInputError)
   }
 
@@ -184,7 +184,7 @@ const validateWitnessing = (params: SigningParameters): void => {
 }
 
 const validateSigning = (params: SigningParameters): void => {
-  if (params.unsignedTxParsed.inputs.length === 0) {
+  if (params.rawTx.body.inputs.length === 0) {
     throw Error(Errors.MissingInputError)
   }
 
