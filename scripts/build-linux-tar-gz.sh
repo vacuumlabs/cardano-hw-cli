@@ -14,6 +14,7 @@ mkdir ./build/linux/archive
 mkdir ./build/linux/archive/cardano-hw-cli
 
 # Build executable
+# TODO update version when Nexe supports 12.19.1 (or higher) https://github.com/nexe/nexe/issues/821
 yarn nexe ./dist/index.js -o ./build/linux/archive/cardano-hw-cli/cardano-hw-cli -t linux-x64-12.16.2
 
 # Copy dependencies
