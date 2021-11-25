@@ -1,4 +1,4 @@
-import { SignedTxOutput, WitnessOutput } from './transaction/types'
+import { TxOutput, WitnessOutput } from './transaction/types'
 import { CommandType } from './command-parser/commandParser'
 import { KesVKey } from './opCert/opCert'
 
@@ -219,7 +219,7 @@ export type OpCertIssueCounterOutput = {
 }
 
 export type OutputData =
-  | SignedTxOutput
+  | TxOutput
   | WitnessOutput
   | HwSigningOutput
   | VerificationKeyOutput

@@ -8,7 +8,7 @@ import {
 } from '../opCert/opCert'
 import { TxByronWitness, TxShelleyWitness, TxSigned } from '../transaction/transaction'
 import {
-  SignedTxCborHex,
+  TxCborHex,
   _ByronWitness,
   _ShelleyWitness,
   TxWitnessKeys,
@@ -619,7 +619,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
   const signTx = async (
     params: SigningParameters,
     changeOutputFiles: HwSigningData[],
-  ): Promise<SignedTxCborHex> => {
+  ): Promise<TxCborHex> => {
     const ledgerWitnesses = await ledgerSignTx(params, changeOutputFiles)
     const { byronWitnesses, shelleyWitnesses } = createWitnesses(ledgerWitnesses, params.hwSigningFileData)
     return TxSigned(params.rawTx, byronWitnesses, shelleyWitnesses)

@@ -23,7 +23,9 @@ export type TxWitnesses = {
   shelleyWitnesses: TxWitnessShelley[]
 }
 
-export type SignedTxCborHex = CborHex
+export type RawTxCborHex = CborHex
+
+export type TxCborHex = CborHex
 
 export type TxWitnessCborHex = CborHex
 
@@ -42,16 +44,22 @@ export type _ShelleyWitness = {
   data: TxWitnessShelley,
 }
 
+export type RawTxOutput = {
+  type: string,
+  description: '',
+  cborHex: RawTxCborHex,
+}
+
+export type TxOutput = {
+  type: string,
+  description: '',
+  cborHex: TxCborHex,
+}
+
 export type WitnessOutput = {
   type: string
   description: '',
   cborHex: TxWitnessCborHex,
-}
-
-export type SignedTxOutput = {
-  type: string,
-  description: '',
-  cborHex: SignedTxCborHex,
 }
 
 export type VotingRegistrationMetaData = Map<number, Map<number, Buffer | BigInt>>

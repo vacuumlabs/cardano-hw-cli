@@ -1,7 +1,7 @@
 import { RawTransaction } from 'cardano-hw-interop-lib'
 import { KesVKey, OpCertIssueCounter, SignedOpCertCborHex } from '../opCert/opCert'
 import {
-  SignedTxCborHex,
+  TxCborHex,
   _ShelleyWitness,
   _ByronWitness,
   VotingRegistrationMetaDataCborHex,
@@ -41,7 +41,7 @@ export type CryptoProvider = {
   signTx: (
     params: SigningParameters,
     changeOutputFiles: HwSigningData[],
-  ) => Promise<SignedTxCborHex>,
+  ) => Promise<TxCborHex>,
   witnessTx: (
     params: SigningParameters,
     changeOutputFiles: HwSigningData[],

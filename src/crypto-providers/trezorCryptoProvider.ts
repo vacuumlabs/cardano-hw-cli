@@ -1,7 +1,7 @@
 import * as TxTypes from 'cardano-hw-interop-lib'
 import TrezorConnect, * as TrezorTypes from 'trezor-connect'
 import {
-  SignedTxCborHex,
+  TxCborHex,
   _ByronWitness,
   _ShelleyWitness,
   VotingRegistrationMetaDataCborHex,
@@ -523,7 +523,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
   const signTx = async (
     params: SigningParameters,
     changeOutputFiles: HwSigningData[],
-  ): Promise<SignedTxCborHex> => {
+  ): Promise<TxCborHex> => {
     const trezorWitnesses = await trezorSignTx(params, changeOutputFiles)
     const { byronWitnesses, shelleyWitnesses } = createWitnesses(trezorWitnesses, params.hwSigningFileData)
     return TxSigned(params.rawTx, byronWitnesses, shelleyWitnesses)
