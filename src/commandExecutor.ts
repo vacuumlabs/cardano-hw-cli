@@ -6,7 +6,7 @@ import {
 } from 'cardano-hw-interop-lib'
 import { CryptoProvider } from './crypto-providers/types'
 import {
-  constructSignedTxOutput,
+  constructTxOutput,
   write,
   constructHwSigningKeyOutput,
   constructVerificationKeyOutput,
@@ -132,7 +132,7 @@ const CommandExecutor = async () => {
     }
     validateSigning(signingParameters)
     const signedTx = await cryptoProvider.signTx(signingParameters, args.changeOutputKeyFileData)
-    write(args.outFile, constructSignedTxOutput(args.txBodyFileData.era, signedTx))
+    write(args.outFile, constructTxOutput(args.txBodyFileData.era, signedTx))
   }
 
   const createTxPolicyId = async (args: ParsedTransactionPolicyIdArguments) => {

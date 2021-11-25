@@ -1,16 +1,16 @@
 # Code structure
 
-## 1. Input arguments parsing 
+## 1. Input arguments parsing
 
-Input arguments are parsed according to [parserConfig.ts](../src/command-parser/parserConfig.ts). 
+Input arguments are parsed according to [parserConfig.ts](../src/command-parser/parserConfig.ts).
 
-The first one or two arguments determine what action will be taken (see `CommandType`). 
+The first one or two arguments determine what action will be taken (see `CommandType`).
 
 ## 2. Input files parsing
 
 Most input data are contained in files that are given by their respective paths in arguments.
 
-For instance, the transaction that is to be signed is read from the input file and parsed by `parseUnsignedTx`.
+For instance, the transaction that is to be signed is read from the input file and then parsed by `cardano-hw-interop-lib`.
 
 ## 3. Executing the command
 

@@ -2,8 +2,10 @@ import { HARDENED_THRESHOLD, PathLabel } from './constants'
 import { classifyPath, PathTypes } from './crypto-providers/util'
 import { OpCertIssueCounter, SignedOpCertCborHex } from './opCert/opCert'
 import {
-  SignedTxCborHex,
-  SignedTxOutput,
+  RawTxCborHex,
+  RawTxOutput,
+  TxCborHex,
+  TxOutput,
   WitnessOutput,
   _ByronWitness,
   _ShelleyWitness,
@@ -31,6 +33,20 @@ const writeCbor = (path: string, data: Cbor) => rw.writeFileSync(
   path, data,
 )
 
+const cardanoEraToRawType: {[key in CardanoEra]: string} = {
+  [CardanoEra.BYRON]: 'TxUnsignedByron',
+  [CardanoEra.SHELLEY]: 'TxUnsignedShelley',
+  [CardanoEra.ALLEGRA]: 'TxBodyAllegra',
+  [CardanoEra.MARY]: 'TxBodyMary',
+  [CardanoEra.ALONZO]: 'TxBodyAlonzo',
+}
+
+const constructRawTxOutput = (era: CardanoEra, rawTxCborHex: RawTxCborHex): RawTxOutput => ({
+  type: cardanoEraToRawType[era],
+  description: '',
+  cborHex: rawTxCborHex,
+})
+
 const cardanoEraToSignedType: {[key in CardanoEra]: string} = {
   [CardanoEra.BYRON]: 'TxSignedByron',
   [CardanoEra.SHELLEY]: 'TxSignedShelley',
@@ -39,10 +55,10 @@ const cardanoEraToSignedType: {[key in CardanoEra]: string} = {
   [CardanoEra.ALONZO]: 'Tx AlonzoEra',
 }
 
-const constructSignedTxOutput = (era: CardanoEra, signedTxCborHex: SignedTxCborHex): SignedTxOutput => ({
+const constructTxOutput = (era: CardanoEra, txCborHex: TxCborHex): TxOutput => ({
   type: cardanoEraToSignedType[era],
   description: '',
-  cborHex: signedTxCborHex,
+  cborHex: txCborHex,
 })
 
 const cardanoEraToWitnessType: {[key in CardanoEra]: string} = {
@@ -146,7 +162,7 @@ const constructHwSigningKeyOutput = (xPubKey: XPubKeyHex, path: BIP32Path): HwSi
   }
 }
 
-const constructSignedOpCertOutput = (signedOpCertCborHex: SignedOpCertCborHex): SignedTxOutput => ({
+const constructSignedOpCertOutput = (signedOpCertCborHex: SignedOpCertCborHex): TxOutput => ({
   type: 'NodeOperationalCertificate',
   description: '',
   cborHex: signedOpCertCborHex,
@@ -164,7 +180,8 @@ const constructOpCertIssueCounterOutput = (issueCounter: OpCertIssueCounter): Op
 export {
   write,
   writeCbor,
-  constructSignedTxOutput,
+  constructRawTxOutput,
+  constructTxOutput,
   constructTxWitnessOutput,
   constructHwSigningKeyOutput,
   constructVerificationKeyOutput,
