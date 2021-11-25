@@ -1,9 +1,9 @@
 import { isEqual, uniqWith } from 'lodash'
-import { encodeSignedTx, RawTransaction } from 'cardano-hw-interop-lib'
+import { encodeTx, RawTransaction } from 'cardano-hw-interop-lib'
 import {
   TxWitnessByron,
   TxWitnessShelley,
-  SignedTxCborHex,
+  TxCborHex,
   TxWitnessKeys,
 } from './types'
 import { encodeCbor } from '../util'
@@ -18,7 +18,7 @@ const TxSigned = (
   rawTx: RawTransaction,
   byronWitnesses: TxWitnessByron[],
   shelleyWitnesses: TxWitnessShelley[],
-): SignedTxCborHex => {
+): TxCborHex => {
   const { body, nativeScriptWitnesses, auxiliaryData } = rawTx
   const nativeScriptWitnessList = nativeScriptWitnesses as any[] | undefined
   const witnessSet = new Map()
@@ -32,7 +32,7 @@ const TxSigned = (
   if (byronWitnesses.length > 0) {
     witnessSet.set(TxWitnessKeys.BYRON, byronWitnesses)
   }
-  return encodeSignedTx({ body, witnessSet, auxiliaryData }).toString('hex') as SignedTxCborHex
+  return encodeTx({ body, witnessSet, auxiliaryData }).toString('hex') as TxCborHex
 }
 
 export {
