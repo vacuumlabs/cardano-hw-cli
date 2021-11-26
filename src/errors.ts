@@ -4,7 +4,8 @@ const enum Errors {
   InvalidPathError = 'Can not parse path',
   InvalidFileTypeError = 'Invalid file type of hw-signing-file',
   InvalidHwSigningFileError = 'Invalid file contents of hw-signing-file',
-  InvalidTxBodyFileError = 'Invalid file contents of tx-body-file',
+  InvalidRawTxFileError = 'Invalid file contents of tx-body-file',
+  InvalidTxFileError = 'Invalid file contents of tx-file',
   InvalidKesVKeyFileError = 'Invalid KES verification key file',
   InvalidOpCertIssueCounterFileError = 'Invalid operational certificate issue counter file',
   InvalidNodeKeyGenInputsError = 'Invalid node key-gen inputs',
@@ -63,6 +64,9 @@ const enum Errors {
   KeyHashStakeCredentialInMultisigTx = 'Address key hash stake credential used in a multisig transaction',
   TrezorPoolRegistrationAsOperatorNotSupported = 'Trezor does not support signing pool registration certificate as operator',
   InvalidInputError = 'Invalid input',
+  TxContainsUnfixableErrors = 'Transaction CBOR contains unfixable errors',
+  TxContainsFixableErrors = 'Transaction CBOR contains fixable errors, please run "transform" or "transform-raw" command first',
+  CannotTransformSignedTx = 'Transaction contains vkey witnesses, transformation would invalidate them'
 }
 
 export {

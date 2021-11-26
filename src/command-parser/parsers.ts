@@ -1,23 +1,24 @@
 import fsPath from 'path'
 import { HARDENED_THRESHOLD, NETWORKS, PathLabel } from '../constants'
 import {
-  isBIP32Path, isCborHex, isHwSigningData, isTxBodyData, isVotePublicKeyHex,
+  isBIP32Path, isCborHex, isHwSigningData, isRawTxData, isTxData, isVotePublicKeyHex,
 } from '../guards'
 import { Errors } from '../errors'
 import {
   Address,
   BIP32Path,
-  CardanoEra,
   HwSigningData,
   HwSigningType,
   NativeScript,
   NativeScriptType,
-  TxBodyData,
+  RawTxData,
+  TxData,
   VotePublicKeyHex,
 } from '../types'
 import { KesVKey, OpCertIssueCounter } from '../opCert/opCert'
-import { decodeCbor } from '../util'
+import { decodeCbor, invertObject } from '../util'
 import { classifyPath, PathTypes } from '../crypto-providers/util'
+import { cardanoEraToRawType, cardanoEraToSignedType } from '../fileWriter'
 
 const { bech32 } = require('cardano-crypto.js')
 const rw = require('rw')
@@ -92,19 +93,28 @@ export const parseHwSigningFile = (path: string): HwSigningData => {
   throw Error(Errors.InvalidHwSigningFileError)
 }
 
-export const parseTxBodyFile = (path: string): TxBodyData => {
+export const parseRawTxFile = (path: string): RawTxData => {
   const json = JSON.parse(rw.readFileSync(path, 'utf8'))
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { type, description, ...parsedData } = json
-  const era = Object.values(CardanoEra).find((e) => type.includes(e))
-  const data = {
-    ...parsedData,
-    era,
-  }
-  if (isTxBodyData(data)) {
+  const era = invertObject(cardanoEraToRawType)[type]
+  const data = { ...parsedData, era }
+  if (isRawTxData(data)) {
     return data
   }
-  throw Error(Errors.InvalidTxBodyFileError)
+  throw Error(Errors.InvalidRawTxFileError)
+}
+
+export const parseTxFile = (path: string): TxData => {
+  const json = JSON.parse(rw.readFileSync(path, 'utf8'))
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { type, description, ...parsedData } = json
+  const era = invertObject(cardanoEraToSignedType)[type]
+  const data = { ...parsedData, era }
+  if (isTxData(data)) {
+    return data
+  }
+  throw Error(Errors.InvalidTxFileError)
 }
 
 export const parseAddressFile = (path: string): Address => {

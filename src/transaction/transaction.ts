@@ -1,3 +1,4 @@
+import * as InteropLib from 'cardano-hw-interop-lib'
 import { isEqual, uniqWith } from 'lodash'
 import { encodeTx, RawTransaction } from 'cardano-hw-interop-lib'
 import {
@@ -33,6 +34,13 @@ const TxSigned = (
     witnessSet.set(TxWitnessKeys.BYRON, byronWitnesses)
   }
   return encodeTx({ body, witnessSet, auxiliaryData }).toString('hex') as TxCborHex
+}
+
+export const containsVKeyWitnesses = (tx: InteropLib.Transaction): boolean => {
+  const witnessSet = tx.witnessSet as Map<number, unknown[]>
+  const shelleyWitnesses = witnessSet?.get(TxWitnessKeys.SHELLEY) || []
+  const byronWitnesses = witnessSet?.get(TxWitnessKeys.BYRON) || []
+  return [...shelleyWitnesses, ...byronWitnesses].length > 0
 }
 
 export {

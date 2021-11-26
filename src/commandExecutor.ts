@@ -1,11 +1,7 @@
-import {
-  validateRawTx,
-  parseRawTx,
-  transformRawTx,
-  RawTransaction,
-} from 'cardano-hw-interop-lib'
+import * as InteropLib from 'cardano-hw-interop-lib'
 import { CryptoProvider } from './crypto-providers/types'
 import {
+  constructRawTxOutput,
   constructTxOutput,
   write,
   constructHwSigningKeyOutput,
@@ -27,6 +23,10 @@ import {
   ParsedCatalystVotingKeyRegistrationMetadataArguments,
   Cbor,
   NativeScriptDisplayFormat,
+  ParsedTransactionValidateRawArguments,
+  ParsedTransactionValidateArguments,
+  ParsedTransactionTransformRawArguments,
+  ParsedTransactionTransformArguments,
   CborHex,
 } from './types'
 import { LedgerCryptoProvider } from './crypto-providers/ledgerCryptoProvider'
@@ -42,6 +42,8 @@ import {
 import { Errors } from './errors'
 import { parseOpCertIssueCounterFile } from './command-parser/parsers'
 import { validateSigning, validateWitnessing } from './crypto-providers/signingValidation'
+import { printValidationErrors, validateRawTxBeforeSigning } from './transaction/transactionValidation'
+import { containsVKeyWitnesses } from './transaction/transaction'
 
 const promiseTimeout = <T> (promise: Promise<T>, ms: number): Promise<T> => {
   const timeout: Promise<T> = new Promise((resolve, reject) => {
@@ -102,27 +104,10 @@ const CommandExecutor = async () => {
     ))
   }
 
-  const _validateAndParseRawTx = (rawTxCborHex: CborHex): RawTransaction => {
-    const rawTxCbor = Buffer.from(rawTxCborHex, 'hex')
-    const validationErrors = validateRawTx(rawTxCbor)
-    validationErrors.forEach((validationError) => {
-      if (!validationError.fixable) {
-        throw Error(validationError.reason)
-      }
-    })
-    if (validationErrors.length !== 0) {
-      // eslint-disable-next-line no-console
-      console.log('Note: following errors in the transaction will be fixed:')
-      validationErrors.forEach((validationError) => {
-        // eslint-disable-next-line no-console
-        console.log(`${validationError.reason} (${validationError.position})`)
-      })
-    }
-    return transformRawTx(parseRawTx(rawTxCbor))
-  }
-
   const createSignedTx = async (args: ParsedTransactionSignArguments) => {
-    const rawTx = _validateAndParseRawTx(args.txBodyFileData.cborHex)
+    validateRawTxBeforeSigning(args.rawTxFileData.cborHex)
+    const rawTxCbor = Buffer.from(args.rawTxFileData.cborHex, 'hex')
+    const rawTx = InteropLib.parseRawTx(rawTxCbor)
     const signingParameters = {
       signingMode: determineSigningMode(rawTx.body, args.hwSigningFileData),
       rawTx,
@@ -132,7 +117,7 @@ const CommandExecutor = async () => {
     }
     validateSigning(signingParameters)
     const signedTx = await cryptoProvider.signTx(signingParameters, args.changeOutputKeyFileData)
-    write(args.outFile, constructTxOutput(args.txBodyFileData.era, signedTx))
+    write(args.outFile, constructTxOutput(args.rawTxFileData.era, signedTx))
   }
 
   const createTxPolicyId = async (args: ParsedTransactionPolicyIdArguments) => {
@@ -147,7 +132,9 @@ const CommandExecutor = async () => {
   }
 
   const createTxWitnesses = async (args: ParsedTransactionWitnessArguments) => {
-    const rawTx = _validateAndParseRawTx(args.txBodyFileData.cborHex)
+    validateRawTxBeforeSigning(args.rawTxFileData.cborHex)
+    const rawTxCbor = Buffer.from(args.rawTxFileData.cborHex, 'hex')
+    const rawTx = InteropLib.parseRawTx(rawTxCbor)
     const signingParameters = {
       signingMode: determineSigningMode(rawTx.body, args.hwSigningFileData),
       rawTx,
@@ -158,8 +145,53 @@ const CommandExecutor = async () => {
     validateWitnessing(signingParameters)
     const txWitnesses = await cryptoProvider.witnessTx(signingParameters, args.changeOutputKeyFileData)
     for (let i = 0; i < txWitnesses.length; i += 1) {
-      write(args.outFiles[i], constructTxWitnessOutput(args.txBodyFileData.era, txWitnesses[i]))
+      write(args.outFiles[i], constructTxWitnessOutput(args.rawTxFileData.era, txWitnesses[i]))
     }
+  }
+
+  const validateRawTx = async (args: ParsedTransactionValidateRawArguments) => {
+    printValidationErrors(args.rawTxFileData.cborHex, InteropLib.validateRawTx, true)
+  }
+
+  const validateTx = async (args: ParsedTransactionValidateArguments) => {
+    printValidationErrors(args.txFileData.cborHex, InteropLib.validateTx, true)
+  }
+
+  const transformRawTx = async (args: ParsedTransactionTransformRawArguments) => {
+    const {
+      containsUnfixable, containsFixable,
+    } = printValidationErrors(args.rawTxFileData.cborHex, InteropLib.validateRawTx, true)
+    if (containsUnfixable) {
+      throw Error(Errors.TxContainsUnfixableErrors)
+    }
+    if (containsFixable) {
+      // eslint-disable-next-line no-console
+      console.log('Fixed transaction will be written to the output file.')
+    }
+    const rawTxCbor = Buffer.from(args.rawTxFileData.cborHex, 'hex')
+    const transformedRawTx = InteropLib.transformRawTx(InteropLib.parseRawTx(rawTxCbor))
+    const encodedRawTx = InteropLib.encodeRawTx(transformedRawTx).toString('hex') as CborHex
+    write(args.outFile, constructRawTxOutput(args.rawTxFileData.era, encodedRawTx))
+  }
+
+  const transformTx = async (args: ParsedTransactionTransformArguments) => {
+    const {
+      containsUnfixable, containsFixable,
+    } = printValidationErrors(args.txFileData.cborHex, InteropLib.validateTx, true)
+    if (containsUnfixable) {
+      throw Error(Errors.TxContainsUnfixableErrors)
+    }
+    const txCbor = Buffer.from(args.txFileData.cborHex, 'hex')
+    const transformedTx = InteropLib.transformTx(InteropLib.parseTx(txCbor))
+    if (containsFixable) {
+      if (containsVKeyWitnesses(transformedTx)) {
+        throw Error(Errors.CannotTransformSignedTx)
+      }
+      // eslint-disable-next-line no-console
+      console.log('Fixed transaction will be written to the output file.')
+    }
+    const encodedTx = InteropLib.encodeTx(transformedTx).toString('hex') as CborHex
+    write(args.outFile, constructTxOutput(args.txFileData.era, encodedTx))
   }
 
   const createNodeSigningKeyFiles = async (args: ParsedNodeKeyGenArguments) => {
@@ -233,6 +265,10 @@ const CommandExecutor = async () => {
     createSignedTx,
     createTxPolicyId,
     createTxWitnesses,
+    validateRawTx,
+    validateTx,
+    transformRawTx,
+    transformTx,
     createNodeSigningKeyFiles,
     createSignedOperationalCertificate,
     createCatalystVotingKeyRegistrationMetadata,

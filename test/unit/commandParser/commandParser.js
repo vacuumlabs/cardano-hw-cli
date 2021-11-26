@@ -95,9 +95,9 @@ describe('Command parser', () => {
     const expectedResult = {
       command: CommandType.SIGN_TRANSACTION,
       network: NETWORKS.MAINNET,
-      txBodyFileData: {
+      rawTxFileData: {
         // eslint-disable-next-line max-len
-        cborHex: '839f8200d81858248258206ca5fde47f4ff7f256a7464dbf0cb9b4fb6bce9049eee1067eed65cf5d6e2765008200d81858248258206ca5fde47f4ff7f256a7464dbf0cb9b4fb6bce9049eee1067eed65cf5d6e276501ff9f8282d818584283581c13f3997560a5b81f5ac680b3322a2339433424e4e589ab3d752afdb6a101581e581c2eab4601bfe583febc23a04fb0abc21557adb47cea49c68d7b2f40a5001ac63884bf182f8282d818584283581cf9a5257f805a1d378c87b0bfb09232c10d9098bc56fd21d9a6a4072aa101581e581c140539c64edded60a7f2c4692c460a154cbdd06088333fd7f75ea7e7001a0ff80ab91a002a81c7ffa0',
+        cborHex: '82a40081825820941a33cf9d39bba4102c4eff8bd54efd72cf93e65a023a4475ba48a58fc0de000001818258390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c1a002b2b4b021a00029b75031a00a8474cf6',
         era: CardanoEra.SHELLEY,
       },
       hwSigningFileData: [
@@ -131,9 +131,9 @@ describe('Command parser', () => {
     const expectedResult = {
       command: CommandType.WITNESS_TRANSACTION,
       network: NETWORKS.TESTNET,
-      txBodyFileData: {
+      rawTxFileData: {
         // eslint-disable-next-line max-len
-        cborHex: '839f8200d81858248258206ca5fde47f4ff7f256a7464dbf0cb9b4fb6bce9049eee1067eed65cf5d6e2765008200d81858248258206ca5fde47f4ff7f256a7464dbf0cb9b4fb6bce9049eee1067eed65cf5d6e276501ff9f8282d818584283581c13f3997560a5b81f5ac680b3322a2339433424e4e589ab3d752afdb6a101581e581c2eab4601bfe583febc23a04fb0abc21557adb47cea49c68d7b2f40a5001ac63884bf182f8282d818584283581cf9a5257f805a1d378c87b0bfb09232c10d9098bc56fd21d9a6a4072aa101581e581c140539c64edded60a7f2c4692c460a154cbdd06088333fd7f75ea7e7001a0ff80ab91a002a81c7ffa0',
+        cborHex: '82a40081825820941a33cf9d39bba4102c4eff8bd54efd72cf93e65a023a4475ba48a58fc0de000001818258390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c1a002b2b4b021a00029b75031a00a8474cf6',
         era: CardanoEra.SHELLEY,
       },
       hwSigningFileData: [{
@@ -146,6 +146,7 @@ describe('Command parser', () => {
     }
     assert.deepStrictEqual(parsedArgs, expectedResult)
   })
+
   it('Should parse sign transaction with change', () => {
     const args = pad([
       'shelley',
@@ -165,9 +166,9 @@ describe('Command parser', () => {
     const expectedResult = {
       command: CommandType.SIGN_TRANSACTION,
       network: NETWORKS.MAINNET,
-      txBodyFileData: {
+      rawTxFileData: {
         // eslint-disable-next-line max-len
-        cborHex: '839f8200d81858248258206ca5fde47f4ff7f256a7464dbf0cb9b4fb6bce9049eee1067eed65cf5d6e2765008200d81858248258206ca5fde47f4ff7f256a7464dbf0cb9b4fb6bce9049eee1067eed65cf5d6e276501ff9f8282d818584283581c13f3997560a5b81f5ac680b3322a2339433424e4e589ab3d752afdb6a101581e581c2eab4601bfe583febc23a04fb0abc21557adb47cea49c68d7b2f40a5001ac63884bf182f8282d818584283581cf9a5257f805a1d378c87b0bfb09232c10d9098bc56fd21d9a6a4072aa101581e581c140539c64edded60a7f2c4692c460a154cbdd06088333fd7f75ea7e7001a0ff80ab91a002a81c7ffa0',
+        cborHex: '82a40081825820941a33cf9d39bba4102c4eff8bd54efd72cf93e65a023a4475ba48a58fc0de000001818258390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c1a002b2b4b021a00029b75031a00a8474cf6',
         era: CardanoEra.SHELLEY,
       },
       hwSigningFileData: [{
@@ -184,6 +185,7 @@ describe('Command parser', () => {
     }
     assert.deepStrictEqual(parsedArgs, expectedResult)
   })
+
   it('Should parse sign catalyst voting registration', () => {
     const args = pad([
       'catalyst',
@@ -233,6 +235,7 @@ describe('Command parser', () => {
     }
     assert.deepStrictEqual(parsedArgs, expectedResult)
   })
+
   it('Should parse policy-id command', () => {
     const args = pad([
       'transaction',
@@ -298,6 +301,88 @@ describe('Command parser', () => {
         ],
       },
       hwSigningFileData: undefined,
+    }
+    assert.deepStrictEqual(parsedArgs, expectedResult)
+  })
+
+  it('Should parse validate-raw transaction', () => {
+    const args = pad([
+      'transaction',
+      'validate-raw',
+      '--tx-body-file',
+      prefix('tx.raw'),
+    ])
+    const { parsedArgs } = parse(args)
+    const expectedResult = {
+      command: CommandType.VALIDATE_RAW_TRANSACTION,
+      rawTxFileData: {
+        // eslint-disable-next-line max-len
+        cborHex: '82a40081825820941a33cf9d39bba4102c4eff8bd54efd72cf93e65a023a4475ba48a58fc0de000001818258390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c1a002b2b4b021a00029b75031a00a8474cf6',
+        era: CardanoEra.SHELLEY,
+      },
+    }
+    assert.deepStrictEqual(parsedArgs, expectedResult)
+  })
+
+  it('Should parse validate transaction', () => {
+    const args = pad([
+      'transaction',
+      'validate',
+      '--tx-file',
+      prefix('tx.signed'),
+    ])
+    const { parsedArgs } = parse(args)
+    const expectedResult = {
+      command: CommandType.VALIDATE_TRANSACTION,
+      txFileData: {
+        // eslint-disable-next-line max-len
+        cborHex: '83a40081825820941a33cf9d39bba4102c4eff8bd54efd72cf93e65a023a4475ba48a58fc0de000001818258390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c1a002b2b4b021a00029b75031a00a8474ca10081825820cd2b047d1a803eee059769cffb3dfd0a4b9327e55bc78aa962d9bd4f720db0b2584093cbb49246dffb2cb2ca2c18e75039bdb4f80730bb9478045c4b8ef5494145a71bd59a478df4ec0dd22e78c9fc919918f4404115fafb10fa4f218b269d3e220af6',
+        era: CardanoEra.SHELLEY,
+      },
+    }
+    assert.deepStrictEqual(parsedArgs, expectedResult)
+  })
+
+  it('Should parse transform-raw transaction', () => {
+    const args = pad([
+      'transaction',
+      'transform-raw',
+      '--tx-body-file',
+      prefix('tx.raw'),
+      '--out-file',
+      prefix('fixed.raw'),
+    ])
+    const { parsedArgs } = parse(args)
+    const expectedResult = {
+      command: CommandType.TRANSFORM_RAW_TRANSACTION,
+      rawTxFileData: {
+        // eslint-disable-next-line max-len
+        cborHex: '82a40081825820941a33cf9d39bba4102c4eff8bd54efd72cf93e65a023a4475ba48a58fc0de000001818258390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c1a002b2b4b021a00029b75031a00a8474cf6',
+        era: CardanoEra.SHELLEY,
+      },
+      outFile: 'test/unit/commandParser/res/fixed.raw',
+    }
+    assert.deepStrictEqual(parsedArgs, expectedResult)
+  })
+
+  it('Should parse transform transaction', () => {
+    const args = pad([
+      'transaction',
+      'transform',
+      '--tx-file',
+      prefix('tx.signed'),
+      '--out-file',
+      prefix('fixed.signed'),
+    ])
+    const { parsedArgs } = parse(args)
+    const expectedResult = {
+      command: CommandType.TRANSFORM_TRANSACTION,
+      txFileData: {
+        // eslint-disable-next-line max-len
+        cborHex: '83a40081825820941a33cf9d39bba4102c4eff8bd54efd72cf93e65a023a4475ba48a58fc0de000001818258390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c1a002b2b4b021a00029b75031a00a8474ca10081825820cd2b047d1a803eee059769cffb3dfd0a4b9327e55bc78aa962d9bd4f720db0b2584093cbb49246dffb2cb2ca2c18e75039bdb4f80730bb9478045c4b8ef5494145a71bd59a478df4ec0dd22e78c9fc919918f4404115fafb10fa4f218b269d3e220af6',
+        era: CardanoEra.SHELLEY,
+      },
+      outFile: 'test/unit/commandParser/res/fixed.signed',
     }
     assert.deepStrictEqual(parsedArgs, expectedResult)
   })
