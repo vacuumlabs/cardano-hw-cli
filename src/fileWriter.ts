@@ -187,4 +187,6 @@ export {
   constructVerificationKeyOutput,
   constructSignedOpCertOutput,
   constructOpCertIssueCounterOutput,
+  cardanoEraToRawType,
+  cardanoEraToSignedType,
 }

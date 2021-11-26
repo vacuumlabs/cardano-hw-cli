@@ -48,6 +48,36 @@ cardano-hw-cli transaction witness
 --out-file FILE                        Output filepath of the Tx.
 ```
 
+## Validate raw transaction
+Verifies whether the tx body file (ie. raw transaction) complies to [restrictions](https://github.com/cardano-foundation/CIPs/blob/master/CIP-0021/README.md) imposed by hardware wallets.
+```
+cardano-hw-cli transaction validate-raw
+--tx-body-file FILE                    Input filepath of the raw tx.
+```
+
+## Validate transaction
+Verifies whether the tx file complies to [restrictions](https://github.com/cardano-foundation/CIPs/blob/master/CIP-0021/README.md) imposed by hardware wallets.
+```
+cardano-hw-cli transaction validate
+--tx-file FILE                         Input filepath of the tx.
+```
+
+## Transform raw transaction
+Tries to non-destructively transform the tx body file (ie. raw transaction), so that it complies to [restrictions](https://github.com/cardano-foundation/CIPs/blob/master/CIP-0021/README.md) imposed by hardware wallets.
+```
+cardano-hw-cli transaction transform-raw
+--tx-body-file FILE                    Input filepath of the raw tx.
+--out-file FILE                        Output filepath of the raw tx.
+```
+
+## Transform transaction
+Tries to non-destructively transform the tx file, so that it complies to [restrictions](https://github.com/cardano-foundation/CIPs/blob/master/CIP-0021/README.md) imposed by hardware wallets.
+```
+cardano-hw-cli transaction transform
+--tx-file FILE                         Input filepath of the tx.
+--out-file FILE                        Output filepath of the tx.
+```
+
 # Show address on device
 ```
 cardano-hw-cli address show

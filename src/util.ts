@@ -25,3 +25,7 @@ export const removeNullFields = (obj: any): any => Object.keys(obj)
 export const partition = <T>(array: T[], predicate: (t: T) => boolean): [T[], T[]] => (
   [array.filter(predicate), array.filter((t) => !predicate(t))]
 )
+
+export const invertObject = (obj: {[key: string]: string}): {[key: string]: string} => (
+  Object.fromEntries(Object.entries(obj).map(([k, v]) => [v, k]))
+)
