@@ -1,4 +1,4 @@
-import { TxOutput, WitnessOutput } from './transaction/types'
+import { RawTxOutput, TxOutput, WitnessOutput } from './transaction/types'
 import { CommandType } from './command-parser/commandParser'
 import { KesVKey } from './opCert/opCert'
 
@@ -50,7 +50,12 @@ export type HwSigningData = {
   cborXPubKeyHex: XPubKeyCborHex
 }
 
-export type TxBodyData = {
+export type RawTxData = {
+  era: CardanoEra,
+  cborHex: CborHex
+}
+
+export type TxData = {
   era: CardanoEra,
   cborHex: CborHex
 }
@@ -107,7 +112,7 @@ export type Network = {
 export type ParsedTransactionSignArguments = {
   command: CommandType.SIGN_TRANSACTION,
   network: Network,
-  txBodyFileData: TxBodyData,
+  rawTxFileData: RawTxData,
   hwSigningFileData: HwSigningData[],
   outFile: string,
   changeOutputKeyFileData: HwSigningData[],
@@ -151,10 +156,32 @@ export type ParsedTransactionPolicyIdArguments = {
 export type ParsedTransactionWitnessArguments = {
   command: CommandType.WITNESS_TRANSACTION,
   network: Network,
-  txBodyFileData: TxBodyData,
+  rawTxFileData: RawTxData,
   hwSigningFileData: HwSigningData[],
   outFiles: string[],
   changeOutputKeyFileData: HwSigningData[],
+}
+
+export type ParsedTransactionValidateRawArguments = {
+  command: CommandType.VALIDATE_RAW_TRANSACTION,
+  rawTxFileData: RawTxData,
+}
+
+export type ParsedTransactionValidateArguments = {
+  command: CommandType.VALIDATE_TRANSACTION,
+  txFileData: TxData,
+}
+
+export type ParsedTransactionTransformRawArguments = {
+  command: CommandType.TRANSFORM_RAW_TRANSACTION,
+  rawTxFileData: RawTxData,
+  outFile: string,
+}
+
+export type ParsedTransactionTransformArguments = {
+  command: CommandType.TRANSFORM_TRANSACTION,
+  txFileData: TxData,
+  outFile: string,
 }
 
 export type ParsedOpCertArguments = {
@@ -194,6 +221,10 @@ export type ParsedArguments =
   | ParsedTransactionSignArguments
   | ParsedTransactionPolicyIdArguments
   | ParsedTransactionWitnessArguments
+  | ParsedTransactionValidateRawArguments
+  | ParsedTransactionValidateArguments
+  | ParsedTransactionTransformRawArguments
+  | ParsedTransactionTransformArguments
   | ParsedNodeKeyGenArguments
   | ParsedOpCertArguments
   | ParsedCatalystVotingKeyRegistrationMetadataArguments
@@ -219,6 +250,7 @@ export type OpCertIssueCounterOutput = {
 }
 
 export type OutputData =
+  | RawTxOutput
   | TxOutput
   | WitnessOutput
   | HwSigningOutput

@@ -41,6 +41,18 @@ const executeCommand = async (): Promise<void> => {
     case (CommandType.WITNESS_TRANSACTION):
       await commandExecutor.createTxWitnesses(parsedArgs)
       break
+    case (CommandType.VALIDATE_RAW_TRANSACTION):
+      await commandExecutor.validateRawTx(parsedArgs)
+      break
+    case (CommandType.VALIDATE_TRANSACTION):
+      await commandExecutor.validateTx(parsedArgs)
+      break
+    case (CommandType.TRANSFORM_RAW_TRANSACTION):
+      await commandExecutor.transformRawTx(parsedArgs)
+      break
+    case (CommandType.TRANSFORM_TRANSACTION):
+      await commandExecutor.transformTx(parsedArgs)
+      break
     case (CommandType.NODE_KEY_GEN):
       await commandExecutor.createNodeSigningKeyFiles(parsedArgs)
       break

@@ -5,7 +5,8 @@ import {
   parseHwSigningFile,
   parseNetwork,
   parseBIP32Path,
-  parseTxBodyFile,
+  parseRawTxFile,
+  parseTxFile,
   parseKesVKeyFile,
   parseVotePubFile,
   parseScriptHashHex,
@@ -78,8 +79,8 @@ const txSigningArgs = {
   },
   '--tx-body-file': {
     required: true,
-    dest: 'txBodyFileData',
-    type: (path: string) => parseTxBodyFile(path),
+    dest: 'rawTxFileData',
+    type: (path: string) => parseRawTxFile(path),
     help: 'Input filepath of the TxBody.',
   },
   '--hw-signing-file': {
@@ -230,6 +231,48 @@ export const parserConfig = {
         required: true,
         action: 'append',
         dest: 'outFiles',
+        help: 'Output filepath.',
+      },
+    },
+    'validate-raw': {
+      '--tx-body-file': {
+        required: true,
+        dest: 'rawTxFileData',
+        type: (path: string) => parseRawTxFile(path),
+        help: 'Input filepath of the raw tx.',
+      },
+    },
+    'validate': {
+      '--tx-file': {
+        required: true,
+        dest: 'txFileData',
+        type: (path: string) => parseTxFile(path),
+        help: 'Input filepath of the tx.',
+      },
+    },
+    'transform-raw': {
+      '--tx-body-file': {
+        required: true,
+        dest: 'rawTxFileData',
+        type: (path: string) => parseRawTxFile(path),
+        help: 'Input filepath of the raw tx.',
+      },
+      '--out-file': {
+        required: true,
+        dest: 'outFile',
+        help: 'Output filepath.',
+      },
+    },
+    'transform': {
+      '--tx-file': {
+        required: true,
+        dest: 'txFileData',
+        type: (path: string) => parseTxFile(path),
+        help: 'Input filepath of the tx.',
+      },
+      '--out-file': {
+        required: true,
+        dest: 'outFile',
         help: 'Output filepath.',
       },
     },
