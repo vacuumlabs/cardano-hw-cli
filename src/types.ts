@@ -273,3 +273,10 @@ export enum AddressType {
     REWARD_KEY = 0b1110,
     REWARD_SCRIPT = 0b1111,
 }
+
+export enum ExitCode {
+  Success = 0,
+  Error = 1,
+  UnfixableValidationErrorsFound = 2,
+  FixableValidationErrorsFound = 3,
+}

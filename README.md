@@ -49,21 +49,31 @@ cardano-hw-cli transaction witness
 ```
 
 ## Validate raw transaction
-Verifies whether the tx body file (ie. raw transaction) complies to [restrictions](https://github.com/cardano-foundation/CIPs/blob/master/CIP-0021/README.md) imposed by hardware wallets.
+Verifies whether the tx body file (i.e. raw transaction) complies with [restrictions](https://github.com/cardano-foundation/CIPs/blob/master/CIP-0021/README.md) imposed by hardware wallets.
 ```
 cardano-hw-cli transaction validate-raw
 --tx-body-file FILE                    Input filepath of the raw tx.
 ```
+Exit code meaning:
+- `0` transaction complies with all restrictions
+- `1` an error occured (e.g. the transaction could not be parsed)
+- `2` transaction contains validation errrors that cannot be fixed automatically (e.g. too many tx inputs)
+- `3` transaction contains validation errrors that can be fixed by running `transaction transform-raw` (e.g. non-canonical CBOR)
 
 ## Validate transaction
-Verifies whether the tx file complies to [restrictions](https://github.com/cardano-foundation/CIPs/blob/master/CIP-0021/README.md) imposed by hardware wallets.
+Verifies whether the tx file complies with [restrictions](https://github.com/cardano-foundation/CIPs/blob/master/CIP-0021/README.md) imposed by hardware wallets.
 ```
 cardano-hw-cli transaction validate
 --tx-file FILE                         Input filepath of the tx.
 ```
+Exit code meaning:
+- `0` transaction complies with all restrictions
+- `1` an error occured (e.g. the transaction could not be parsed)
+- `2` transaction contains validation errrors that cannot be fixed automatically (e.g. too many tx inputs)
+- `3` transaction contains validation errrors that can be fixed by running `transaction transform` (e.g. non-canonical CBOR)
 
 ## Transform raw transaction
-Tries to non-destructively transform the tx body file (ie. raw transaction), so that it complies to [restrictions](https://github.com/cardano-foundation/CIPs/blob/master/CIP-0021/README.md) imposed by hardware wallets.
+Tries to non-destructively transform the tx body file (i.e. raw transaction), so that it complies with [restrictions](https://github.com/cardano-foundation/CIPs/blob/master/CIP-0021/README.md) imposed by hardware wallets.
 ```
 cardano-hw-cli transaction transform-raw
 --tx-body-file FILE                    Input filepath of the raw tx.
@@ -71,7 +81,7 @@ cardano-hw-cli transaction transform-raw
 ```
 
 ## Transform transaction
-Tries to non-destructively transform the tx file, so that it complies to [restrictions](https://github.com/cardano-foundation/CIPs/blob/master/CIP-0021/README.md) imposed by hardware wallets.
+Tries to non-destructively transform the tx file, so that it complies with [restrictions](https://github.com/cardano-foundation/CIPs/blob/master/CIP-0021/README.md) imposed by hardware wallets.
 ```
 cardano-hw-cli transaction transform
 --tx-file FILE                         Input filepath of the tx.
