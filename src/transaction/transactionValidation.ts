@@ -7,6 +7,7 @@ import {
   ParsedTransactionTransformRawArguments,
   ParsedTransactionTransformArguments,
   CborHex,
+  ExitCode,
 } from '../types'
 import { constructRawTxOutput, constructTxOutput, write } from '../fileWriter'
 import { containsVKeyWitnesses } from './transaction'
@@ -52,15 +53,25 @@ const validateRawTxBeforeSigning = (rawTxCborHex: CborHex): void => {
   }
 }
 
-const validateRawTx = (args: ParsedTransactionValidateRawArguments) => {
-  printValidationErrors(args.rawTxFileData.cborHex, InteropLib.validateRawTx, true)
+const validateRawTx = (args: ParsedTransactionValidateRawArguments): ExitCode => {
+  const {
+    containsUnfixable, containsFixable,
+  } = printValidationErrors(args.rawTxFileData.cborHex, InteropLib.validateRawTx, true)
+  if (containsUnfixable) return ExitCode.UnfixableValidationErrorsFound
+  if (containsFixable) return ExitCode.FixableValidationErrorsFound
+  return ExitCode.Success
 }
 
-const validateTx = (args: ParsedTransactionValidateArguments) => {
-  printValidationErrors(args.txFileData.cborHex, InteropLib.validateTx, true)
+const validateTx = (args: ParsedTransactionValidateArguments): ExitCode => {
+  const {
+    containsUnfixable, containsFixable,
+  } = printValidationErrors(args.txFileData.cborHex, InteropLib.validateTx, true)
+  if (containsUnfixable) return ExitCode.UnfixableValidationErrorsFound
+  if (containsFixable) return ExitCode.FixableValidationErrorsFound
+  return ExitCode.Success
 }
 
-const transformRawTx = (args: ParsedTransactionTransformRawArguments) => {
+const transformRawTx = (args: ParsedTransactionTransformRawArguments): void => {
   const {
     containsUnfixable, containsFixable,
   } = printValidationErrors(args.rawTxFileData.cborHex, InteropLib.validateRawTx, true)
@@ -77,7 +88,7 @@ const transformRawTx = (args: ParsedTransactionTransformRawArguments) => {
   write(args.outFile, constructRawTxOutput(args.rawTxFileData.era, encodedRawTx))
 }
 
-const transformTx = (args: ParsedTransactionTransformArguments) => {
+const transformTx = (args: ParsedTransactionTransformArguments): void => {
   const {
     containsUnfixable, containsFixable,
   } = printValidationErrors(args.txFileData.cborHex, InteropLib.validateTx, true)
