@@ -1,7 +1,6 @@
 import * as InteropLib from 'cardano-hw-interop-lib'
 import { CryptoProvider } from './crypto-providers/types'
 import {
-  constructRawTxOutput,
   constructTxOutput,
   write,
   constructHwSigningKeyOutput,
@@ -23,11 +22,6 @@ import {
   ParsedCatalystVotingKeyRegistrationMetadataArguments,
   Cbor,
   NativeScriptDisplayFormat,
-  ParsedTransactionValidateRawArguments,
-  ParsedTransactionValidateArguments,
-  ParsedTransactionTransformRawArguments,
-  ParsedTransactionTransformArguments,
-  CborHex,
 } from './types'
 import { LedgerCryptoProvider } from './crypto-providers/ledgerCryptoProvider'
 import { TrezorCryptoProvider } from './crypto-providers/trezorCryptoProvider'
@@ -42,8 +36,7 @@ import {
 import { Errors } from './errors'
 import { parseOpCertIssueCounterFile } from './command-parser/parsers'
 import { validateSigning, validateWitnessing } from './crypto-providers/signingValidation'
-import { printValidationErrors, validateRawTxBeforeSigning } from './transaction/transactionValidation'
-import { containsVKeyWitnesses } from './transaction/transaction'
+import { validateRawTxBeforeSigning } from './transaction/transactionValidation'
 
 const promiseTimeout = <T> (promise: Promise<T>, ms: number): Promise<T> => {
   const timeout: Promise<T> = new Promise((resolve, reject) => {
@@ -149,51 +142,6 @@ const CommandExecutor = async () => {
     }
   }
 
-  const validateRawTx = async (args: ParsedTransactionValidateRawArguments) => {
-    printValidationErrors(args.rawTxFileData.cborHex, InteropLib.validateRawTx, true)
-  }
-
-  const validateTx = async (args: ParsedTransactionValidateArguments) => {
-    printValidationErrors(args.txFileData.cborHex, InteropLib.validateTx, true)
-  }
-
-  const transformRawTx = async (args: ParsedTransactionTransformRawArguments) => {
-    const {
-      containsUnfixable, containsFixable,
-    } = printValidationErrors(args.rawTxFileData.cborHex, InteropLib.validateRawTx, true)
-    if (containsUnfixable) {
-      throw Error(Errors.TxContainsUnfixableErrors)
-    }
-    if (containsFixable) {
-      // eslint-disable-next-line no-console
-      console.log('Fixed transaction will be written to the output file.')
-    }
-    const rawTxCbor = Buffer.from(args.rawTxFileData.cborHex, 'hex')
-    const transformedRawTx = InteropLib.transformRawTx(InteropLib.parseRawTx(rawTxCbor))
-    const encodedRawTx = InteropLib.encodeRawTx(transformedRawTx).toString('hex') as CborHex
-    write(args.outFile, constructRawTxOutput(args.rawTxFileData.era, encodedRawTx))
-  }
-
-  const transformTx = async (args: ParsedTransactionTransformArguments) => {
-    const {
-      containsUnfixable, containsFixable,
-    } = printValidationErrors(args.txFileData.cborHex, InteropLib.validateTx, true)
-    if (containsUnfixable) {
-      throw Error(Errors.TxContainsUnfixableErrors)
-    }
-    const txCbor = Buffer.from(args.txFileData.cborHex, 'hex')
-    const transformedTx = InteropLib.transformTx(InteropLib.parseTx(txCbor))
-    if (containsFixable) {
-      if (containsVKeyWitnesses(transformedTx)) {
-        throw Error(Errors.CannotTransformSignedTx)
-      }
-      // eslint-disable-next-line no-console
-      console.log('Fixed transaction will be written to the output file.')
-    }
-    const encodedTx = InteropLib.encodeTx(transformedTx).toString('hex') as CborHex
-    write(args.outFile, constructTxOutput(args.txFileData.era, encodedTx))
-  }
-
   const createNodeSigningKeyFiles = async (args: ParsedNodeKeyGenArguments) => {
     const {
       paths, hwSigningFiles, verificationKeyFiles, issueCounterFiles,
@@ -265,10 +213,6 @@ const CommandExecutor = async () => {
     createSignedTx,
     createTxPolicyId,
     createTxWitnesses,
-    validateRawTx,
-    validateTx,
-    transformRawTx,
-    transformTx,
     createNodeSigningKeyFiles,
     createSignedOperationalCertificate,
     createCatalystVotingKeyRegistrationMetadata,

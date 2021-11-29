@@ -3,6 +3,12 @@ import { CommandType, parse } from './command-parser/commandParser'
 import { parseAppVersion } from './command-parser/parsers'
 import { CommandExecutor } from './commandExecutor'
 import { Errors } from './errors'
+import {
+  transformRawTx,
+  transformTx,
+  validateRawTx,
+  validateTx,
+} from './transaction/transactionValidation'
 
 const executeCommand = async (): Promise<void> => {
   const { parser, parsedArgs } = parse(process.argv)
@@ -11,11 +17,28 @@ const executeCommand = async (): Promise<void> => {
     return
   }
 
-  if (parsedArgs.command === CommandType.APP_VERSION) {
-    const { version, commit } = parseAppVersion()
-    console.log(`Cardano HW CLI Tool version ${version}`)
-    if (commit) console.log(`Commit hash: ${commit}`)
-    return
+  const { version, commit } = parseAppVersion()
+
+  // calls that don't need a cryptoProvider
+  switch (parsedArgs.command) {
+    case (CommandType.APP_VERSION):
+      console.log(`Cardano HW CLI Tool version ${version}`)
+      if (commit) console.log(`Commit hash: ${commit}`)
+      return
+    case (CommandType.VALIDATE_RAW_TRANSACTION):
+      validateRawTx(parsedArgs)
+      return
+    case (CommandType.VALIDATE_TRANSACTION):
+      validateTx(parsedArgs)
+      return
+    case (CommandType.TRANSFORM_RAW_TRANSACTION):
+      transformRawTx(parsedArgs)
+      return
+    case (CommandType.TRANSFORM_TRANSACTION):
+      transformTx(parsedArgs)
+      return
+    default:
+      break
   }
 
   const commandExecutor = await CommandExecutor()
@@ -40,18 +63,6 @@ const executeCommand = async (): Promise<void> => {
       break
     case (CommandType.WITNESS_TRANSACTION):
       await commandExecutor.createTxWitnesses(parsedArgs)
-      break
-    case (CommandType.VALIDATE_RAW_TRANSACTION):
-      await commandExecutor.validateRawTx(parsedArgs)
-      break
-    case (CommandType.VALIDATE_TRANSACTION):
-      await commandExecutor.validateTx(parsedArgs)
-      break
-    case (CommandType.TRANSFORM_RAW_TRANSACTION):
-      await commandExecutor.transformRawTx(parsedArgs)
-      break
-    case (CommandType.TRANSFORM_TRANSACTION):
-      await commandExecutor.transformTx(parsedArgs)
       break
     case (CommandType.NODE_KEY_GEN):
       await commandExecutor.createNodeSigningKeyFiles(parsedArgs)
