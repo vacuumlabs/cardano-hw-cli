@@ -1,9 +1,17 @@
 import * as InteropLib from 'cardano-hw-interop-lib'
 import { Errors } from '../errors'
-import { CborHex } from '../types'
 import { partition } from '../util'
+import {
+  ParsedTransactionValidateRawArguments,
+  ParsedTransactionValidateArguments,
+  ParsedTransactionTransformRawArguments,
+  ParsedTransactionTransformArguments,
+  CborHex,
+} from '../types'
+import { constructRawTxOutput, constructTxOutput, write } from '../fileWriter'
+import { containsVKeyWitnesses } from './transaction'
 
-export const printValidationErrors = (
+const printValidationErrors = (
   cborHex: CborHex,
   validator: (txCbor: Buffer) => InteropLib.ValidationError[],
   printSuccessMessage: boolean,
@@ -20,7 +28,7 @@ export const printValidationErrors = (
       // eslint-disable-next-line no-console
       console.log(`The transaction contains following ${title} errors:`)
       // eslint-disable-next-line no-console
-      errors.forEach((e) => console.log(`  ${e.reason} (${e.position})`))
+      errors.forEach((e) => console.log(`- ${e.reason} (${e.position})`))
     }
   })
 
@@ -31,7 +39,7 @@ export const printValidationErrors = (
   return { containsUnfixable: unfixableErrors.length > 0, containsFixable: fixableErrors.length > 0 }
 }
 
-export const validateRawTxBeforeSigning = (rawTxCborHex: CborHex): void => {
+const validateRawTxBeforeSigning = (rawTxCborHex: CborHex): void => {
   const {
     containsUnfixable, containsFixable,
   } = printValidationErrors(rawTxCborHex, InteropLib.validateRawTx, false)
@@ -42,4 +50,57 @@ export const validateRawTxBeforeSigning = (rawTxCborHex: CborHex): void => {
   if (containsFixable) {
     throw Error(Errors.TxContainsFixableErrors)
   }
+}
+
+const validateRawTx = (args: ParsedTransactionValidateRawArguments) => {
+  printValidationErrors(args.rawTxFileData.cborHex, InteropLib.validateRawTx, true)
+}
+
+const validateTx = (args: ParsedTransactionValidateArguments) => {
+  printValidationErrors(args.txFileData.cborHex, InteropLib.validateTx, true)
+}
+
+const transformRawTx = (args: ParsedTransactionTransformRawArguments) => {
+  const {
+    containsUnfixable, containsFixable,
+  } = printValidationErrors(args.rawTxFileData.cborHex, InteropLib.validateRawTx, true)
+  if (containsUnfixable) {
+    throw Error(Errors.TxContainsUnfixableErrors)
+  }
+  if (containsFixable) {
+    // eslint-disable-next-line no-console
+    console.log('Fixed transaction will be written to the output file.')
+  }
+  const rawTxCbor = Buffer.from(args.rawTxFileData.cborHex, 'hex')
+  const transformedRawTx = InteropLib.transformRawTx(InteropLib.parseRawTx(rawTxCbor))
+  const encodedRawTx = InteropLib.encodeRawTx(transformedRawTx).toString('hex') as CborHex
+  write(args.outFile, constructRawTxOutput(args.rawTxFileData.era, encodedRawTx))
+}
+
+const transformTx = (args: ParsedTransactionTransformArguments) => {
+  const {
+    containsUnfixable, containsFixable,
+  } = printValidationErrors(args.txFileData.cborHex, InteropLib.validateTx, true)
+  if (containsUnfixable) {
+    throw Error(Errors.TxContainsUnfixableErrors)
+  }
+  const txCbor = Buffer.from(args.txFileData.cborHex, 'hex')
+  const transformedTx = InteropLib.transformTx(InteropLib.parseTx(txCbor))
+  if (containsFixable) {
+    if (containsVKeyWitnesses(transformedTx)) {
+      throw Error(Errors.CannotTransformSignedTx)
+    }
+    // eslint-disable-next-line no-console
+    console.log('Fixed transaction will be written to the output file.')
+  }
+  const encodedTx = InteropLib.encodeTx(transformedTx).toString('hex') as CborHex
+  write(args.outFile, constructTxOutput(args.txFileData.era, encodedTx))
+}
+
+export {
+  validateRawTxBeforeSigning,
+  validateRawTx,
+  validateTx,
+  transformRawTx,
+  transformTx,
 }
