@@ -9,12 +9,13 @@ import {
   validateRawTx,
   validateTx,
 } from './transaction/transactionValidation'
+import { ExitCode } from './types'
 
-const executeCommand = async (): Promise<void> => {
+const executeCommand = async (): Promise<ExitCode> => {
   const { parser, parsedArgs } = parse(process.argv)
   if (!Object.values(CommandType).includes(parsedArgs.command)) {
     parser.print_help()
-    return
+    return ExitCode.Success
   }
 
   const { version, commit } = parseAppVersion()
@@ -24,19 +25,17 @@ const executeCommand = async (): Promise<void> => {
     case (CommandType.APP_VERSION):
       console.log(`Cardano HW CLI Tool version ${version}`)
       if (commit) console.log(`Commit hash: ${commit}`)
-      return
+      return ExitCode.Success
     case (CommandType.VALIDATE_RAW_TRANSACTION):
-      validateRawTx(parsedArgs)
-      return
+      return validateRawTx(parsedArgs)
     case (CommandType.VALIDATE_TRANSACTION):
-      validateTx(parsedArgs)
-      return
+      return validateTx(parsedArgs)
     case (CommandType.TRANSFORM_RAW_TRANSACTION):
       transformRawTx(parsedArgs)
-      return
+      return ExitCode.Success
     case (CommandType.TRANSFORM_TRANSACTION):
       transformTx(parsedArgs)
-      return
+      return ExitCode.Success
     default:
       break
   }
@@ -76,11 +75,13 @@ const executeCommand = async (): Promise<void> => {
     default:
       throw Error(Errors.UndefinedCommandError)
   }
+
+  return ExitCode.Success
 }
 
 executeCommand()
-  .then(() => process.exit(0))
+  .then((exitCode: ExitCode) => process.exit(exitCode))
   .catch((e: Error) => {
     console.error('Error:', e.message)
-    process.exit(1)
+    process.exit(ExitCode.Error)
   })
