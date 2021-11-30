@@ -1,7 +1,7 @@
 import fsPath from 'path'
 import { HARDENED_THRESHOLD, NETWORKS, PathLabel } from '../constants'
 import {
-  isBIP32Path, isCborHex, isHwSigningData, isRawTxData, isTxData, isVotePublicKeyHex,
+  isBIP32Path, isCborHex, isHwSigningData, isRawTxFileData, isTxFileData, isVotePublicKeyHex,
 } from '../guards'
 import { Errors } from '../errors'
 import {
@@ -11,8 +11,8 @@ import {
   HwSigningType,
   NativeScript,
   NativeScriptType,
-  RawTxData,
-  TxData,
+  RawTxFileData,
+  TxFileData,
   VotePublicKeyHex,
 } from '../types'
 import { KesVKey, OpCertIssueCounter } from '../opCert/opCert'
@@ -93,25 +93,25 @@ export const parseHwSigningFile = (path: string): HwSigningData => {
   throw Error(Errors.InvalidHwSigningFileError)
 }
 
-export const parseRawTxFile = (path: string): RawTxData => {
+export const parseRawTxFile = (path: string): RawTxFileData => {
   const json = JSON.parse(rw.readFileSync(path, 'utf8'))
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { type, description, ...parsedData } = json
   const era = invertObject(cardanoEraToRawType)[type]
   const data = { ...parsedData, era }
-  if (isRawTxData(data)) {
+  if (isRawTxFileData(data)) {
     return data
   }
   throw Error(Errors.InvalidRawTxFileError)
 }
 
-export const parseTxFile = (path: string): TxData => {
+export const parseTxFile = (path: string): TxFileData => {
   const json = JSON.parse(rw.readFileSync(path, 'utf8'))
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { type, description, ...parsedData } = json
   const era = invertObject(cardanoEraToSignedType)[type]
   const data = { ...parsedData, era }
-  if (isTxData(data)) {
+  if (isTxFileData(data)) {
     return data
   }
   throw Error(Errors.InvalidTxFileError)

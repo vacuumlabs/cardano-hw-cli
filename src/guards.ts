@@ -3,8 +3,8 @@ import {
   CborHex,
   CardanoEra,
   HwSigningData,
-  RawTxData,
-  TxData,
+  RawTxFileData,
+  TxFileData,
   PubKeyHex,
   PubKeyCborHex,
   ChainCodeHex,
@@ -42,13 +42,13 @@ export const isHwSigningData = (
   value: any,
 ): value is HwSigningData => isBIP32Path(value.path) && isString(value.cborXPubKeyHex)
 
-export const isRawTxData = (
+export const isRawTxFileData = (
   value: any,
-): value is RawTxData => isEra(value.era) && isCborHex(value.cborHex)
+): value is RawTxFileData => isEra(value.era) && isCborHex(value.cborHex)
 
-export const isTxData = (
+export const isTxFileData = (
   value: any,
-): value is TxData => isEra(value.era) && isCborHex(value.cborHex)
+): value is TxFileData => isEra(value.era) && isCborHex(value.cborHex)
 
 export const isArrayOfType = <T>(
   value: any,
