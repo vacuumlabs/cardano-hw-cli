@@ -100,7 +100,7 @@ const CommandExecutor = async () => {
   const createSignedTx = async (args: ParsedTransactionSignArguments) => {
     validateRawTxBeforeSigning(args.rawTxFileData.cborHex)
     const rawTxCbor = Buffer.from(args.rawTxFileData.cborHex, 'hex')
-    const rawTx = InteropLib.parseRawTx(rawTxCbor)
+    const rawTx = InteropLib.decodeRawTx(rawTxCbor)
     const signingParameters = {
       signingMode: determineSigningMode(rawTx.body, args.hwSigningFileData),
       rawTx,
@@ -127,7 +127,7 @@ const CommandExecutor = async () => {
   const createTxWitnesses = async (args: ParsedTransactionWitnessArguments) => {
     validateRawTxBeforeSigning(args.rawTxFileData.cborHex)
     const rawTxCbor = Buffer.from(args.rawTxFileData.cborHex, 'hex')
-    const rawTx = InteropLib.parseRawTx(rawTxCbor)
+    const rawTx = InteropLib.decodeRawTx(rawTxCbor)
     const signingParameters = {
       signingMode: determineSigningMode(rawTx.body, args.hwSigningFileData),
       rawTx,

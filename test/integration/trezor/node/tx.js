@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
 const assert = require('assert')
-const { parseRawTx } = require('cardano-hw-interop-lib')
+const { decodeRawTx } = require('cardano-hw-interop-lib')
 const { TrezorCryptoProvider } = require('../../../../src/crypto-providers/trezorCryptoProvider')
 const { NETWORKS } = require('../../../../src/constants')
 const { determineSigningMode, getTxBodyHash } = require('../../../../src/crypto-providers/util')
@@ -176,7 +176,7 @@ const transactions = {
 }
 
 async function testTxSigning(cryptoProvider, transaction) {
-  const rawTx = parseRawTx(transaction.unsignedCborHex)
+  const rawTx = decodeRawTx(transaction.unsignedCborHex)
   const signingMode = determineSigningMode(rawTx.body, transaction.hwSigningFiles)
   const signingParameters = {
     signingMode,
@@ -191,7 +191,7 @@ async function testTxSigning(cryptoProvider, transaction) {
 }
 
 async function testTxWitnessing(cryptoProvider, transaction) {
-  const rawTx = parseRawTx(transaction.unsignedCborHex)
+  const rawTx = decodeRawTx(transaction.unsignedCborHex)
   const signingMode = determineSigningMode(rawTx.body, transaction.hwSigningFiles)
   const signingParameters = {
     signingMode,

@@ -83,7 +83,7 @@ const transformRawTx = (args: ParsedTransactionTransformRawArguments): void => {
     console.log('Fixed transaction will be written to the output file.')
   }
   const rawTxCbor = Buffer.from(args.rawTxFileData.cborHex, 'hex')
-  const transformedRawTx = InteropLib.transformRawTx(InteropLib.parseRawTx(rawTxCbor))
+  const transformedRawTx = InteropLib.transformRawTx(InteropLib.decodeRawTx(rawTxCbor))
   const encodedRawTx = InteropLib.encodeRawTx(transformedRawTx).toString('hex') as CborHex
   write(args.outFile, constructRawTxOutput(args.rawTxFileData.era, encodedRawTx))
 }
@@ -96,7 +96,7 @@ const transformTx = (args: ParsedTransactionTransformArguments): void => {
     throw Error(Errors.TxContainsUnfixableErrors)
   }
   const txCbor = Buffer.from(args.txFileData.cborHex, 'hex')
-  const transformedTx = InteropLib.transformTx(InteropLib.parseTx(txCbor))
+  const transformedTx = InteropLib.transformTx(InteropLib.decodeTx(txCbor))
   if (containsFixable) {
     if (containsVKeyWitnesses(transformedTx)) {
       throw Error(Errors.CannotTransformSignedTx)
