@@ -5,6 +5,7 @@ const { LedgerCryptoProvider } = require('../../../../src/crypto-providers/ledge
 const { NETWORKS } = require('../../../../src/constants')
 const { determineSigningMode, getTxBodyHash } = require('../../../../src/crypto-providers/util')
 const { validateSigning, validateWitnessing } = require('../../../../src/crypto-providers/signingValidation')
+const { validateRawTxBeforeSigning } = require('../../../../src/transaction/transactionValidation')
 
 const { signingFiles } = require('./signingFiles')
 
@@ -253,6 +254,7 @@ const transactions = {
 }
 
 async function testTxSigning(cryptoProvider, transaction) {
+  validateRawTxBeforeSigning(transaction.unsignedCborHex)
   const rawTx = decodeRawTx(transaction.unsignedCborHex)
   const signingMode = determineSigningMode(rawTx.body, transaction.hwSigningFiles)
   const signingParameters = {
@@ -268,6 +270,7 @@ async function testTxSigning(cryptoProvider, transaction) {
 }
 
 async function testTxWitnessing(cryptoProvider, transaction) {
+  validateRawTxBeforeSigning(transaction.unsignedCborHex)
   const rawTx = decodeRawTx(transaction.unsignedCborHex)
   const signingMode = determineSigningMode(rawTx.body, transaction.hwSigningFiles)
   const signingParameters = {
