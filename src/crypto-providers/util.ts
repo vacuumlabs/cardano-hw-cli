@@ -11,7 +11,7 @@ import {
   StakeRegistrationCertificate,
   StakeDeregistrationCertificate,
   StakeDelegationCertificate,
-  AddressKeyHash,
+  KeyHash,
   ScriptHash,
 } from 'cardano-hw-interop-lib'
 import { HARDENED_THRESHOLD } from '../constants'
@@ -457,8 +457,8 @@ const rewardAccountToStakeCredential = (address: RewardAccount): StakeCredential
   switch (type) {
     case (AddressType.REWARD_KEY): {
       return {
-        type: StakeCredentialType.ADDRESS_KEY_HASH,
-        hash: address.slice(1) as AddressKeyHash,
+        type: StakeCredentialType.KEY_HASH,
+        hash: address.slice(1) as KeyHash,
       }
     }
     case (AddressType.REWARD_SCRIPT): {
