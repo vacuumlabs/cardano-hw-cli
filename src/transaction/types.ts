@@ -44,13 +44,13 @@ export type _ShelleyWitness = {
   data: TxWitnessShelley,
 }
 
-export type RawTxOutput = {
+export type RawTxFileOutput = {
   type: string,
   description: '',
   cborHex: RawTxCborHex,
 }
 
-export type TxOutput = {
+export type TxFileOutput = {
   type: string,
   description: '',
   cborHex: TxCborHex,

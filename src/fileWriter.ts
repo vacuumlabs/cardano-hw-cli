@@ -3,9 +3,9 @@ import { classifyPath, PathTypes } from './crypto-providers/util'
 import { OpCertIssueCounter, SignedOpCertCborHex } from './opCert/opCert'
 import {
   RawTxCborHex,
-  RawTxOutput,
+  RawTxFileOutput,
   TxCborHex,
-  TxOutput,
+  TxFileOutput,
   WitnessOutput,
   _ByronWitness,
   _ShelleyWitness,
@@ -41,7 +41,7 @@ const cardanoEraToRawType: {[key in CardanoEra]: string} = {
   [CardanoEra.ALONZO]: 'TxBodyAlonzo',
 }
 
-const constructRawTxOutput = (era: CardanoEra, rawTxCborHex: RawTxCborHex): RawTxOutput => ({
+const constructRawTxFileOutput = (era: CardanoEra, rawTxCborHex: RawTxCborHex): RawTxFileOutput => ({
   type: cardanoEraToRawType[era],
   description: '',
   cborHex: rawTxCborHex,
@@ -55,7 +55,7 @@ const cardanoEraToSignedType: {[key in CardanoEra]: string} = {
   [CardanoEra.ALONZO]: 'Tx AlonzoEra',
 }
 
-const constructTxOutput = (era: CardanoEra, txCborHex: TxCborHex): TxOutput => ({
+const constructTxFileOutput = (era: CardanoEra, txCborHex: TxCborHex): TxFileOutput => ({
   type: cardanoEraToSignedType[era],
   description: '',
   cborHex: txCborHex,
@@ -162,7 +162,7 @@ const constructHwSigningKeyOutput = (xPubKey: XPubKeyHex, path: BIP32Path): HwSi
   }
 }
 
-const constructSignedOpCertOutput = (signedOpCertCborHex: SignedOpCertCborHex): TxOutput => ({
+const constructSignedOpCertOutput = (signedOpCertCborHex: SignedOpCertCborHex): TxFileOutput => ({
   type: 'NodeOperationalCertificate',
   description: '',
   cborHex: signedOpCertCborHex,
@@ -180,8 +180,8 @@ const constructOpCertIssueCounterOutput = (issueCounter: OpCertIssueCounter): Op
 export {
   write,
   writeCbor,
-  constructRawTxOutput,
-  constructTxOutput,
+  constructRawTxFileOutput,
+  constructTxFileOutput,
   constructTxWitnessOutput,
   constructHwSigningKeyOutput,
   constructVerificationKeyOutput,

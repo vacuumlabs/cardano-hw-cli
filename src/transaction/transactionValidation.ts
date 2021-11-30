@@ -9,7 +9,7 @@ import {
   CborHex,
   ExitCode,
 } from '../types'
-import { constructRawTxOutput, constructTxOutput, write } from '../fileWriter'
+import { constructRawTxFileOutput, constructTxFileOutput, write } from '../fileWriter'
 import { containsVKeyWitnesses } from './transaction'
 
 const printValidationErrors = (
@@ -85,7 +85,7 @@ const transformRawTx = (args: ParsedTransactionTransformRawArguments): void => {
   const rawTxCbor = Buffer.from(args.rawTxFileData.cborHex, 'hex')
   const transformedRawTx = InteropLib.transformRawTx(InteropLib.decodeRawTx(rawTxCbor))
   const encodedRawTx = InteropLib.encodeRawTx(transformedRawTx).toString('hex') as CborHex
-  write(args.outFile, constructRawTxOutput(args.rawTxFileData.era, encodedRawTx))
+  write(args.outFile, constructRawTxFileOutput(args.rawTxFileData.era, encodedRawTx))
 }
 
 const transformTx = (args: ParsedTransactionTransformArguments): void => {
@@ -105,7 +105,7 @@ const transformTx = (args: ParsedTransactionTransformArguments): void => {
     console.log('Fixed transaction will be written to the output file.')
   }
   const encodedTx = InteropLib.encodeTx(transformedTx).toString('hex') as CborHex
-  write(args.outFile, constructTxOutput(args.txFileData.era, encodedTx))
+  write(args.outFile, constructTxFileOutput(args.txFileData.era, encodedTx))
 }
 
 export {
