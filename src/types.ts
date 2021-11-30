@@ -1,4 +1,4 @@
-import { RawTxOutput, TxOutput, WitnessOutput } from './transaction/types'
+import { RawTxFileOutput, TxFileOutput, WitnessOutput } from './transaction/types'
 import { CommandType } from './command-parser/commandParser'
 import { KesVKey } from './opCert/opCert'
 
@@ -50,12 +50,12 @@ export type HwSigningData = {
   cborXPubKeyHex: XPubKeyCborHex
 }
 
-export type RawTxData = {
+export type RawTxFileData = {
   era: CardanoEra,
   cborHex: CborHex
 }
 
-export type TxData = {
+export type TxFileData = {
   era: CardanoEra,
   cborHex: CborHex
 }
@@ -112,7 +112,7 @@ export type Network = {
 export type ParsedTransactionSignArguments = {
   command: CommandType.SIGN_TRANSACTION,
   network: Network,
-  rawTxFileData: RawTxData,
+  rawTxFileData: RawTxFileData,
   hwSigningFileData: HwSigningData[],
   outFile: string,
   changeOutputKeyFileData: HwSigningData[],
@@ -156,7 +156,7 @@ export type ParsedTransactionPolicyIdArguments = {
 export type ParsedTransactionWitnessArguments = {
   command: CommandType.WITNESS_TRANSACTION,
   network: Network,
-  rawTxFileData: RawTxData,
+  rawTxFileData: RawTxFileData,
   hwSigningFileData: HwSigningData[],
   outFiles: string[],
   changeOutputKeyFileData: HwSigningData[],
@@ -164,23 +164,23 @@ export type ParsedTransactionWitnessArguments = {
 
 export type ParsedTransactionValidateRawArguments = {
   command: CommandType.VALIDATE_RAW_TRANSACTION,
-  rawTxFileData: RawTxData,
+  rawTxFileData: RawTxFileData,
 }
 
 export type ParsedTransactionValidateArguments = {
   command: CommandType.VALIDATE_TRANSACTION,
-  txFileData: TxData,
+  txFileData: TxFileData,
 }
 
 export type ParsedTransactionTransformRawArguments = {
   command: CommandType.TRANSFORM_RAW_TRANSACTION,
-  rawTxFileData: RawTxData,
+  rawTxFileData: RawTxFileData,
   outFile: string,
 }
 
 export type ParsedTransactionTransformArguments = {
   command: CommandType.TRANSFORM_TRANSACTION,
-  txFileData: TxData,
+  txFileData: TxFileData,
   outFile: string,
 }
 
@@ -250,8 +250,8 @@ export type OpCertIssueCounterOutput = {
 }
 
 export type OutputData =
-  | RawTxOutput
-  | TxOutput
+  | RawTxFileOutput
+  | TxFileOutput
   | WitnessOutput
   | HwSigningOutput
   | VerificationKeyOutput
