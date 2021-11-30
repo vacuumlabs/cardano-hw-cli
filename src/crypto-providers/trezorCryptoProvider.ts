@@ -224,9 +224,9 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     stakeSigningFiles: HwSigningData[],
   ): {path: string | number[]} | {scriptHash: string} => {
     switch (stakeCredential.type) {
-      case (TxTypes.StakeCredentialType.ADDRESS_KEY_HASH): {
+      case (TxTypes.StakeCredentialType.KEY_HASH): {
         const path = findSigningPathForKeyHash(
-          (stakeCredential as TxTypes.StakeCredentialAddress).hash, stakeSigningFiles,
+          (stakeCredential as TxTypes.StakeCredentialKey).hash, stakeSigningFiles,
         )
         if (!path) throw Error(Errors.MissingSigningFileForCertificateError)
         return { path }
