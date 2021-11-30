@@ -12,9 +12,10 @@ import {
 import { constructRawTxFileOutput, constructTxFileOutput, write } from '../fileWriter'
 import { containsVKeyWitnesses } from './transaction'
 
-const printValidationErrors = (
+const checkValidationErrors = (
   cborHex: CborHex,
   validator: (txCbor: Buffer) => InteropLib.ValidationError[],
+  printErrors: boolean,
   printSuccessMessage: boolean,
 ): { containsUnfixable: boolean, containsFixable: boolean } => {
   const cbor = Buffer.from(cborHex, 'hex')
@@ -25,7 +26,7 @@ const printValidationErrors = (
     { title: 'fixable', errors: fixableErrors },
   ]
   errorGroups.forEach(({ title, errors }) => {
-    if (errors.length > 0) {
+    if (errors.length > 0 && printErrors) {
       // eslint-disable-next-line no-console
       console.log(`The transaction contains following ${title} errors:`)
       // eslint-disable-next-line no-console
@@ -43,7 +44,7 @@ const printValidationErrors = (
 const validateRawTxBeforeSigning = (rawTxCborHex: CborHex): void => {
   const {
     containsUnfixable, containsFixable,
-  } = printValidationErrors(rawTxCborHex, InteropLib.validateRawTx, false)
+  } = checkValidationErrors(rawTxCborHex, InteropLib.validateRawTx, true, false)
 
   if (containsUnfixable) {
     throw Error(Errors.TxContainsUnfixableErrors)
@@ -56,7 +57,7 @@ const validateRawTxBeforeSigning = (rawTxCborHex: CborHex): void => {
 const validateRawTx = (args: ParsedTransactionValidateRawArguments): ExitCode => {
   const {
     containsUnfixable, containsFixable,
-  } = printValidationErrors(args.rawTxFileData.cborHex, InteropLib.validateRawTx, true)
+  } = checkValidationErrors(args.rawTxFileData.cborHex, InteropLib.validateRawTx, true, true)
   if (containsUnfixable) return ExitCode.UnfixableValidationErrorsFound
   if (containsFixable) return ExitCode.FixableValidationErrorsFound
   return ExitCode.Success
@@ -65,7 +66,7 @@ const validateRawTx = (args: ParsedTransactionValidateRawArguments): ExitCode =>
 const validateTx = (args: ParsedTransactionValidateArguments): ExitCode => {
   const {
     containsUnfixable, containsFixable,
-  } = printValidationErrors(args.txFileData.cborHex, InteropLib.validateTx, true)
+  } = checkValidationErrors(args.txFileData.cborHex, InteropLib.validateTx, true, true)
   if (containsUnfixable) return ExitCode.UnfixableValidationErrorsFound
   if (containsFixable) return ExitCode.FixableValidationErrorsFound
   return ExitCode.Success
@@ -74,7 +75,7 @@ const validateTx = (args: ParsedTransactionValidateArguments): ExitCode => {
 const transformRawTx = (args: ParsedTransactionTransformRawArguments): void => {
   const {
     containsUnfixable, containsFixable,
-  } = printValidationErrors(args.rawTxFileData.cborHex, InteropLib.validateRawTx, true)
+  } = checkValidationErrors(args.rawTxFileData.cborHex, InteropLib.validateRawTx, true, true)
   if (containsUnfixable) {
     throw Error(Errors.TxContainsUnfixableErrors)
   }
@@ -91,7 +92,7 @@ const transformRawTx = (args: ParsedTransactionTransformRawArguments): void => {
 const transformTx = (args: ParsedTransactionTransformArguments): void => {
   const {
     containsUnfixable, containsFixable,
-  } = printValidationErrors(args.txFileData.cborHex, InteropLib.validateTx, true)
+  } = checkValidationErrors(args.txFileData.cborHex, InteropLib.validateTx, true, true)
   if (containsUnfixable) {
     throw Error(Errors.TxContainsUnfixableErrors)
   }
@@ -109,6 +110,7 @@ const transformTx = (args: ParsedTransactionTransformArguments): void => {
 }
 
 export {
+  checkValidationErrors,
   validateRawTxBeforeSigning,
   validateRawTx,
   validateTx,
