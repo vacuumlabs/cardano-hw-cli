@@ -20,8 +20,8 @@ const TxSigned = (
   byronWitnesses: TxWitnessByron[],
   shelleyWitnesses: TxWitnessShelley[],
 ): TxCborHex => {
-  const { body, nativeScriptWitnesses, auxiliaryData } = rawTx
-  const nativeScriptWitnessList = nativeScriptWitnesses as any[] | undefined
+  const { body, scriptWitnesses, auxiliaryData } = rawTx
+  const nativeScriptWitnessList = scriptWitnesses as any[] | undefined
   const witnessSet = new Map()
   if (shelleyWitnesses.length > 0) {
     witnessSet.set(TxWitnessKeys.SHELLEY, shelleyWitnesses)
