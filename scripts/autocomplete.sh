@@ -12,7 +12,7 @@ _cardano_hw_cli_completions()
                 COMPREPLY=( $(compgen -W "verification-key" "${COMP_WORDS[2]}") )
             fi
             if [ "${COMP_WORDS[1]}" = "transaction" ]; then
-                COMPREPLY=( $(compgen -W "sign witness" "${COMP_WORDS[2]}") )
+                COMPREPLY=( $(compgen -W "sign witness policyid validate-raw validate transform-raw transform" "${COMP_WORDS[2]}") )
             fi
             if [ "${COMP_WORDS[1]}" = "device" ]; then
                 COMPREPLY=( $(compgen -W "version" "${COMP_WORDS[2]}") )
@@ -37,6 +37,21 @@ _cardano_hw_cli_completions()
             if [ "${COMP_WORDS[2]}" = "sign" ] || [ "${COMP_WORDS[2]}" = "witness" ]; then
                 COMPREPLY=( $(compgen -W "--mainnet --testnet-magic --tx-body-file --hw-signing-file --change-output-key-file --out-file" -- "${COMP_WORDS[-1]}") )
             fi
+            if [ "${COMP_WORDS[2]}" = "policyid" ]; then
+                COMPREPLY=( $(compgen -W "--script-file --hw-signing-file" -- "${COMP_WORDS[-1]}") )
+            fi
+            if [ "${COMP_WORDS[2]}" = "validate-raw" ]; then
+                COMPREPLY=( $(compgen -W "--tx-body-file" -- "${COMP_WORDS[-1]}") )
+            fi
+            if [ "${COMP_WORDS[2]}" = "validate" ]; then
+                COMPREPLY=( $(compgen -W "--tx-file" -- "${COMP_WORDS[-1]}") )
+            fi
+            if [ "${COMP_WORDS[2]}" = "transform-raw" ]; then
+                COMPREPLY=( $(compgen -W "--tx-body-file --out-file" -- "${COMP_WORDS[-1]}") )
+            fi
+            if [ "${COMP_WORDS[2]}" = "transform" ]; then
+                COMPREPLY=( $(compgen -W "--tx-file --out-file" -- "${COMP_WORDS[-1]}") )
+            fi
             if [ "${COMP_WORDS[1]}" = "node" ] && [ "${COMP_WORDS[2]}" = "key-gen" ]; then
                 COMPREPLY=( $(compgen -W "--path --hw-signing-file --cold-verification-key-file --operational-certificate-issue-counter-file" -- "${COMP_WORDS[-1]}") )
             fi
@@ -51,4 +66,3 @@ _cardano_hw_cli_completions()
 }
 
 complete -F _cardano_hw_cli_completions cardano-hw-cli
-
