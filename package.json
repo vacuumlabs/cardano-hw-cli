@@ -1,6 +1,6 @@
 {
   "name": "cardano-hw-cli",
-  "version": "1.9.0-rc0",
+  "version": "1.9.0",
   "engines": {
     "node": "12.19.1"
   },
@@ -46,7 +46,7 @@
     "cbor": "^7.0.4",
     "lodash": "^4.17.21",
     "rw": "1.3.3",
-    "trezor-connect": "8.2.3-beta.3"
+    "trezor-connect": "8.2.3-beta.8"
   },
   "devDependencies": {
     "@types/argparse": "^2.0.10",
