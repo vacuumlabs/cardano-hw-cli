@@ -239,10 +239,10 @@
     tiny-worker "^2.3.0"
     ws "^7.4.0"
 
-"@trezor/connect-common@^0.0.2":
-  version "0.0.2"
-  resolved "https://registry.yarnpkg.com/@trezor/connect-common/-/connect-common-0.0.2.tgz#d2bb1e90de6be2895b7f44215f09b52db361aaf4"
-  integrity sha512-b0R/HfA10mH2CR0BoPkKUs/2TC5Bf4MSGBFRF+1Q4tluQfSRzongQEZivg09vbBQEZBD1Ora3Oikn74zqsW4Aw==
+"@trezor/connect-common@^0.0.3":
+  version "0.0.3"
+  resolved "https://registry.yarnpkg.com/@trezor/connect-common/-/connect-common-0.0.3.tgz#d136453d259d24f9200daf72d0184594d56e92e2"
+  integrity sha512-oc4K/Ve2e1o3R1M0QAexLYN7aOepeSlcO5NVP/cfxBA+36cApZrRSy6kbs3OB2uc15tua5qkmYEDpJ3QSnZarg==
 
 "@trezor/rollout@^1.2.0":
   version "1.2.0"
@@ -4563,14 +4563,14 @@ to-regex@^3.0.1, to-regex@^3.0.2:
     regex-not "^1.0.2"
     safe-regex "^1.1.0"
 
-trezor-connect@8.2.3-beta.3:
-  version "8.2.3-beta.3"
-  resolved "https://registry.yarnpkg.com/trezor-connect/-/trezor-connect-8.2.3-beta.3.tgz#5f397a95839ed39472cbaf1b1d3cbaacc04a2530"
-  integrity sha512-WOyhVjEYyk7+CwJaMKEzJ8o4wj5RmYmbUr2mr/Dwl4YiJXWK2J+RWwYf97HsGJFL4DUmCzRmkmF8oIK8l8QLSQ==
+trezor-connect@8.2.3-beta.8:
+  version "8.2.3-beta.8"
+  resolved "https://registry.yarnpkg.com/trezor-connect/-/trezor-connect-8.2.3-beta.8.tgz#2034e7290e7b5111f3ba96557e8006b6aa11f0a4"
+  integrity sha512-qFFPucy94YtETcPJE2Zv9lMZzzgRRDyncS0N5QpqLT+a0/1gUkquw2Fq4e5H5ExQf0G651wGnnRBfAA27V7YWQ==
   dependencies:
     "@babel/runtime" "^7.15.4"
     "@trezor/blockchain-link" "^1.0.17"
-    "@trezor/connect-common" "^0.0.2"
+    "@trezor/connect-common" "^0.0.3"
     "@trezor/rollout" "^1.2.0"
     "@trezor/utxo-lib" "1.0.0-beta.10"
     bignumber.js "^9.0.1"
