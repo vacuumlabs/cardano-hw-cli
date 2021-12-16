@@ -35,18 +35,18 @@
   "homepage": "https://github.com/vacuumlabs/cardano-hw-cli#readme",
   "dependencies": {
     "@babel/runtime": "^7.11.2",
-    "@cardano-foundation/ledgerjs-hw-app-cardano": "^4.0.0",
+    "@cardano-foundation/ledgerjs-hw-app-cardano": "./ledgerjs-alonzo-10.tgz",
     "@emurgo/cardano-serialization-lib-nodejs": "^8.0.0",
     "@ledgerhq/hw-transport-node-hid": "^5.25.0",
     "argparse": "^2.0.1",
     "bignumber": "^1.1.0",
     "borc": "^2.1.2",
     "cardano-crypto.js": "^5.3.6-rc.6",
-    "cardano-hw-interop-lib": "0.1.0",
+    "cardano-hw-interop-lib": "./cardano-hw-interop-lib-v0.1.0-40.tgz",
     "cbor": "^7.0.4",
     "lodash": "^4.17.21",
     "rw": "1.3.3",
-    "trezor-connect": "8.2.4-extended"
+    "trezor-connect": "./trezor-connect-alonzo-4.tgz"
   },
   "devDependencies": {
     "@types/argparse": "^2.0.10",
