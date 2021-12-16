@@ -49,7 +49,6 @@ import {
   validateVotingRegistrationAddressType,
   findSigningPathForKey,
   encodeVotingRegistrationMetaData,
-  findPathForKeyHash,
   rewardAccountToStakeCredential,
 } from './util'
 
@@ -765,7 +764,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
   ): LedgerTypes.NativeScript => {
     switch (nativeScript.type) {
       case NativeScriptType.PUBKEY: {
-        const path = findPathForKeyHash(Buffer.from(nativeScript.keyHash, 'hex'), signingFiles)
+        const path = findSigningPathForKeyHash(Buffer.from(nativeScript.keyHash, 'hex'), signingFiles)
         if (path) {
           return {
             type: LedgerTypes.NativeScriptType.PUBKEY_DEVICE_OWNED,
