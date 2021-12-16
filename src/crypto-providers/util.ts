@@ -199,37 +199,26 @@ const filterSigningFiles = (
   }
 }
 
-const hwSigningFileToPubKeyHash = (signingFile: HwSigningData): Uint8Array => (
-  cardanoSerialization.PublicKey.from_bytes(
-    splitXPubKeyCborHex(signingFile.cborXPubKeyHex).pubKey,
-  ).hash().to_bytes()
+const hwSigningFileToPubKey = (signingFile: HwSigningData): Buffer => (
+  splitXPubKeyCborHex(signingFile.cborXPubKeyHex).pubKey
 )
 
-const findPathForKeyHash = (
+const hwSigningFileToPubKeyHash = (signingFile: HwSigningData): Uint8Array => {
+  const pubKey = hwSigningFileToPubKey(signingFile)
+  return cardanoSerialization.PublicKey.from_bytes(pubKey).hash().to_bytes()
+}
+
+const findSigningPathForKey = (
   keyHash: Buffer, signingFiles: HwSigningData[],
 ): BIP32Path | undefined => {
-  const signingFile = signingFiles.find((file) => keyHash.equals(hwSigningFileToPubKeyHash(file)))
+  const signingFile = signingFiles.find((file) => keyHash.equals(hwSigningFileToPubKey(file)))
   return signingFile?.path
 }
 
 const findSigningPathForKeyHash = (
   keyHash: Buffer, signingFiles: HwSigningData[],
 ): BIP32Path | undefined => {
-  const signingFile = signingFiles.find((file) => {
-    const { pubKey } = splitXPubKeyCborHex(file.cborXPubKeyHex)
-    const pubKeyHash = cardanoCrypto.getPubKeyBlake2b224Hash(pubKey)
-    return keyHash.equals(pubKeyHash)
-  })
-  return signingFile?.path
-}
-
-const findSigningPathForKey = (
-  key: Buffer, signingFiles: HwSigningData[],
-): BIP32Path | undefined => {
-  const signingFile = signingFiles.find((file) => {
-    const { pubKey } = splitXPubKeyCborHex(file.cborXPubKeyHex)
-    return key.equals(pubKey)
-  })
+  const signingFile = signingFiles.find((file) => keyHash.equals(hwSigningFileToPubKeyHash(file)))
   return signingFile?.path
 }
 
@@ -562,7 +551,6 @@ export {
   validateKeyGenInputs,
   getSigningPath,
   filterSigningFiles,
-  findPathForKeyHash,
   findSigningPathForKeyHash,
   findSigningPathForKey,
   extractStakePubKeyFromHwSigningData,

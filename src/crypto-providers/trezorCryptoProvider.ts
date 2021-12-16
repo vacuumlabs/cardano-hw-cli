@@ -48,7 +48,6 @@ import {
   validateVotingRegistrationAddressType,
   splitXPubKeyCborHex,
   encodeVotingRegistrationMetaData,
-  findPathForKeyHash,
   rewardAccountToStakeCredential,
 } from './util'
 import { Errors } from '../errors'
@@ -660,7 +659,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
   ): TrezorTypes.CardanoNativeScript => {
     switch (nativeScript.type) {
       case NativeScriptType.PUBKEY: {
-        const path = findPathForKeyHash(Buffer.from(nativeScript.keyHash, 'hex'), signingFiles)
+        const path = findSigningPathForKeyHash(Buffer.from(nativeScript.keyHash, 'hex'), signingFiles)
         if (path) {
           return {
             type: TrezorTypes.CardanoNativeScriptType.PUB_KEY,
