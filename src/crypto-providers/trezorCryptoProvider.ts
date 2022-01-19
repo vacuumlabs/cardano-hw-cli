@@ -480,6 +480,8 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
         throw Error(Errors.TrezorPoolRegistrationAsOperatorNotSupported)
       case SigningMode.MULTISIG_TRANSACTION:
         return TrezorTypes.CardanoTxSigningMode.MULTISIG_TRANSACTION
+      case SigningMode.PLUTUS_TRANSACTION:
+        return TrezorTypes.CardanoTxSigningMode.PLUTUS_TRANSACTION
       default:
         throw Error(Errors.Unreachable)
     }
