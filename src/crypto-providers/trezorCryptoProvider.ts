@@ -507,7 +507,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
       (output) => prepareOutput(output, network, changeOutputFiles, signingMode),
     )
     const certificates = body.certificates?.map(
-      (certificate) => prepareCertificate(certificate, [...stakeSigningFiles, ...multisigSigningFiles]),
+      (certificate) => prepareCertificate(certificate, stakeSigningFiles),
     )
     const fee = `${body.fee}`
     const ttl = prepareTtl(body.ttl)

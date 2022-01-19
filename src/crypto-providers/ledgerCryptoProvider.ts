@@ -608,7 +608,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     const certificates = body.certificates?.map(
       (certificate) => prepareCertificate(
         certificate,
-        [...stakeSigningFiles, ...poolColdSigningFiles, ...multisigSigningFiles],
+        [...stakeSigningFiles, ...poolColdSigningFiles],
         network,
         signingMode,
       ),
