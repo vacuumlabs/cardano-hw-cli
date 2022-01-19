@@ -67,7 +67,8 @@ const enum Errors {
   InvalidCollateralInputError = 'Invalid collateral input',
   TxContainsUnfixableErrors = 'Transaction CBOR contains unfixable errors',
   TxContainsFixableErrors = 'Transaction CBOR contains fixable errors, please run "transform" or "transform-raw" command first',
-  CannotTransformSignedTx = 'Transaction contains vkey witnesses, transformation would invalidate them'
+  CannotTransformSignedTx = 'Transaction contains vkey witnesses, transformation would invalidate them',
+  NetworkIdMismatchError = 'Provided network id differs from network id included in transaction body',
 }
 
 export {

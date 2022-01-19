@@ -1,6 +1,7 @@
 import {
   CertificateType,
   TransactionBody,
+  Uint,
 } from 'cardano-hw-interop-lib'
 import { Errors } from '../errors'
 import {
@@ -155,11 +156,19 @@ const validateMultisigSigning = (params: SigningParameters) => {
   // there are no checks that can be done (except those in validateMultisigWitnesses)
 }
 
+const validateNetworkId = (cliNetworkId: number, bodyNetworkId: Uint | undefined): void => {
+  if (bodyNetworkId !== undefined && bodyNetworkId !== cliNetworkId) {
+    throw Error(Errors.MissingInputError)
+  }
+}
+
 const validateWitnessing = (params: SigningParameters): void => {
-  // verifies whether the tx and signing files correspond to to each other and to the signing mode
+  // verifies whether signing parameters correspond to each other
   if (params.rawTx.body.inputs.length === 0) {
     throw Error(Errors.MissingInputError)
   }
+
+  validateNetworkId(params.network.networkId, params.rawTx.body.networkId)
 
   switch (params.signingMode) {
     case SigningMode.ORDINARY_TRANSACTION:
@@ -187,6 +196,8 @@ const validateSigning = (params: SigningParameters): void => {
   if (params.rawTx.body.inputs.length === 0) {
     throw Error(Errors.MissingInputError)
   }
+
+  validateNetworkId(params.network.networkId, params.rawTx.body.networkId)
 
   switch (params.signingMode) {
     case SigningMode.ORDINARY_TRANSACTION:
