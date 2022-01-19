@@ -24,6 +24,7 @@ export enum SigningMode {
   POOL_REGISTRATION_AS_OWNER,
   POOL_REGISTRATION_AS_OPERATOR,
   MULTISIG_TRANSACTION,
+  PLUTUS_TRANSACTION,
 }
 
 export type SigningParameters = {

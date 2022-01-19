@@ -256,6 +256,10 @@ const determineSigningMode = (
       : SigningMode.POOL_REGISTRATION_AS_OWNER
   }
 
+  if (txBody.collaterals || txBody.requiredSigners) {
+    return SigningMode.PLUTUS_TRANSACTION
+  }
+
   return hasMultisigSigningFile(signingFiles)
     ? SigningMode.MULTISIG_TRANSACTION
     : SigningMode.ORDINARY_TRANSACTION

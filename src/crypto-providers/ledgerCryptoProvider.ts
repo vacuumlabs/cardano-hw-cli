@@ -579,6 +579,8 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
         return LedgerTypes.TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR
       case SigningMode.MULTISIG_TRANSACTION:
         return LedgerTypes.TransactionSigningMode.MULTISIG_TRANSACTION
+      case SigningMode.PLUTUS_TRANSACTION:
+        return LedgerTypes.TransactionSigningMode.PLUTUS_TRANSACTION
       default:
         throw Error(Errors.Unreachable)
     }
