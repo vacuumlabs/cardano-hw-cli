@@ -162,7 +162,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
       throw Error(Errors.InvalidInputError)
     }
     return {
-      path: path as number[], // TODO: Check if null
+      path: path || undefined,
       prev_hash: input.transactionId.toString('hex'),
       prev_index: Number(input.index),
     }
@@ -187,6 +187,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     lovelaceAmount: TxTypes.Uint,
     changeAddress: _AddressParameters,
     tokenBundle?: TrezorTypes.CardanoAssetGroup[],
+    datumHash?: string,
   ): TrezorTypes.CardanoOutput => ({
     amount: `${lovelaceAmount}`,
     addressParameters: {
@@ -195,6 +196,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
       stakingPath: changeAddress.stakePath,
     },
     tokenBundle,
+    datumHash,
   })
 
   const prepareOutput = (
@@ -206,16 +208,18 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     const changeAddressParams = getAddressParameters(changeOutputFiles, output.address, network)
     const tokenBundle = output.amount.type === TxTypes.AmountType.WITH_MULTIASSET
       ? prepareTokenBundle(output.amount.multiasset, false) : []
+    const datumHash = output.datumHash?.toString('hex')
 
     if (changeAddressParams && signingMode === SigningMode.ORDINARY_TRANSACTION) {
-      return prepareChangeOutput(output.amount.coin, changeAddressParams, tokenBundle)
+      return prepareChangeOutput(output.amount.coin, changeAddressParams, tokenBundle, datumHash)
     }
 
-    return ({
+    return {
       address: encodeAddress(output.address),
       amount: `${output.amount.coin}`,
       tokenBundle,
-    })
+      datumHash,
+    }
   }
 
   const _prepareStakeCredential = (
@@ -371,6 +375,32 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     }) : undefined
   )
 
+  const prepareScriptDataHash = (
+    scriptDataHash: Buffer | undefined,
+  ): string | undefined => scriptDataHash?.toString('hex')
+
+  const prepareCollateralInput = (
+    collateralInput: TxTypes.Collateral, path: BIP32Path | null,
+  ): TrezorTypes.CardanoCollateralInput => {
+    if (collateralInput.index < 0 || collateralInput.index > Number.MAX_SAFE_INTEGER) {
+      throw Error(Errors.InvalidCollateralInputError)
+    }
+    return {
+      path: path || undefined,
+      prev_hash: collateralInput.transactionId.toString('hex'),
+      prev_index: Number(collateralInput.index),
+    }
+  }
+
+  const prepareRequiredSigner = (
+    requiredSigner: TxTypes.RequiredSigner, signingFiles: HwSigningData[],
+  ): TrezorTypes.CardanoRequiredSigner => {
+    const path = findSigningPathForKeyHash(requiredSigner, signingFiles)
+    return path
+      ? { keyPath: path }
+      : { keyHash: requiredSigner.toString('hex') }
+  }
+
   const prepareAdditionalWitnessRequests = (
     mintSigningFiles: HwSigningData[],
     multisigSigningFiles: HwSigningData[],
@@ -484,8 +514,20 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
       (withdrawal) => prepareWithdrawal(withdrawal, stakeSigningFiles),
     )
     const auxiliaryData = prepareMetaDataHashHex(body.metadataHash)
-
     const mint = body.mint ? prepareTokenBundle(body.mint, true) : undefined
+    const scriptDataHash = prepareScriptDataHash(body.scriptDataHash)
+    const collateralInputs = body.collaterals?.map(
+      (collateralInput, i) => prepareCollateralInput(
+        collateralInput, getSigningPath(paymentSigningFiles, inputs.length + i),
+      ),
+    )
+    const requiredSigners = body.requiredSigners?.map(
+      (requiredSigner) => prepareRequiredSigner(
+        requiredSigner,
+        [...paymentSigningFiles, ...stakeSigningFiles, ...mintSigningFiles, ...multisigSigningFiles],
+      ),
+    )
+    const includeNetworkId = body.networkId !== undefined
 
     const additionalWitnessRequests = prepareAdditionalWitnessRequests(mintSigningFiles, multisigSigningFiles)
 
@@ -502,7 +544,11 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
       withdrawals,
       auxiliaryData,
       mint,
+      scriptDataHash,
+      collateralInputs,
+      requiredSigners,
       additionalWitnessRequests,
+      includeNetworkId,
     }
 
     const response = await TrezorConnect.cardanoSignTransaction(request)
@@ -523,7 +569,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
   ): Promise<TxCborHex> => {
     const trezorWitnesses = await trezorSignTx(params, changeOutputFiles)
     const { byronWitnesses, shelleyWitnesses } = createWitnesses(trezorWitnesses, params.hwSigningFileData)
-    return TxSigned(params.rawTx, byronWitnesses, shelleyWitnesses)
+    return TxSigned(params.rawTx, params.era, byronWitnesses, shelleyWitnesses)
   }
 
   const witnessTx = async (

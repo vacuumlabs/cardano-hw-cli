@@ -107,6 +107,7 @@ const CommandExecutor = async () => {
       txBodyHashHex: getTxBodyHash(rawTx.body),
       hwSigningFileData: args.hwSigningFileData,
       network: args.network,
+      era: args.rawTxFileData.era,
     }
     validateSigning(signingParameters)
     const signedTx = await cryptoProvider.signTx(signingParameters, args.changeOutputKeyFileData)
@@ -134,6 +135,7 @@ const CommandExecutor = async () => {
       txBodyHashHex: getTxBodyHash(rawTx.body),
       hwSigningFileData: args.hwSigningFileData,
       network: args.network,
+      era: args.rawTxFileData.era,
     }
     validateWitnessing(signingParameters)
     const txWitnesses = await cryptoProvider.witnessTx(signingParameters, args.changeOutputKeyFileData)

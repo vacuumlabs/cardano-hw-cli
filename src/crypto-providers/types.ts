@@ -16,6 +16,7 @@ import {
   NativeScriptHashKeyHex,
   NativeScriptDisplayFormat,
   ParsedShowAddressArguments,
+  CardanoEra,
 } from '../types'
 
 export enum SigningMode {
@@ -31,6 +32,7 @@ export type SigningParameters = {
   txBodyHashHex: string,
   hwSigningFileData: HwSigningData[],
   network: Network,
+  era: CardanoEra,
 }
 
 export type CryptoProvider = {
