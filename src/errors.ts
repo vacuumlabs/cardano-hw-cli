@@ -64,6 +64,7 @@ const enum Errors {
   KeyHashStakeCredentialInMultisigTx = 'Address key hash stake credential used in a multisig transaction',
   TrezorPoolRegistrationAsOperatorNotSupported = 'Trezor does not support signing pool registration certificate as operator',
   InvalidInputError = 'Invalid input',
+  InvalidCollateralInputError = 'Invalid collateral input',
   TxContainsUnfixableErrors = 'Transaction CBOR contains unfixable errors',
   TxContainsFixableErrors = 'Transaction CBOR contains fixable errors, please run "transform" or "transform-raw" command first',
   CannotTransformSignedTx = 'Transaction contains vkey witnesses, transformation would invalidate them'

@@ -147,6 +147,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     lovelaceAmount: TxTypes.Uint,
     changeOutput: _AddressParameters,
     tokenBundle: LedgerTypes.AssetGroup[] | null,
+    datumHashHex?: string,
   ): LedgerTypes.TxOutput => ({
     destination: {
       type: LedgerTypes.TxOutputDestinationType.DEVICE_OWNED,
@@ -160,6 +161,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     },
     amount: `${lovelaceAmount}`,
     tokenBundle,
+    datumHashHex,
   })
 
   const prepareOutput = (
@@ -171,9 +173,10 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     const changeAddressParams = getAddressParameters(changeOutputFiles, output.address, network)
     const tokenBundle = output.amount.type === TxTypes.AmountType.WITH_MULTIASSET
       ? prepareTokenBundle(output.amount.multiasset) : null
+    const datumHashHex = output.datumHash?.toString('hex')
 
     if (changeAddressParams && signingMode === SigningMode.ORDINARY_TRANSACTION) {
-      return prepareChangeOutput(output.amount.coin, changeAddressParams, tokenBundle)
+      return prepareChangeOutput(output.amount.coin, changeAddressParams, tokenBundle, datumHashHex)
     }
 
     return {
@@ -185,6 +188,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
       },
       amount: `${output.amount.coin}`,
       tokenBundle,
+      datumHashHex,
     }
   }
 
@@ -454,6 +458,38 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     }) : undefined
   )
 
+  const prepareScriptDataHash = (
+    scriptDataHash: Buffer | undefined,
+  ): string | undefined => scriptDataHash?.toString('hex')
+
+  const prepareCollateralInput = (
+    collateralInput: TxTypes.Collateral, path: BIP32Path | null,
+  ): LedgerTypes.TxInput => {
+    if (collateralInput.index < 0 || collateralInput.index > Number.MAX_SAFE_INTEGER) {
+      throw Error(Errors.InvalidCollateralInputError)
+    }
+    return {
+      path,
+      txHashHex: collateralInput.transactionId.toString('hex'),
+      outputIndex: Number(collateralInput.index),
+    }
+  }
+
+  const prepareRequiredSigner = (
+    requiredSigner: TxTypes.RequiredSigner, signingFiles: HwSigningData[],
+  ): LedgerTypes.RequiredSigner => {
+    const path = findSigningPathForKeyHash(requiredSigner, signingFiles)
+    return path
+      ? {
+        type: LedgerTypes.TxRequiredSignerType.PATH,
+        path,
+      }
+      : {
+        type: LedgerTypes.TxRequiredSignerType.HASH,
+        hash: requiredSigner.toString('hex'),
+      }
+  }
+
   const prepareAdditionalWitnessRequests = (
     mintSigningFiles: HwSigningData[],
     multisigSigningFiles: HwSigningData[],
@@ -582,9 +618,20 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
       (withdrawal) => prepareWithdrawal(withdrawal, stakeSigningFiles),
     )
     const auxiliaryData = prepareMetaDataHashHex(body.metadataHash)
-
-    // Ledger expects to receive either a `null` mint field, or a non-empty array
-    const mint = (body.mint && body.mint.length > 0) ? prepareTokenBundle(body.mint) : null
+    const mint = body.mint ? prepareTokenBundle(body.mint) : null
+    const scriptDataHashHex = prepareScriptDataHash(body.scriptDataHash)
+    const collaterals = body.collaterals?.map(
+      (collateralInput, i) => prepareCollateralInput(
+        collateralInput, getSigningPath(paymentSigningFiles, inputs.length + i),
+      ),
+    )
+    const requiredSigners = body.requiredSigners?.map(
+      (requiredSigner) => prepareRequiredSigner(
+        requiredSigner,
+        [...paymentSigningFiles, ...stakeSigningFiles, ...mintSigningFiles, ...multisigSigningFiles],
+      ),
+    )
+    // const includeNetworkId = body.networkId !== undefined
 
     const additionalWitnessRequests = prepareAdditionalWitnessRequests(mintSigningFiles, multisigSigningFiles)
 
@@ -601,6 +648,10 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
         auxiliaryData,
         validityIntervalStart,
         mint,
+        scriptDataHashHex,
+        collaterals,
+        requiredSigners,
+        // TODO includeNetworkId
       },
       additionalWitnessPaths: additionalWitnessRequests,
     })
@@ -621,7 +672,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
   ): Promise<TxCborHex> => {
     const ledgerWitnesses = await ledgerSignTx(params, changeOutputFiles)
     const { byronWitnesses, shelleyWitnesses } = createWitnesses(ledgerWitnesses, params.hwSigningFileData)
-    return TxSigned(params.rawTx, byronWitnesses, shelleyWitnesses)
+    return TxSigned(params.rawTx, params.era, byronWitnesses, shelleyWitnesses)
   }
 
   const witnessTx = async (

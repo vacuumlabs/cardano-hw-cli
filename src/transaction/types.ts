@@ -4,6 +4,9 @@ export const enum TxWitnessKeys {
   SHELLEY = 0,
   NATIVE_SCRIPTS = 1,
   BYRON = 2,
+  PLUTUS_SCRIPTS = 3,
+  PLUTUS_DATA = 4,
+  REDEEMERS = 5,
 }
 
 export type TxWitnessByron = [
