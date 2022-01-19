@@ -51,7 +51,7 @@ import {
   rewardAccountToStakeCredential,
 } from './util'
 import { Errors } from '../errors'
-import { partition, removeNullFields } from '../util'
+import { partition } from '../util'
 import { TREZOR_VERSIONS } from './constants'
 import { KesVKey, OpCertIssueCounter, SignedOpCertCborHex } from '../opCert/opCert'
 import { parseBIP32Path } from '../command-parser/parsers'
@@ -172,11 +172,11 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     multiAssets: TxTypes.Multiasset<TxTypes.Uint> | TxTypes.Multiasset<TxTypes.Int>,
     isMint: boolean,
   ): TrezorTypes.CardanoAssetGroup[] => multiAssets.map(({ policyId, tokens }) => {
-    const tokenAmounts = tokens.map(({ assetName, amount }) => (removeNullFields({
+    const tokenAmounts = tokens.map(({ assetName, amount }) => ({
       assetNameBytes: assetName.toString('hex'),
       amount: !isMint ? `${amount}` : undefined,
       mintAmount: isMint ? `${amount}` : undefined,
-    })))
+    }))
     return {
       policyId: policyId.toString('hex'),
       tokenAmounts,
@@ -505,9 +505,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
       additionalWitnessRequests,
     }
 
-    // TODO: removeNullFields shouldn't be necessary, remove when fixed in trezor connect
-    // https://github.com/trezor/connect/issues/770
-    const response = await TrezorConnect.cardanoSignTransaction(removeNullFields(request))
+    const response = await TrezorConnect.cardanoSignTransaction(request)
 
     if (!response.success) {
       throw Error(response.payload.error)

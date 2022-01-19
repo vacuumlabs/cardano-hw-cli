@@ -12,16 +12,6 @@ export const encodeCbor = (value: any) => {
   return enc.read()
 }
 
-export const removeNullFields = (obj: any): any => Object.keys(obj)
-  .filter((key) => obj[key] != null)
-  .reduce(
-    (acc, key) => {
-      acc[key] = obj[key]
-      return acc
-    },
-    {},
-  )
-
 export const partition = <T>(array: T[], predicate: (t: T) => boolean): [T[], T[]] => (
   [array.filter(predicate), array.filter((t) => !predicate(t))]
 )
