@@ -309,6 +309,9 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     })
 
     const ownersWithPath = poolOwners.filter((owner) => owner.type === LedgerTypes.PoolOwnerType.DEVICE_OWNED)
+    if (!ownersWithPath.length && signingMode === SigningMode.POOL_REGISTRATION_AS_OWNER) {
+      throw Error(Errors.MissingSigningFileForCertificateError)
+    }
     if (ownersWithPath.length > 1) throw Error(Errors.OwnerMultipleTimesInTxError)
 
     return poolOwners
