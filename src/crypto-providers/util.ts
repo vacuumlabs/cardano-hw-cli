@@ -38,7 +38,6 @@ import {
 } from '../types'
 import { decodeCbor, encodeCbor } from '../util'
 import {
-  DeviceVersion,
   _AddressParameters,
   SigningMode,
 } from './types'
@@ -465,20 +464,6 @@ const rewardAccountToStakeCredential = (address: RewardAccount): StakeCredential
   }
 }
 
-const isDeviceVersionGTE = (
-  deviceVersion: DeviceVersion,
-  thresholdVersion: DeviceVersion,
-): boolean => deviceVersion.major > thresholdVersion.major
-  || (
-    deviceVersion.major === thresholdVersion.major
-    && deviceVersion.minor > thresholdVersion.minor
-  )
-  || (
-    deviceVersion.major === thresholdVersion.major
-    && deviceVersion.minor === thresholdVersion.minor
-    && deviceVersion.patch >= thresholdVersion.patch
-  )
-
 const formatVotingRegistrationMetaData = (
   votingPublicKey: Buffer,
   stakePub: Buffer,
@@ -565,7 +550,6 @@ export {
   ipv4ToString,
   ipv6ToString,
   rewardAccountToStakeCredential,
-  isDeviceVersionGTE,
   formatVotingRegistrationMetaData,
   encodeVotingRegistrationMetaData,
   areHwSigningDataNonByron,

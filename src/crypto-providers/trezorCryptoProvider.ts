@@ -10,12 +10,10 @@ import {
 } from '../transaction/types'
 import {
   CryptoProvider,
-  DeviceVersion,
   _AddressParameters,
   SigningMode,
   SigningParameters,
 } from './types'
-import { TrezorCryptoProviderFeature } from './trezorTypes'
 import {
   TxByronWitness,
   TxShelleyWitness,
@@ -43,7 +41,6 @@ import {
   getSigningPath,
   ipv4ToString,
   ipv6ToString,
-  isDeviceVersionGTE,
   getAddressParameters,
   validateVotingRegistrationAddressType,
   splitXPubKeyCborHex,
@@ -52,7 +49,6 @@ import {
 } from './util'
 import { Errors } from '../errors'
 import { partition } from '../util'
-import { TREZOR_VERSIONS } from './constants'
 import { KesVKey, OpCertIssueCounter, SignedOpCertCborHex } from '../opCert/opCert'
 import { parseBIP32Path } from '../command-parser/parsers'
 
@@ -89,7 +85,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
 
   await initTrezorConnect()
 
-  const getDeviceVersion = async (): Promise<DeviceVersion> => {
+  const getVersion = async (): Promise<string> => {
     const { payload: features } = await TrezorConnect.getFeatures()
     const isSuccessful = (
       value: any,
@@ -98,19 +94,8 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     if (!isSuccessful(features)) throw Error(Errors.TrezorVersionError)
 
     const { major_version: major, minor_version: minor, patch_version: patch } = features
-    return { major, minor, patch }
-  }
-
-  const deviceVersion = await getDeviceVersion()
-
-  const getVersion = async (): Promise<string> => {
-    const { major, minor, patch } = await getDeviceVersion()
     return `Trezor app version ${major}.${minor}.${patch}`
   }
-
-  const isFeatureSupportedForVersion = (
-    feature: TrezorCryptoProviderFeature,
-  ): boolean => TREZOR_VERSIONS[feature] && isDeviceVersionGTE(deviceVersion, TREZOR_VERSIONS[feature])
 
   const showAddress = async (
     {
@@ -420,30 +405,6 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     [...mintSigningFiles, ...multisigSigningFiles].map((f) => f.path)
   )
 
-  const ensureFirmwareSupportsParams = (txBody: TxTypes.TransactionBody) => {
-    if (
-      txBody.ttl === undefined
-      && !isFeatureSupportedForVersion(TrezorCryptoProviderFeature.OPTIONAL_TTL)
-    ) {
-      throw Error(Errors.TrezorOptionalTTLNotSupported)
-    }
-    if (
-      txBody.validityIntervalStart !== undefined
-      && !isFeatureSupportedForVersion(TrezorCryptoProviderFeature.VALIDITY_INTERVAL_START)
-    ) {
-      throw Error(Errors.TrezorValidityIntervalStartNotSupported)
-    }
-    txBody.outputs.forEach((output) => {
-      if (
-        output.amount.type === TxTypes.AmountType.WITH_MULTIASSET
-        && output.amount.multiasset.length !== 0
-        && !isFeatureSupportedForVersion(TrezorCryptoProviderFeature.MULTI_ASSET)
-      ) {
-        throw Error(Errors.TrezorMultiAssetsNotSupported)
-      }
-    })
-  }
-
   const createWitnesses = (
     trezorWitnesses: TrezorTypes.CardanoSignedTxWitness[],
     signingFiles: HwSigningData[],
@@ -505,8 +466,6 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     params: SigningParameters,
     changeOutputFiles: HwSigningData[],
   ): Promise<TrezorTypes.CardanoSignedTxWitness[]> => {
-    ensureFirmwareSupportsParams(params.rawTx.body)
-
     const {
       signingMode, rawTx: { body }, txBodyHashHex, hwSigningFileData, network,
     } = params

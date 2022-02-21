@@ -29,8 +29,6 @@ import {
   XPubKeyHex,
 } from '../types'
 import { partition } from '../util'
-import { LEDGER_VERSIONS } from './constants'
-import { LedgerCryptoProviderFeature, LedgerWitness } from './ledgerTypes'
 import {
   CryptoProvider, _AddressParameters, SigningMode, SigningParameters,
 } from './types'
@@ -42,7 +40,6 @@ import {
   getAddressAttributes,
   ipv4ToString,
   ipv6ToString,
-  isDeviceVersionGTE,
   filterSigningFiles,
   getAddressParameters,
   splitXPubKeyCborHex,
@@ -64,12 +61,6 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     const { major, minor, patch } = (await ledger.getVersion()).version
     return `Ledger app version ${major}.${minor}.${patch}`
   }
-
-  const deviceVersion = (await ledger.getVersion()).version
-
-  const isFeatureSupportedForVersion = (
-    feature: LedgerCryptoProviderFeature,
-  ): boolean => LEDGER_VERSIONS[feature] && isDeviceVersionGTE(deviceVersion, LEDGER_VERSIONS[feature])
 
   const showAddress = async (
     {
@@ -516,40 +507,10 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     [...mintSigningFiles, ...multisigSigningFiles].map((f) => f.path)
   )
 
-  const ensureFirmwareSupportsParams = (params: SigningParameters) => {
-    if (
-      params.rawTx.body.ttl === undefined
-      && !isFeatureSupportedForVersion(LedgerCryptoProviderFeature.OPTIONAL_TTL)
-    ) {
-      throw Error(Errors.LedgerOptionalTTLNotSupported)
-    }
-    if (
-      params.rawTx.body.validityIntervalStart !== undefined
-      && !isFeatureSupportedForVersion(LedgerCryptoProviderFeature.VALIDITY_INTERVAL_START)
-    ) {
-      throw Error(Errors.LedgerValidityIntervalStartNotSupported)
-    }
-    params.rawTx.body.outputs.forEach((output) => {
-      if (
-        output.amount.type === TxTypes.AmountType.WITH_MULTIASSET
-        && output.amount.multiasset.length !== 0
-        && !isFeatureSupportedForVersion(LedgerCryptoProviderFeature.MULTI_ASSET)
-      ) {
-        throw Error(Errors.LedgerMultiAssetsNotSupported)
-      }
-    })
-
-    switch (params.signingMode) {
-      case SigningMode.POOL_REGISTRATION_AS_OPERATOR:
-        if (!isFeatureSupportedForVersion(LedgerCryptoProviderFeature.POOL_REGISTRATION_OPERATOR)) {
-          throw Error(Errors.PoolRegistrationAsOperatorNotSupported)
-        }
-        break
-      default:
-    }
-  }
-
-  const createWitnesses = (ledgerWitnesses: LedgerWitness[], signingFiles: HwSigningData[]): TxWitnesses => {
+  const createWitnesses = (
+    ledgerWitnesses: LedgerTypes.Witness[],
+    signingFiles: HwSigningData[],
+  ): TxWitnesses => {
     const pathEquals = (
       path1: BIP32Path, path2: BIP32Path,
     ) => path1.every((element, i) => element === path2[i])
@@ -567,10 +528,11 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     const [byronWitnesses, shelleyWitnesses] = partition(
       ledgerWitnesses.map((witness) => {
         const { pubKey, chainCode } = splitXPubKeyCborHex(
-          getSigningFileDataByPath(witness.path).cborXPubKeyHex,
+          getSigningFileDataByPath(witness.path as BIP32Path).cborXPubKeyHex,
         )
         return ({
-          ...witness,
+          path: witness.path,
+          signature: Buffer.from(witness.witnessSignatureHex, 'hex'),
           pubKey,
           chainCode,
         })
@@ -610,9 +572,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
   const ledgerSignTx = async (
     params: SigningParameters,
     changeOutputFiles: HwSigningData[],
-  ): Promise<LedgerWitness[]> => {
-    ensureFirmwareSupportsParams(params)
-
+  ): Promise<LedgerTypes.Witness[]> => {
     const {
       signingMode, rawTx: { body }, txBodyHashHex, hwSigningFileData, network,
     } = params
@@ -683,10 +643,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
       throw Error(Errors.TxSerializationMismatchError)
     }
 
-    return response.witnesses.map((witness: any) => ({
-      path: witness.path,
-      signature: Buffer.from(witness.witnessSignatureHex, 'hex'),
-    }))
+    return response.witnesses
   }
 
   const signTx = async (
@@ -811,10 +768,6 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
     issueCounter: OpCertIssueCounter,
     signingFiles: HwSigningData[],
   ): Promise<SignedOpCertCborHex> => {
-    if (!isFeatureSupportedForVersion(LedgerCryptoProviderFeature.SIGN_OPERATIONAL_CERTIFICATE)) {
-      throw Error(Errors.LedgerSignOperationalCertificateNotSupported)
-    }
-
     const poolColdKeyPath = findSigningPathForKey(issueCounter.poolColdKey, signingFiles)
 
     const { signatureHex } = await ledger.signOperationalCertificate({
