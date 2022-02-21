@@ -649,7 +649,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
         [...paymentSigningFiles, ...stakeSigningFiles, ...mintSigningFiles, ...multisigSigningFiles],
       ),
     )
-    // const includeNetworkId = body.networkId !== undefined
+    const includeNetworkId = body.networkId !== undefined
 
     const additionalWitnessRequests = prepareAdditionalWitnessRequests(mintSigningFiles, multisigSigningFiles)
 
@@ -669,7 +669,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
         scriptDataHashHex,
         collaterals,
         requiredSigners,
-        // TODO includeNetworkId
+        includeNetworkId,
       },
       additionalWitnessPaths: additionalWitnessRequests,
     })
