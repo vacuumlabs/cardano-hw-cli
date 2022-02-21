@@ -9,6 +9,10 @@ export const NETWORKS: {[key: string]: Network} = {
     networkId: NetworkIds.TESTNET,
     protocolMagic: ProtocolMagics.TESTNET,
   },
+  TESTNET_LEGACY: {
+    networkId: NetworkIds.TESTNET,
+    protocolMagic: ProtocolMagics.TESTNET_LEGACY,
+  },
 }
 
 export const HARDENED_THRESHOLD = 0x80000000

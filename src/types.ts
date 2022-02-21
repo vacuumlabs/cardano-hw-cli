@@ -101,7 +101,8 @@ export enum NetworkIds {
 
 export enum ProtocolMagics {
   MAINNET = 764824073,
-  TESTNET = 42,
+  TESTNET = 1097911063,
+  TESTNET_LEGACY = 42,
 }
 
 export type Network = {
