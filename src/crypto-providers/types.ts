@@ -77,9 +77,3 @@ export type _AddressParameters = {
   paymentPath?: BIP32Path,
   stakePath?: BIP32Path,
 }
-
-export type DeviceVersion = {
-  major: number,
-  minor: number,
-  patch: number,
-}
