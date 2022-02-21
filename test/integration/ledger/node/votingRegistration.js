@@ -8,7 +8,7 @@ const { addresses } = require('./addresses')
 
 const votingRegistrations = {
   withTestnetBaseAddress0: {
-    network: 'TESTNET',
+    network: 'TESTNET_LEGACY',
     auxiliarySigningFiles: [signingFiles.payment0, signingFiles.stake0],
     hwStakeSigningFile: signingFiles.stake0,
     rewardAddressBech32: addresses.testnet.base0,
@@ -26,7 +26,7 @@ const votingRegistrations = {
     signedVotingRegistrationMetaDataHex: 'a219ef64a40158203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b702582066610efd336e1137c525937b76511fbcf2a0e6bcf0d340a67bcb39bc870d85e80358390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c041a000286bc19ef65a101584031e0da1b744776cec0f1dd9a4668b0a92dd61d8ca62fb1f923f469ff8f2c3c30034ad9e4d23a22ee92984efb12dbf5bc1ec5bdb8aa9073fb03f7e994cb061004',
   },
   withTestnetRewardAddress0: {
-    network: 'TESTNET',
+    network: 'TESTNET_LEGACY',
     auxiliarySigningFiles: [signingFiles.stake0],
     hwStakeSigningFile: signingFiles.stake0,
     rewardAddressBech32: addresses.testnet.reward0,
