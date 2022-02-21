@@ -509,7 +509,12 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
   const prepareAdditionalWitnessRequests = (
     mintSigningFiles: HwSigningData[],
     multisigSigningFiles: HwSigningData[],
-  ) => mintSigningFiles.concat(multisigSigningFiles).map((f) => f.path)
+  ) => (
+    // Even though Plutus txs might require additional payment/stake signatures, Plutus scripts
+    // don't see signatures directly - they can only access requiredSigners, and their witnesses
+    // are gathered above.
+    [...mintSigningFiles, ...multisigSigningFiles].map((f) => f.path)
+  )
 
   const ensureFirmwareSupportsParams = (params: SigningParameters) => {
     if (
