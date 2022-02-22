@@ -1,4 +1,10 @@
-import { HARDENED_THRESHOLD, PathLabel } from './constants'
+import {
+  cardanoEraToRawType,
+  cardanoEraToSignedType,
+  cardanoEraToWitnessType,
+  HARDENED_THRESHOLD,
+  PathLabel,
+} from './constants'
 import { classifyPath, PathTypes } from './crypto-providers/util'
 import { OpCertIssueCounter, SignedOpCertCborHex } from './opCert/opCert'
 import {
@@ -33,41 +39,17 @@ const writeCbor = (path: string, data: Cbor) => rw.writeFileSync(
   path, data,
 )
 
-const cardanoEraToRawType: {[key in CardanoEra]: string} = {
-  [CardanoEra.BYRON]: 'TxUnsignedByron',
-  [CardanoEra.SHELLEY]: 'TxUnsignedShelley',
-  [CardanoEra.ALLEGRA]: 'TxBodyAllegra',
-  [CardanoEra.MARY]: 'TxBodyMary',
-  [CardanoEra.ALONZO]: 'TxBodyAlonzo',
-}
-
 const constructRawTxFileOutput = (era: CardanoEra, rawTxCborHex: RawTxCborHex): RawTxFileOutput => ({
   type: cardanoEraToRawType[era],
   description: '',
   cborHex: rawTxCborHex,
 })
 
-const cardanoEraToSignedType: {[key in CardanoEra]: string} = {
-  [CardanoEra.BYRON]: 'TxSignedByron',
-  [CardanoEra.SHELLEY]: 'TxSignedShelley',
-  [CardanoEra.ALLEGRA]: 'Tx AllegraEra',
-  [CardanoEra.MARY]: 'Tx MaryEra',
-  [CardanoEra.ALONZO]: 'Tx AlonzoEra',
-}
-
 const constructTxFileOutput = (era: CardanoEra, txCborHex: TxCborHex): TxFileOutput => ({
   type: cardanoEraToSignedType[era],
   description: '',
   cborHex: txCborHex,
 })
-
-const cardanoEraToWitnessType: {[key in CardanoEra]: string} = {
-  [CardanoEra.BYRON]: 'TxWitnessByron',
-  [CardanoEra.SHELLEY]: 'TxWitnessShelley',
-  [CardanoEra.ALLEGRA]: 'TxWitness AllegraEra',
-  [CardanoEra.MARY]: 'TxWitness MaryEra',
-  [CardanoEra.ALONZO]: 'TxWitness AlonzoEra',
-}
 
 const constructTxWitnessOutput = (
   era: CardanoEra,
@@ -187,6 +169,4 @@ export {
   constructVerificationKeyOutput,
   constructSignedOpCertOutput,
   constructOpCertIssueCounterOutput,
-  cardanoEraToRawType,
-  cardanoEraToSignedType,
 }

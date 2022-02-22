@@ -1,5 +1,11 @@
 import fsPath from 'path'
-import { HARDENED_THRESHOLD, NETWORKS, PathLabel } from '../constants'
+import {
+  cardanoEraToRawType,
+  cardanoEraToSignedType,
+  HARDENED_THRESHOLD,
+  NETWORKS,
+  PathLabel,
+} from '../constants'
 import {
   isBIP32Path, isCborHex, isHwSigningData, isRawTxFileData, isTxFileData, isVotePublicKeyHex,
 } from '../guards'
@@ -18,7 +24,6 @@ import {
 import { KesVKey, OpCertIssueCounter } from '../opCert/opCert'
 import { decodeCbor, invertObject } from '../util'
 import { classifyPath, PathTypes } from '../crypto-providers/util'
-import { cardanoEraToRawType, cardanoEraToSignedType } from '../fileWriter'
 
 const { bech32 } = require('cardano-crypto.js')
 const rw = require('rw')
