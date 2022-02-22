@@ -467,8 +467,9 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     changeOutputFiles: HwSigningData[],
   ): Promise<TrezorTypes.CardanoSignedTxWitness[]> => {
     const {
-      signingMode, rawTx: { body }, txBodyHashHex, hwSigningFileData, network,
+      signingMode, rawTx, tx, txBodyHashHex, hwSigningFileData, network,
     } = params
+    const body = (rawTx?.body ?? tx?.body)!
     const {
       paymentSigningFiles, stakeSigningFiles, mintSigningFiles, multisigSigningFiles,
     } = filterSigningFiles(hwSigningFileData)
@@ -544,7 +545,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
   ): Promise<TxCborHex> => {
     const trezorWitnesses = await trezorSignTx(params, changeOutputFiles)
     const { byronWitnesses, shelleyWitnesses } = createWitnesses(trezorWitnesses, params.hwSigningFileData)
-    return TxSigned(params.rawTx, params.era, byronWitnesses, shelleyWitnesses)
+    return TxSigned(params, byronWitnesses, shelleyWitnesses)
   }
 
   const witnessTx = async (

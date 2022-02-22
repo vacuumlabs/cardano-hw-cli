@@ -36,7 +36,7 @@ import {
 import { Errors } from './errors'
 import { parseOpCertIssueCounterFile } from './command-parser/parsers'
 import { validateSigning, validateWitnessing } from './crypto-providers/signingValidation'
-import { validateRawTxBeforeSigning } from './transaction/transactionValidation'
+import { validateRawTxBeforeSigning, validateTxBeforeSigning } from './transaction/transactionValidation'
 
 const promiseTimeout = <T> (promise: Promise<T>, ms: number): Promise<T> => {
   const timeout: Promise<T> = new Promise((resolve, reject) => {
@@ -98,20 +98,31 @@ const CommandExecutor = async () => {
   }
 
   const createSignedTx = async (args: ParsedTransactionSignArguments) => {
-    validateRawTxBeforeSigning(args.rawTxFileData.cborHex)
-    const rawTxCbor = Buffer.from(args.rawTxFileData.cborHex, 'hex')
-    const rawTx = InteropLib.decodeRawTx(rawTxCbor)
+    let rawTx: InteropLib.RawTransaction | undefined
+    let tx: InteropLib.Transaction | undefined
+    if (args.rawTxFileData) {
+      validateRawTxBeforeSigning(args.rawTxFileData.cborHex)
+      const rawTxCbor = Buffer.from(args.rawTxFileData.cborHex, 'hex')
+      rawTx = InteropLib.decodeRawTx(rawTxCbor)
+    } else {
+      validateTxBeforeSigning(args.txFileData!.cborHex)
+      const txCbor = Buffer.from(args.txFileData!.cborHex, 'hex')
+      tx = InteropLib.decodeTx(txCbor)
+    }
+    const txBody = (rawTx?.body ?? tx?.body)!
+    const era = (args.rawTxFileData?.era ?? args.txFileData?.era)!
     const signingParameters = {
-      signingMode: determineSigningMode(rawTx.body, args.hwSigningFileData),
+      signingMode: determineSigningMode(txBody, args.hwSigningFileData),
       rawTx,
-      txBodyHashHex: getTxBodyHash(rawTx.body),
+      tx,
+      txBodyHashHex: getTxBodyHash(txBody),
       hwSigningFileData: args.hwSigningFileData,
       network: args.network,
-      era: args.rawTxFileData.era,
+      era,
     }
     validateSigning(signingParameters)
     const signedTx = await cryptoProvider.signTx(signingParameters, args.changeOutputKeyFileData)
-    write(args.outFile, constructTxFileOutput(args.rawTxFileData.era, signedTx))
+    write(args.outFile, constructTxFileOutput(era, signedTx))
   }
 
   const createTxPolicyId = async (args: ParsedTransactionPolicyIdArguments) => {
@@ -126,21 +137,32 @@ const CommandExecutor = async () => {
   }
 
   const createTxWitnesses = async (args: ParsedTransactionWitnessArguments) => {
-    validateRawTxBeforeSigning(args.rawTxFileData.cborHex)
-    const rawTxCbor = Buffer.from(args.rawTxFileData.cborHex, 'hex')
-    const rawTx = InteropLib.decodeRawTx(rawTxCbor)
+    let rawTx: InteropLib.RawTransaction | undefined
+    let tx: InteropLib.Transaction | undefined
+    if (args.rawTxFileData) {
+      validateRawTxBeforeSigning(args.rawTxFileData.cborHex)
+      const rawTxCbor = Buffer.from(args.rawTxFileData.cborHex, 'hex')
+      rawTx = InteropLib.decodeRawTx(rawTxCbor)
+    } else {
+      validateTxBeforeSigning(args.txFileData!.cborHex)
+      const txCbor = Buffer.from(args.txFileData!.cborHex, 'hex')
+      tx = InteropLib.decodeTx(txCbor)
+    }
+    const txBody = (rawTx?.body ?? tx?.body)!
+    const era = (args.rawTxFileData?.era ?? args.txFileData?.era)!
     const signingParameters = {
-      signingMode: determineSigningMode(rawTx.body, args.hwSigningFileData),
+      signingMode: determineSigningMode(txBody, args.hwSigningFileData),
       rawTx,
-      txBodyHashHex: getTxBodyHash(rawTx.body),
+      tx,
+      txBodyHashHex: getTxBodyHash(txBody),
       hwSigningFileData: args.hwSigningFileData,
       network: args.network,
-      era: args.rawTxFileData.era,
+      era,
     }
     validateWitnessing(signingParameters)
     const txWitnesses = await cryptoProvider.witnessTx(signingParameters, args.changeOutputKeyFileData)
     for (let i = 0; i < txWitnesses.length; i += 1) {
-      write(args.outFiles[i], constructTxWitnessOutput(args.rawTxFileData.era, txWitnesses[i]))
+      write(args.outFiles[i], constructTxWitnessOutput(era, txWitnesses[i]))
     }
   }
 

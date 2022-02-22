@@ -54,6 +54,19 @@ const validateRawTxBeforeSigning = (rawTxCborHex: CborHex): void => {
   }
 }
 
+const validateTxBeforeSigning = (txCborHex: CborHex): void => {
+  const {
+    containsUnfixable, containsFixable,
+  } = checkValidationErrors(txCborHex, InteropLib.validateTx, true, false)
+
+  if (containsUnfixable) {
+    throw Error(Errors.TxContainsUnfixableErrors)
+  }
+  if (containsFixable) {
+    throw Error(Errors.TxContainsFixableErrors)
+  }
+}
+
 const validateRawTx = (args: ParsedTransactionValidateRawArguments): ExitCode => {
   const {
     containsUnfixable, containsFixable,
@@ -112,6 +125,7 @@ const transformTx = (args: ParsedTransactionTransformArguments): void => {
 export {
   checkValidationErrors,
   validateRawTxBeforeSigning,
+  validateTxBeforeSigning,
   validateRawTx,
   validateTx,
   transformRawTx,
