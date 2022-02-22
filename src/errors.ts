@@ -24,7 +24,6 @@ const enum Errors {
   TooManyPoolColdSigningFilesError = 'Too many pool cold key signing files',
   TooManyMintSigningFilesError = 'Too many mint signing files',
   TooManyMultisigSigningFilesError = 'Too many multisig signing files',
-  MissingInputError = 'Missing input',
   MissingSigningFileForCertificateError = 'Missing signing file for certificate',
   OwnerMultipleTimesInTxError = 'Owner multiple times in tx',
   UnsupportedRelayTypeError = 'Unsupported relay type',
