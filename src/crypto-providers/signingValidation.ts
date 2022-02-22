@@ -164,9 +164,6 @@ const validateNetworkId = (cliNetworkId: number, bodyNetworkId: Uint | undefined
 
 const validateWitnessing = (params: SigningParameters): void => {
   // verifies whether signing parameters correspond to each other
-  if (params.rawTx.body.inputs.length === 0) {
-    throw Error(Errors.MissingInputError)
-  }
 
   validateNetworkId(params.network.networkId, params.rawTx.body.networkId)
 
@@ -193,10 +190,6 @@ const validateWitnessing = (params: SigningParameters): void => {
 }
 
 const validateSigning = (params: SigningParameters): void => {
-  if (params.rawTx.body.inputs.length === 0) {
-    throw Error(Errors.MissingInputError)
-  }
-
   validateNetworkId(params.network.networkId, params.rawTx.body.networkId)
 
   switch (params.signingMode) {
