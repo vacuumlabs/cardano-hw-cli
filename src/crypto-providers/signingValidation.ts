@@ -156,9 +156,22 @@ const validateMultisigSigning = (params: SigningParameters) => {
   // there are no checks that can be done (except those in validateMultisigWitnesses)
 }
 
+const validatePlutusWitnesses = (params: SigningParameters) => {
+  const { poolColdSigningFiles } = filterSigningFiles(params.hwSigningFileData)
+
+  if (poolColdSigningFiles.length > 0) {
+    throw Error(Errors.TooManyPoolColdSigningFilesError)
+  }
+}
+
+const validatePlutusSigning = (params: SigningParameters) => {
+  validatePlutusWitnesses(params)
+  // there are no checks that can be done (except those in validatePlutusWitnesses)
+}
+
 const validateNetworkId = (cliNetworkId: number, bodyNetworkId: Uint | undefined): void => {
   if (bodyNetworkId !== undefined && bodyNetworkId !== cliNetworkId) {
-    throw Error(Errors.MissingInputError)
+    throw Error(Errors.NetworkIdMismatchError)
   }
 }
 
@@ -184,6 +197,10 @@ const validateWitnessing = (params: SigningParameters): void => {
       validateMultisigWitnesses(params)
       break
 
+    case SigningMode.PLUTUS_TRANSACTION:
+      validatePlutusWitnesses(params)
+      break
+
     default:
       throw Error(Errors.Unreachable)
   }
@@ -203,6 +220,10 @@ const validateSigning = (params: SigningParameters): void => {
 
     case SigningMode.MULTISIG_TRANSACTION:
       validateMultisigSigning(params)
+      break
+
+    case SigningMode.PLUTUS_TRANSACTION:
+      validatePlutusSigning(params)
       break
 
     default:
