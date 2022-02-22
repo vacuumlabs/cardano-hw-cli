@@ -1,4 +1,4 @@
-import { RawTransaction } from 'cardano-hw-interop-lib'
+import { RawTransaction, Transaction } from 'cardano-hw-interop-lib'
 import { KesVKey, OpCertIssueCounter, SignedOpCertCborHex } from '../opCert/opCert'
 import {
   TxCborHex,
@@ -29,7 +29,8 @@ export enum SigningMode {
 
 export type SigningParameters = {
   signingMode: SigningMode,
-  rawTx: RawTransaction,
+  rawTx?: RawTransaction,
+  tx?: Transaction,
   txBodyHashHex: string,
   hwSigningFileData: HwSigningData[],
   network: Network,

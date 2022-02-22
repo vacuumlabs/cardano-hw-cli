@@ -77,11 +77,17 @@ const txSigningArgs = {
     type: (magic: string) => parseNetwork('TESTNET', magic),
     help: 'Protocol magic number.',
   },
-  '--tx-body-file': {
-    required: true,
-    dest: 'rawTxFileData',
-    type: (path: string) => parseRawTxFile(path),
-    help: 'Input filepath of the TxBody.',
+  '_mutually-exclusive-group-required-tx-file': {
+    '--tx-body-file': {
+      dest: 'rawTxFileData',
+      type: (path: string) => parseRawTxFile(path),
+      help: 'Input filepath of the TxBody. This option is DEPRECATED and will be REMOVED in Oct 2022. Please use --tx-file instead (use --cddl-format when building transactions with cardano-cli).',
+    },
+    '--tx-file': {
+      dest: 'txFileData',
+      type: (path: string) => parseTxFile(path),
+      help: 'Input filepath of the tx.',
+    },
   },
   '--hw-signing-file': {
     dest: 'hwSigningFileData',
@@ -239,7 +245,7 @@ export const parserConfig = {
         required: true,
         dest: 'rawTxFileData',
         type: (path: string) => parseRawTxFile(path),
-        help: 'Input filepath of the raw tx.',
+        help: 'Input filepath of the raw tx. This call is DEPRECATED and will be REMOVED in Oct 2022. Please use validate call instead (use --cddl-format when building transactions with cardano-cli).',
       },
     },
     'validate': {
@@ -255,7 +261,7 @@ export const parserConfig = {
         required: true,
         dest: 'rawTxFileData',
         type: (path: string) => parseRawTxFile(path),
-        help: 'Input filepath of the raw tx.',
+        help: 'Input filepath of the raw tx. This call is DEPRECATED and will be REMOVED in Oct 2022. Please use transform call instead (use --cddl-format when building transactions with cardano-cli).',
       },
       '--out-file': {
         required: true,

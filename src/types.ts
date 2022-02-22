@@ -70,8 +70,8 @@ export type ParsedDeviceVersionArguments = {
   command: CommandType.DEVICE_VERSION,
 }
 
-// only one of paymentPath vs. paymentScriptHash and stakingPath vs. stakingScriptHash
-// should be present (the result of parse() complies to this)
+// exactly one of paymentPath vs. paymentScriptHash and stakingPath vs. stakingScriptHash
+// should be present (the result of parse() complies with this)
 export type ParsedShowAddressArguments = {
   command: CommandType.SHOW_ADDRESS,
   paymentPath: BIP32Path,
@@ -110,10 +110,13 @@ export type Network = {
   protocolMagic: number,
 }
 
+// exctly one of rawTxFileData vs. txFileData should be present
+// (the result of parse() complies with this)
 export type ParsedTransactionSignArguments = {
   command: CommandType.SIGN_TRANSACTION,
   network: Network,
-  rawTxFileData: RawTxFileData,
+  rawTxFileData?: RawTxFileData,
+  txFileData?: TxFileData,
   hwSigningFileData: HwSigningData[],
   outFile: string,
   changeOutputKeyFileData: HwSigningData[],
@@ -154,10 +157,13 @@ export type ParsedTransactionPolicyIdArguments = {
   hwSigningFileData: HwSigningData[],
 }
 
+// exctly one of rawTxFileData vs. txFileData should be present
+// (the result of parse() complies with this)
 export type ParsedTransactionWitnessArguments = {
   command: CommandType.WITNESS_TRANSACTION,
   network: Network,
-  rawTxFileData: RawTxFileData,
+  rawTxFileData?: RawTxFileData,
+  txFileData?: TxFileData,
   hwSigningFileData: HwSigningData[],
   outFiles: string[],
   changeOutputKeyFileData: HwSigningData[],

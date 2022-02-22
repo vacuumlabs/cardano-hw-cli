@@ -1,5 +1,5 @@
 import * as InteropLib from 'cardano-hw-interop-lib'
-import { isEqual, uniqWith } from 'lodash'
+import { isEqual, uniqWith, cloneDeep } from 'lodash'
 import {
   TxWitnessByron,
   TxWitnessShelley,
@@ -8,6 +8,7 @@ import {
 } from './types'
 import { encodeCbor } from '../util'
 import { CardanoEra } from '../types'
+import { SigningParameters } from '../crypto-providers/types'
 
 const TxByronWitness = (
   publicKey: Buffer, signature: Buffer, chaincode: Buffer, addressAttributes: object,
@@ -15,24 +16,23 @@ const TxByronWitness = (
 
 const TxShelleyWitness = (publicKey: Buffer, signature: Buffer): TxWitnessShelley => [publicKey, signature]
 
-const TxSigned = (
-  rawTx: InteropLib.RawTransaction,
-  era: CardanoEra,
+const _rawTxToTxSigned = (
+  params: SigningParameters,
   byronWitnesses: TxWitnessByron[],
   shelleyWitnesses: TxWitnessShelley[],
 ): TxCborHex => {
   const {
     body, scriptWitnesses, datumWitnesses, redeemerWitnesses, scriptValidity, auxiliaryData,
-  } = rawTx
+  } = params.rawTx!
 
   // cardano-cli deduplicates the script witnesses before adding them to the signed transaction
   const scriptWitnessList = uniqWith((scriptWitnesses || []) as any[], isEqual)
   const datumWitnessList = (datumWitnesses || []) as any[]
   const redeemerWitnessList = (redeemerWitnesses || []) as any[]
 
-  let nativeScriptWitnessList: any[] = []
-  let plutusScriptWitnessList: any[] = []
-  if (era === CardanoEra.ALONZO) {
+  let nativeScriptWitnessList: unknown[] = []
+  let plutusScriptWitnessList: unknown[] = []
+  if (params.era === CardanoEra.ALONZO) {
     // In alonzo era txs, each native script is packed in a list with 0 literal, each plutus script
     // is packed in a list with 1 literal and they are all stored in scriptWitnessList.
     // We need to partition them back and unpack the actual scripts.
@@ -43,7 +43,7 @@ const TxSigned = (
     nativeScriptWitnessList = scriptWitnessList
   }
 
-  const witnessSet = new Map()
+  const witnessSet = new Map<number, unknown[]>()
 
   if (shelleyWitnesses.length > 0) {
     witnessSet.set(TxWitnessKeys.SHELLEY, shelleyWitnesses)
@@ -69,10 +69,43 @@ const TxSigned = (
     witnessSet.set(TxWitnessKeys.REDEEMERS, redeemerWitnessList)
   }
 
-  const tx = {
+  const signedTx = {
     body, witnessSet, scriptValidity, auxiliaryData,
   }
-  return InteropLib.encodeTx(tx).toString('hex') as TxCborHex
+  return InteropLib.encodeTx(signedTx).toString('hex') as TxCborHex
+}
+
+const TxSigned = (
+  params: SigningParameters,
+  byronWitnesses: TxWitnessByron[],
+  shelleyWitnesses: TxWitnessShelley[],
+): TxCborHex => {
+  if (params.rawTx) {
+    return _rawTxToTxSigned(params, byronWitnesses, shelleyWitnesses)
+  }
+
+  const witnessSet = cloneDeep(params.tx!.witnessSet) as Map<number, unknown[]>
+
+  const byronWitnessesList = [
+    ...witnessSet.get(TxWitnessKeys.BYRON) ?? [],
+    byronWitnesses,
+  ]
+  if (byronWitnessesList.length > 0) {
+    // cardano-cli deduplicates the witnesses before adding them to the signed transaction
+    witnessSet.set(TxWitnessKeys.BYRON, uniqWith(byronWitnessesList, isEqual))
+  }
+
+  const shelleyWitnessesList = [
+    ...witnessSet.get(TxWitnessKeys.SHELLEY) ?? [],
+    shelleyWitnesses,
+  ]
+  if (shelleyWitnessesList.length > 0) {
+    // cardano-cli deduplicates the witnesses before adding them to the signed transaction
+    witnessSet.set(TxWitnessKeys.SHELLEY, uniqWith(shelleyWitnessesList, isEqual))
+  }
+
+  const signedTx = { ...params.tx!, witnessSet }
+  return InteropLib.encodeTx(signedTx).toString('hex') as TxCborHex
 }
 
 export const containsVKeyWitnesses = (tx: InteropLib.Transaction): boolean => {

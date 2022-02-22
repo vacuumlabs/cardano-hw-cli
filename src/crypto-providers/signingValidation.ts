@@ -4,6 +4,7 @@ import {
   Uint,
 } from 'cardano-hw-interop-lib'
 import { Errors } from '../errors'
+import { HwSigningData } from '../types'
 import {
   SigningMode,
   SigningParameters,
@@ -12,12 +13,12 @@ import {
   filterSigningFiles,
 } from './util'
 
-const _countWitnessableItems = (txBody: TransactionBody) => {
+const _countWitnessableItems = (body: TransactionBody) => {
   // we count stake registrations separately because they don't necessarily require a staking witness
   let numStakeRegistrationItems = 0
-  let numStakeOtherItems = txBody.withdrawals?.length || 0
+  let numStakeOtherItems = body.withdrawals?.length || 0
   let numPoolColdItems = 0
-  txBody.certificates?.forEach((cert) => {
+  body.certificates?.forEach((cert) => {
     switch (cert.type) {
       case CertificateType.STAKE_REGISTRATION:
         numStakeRegistrationItems += 1
@@ -39,17 +40,17 @@ const _countWitnessableItems = (txBody: TransactionBody) => {
   return { numStakeRegistrationItems, numStakeOtherItems, numPoolColdItems }
 }
 
-const validateOrdinaryWitnesses = (params: SigningParameters) => {
+const validateOrdinaryWitnesses = (body: TransactionBody, hwSigningFileData: HwSigningData[]) => {
   const {
     poolColdSigningFiles, mintSigningFiles, multisigSigningFiles,
-  } = filterSigningFiles(params.hwSigningFileData)
+  } = filterSigningFiles(hwSigningFileData)
 
-  const { numPoolColdItems } = _countWitnessableItems(params.rawTx.body)
+  const { numPoolColdItems } = _countWitnessableItems(body)
 
   if (numPoolColdItems === 0 && poolColdSigningFiles.length > 0) {
     throw Error(Errors.TooManyPoolColdSigningFilesError)
   }
-  if (!params.rawTx.body.mint?.length && mintSigningFiles.length > 0) {
+  if (!body.mint?.length && mintSigningFiles.length > 0) {
     throw Error(Errors.TooManyMintSigningFilesError)
   }
   if (multisigSigningFiles.length > 0) {
@@ -57,14 +58,14 @@ const validateOrdinaryWitnesses = (params: SigningParameters) => {
   }
 }
 
-const validateOrdinarySigning = (params: SigningParameters) => {
-  validateOrdinaryWitnesses(params)
+const validateOrdinarySigning = (body: TransactionBody, hwSigningFileData: HwSigningData[]) => {
+  validateOrdinaryWitnesses(body, hwSigningFileData)
   // these checks should be performed only with createSignedTx call (when the signing file set is
   // expected to be complete) on top of validateOrdinaryWitnesses
 
   const {
     paymentSigningFiles, stakeSigningFiles, poolColdSigningFiles,
-  } = filterSigningFiles(params.hwSigningFileData)
+  } = filterSigningFiles(hwSigningFileData)
 
   if (paymentSigningFiles.length === 0) {
     throw Error(Errors.MissingPaymentSigningFileError)
@@ -72,7 +73,7 @@ const validateOrdinarySigning = (params: SigningParameters) => {
 
   const {
     numStakeOtherItems, numPoolColdItems,
-  } = _countWitnessableItems(params.rawTx.body)
+  } = _countWitnessableItems(body)
 
   if (numStakeOtherItems > 0 && (stakeSigningFiles.length === 0)) {
     throw Error(Errors.MissingStakeSigningFileError)
@@ -82,10 +83,10 @@ const validateOrdinarySigning = (params: SigningParameters) => {
   }
 }
 
-const validatePoolOwnerWitnesses = (params: SigningParameters) => {
+const validatePoolOwnerWitnesses = (body: TransactionBody, hwSigningFileData: HwSigningData[]) => {
   const {
     paymentSigningFiles, stakeSigningFiles, poolColdSigningFiles, mintSigningFiles, multisigSigningFiles,
-  } = filterSigningFiles(params.hwSigningFileData)
+  } = filterSigningFiles(hwSigningFileData)
 
   if (paymentSigningFiles.length > 0) {
     throw Error(Errors.TooManyPaymentFilesWithPoolRegError)
@@ -110,10 +111,10 @@ const validatePoolOwnerWitnesses = (params: SigningParameters) => {
   }
 }
 
-const validatePoolOperatorWitnesses = (params: SigningParameters) => {
+const validatePoolOperatorWitnesses = (body: TransactionBody, hwSigningFileData: HwSigningData[]) => {
   const {
     stakeSigningFiles, poolColdSigningFiles, mintSigningFiles, multisigSigningFiles,
-  } = filterSigningFiles(params.hwSigningFileData)
+  } = filterSigningFiles(hwSigningFileData)
 
   if (stakeSigningFiles.length > 0) {
     throw Error(Errors.TooManyStakeSigningFilesError)
@@ -132,10 +133,10 @@ const validatePoolOperatorWitnesses = (params: SigningParameters) => {
   }
 }
 
-const validateMultisigWitnesses = (params: SigningParameters) => {
+const validateMultisigWitnesses = (body: TransactionBody, hwSigningFileData: HwSigningData[]) => {
   const {
     paymentSigningFiles, stakeSigningFiles, poolColdSigningFiles, mintSigningFiles,
-  } = filterSigningFiles(params.hwSigningFileData)
+  } = filterSigningFiles(hwSigningFileData)
 
   if (paymentSigningFiles.length > 0) {
     throw Error(Errors.TooManyPaymentSigningFilesError)
@@ -146,26 +147,26 @@ const validateMultisigWitnesses = (params: SigningParameters) => {
   if (poolColdSigningFiles.length > 0) {
     throw Error(Errors.TooManyPoolColdSigningFilesError)
   }
-  if (!params.rawTx.body.mint?.length && mintSigningFiles.length > 0) {
+  if (!body.mint?.length && mintSigningFiles.length > 0) {
     throw Error(Errors.TooManyMintSigningFilesError)
   }
 }
 
-const validateMultisigSigning = (params: SigningParameters) => {
-  validateMultisigWitnesses(params)
+const validateMultisigSigning = (body: TransactionBody, hwSigningFileData: HwSigningData[]) => {
+  validateMultisigWitnesses(body, hwSigningFileData)
   // there are no checks that can be done (except those in validateMultisigWitnesses)
 }
 
-const validatePlutusWitnesses = (params: SigningParameters) => {
-  const { poolColdSigningFiles } = filterSigningFiles(params.hwSigningFileData)
+const validatePlutusWitnesses = (body: TransactionBody, hwSigningFileData: HwSigningData[]) => {
+  const { poolColdSigningFiles } = filterSigningFiles(hwSigningFileData)
 
   if (poolColdSigningFiles.length > 0) {
     throw Error(Errors.TooManyPoolColdSigningFilesError)
   }
 }
 
-const validatePlutusSigning = (params: SigningParameters) => {
-  validatePlutusWitnesses(params)
+const validatePlutusSigning = (body: TransactionBody, hwSigningFileData: HwSigningData[]) => {
+  validatePlutusWitnesses(body, hwSigningFileData)
   // there are no checks that can be done (except those in validatePlutusWitnesses)
 }
 
@@ -177,28 +178,30 @@ const validateNetworkId = (cliNetworkId: number, bodyNetworkId: Uint | undefined
 
 const validateWitnessing = (params: SigningParameters): void => {
   // verifies whether signing parameters correspond to each other
+  const body = (params.rawTx?.body ?? params.tx?.body)!
+  const { hwSigningFileData } = params
 
-  validateNetworkId(params.network.networkId, params.rawTx.body.networkId)
+  validateNetworkId(params.network.networkId, body.networkId)
 
   switch (params.signingMode) {
     case SigningMode.ORDINARY_TRANSACTION:
-      validateOrdinaryWitnesses(params)
+      validateOrdinaryWitnesses(body, hwSigningFileData)
       break
 
     case SigningMode.POOL_REGISTRATION_AS_OWNER:
-      validatePoolOwnerWitnesses(params)
+      validatePoolOwnerWitnesses(body, hwSigningFileData)
       break
 
     case SigningMode.POOL_REGISTRATION_AS_OPERATOR:
-      validatePoolOperatorWitnesses(params)
+      validatePoolOperatorWitnesses(body, hwSigningFileData)
       break
 
     case SigningMode.MULTISIG_TRANSACTION:
-      validateMultisigWitnesses(params)
+      validateMultisigWitnesses(body, hwSigningFileData)
       break
 
     case SigningMode.PLUTUS_TRANSACTION:
-      validatePlutusWitnesses(params)
+      validatePlutusWitnesses(body, hwSigningFileData)
       break
 
     default:
@@ -207,11 +210,14 @@ const validateWitnessing = (params: SigningParameters): void => {
 }
 
 const validateSigning = (params: SigningParameters): void => {
-  validateNetworkId(params.network.networkId, params.rawTx.body.networkId)
+  const body = (params.rawTx?.body ?? params.tx?.body)!
+  const { hwSigningFileData } = params
+
+  validateNetworkId(params.network.networkId, body.networkId)
 
   switch (params.signingMode) {
     case SigningMode.ORDINARY_TRANSACTION:
-      validateOrdinarySigning(params)
+      validateOrdinarySigning(body, hwSigningFileData)
       break
 
     case SigningMode.POOL_REGISTRATION_AS_OWNER:
@@ -219,11 +225,11 @@ const validateSigning = (params: SigningParameters): void => {
       throw Error(Errors.CantSignTxWithPoolRegError)
 
     case SigningMode.MULTISIG_TRANSACTION:
-      validateMultisigSigning(params)
+      validateMultisigSigning(body, hwSigningFileData)
       break
 
     case SigningMode.PLUTUS_TRANSACTION:
-      validatePlutusSigning(params)
+      validatePlutusSigning(body, hwSigningFileData)
       break
 
     default:
