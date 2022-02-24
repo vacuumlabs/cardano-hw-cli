@@ -98,10 +98,16 @@ const CommandExecutor = async () => {
   }
 
   const createSignedTx = async (args: ParsedTransactionSignArguments) => {
+    // eslint-disable-next-line no-console,max-len
+    console.log('Warning! This call is DEPRECATED and will be REMOVED in Oct 2022. Please use witness call instead (use --cddl-format when building transactions with cardano-cli).')
+
     let rawTx: InteropLib.RawTransaction | undefined
     let tx: InteropLib.Transaction | undefined
     if (args.rawTxFileData) {
       validateRawTxBeforeSigning(args.rawTxFileData.cborHex)
+      // eslint-disable-next-line no-console,max-len
+      console.log('Warning! The --tx-body-file option is DEPRECATED and will be REMOVED in Oct 2022. Please use --tx-file instead (use --cddl-format when building transactions with cardano-cli).')
+
       const rawTxCbor = Buffer.from(args.rawTxFileData.cborHex, 'hex')
       rawTx = InteropLib.decodeRawTx(rawTxCbor)
     } else {
@@ -109,6 +115,7 @@ const CommandExecutor = async () => {
       const txCbor = Buffer.from(args.txFileData!.cborHex, 'hex')
       tx = InteropLib.decodeTx(txCbor)
     }
+
     const txBody = (rawTx?.body ?? tx?.body)!
     const era = (args.rawTxFileData?.era ?? args.txFileData?.era)!
     const signingParameters = {
@@ -140,6 +147,9 @@ const CommandExecutor = async () => {
     let rawTx: InteropLib.RawTransaction | undefined
     let tx: InteropLib.Transaction | undefined
     if (args.rawTxFileData) {
+      // eslint-disable-next-line no-console,max-len
+      console.log('Warning! The --tx-body-file option is DEPRECATED and will be REMOVED in Oct 2022. Please use --tx-file instead (use --cddl-format when building transactions with cardano-cli).')
+
       validateRawTxBeforeSigning(args.rawTxFileData.cborHex)
       const rawTxCbor = Buffer.from(args.rawTxFileData.cborHex, 'hex')
       rawTx = InteropLib.decodeRawTx(rawTxCbor)
@@ -148,6 +158,7 @@ const CommandExecutor = async () => {
       const txCbor = Buffer.from(args.txFileData!.cborHex, 'hex')
       tx = InteropLib.decodeTx(txCbor)
     }
+
     const txBody = (rawTx?.body ?? tx?.body)!
     const era = (args.rawTxFileData?.era ?? args.txFileData?.era)!
     const signingParameters = {

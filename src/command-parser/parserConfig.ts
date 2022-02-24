@@ -81,7 +81,7 @@ const txSigningArgs = {
     '--tx-body-file': {
       dest: 'rawTxFileData',
       type: (path: string) => parseRawTxFile(path),
-      help: 'Input filepath of the TxBody. This option is DEPRECATED and will be REMOVED in Oct 2022. Please use --tx-file instead (use --cddl-format when building transactions with cardano-cli).',
+      help: 'Input filepath of the TxBody. Warning! This option is DEPRECATED and will be REMOVED in Oct 2022. Please use --tx-file instead (use --cddl-format when building transactions with cardano-cli).',
     },
     '--tx-file': {
       dest: 'txFileData',
@@ -213,7 +213,7 @@ export const parserConfig = {
       '--out-file': {
         required: true,
         dest: 'outFile',
-        help: 'Output filepath.',
+        help: 'Output filepath. Warning! This call is DEPRECATED and will be REMOVED in Oct 2022. Please use witness call instead (use --cddl-format when building transactions with cardano-cli).',
       },
     },
     'policyid': {
@@ -245,7 +245,7 @@ export const parserConfig = {
         required: true,
         dest: 'rawTxFileData',
         type: (path: string) => parseRawTxFile(path),
-        help: 'Input filepath of the raw tx. This call is DEPRECATED and will be REMOVED in Oct 2022. Please use validate call instead (use --cddl-format when building transactions with cardano-cli).',
+        help: 'Input filepath of the raw tx. Warning! This call is DEPRECATED and will be REMOVED in Oct 2022. Please use validate call instead (use --cddl-format when building transactions with cardano-cli).',
       },
     },
     'validate': {
@@ -261,7 +261,7 @@ export const parserConfig = {
         required: true,
         dest: 'rawTxFileData',
         type: (path: string) => parseRawTxFile(path),
-        help: 'Input filepath of the raw tx. This call is DEPRECATED and will be REMOVED in Oct 2022. Please use transform call instead (use --cddl-format when building transactions with cardano-cli).',
+        help: 'Input filepath of the raw tx. Warning! This call is DEPRECATED and will be REMOVED in Oct 2022. Please use transform call instead (use --cddl-format when building transactions with cardano-cli).',
       },
       '--out-file': {
         required: true,
