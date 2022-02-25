@@ -10,6 +10,17 @@ import { encodeCbor } from '../util'
 import { CardanoEra } from '../types'
 import { SigningParameters } from '../crypto-providers/types'
 
+type WitnessSet = Map<number, unknown[]>
+
+// If witnessSet is empty, the CBOR lib parses it as {}, otherwise it seems to always return a Map.
+// Let's convert it to Map in any case, just to make sure.
+const _parseWitnessSet = (witnessSet: unknown): WitnessSet => {
+  const clonedWitnessSet = cloneDeep(witnessSet)
+  return (clonedWitnessSet instanceof Map)
+    ? clonedWitnessSet
+    : new Map(Object.entries(clonedWitnessSet as object)) as unknown as WitnessSet
+}
+
 const TxByronWitness = (
   publicKey: Buffer, signature: Buffer, chaincode: Buffer, addressAttributes: object,
 ): TxWitnessByron => [publicKey, signature, chaincode, encodeCbor(addressAttributes)]
@@ -43,7 +54,7 @@ const _rawTxToTxSigned = (
     nativeScriptWitnessList = scriptWitnessList
   }
 
-  const witnessSet = new Map<number, unknown[]>()
+  const witnessSet: WitnessSet = new Map()
 
   if (shelleyWitnesses.length > 0) {
     witnessSet.set(TxWitnessKeys.SHELLEY, shelleyWitnesses)
@@ -84,24 +95,24 @@ const TxSigned = (
     return _rawTxToTxSigned(params, byronWitnesses, shelleyWitnesses)
   }
 
-  const witnessSet = cloneDeep(params.tx!.witnessSet) as Map<number, unknown[]>
-
-  const byronWitnessesList = [
-    ...witnessSet.get(TxWitnessKeys.BYRON) ?? [],
-    byronWitnesses,
-  ]
-  if (byronWitnessesList.length > 0) {
-    // cardano-cli deduplicates the witnesses before adding them to the signed transaction
-    witnessSet.set(TxWitnessKeys.BYRON, uniqWith(byronWitnessesList, isEqual))
-  }
+  const witnessSet = _parseWitnessSet(params.tx!.witnessSet)
 
   const shelleyWitnessesList = [
-    ...witnessSet.get(TxWitnessKeys.SHELLEY) ?? [],
-    shelleyWitnesses,
+    ...(witnessSet.get(TxWitnessKeys.SHELLEY) ?? []),
+    ...shelleyWitnesses,
   ]
   if (shelleyWitnessesList.length > 0) {
     // cardano-cli deduplicates the witnesses before adding them to the signed transaction
     witnessSet.set(TxWitnessKeys.SHELLEY, uniqWith(shelleyWitnessesList, isEqual))
+  }
+
+  const byronWitnessesList = [
+    ...witnessSet.get(TxWitnessKeys.BYRON) ?? [],
+    ...byronWitnesses,
+  ]
+  if (byronWitnessesList.length > 0) {
+    // cardano-cli deduplicates the witnesses before adding them to the signed transaction
+    witnessSet.set(TxWitnessKeys.BYRON, uniqWith(byronWitnessesList, isEqual))
   }
 
   const signedTx = { ...params.tx!, witnessSet }
@@ -109,9 +120,9 @@ const TxSigned = (
 }
 
 export const containsVKeyWitnesses = (tx: InteropLib.Transaction): boolean => {
-  const witnessSet = tx.witnessSet as Map<number, unknown[]>
-  const shelleyWitnesses = witnessSet?.get(TxWitnessKeys.SHELLEY) || []
-  const byronWitnesses = witnessSet?.get(TxWitnessKeys.BYRON) || []
+  const witnessSet = _parseWitnessSet(tx.witnessSet)
+  const shelleyWitnesses = witnessSet.get(TxWitnessKeys.SHELLEY) ?? []
+  const byronWitnesses = witnessSet.get(TxWitnessKeys.BYRON) ?? []
   return [...shelleyWitnesses, ...byronWitnesses].length > 0
 }
 
