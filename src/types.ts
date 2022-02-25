@@ -56,8 +56,9 @@ export type RawTxFileData = {
 }
 
 export type TxFileData = {
+  envelopeType: string,
   era: CardanoEra,
-  cborHex: CborHex
+  cborHex: CborHex,
 }
 
 export type Address = string

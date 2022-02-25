@@ -119,7 +119,7 @@ const transformTx = (args: ParsedTransactionTransformArguments): void => {
     console.log('Fixed transaction will be written to the output file.')
   }
   const encodedTx = InteropLib.encodeTx(transformedTx).toString('hex') as CborHex
-  write(args.outFile, constructTxFileOutput(args.txFileData.era, encodedTx))
+  write(args.outFile, constructTxFileOutput(args.txFileData.envelopeType, encodedTx))
 }
 
 export {
