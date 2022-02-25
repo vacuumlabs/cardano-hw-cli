@@ -1,6 +1,5 @@
 import {
   cardanoEraToRawType,
-  cardanoEraToSignedType,
   cardanoEraToWitnessType,
   HARDENED_THRESHOLD,
   PathLabel,
@@ -45,8 +44,8 @@ const constructRawTxFileOutput = (era: CardanoEra, rawTxCborHex: RawTxCborHex): 
   cborHex: rawTxCborHex,
 })
 
-const constructTxFileOutput = (era: CardanoEra, txCborHex: TxCborHex): TxFileOutput => ({
-  type: cardanoEraToSignedType[era],
+const constructTxFileOutput = (envelopeType: string, txCborHex: TxCborHex): TxFileOutput => ({
+  type: envelopeType,
   description: '',
   cborHex: txCborHex,
 })

@@ -37,6 +37,7 @@ import { Errors } from './errors'
 import { parseOpCertIssueCounterFile } from './command-parser/parsers'
 import { validateSigning, validateWitnessing } from './crypto-providers/signingValidation'
 import { validateRawTxBeforeSigning, validateTxBeforeSigning } from './transaction/transactionValidation'
+import { cardanoEraToSignedType } from './constants'
 
 const promiseTimeout = <T> (promise: Promise<T>, ms: number): Promise<T> => {
   const timeout: Promise<T> = new Promise((resolve, reject) => {
@@ -129,7 +130,8 @@ const CommandExecutor = async () => {
     }
     validateSigning(signingParameters)
     const signedTx = await cryptoProvider.signTx(signingParameters, args.changeOutputKeyFileData)
-    write(args.outFile, constructTxFileOutput(era, signedTx))
+    const envelopeType = (args.txFileData?.envelopeType ?? cardanoEraToSignedType[era])!
+    write(args.outFile, constructTxFileOutput(envelopeType, signedTx))
   }
 
   const createTxPolicyId = async (args: ParsedTransactionPolicyIdArguments) => {

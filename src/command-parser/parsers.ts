@@ -1,10 +1,10 @@
 import fsPath from 'path'
 import {
   cardanoEraToRawType,
-  cardanoEraToSignedType,
   HARDENED_THRESHOLD,
   NETWORKS,
   PathLabel,
+  txTypeToCardanoEra,
 } from '../constants'
 import {
   isBIP32Path, isCborHex, isHwSigningData, isRawTxFileData, isTxFileData, isVotePublicKeyHex,
@@ -114,8 +114,12 @@ export const parseTxFile = (path: string): TxFileData => {
   const json = JSON.parse(rw.readFileSync(path, 'utf8'))
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { type, description, ...parsedData } = json
-  const era = invertObject(cardanoEraToSignedType)[type]
-  const data = { ...parsedData, era }
+  const era = txTypeToCardanoEra[type]
+  const data = {
+    ...parsedData,
+    era,
+    envelopeType: type,
+  }
   if (isTxFileData(data)) {
     return data
   }

@@ -1,6 +1,7 @@
 import {
   CardanoEra, Network, NetworkIds, ProtocolMagics,
 } from './types'
+import { invertObject } from './util'
 
 export const NETWORKS: {[key: string]: Network} = {
   MAINNET: {
@@ -33,12 +34,37 @@ export const cardanoEraToRawType: {[key in CardanoEra]: string} = {
   [CardanoEra.ALONZO]: 'TxBodyAlonzo',
 }
 
+// Unwitnessed, Witnessed and Signed types follow the same CDDL format, they are just used
+// in different contexts
+
+export const cardanoEraToUnwitnessedType: {[key in CardanoEra]: string} = {
+  [CardanoEra.BYRON]: 'Unwitnessed Tx ByronEra',
+  [CardanoEra.SHELLEY]: 'Unwitnessed Tx ShelleyEra',
+  [CardanoEra.ALLEGRA]: 'Unwitnessed Tx AllegraEra',
+  [CardanoEra.MARY]: 'Unwitnessed Tx MaryEra',
+  [CardanoEra.ALONZO]: 'Unwitnessed Tx AlonzoEra',
+}
+
+export const cardanoEraToWitnessedType: {[key in CardanoEra]: string} = {
+  [CardanoEra.BYRON]: 'Witnessed Tx ByronEra',
+  [CardanoEra.SHELLEY]: 'Witnessed Tx ShelleyEra',
+  [CardanoEra.ALLEGRA]: 'Witnessed Tx AllegraEra',
+  [CardanoEra.MARY]: 'Witnessed Tx MaryEra',
+  [CardanoEra.ALONZO]: 'Witnessed Tx AlonzoEra',
+}
+
 export const cardanoEraToSignedType: {[key in CardanoEra]: string} = {
   [CardanoEra.BYRON]: 'TxSignedByron',
   [CardanoEra.SHELLEY]: 'TxSignedShelley',
   [CardanoEra.ALLEGRA]: 'Tx AllegraEra',
   [CardanoEra.MARY]: 'Tx MaryEra',
   [CardanoEra.ALONZO]: 'Tx AlonzoEra',
+}
+
+export const txTypeToCardanoEra: {[key: string]: string} = {
+  ...invertObject(cardanoEraToUnwitnessedType),
+  ...invertObject(cardanoEraToWitnessedType),
+  ...invertObject(cardanoEraToSignedType),
 }
 
 export const cardanoEraToWitnessType: {[key in CardanoEra]: string} = {
