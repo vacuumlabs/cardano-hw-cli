@@ -29,10 +29,13 @@ cardano-hw-cli key verification-key
 ```
 
 ## Sign transaction
+
+This call is DEPRECATED and will be REMOVED in Oct 2022. Please use witness call instead.
 ```
 cardano-hw-cli transaction sign
---tx-body-file FILE                    Input filepath of the TxBody.
---hw-signing-file FILE                 Input filepath of the hardware wallet signing file (one or more).
+--tx-body-file FILE                    Input filepath of the TxBody. Warning! This option is DEPRECATED and will be REMOVED in Oct 2022. Please use --tx-file instead.
+--tx-file FILE                         Input filepath of the tx. Use --cddl-format when building transactions with cardano-cli.
+--hw-signing-file FILE                 Input filepath of the hardware wallet signing file (one or more files can be specified).
 --change-output-key-file FILE          Input filepath of the hardware wallet signing file (so hw cli can match the keys of the change address, if present, and let the device hide it).
 --mainnet | --testnet-magic NATURAL    Use the mainnet magic id or specify testnet magic id.
 --out-file FILE                        Output filepath of the Tx.
@@ -41,15 +44,18 @@ cardano-hw-cli transaction sign
 ## Witness transaction
 ```
 cardano-hw-cli transaction witness
---tx-body-file FILE                    Input filepath of the TxBody.
---hw-signing-file FILE                 Input filepath of the hardware wallet signing file.
+--tx-body-file FILE                    Input filepath of the TxBody. Warning! This option is DEPRECATED and will be REMOVED in Oct 2022. Please use --tx-file instead.
+--tx-file FILE                         Input filepath of the tx. Use --cddl-format when building transactions with cardano-cli.
+--hw-signing-file FILE                 Input filepath of the hardware wallet signing file (one or more files can be specified).
 --change-output-key-file FILE          Input filepath of the hardware wallet signing file (so hw cli can match the keys of the change address, if present, and let the device hide it).
 --mainnet | --testnet-magic NATURAL    Use the mainnet magic id or specify testnet magic id.
---out-file FILE                        Output filepath of the Tx.
+--out-file FILE                        Output filepath of the witness (one or more witness files can be specified).
 ```
 
 ## Validate raw transaction
 Verifies whether the tx body file (i.e. raw transaction) complies with [restrictions](https://github.com/cardano-foundation/CIPs/blob/master/CIP-0021/README.md) imposed by hardware wallets.
+
+This call is DEPRECATED and will be REMOVED in Oct 2022. Please use validate call instead.
 ```
 cardano-hw-cli transaction validate-raw
 --tx-body-file FILE                    Input filepath of the raw tx.
@@ -64,7 +70,7 @@ Exit code meaning:
 Verifies whether the tx file complies with [restrictions](https://github.com/cardano-foundation/CIPs/blob/master/CIP-0021/README.md) imposed by hardware wallets.
 ```
 cardano-hw-cli transaction validate
---tx-file FILE                         Input filepath of the tx.
+--tx-file FILE                         Input filepath of the tx. Use --cddl-format when building transactions with cardano-cli.
 ```
 Exit code meaning:
 - `0` transaction complies with all restrictions
@@ -74,6 +80,8 @@ Exit code meaning:
 
 ## Transform raw transaction
 Tries to non-destructively transform the tx body file (i.e. raw transaction), so that it complies with [restrictions](https://github.com/cardano-foundation/CIPs/blob/master/CIP-0021/README.md) imposed by hardware wallets.
+
+This call is DEPRECATED and will be REMOVED in Oct 2022. Please use transform call instead.
 ```
 cardano-hw-cli transaction transform-raw
 --tx-body-file FILE                    Input filepath of the raw tx.
@@ -84,7 +92,7 @@ cardano-hw-cli transaction transform-raw
 Tries to non-destructively transform the tx file, so that it complies with [restrictions](https://github.com/cardano-foundation/CIPs/blob/master/CIP-0021/README.md) imposed by hardware wallets.
 ```
 cardano-hw-cli transaction transform
---tx-file FILE                         Input filepath of the tx.
+--tx-file FILE                         Input filepath of the tx. Use --cddl-format when building transactions with cardano-cli.
 --out-file FILE                        Output filepath of the tx.
 ```
 
