@@ -100,7 +100,7 @@ const CommandExecutor = async () => {
 
   const createSignedTx = async (args: ParsedTransactionSignArguments) => {
     // eslint-disable-next-line no-console,max-len
-    console.log('Warning! This call is DEPRECATED and will be REMOVED in Oct 2022. Please use witness call instead (use --cddl-format when building transactions with cardano-cli).')
+    console.log('Warning! This call is DEPRECATED and will be REMOVED in Oct 2022. Please use witness call instead.')
 
     let rawTx: InteropLib.RawTransaction | undefined
     let tx: InteropLib.Transaction | undefined
