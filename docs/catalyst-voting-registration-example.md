@@ -37,7 +37,7 @@ Create catalyst voting registration metadata with `cardano-hw-cli`:
 cardano-hw-cli catalyst voting-key-registration-metadata \
 --mainnet \
 --vote-public-key catalyst-vote.pkey \
---reward-address stake1u9ye6tv22029vm3ugqlklwvv839n684v5k77u2el7eyw5wclw09wl \
+--reward-address $(cat stake.addr) \
 --stake-signing-key stake.hwsfile \
 --nonce 29747977 \
 --reward-address-signing-key stake.hwsfile \
@@ -48,28 +48,36 @@ cardano-hw-cli catalyst voting-key-registration-metadata \
 Create raw transaction with `cardano-cli`, if you don't know how to create simple transaction, check https://github.com/vacuumlabs/cardano-hw-cli/blob/develop/docs/transaction-example.md
 ```
 cardano-cli transaction build-raw \
---mary-era \
---tx-in 270eb90adfb4634fb7e7356dab9a36d1d6c6763e03629ead2e64b59f70217c75#0 \
+--alonzo-era \
+--tx-in "270eb90adfb4634fb7e7356dab9a36d1d6c6763e03629ead2e64b59f70217c75#0" \
 --tx-out addr1q9nz9shd0wh6uevtnr5j4epyqxtwx6953wegv7pfdttr9hzfn5kc55752ehrcspld7ucc0zt8502efdaac4nlajgagasayc3u9+1810000 \
 --fee 190000 \
 --metadata-cbor-file voting_registration.cbor \
---out-file tx.raw
+--out-file tx.raw \
+--cddl-format
 ```
 
-Create payment hwsfile with `cardano-hw-cli`:
+HW wallets expect the transaction CBOR to be in *canonical* format. Unfortunately, cardano-cli sometimes produces incorrectly formatted tx files. Use the following command to fix the formatting issues.
 ```
-cardano-hw-cli address key-gen \
---path 1852H/1815H/0H/0/0 \
---verification-key-file payment.vkey \
---hw-signing-file payment.hwsfile
+cardano-hw-cli transaction transform \
+--tx-file tx.raw \
+--out-file tx.transformed
 ```
 
-Sign raw transaction with `cardano-hw-cli`:
+Witness the transaction with `cardano-hw-cli`:
 ```
-cardano-hw-cli transaction sign \
---tx-body-file tx.raw \
+cardano-hw-cli transaction witness \
+--tx-file tx.transformed \
 --hw-signing-file payment.hwsfile \
 --mainnet \
+--out-file payment.witness
+```
+
+Assemble the transaction with with `cardano-cli`:
+```
+cardano-cli transaction assemble \
+--tx-body-file tx.transformed \
+--witness-file payment.witness \
 --out-file tx.signed
 ```
 

@@ -1,7 +1,7 @@
 # Transaction example
 This example is modified example found in cardano docs, to work with HW wallets:
-- https://docs.cardano.org/projects/cardano-node/en/latest/stake-pool-operations/keys_and_addresses.html
-- https://docs.cardano.org/projects/cardano-node/en/latest/stake-pool-operations/simple_transaction.html
+- https://github.com/input-output-hk/cardano-node/blob/master/doc/stake-pool-operations/keys_and_addresses.md
+- https://github.com/input-output-hk/cardano-node/blob/master/doc/stake-pool-operations/simple_transaction.md
 
 ## Prepare HW wallet
 Connect your HW wallet to your computer.
@@ -14,7 +14,7 @@ cardano-cli query protocol-parameters \
 ```
 should create `protocol.json` file.
 
-### Verification payment key and hardware wallet signing file
+## Verification payment key and hardware wallet signing file
 ```
 cardano-hw-cli address key-gen \
 --path 1852H/1815H/0H/0/0 \
@@ -58,12 +58,13 @@ bc8bf52ea894fb8e442fe3eea628be87d0c9a37baef185b70eb00a5c8a849d3b     0          
 ## Draft the transaction
 ```
 cardano-cli transaction build-raw \
---mary-era \
---tx-in bc8bf52ea894fb8e442fe3eea628be87d0c9a37baef185b70eb00a5c8a849d3b#0 \
+--alonzo-era \
+--tx-in "bc8bf52ea894fb8e442fe3eea628be87d0c9a37baef185b70eb00a5c8a849d3b#0" \
 --tx-out $(cat payment.addr)+0 \
 --ttl 0 \
 --fee 0 \
---out-file tx.draft
+--out-file tx.draft \
+--cddl-format
 ```
 should create `tx.draft` file.
 
@@ -90,11 +91,11 @@ cardano-cli query tip --mainnet
 example return:
 ```
 {
-  "epoch": 267,
-  "hash": "e00916594a27203d96c5530a56e188dcd394d6b45d31a76cce82a51ca7dd6a2a",
-  "slot": 27507111,
-  "block": 2610889,
-  "era": "Mary"
+  "era": "Alonzo",
+  "hash": "c7eab20fb2e03bbd8ac25cba88369a8efe55788a566e6c3d4e1693faca7cf4ba",
+  "epoch": 189,
+  "slot": 51672781,
+  "block": 3356357
 }
 ```
 
@@ -102,23 +103,40 @@ example return:
 TTL: Add 1000 to `slot` from previous call
 ```
 cardano-cli transaction build-raw \
---mary-era \
---tx-in bc8bf52ea894fb8e442fe3eea628be87d0c9a37baef185b70eb00a5c8a849d3b#0 \
+--alonzo-era \
+--tx-in "bc8bf52ea894fb8e442fe3eea628be87d0c9a37baef185b70eb00a5c8a849d3b#0" \
 --tx-out $(cat payment.addr)+2316348 \
 --ttl 27508111 \
 --fee 170869 \
---out-file tx.raw
+--out-file tx.raw \
+--cddl-format
 ```
 
-## Sign the transaction
+## Transform the transaction
+HW wallets expect the transaction CBOR to be in *canonical* format. Unfortunately, cardano-cli sometimes produces incorrectly formatted tx files. Use the following command to fix the formatting issues.
 ```
-cardano-hw-cli transaction sign \
---tx-body-file tx.raw \
+cardano-hw-cli transaction transform \
+--tx-file tx.raw \
+--out-file tx.transformed
+```
+
+## Witness the transaction
+```
+cardano-hw-cli transaction witness \
+--tx-file tx.transformed \
 --hw-signing-file payment.hwsfile \
 --mainnet \
+--out-file payment.witness
+```
+should return `payment.witness` file.
+
+## Assemble the transaction
+```
+cardano-cli transaction assemble \
+--tx-body-file tx.transformed \
+--witness-file payment.witness \
 --out-file tx.signed
 ```
-should return `tx.signed` file.
 
 ## Submit the transaction
 ```
