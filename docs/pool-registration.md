@@ -1,6 +1,6 @@
 # Pool registration demo
 
-This guide will walk you through registering a stake pool with a hardware wallet. Make sure you are well aware of [staking in Cardano](https://cardano.org/stake-pool-delegation) and [stake pool operations](https://docs.cardano.org/en/latest/getting-started/stake-pool-operators/index.html). Thorough documentation of how to register a staking pool in steps without a hardware wallet can be found [here](https://docs.cardano.org/projects/cardano-node/en/latest/stake-pool-operations/node_keys.html). It contains all the details, implications and explanations. We will reference it in further steps and give general overview of what is going on in each major step.
+This guide will walk you through registering a stake pool with a hardware wallet. Make sure you are well aware of [staking in Cardano](https://cardano.org/stake-pool-delegation) and [stake pool operations](https://developers.cardano.org/docs/operate-a-stake-pool/). Thorough documentation of how to register a staking pool in steps without a hardware wallet can be found [here](https://github.com/input-output-hk/cardano-node/blob/master/doc/stake-pool-operations/node_keys.md). It contains all the details, implications and explanations. We will reference it in further steps and give general overview of what is going on in each major step.
 
 ## Stake pool registration limitations
 
@@ -18,7 +18,7 @@ Currently only Ledger supports signing and creating payment/pool witnesses.
 
 ## Create pool keys
 
-These commands create stake pool keys - VRF, KES. The process is similar with the official documentation found [here](https://docs.cardano.org/projects/cardano-node/en/latest/stake-pool-operations/node_keys.html). All of these keys will be required for further steps and for running a block producing node, therefore keep them very secure and do not share them with anyone.
+These commands create stake pool keys - VRF, KES. The process is similar with the official documentation found [here](hhttps://github.com/input-output-hk/cardano-node/blob/master/doc/stake-pool-operations/node_keys.md). All of these keys will be required for further steps and for running a block producing node, therefore keep them very secure and do not share them with anyone.
 
 ```
 cardano-cli node key-gen-VRF \
@@ -95,7 +95,7 @@ cardano-cli stake-address build \
 --mainnet
 ```
 
-creates a reward address, where all the pool rewards will go. Pool operator must then manually distribute these rewards between all the pool owners, if there are multiple of them.
+This creates a reward address, where all the pool rewards will go. Pool operator must then manually distribute these rewards between all the pool owners, if there are multiple of them.
 
 The staking key (`owner-stake.vkey`) can either be managed from cardano-cli or cardano-hw-cli, and of course, the corresponding CLI then should be used to sign the transaction to withdraw the respective rewards.
 
@@ -103,7 +103,7 @@ If you prefer, you can also manage your staking key/reward address from a UI-bas
 
 Also note that the reward address does not have to be witnessed when registering the stake pool, so you don't have to provide the corresponding staking signing key when registering the stake pool unless it's bound to an owner as well.
 
-Make sure you understand the structure and limitations of the stake pool's metadata and the stake pool registration certificate described [here](https://docs.cardano.org/projects/cardano-node/en/latest/stake-pool-operations/register_stakepool.html). It is crucial in the following blocks of commands.
+Make sure you understand the structure and limitations of the stake pool's metadata and the stake pool registration certificate described [here](https://github.com/input-output-hk/cardano-node/blob/master/doc/stake-pool-operations/register_stakepool.md). It is crucial in the following blocks of commands.
 
 ## Create operator keys and address
 This can be same or different from owner. If you are both owner and operator you already have stake file.
@@ -184,11 +184,10 @@ The file name you specify in `--out-file` will contain the pool registration cer
 ```
 cardano-cli query utxo \
 --address $(cat operator-payment.addr) \
---mainnet \
---mary-era
+--mainnet
 ```
 
-Use the result as $operatorBalance in the next block.
+Use the result as `$operatorBalance` in the next block.
 
 ## Draft the transaction and calculate fee
 
@@ -196,13 +195,14 @@ Create a draft of the transaction to calculate out its fee later:
 
 ```
 cardano-cli transaction build-raw \
---tx-in 73aa1b60a8e32bae39a69b509e03f4b45f297817abb0e29d3eed92ece9dc1bbe#0 \
+--tx-in "73aa1b60a8e32bae39a69b509e03f4b45f297817abb0e29d3eed92ece9dc1bbe#0" \
 --tx-out $(cat operator-payment.addr)+0 \
 --ttl 0 \
 --fee 0 \
 --out-file tx.draft \
 --certificate-file pool-registration.cert \
---mary-era
+--alonzo-era \
+--cddl-format
 ```
 
 Calculate the transaction fee:
@@ -228,17 +228,27 @@ expr $operatorBalance - 500000000 - 194685
 
 = 8000000. This value is the change you get back after sending pool registration transaction.
 
-## Build the tx
+## Build the transaction
 
 ```
 cardano-cli transaction build-raw \
---tx-in 73aa1b60a8e32bae39a69b509e03f4b45f297817abb0e29d3eed92ece9dc1bbe#0 \
+--tx-in "73aa1b60a8e32bae39a69b509e03f4b45f297817abb0e29d3eed92ece9dc1bbe#0" \
 --tx-out $(cat operator-payment.addr)+8000000 \
 --ttl 15770560 \
 --fee 194685 \
 --out-file tx.raw \
 --certificate-file pool-registration.cert \
---mary-era
+--alonzo-era \
+--cddl-format
+```
+
+## Transform the transaction
+
+HW wallets expect the transaction CBOR to be in *canonical* format. Unfortunately, cardano-cli sometimes produces incorrectly formatted tx files. Use the following command to fix the formatting issues.
+```
+cardano-hw-cli transaction transform \
+--tx-file tx.raw \
+--out-file tx.transformed
 ```
 
 ## Create transaction witnesses
@@ -249,7 +259,7 @@ We use Ledger to create all witnesses:
 ## operator witness - Signed by pool operator (payer of pool deposit and fees), can but don't have to be also owner
 ## pool witness - signed by pool's cold key.
 cardano-hw-cli transaction witness \
---tx-body-file tx.raw \
+--tx-file tx.transformed \
 --hw-signing-file operator-payment.hwsfile \
 --hw-signing-file cold.hwsfile \
 --mainnet \
@@ -258,7 +268,7 @@ cardano-hw-cli transaction witness \
 
 ## owner witness - One or multiple hardware wallet pool owners
 cardano-hw-cli transaction witness \
---tx-body-file tx.raw \
+--tx-file tx.transformed \
 --hw-signing-file owner-stake.hwsfile \
 --mainnet \
 --out-file owner.witness
@@ -266,35 +276,35 @@ cardano-hw-cli transaction witness \
 
 In case operator is managing cold key without HW wallet, operator can use cardano-cli to create witnesses the regular way:
 ```
-## operator witness - Signed by pool operator (payer of pool deposit and fees) 
-cardano-cli shelley transaction witness \
---tx-body-file tx.raw \
+## operator witness - Signed by pool operator (payer of pool deposit and fees)
+cardano-cli transaction witness \
+--tx-body-file tx.transformed \
 --signing-key-file operator-payment.skey \
 --mainnet \
 --out-file operator.witness
 
 ## pool witness - signed by pool's cold key.
-cardano-cli shelley transaction witness \
---tx-body-file tx.raw \
+cardano-cli transaction witness \
+--tx-body-file tx.transformed \
 --signing-key-file cold.skey \
 --mainnet \
 --out-file pool.witness
 ```
 
-## Create signed transaction 
+## Create signed transaction
 
 Use witnesses from previous step to assemble the signed pool registration transaction
 
 ```
 cardano-cli transaction assemble \
---tx-body-file tx.raw \
+--tx-body-file tx.transformed \
 --witness-file operator.witness \
 --witness-file pool.witness \
 --witness-file owner.witness \
 --out-file tx.signed
  ```
 
-## Submit the tx
+## Submit the transaction
 
 ```
 cardano-cli transaction submit --tx-file tx.signed --mainnet

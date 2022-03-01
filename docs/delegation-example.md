@@ -5,7 +5,7 @@ Connect your HW wallet to your computer.
 
 ## Get protocol parameters
 ```
-cardano-cli shelley query protocol-parameters \
+cardano-cli query protocol-parameters \
 --mainnet \
 --out-file protocol.json
 ```
@@ -31,7 +31,7 @@ should create `stake.vkey` and `stake.hwsfile` files.
 
 ## Payment address
 ```
-cardano-cli shelley address build \
+cardano-cli address build \
 --payment-verification-key-file payment.vkey \
 --stake-verification-key-file stake.vkey \
 --out-file payment.addr \
@@ -41,7 +41,7 @@ should create `payment.addr` file.
 
 ## Create delegation certificate
 ```
-cardano-cli shelley stake-address delegation-certificate \
+cardano-cli stake-address delegation-certificate \
 --staking-verification-key-file stake.vkey \
 --stake-pool-verification-key-file cold.vkey \
 --out-file delegation.cert
@@ -50,7 +50,7 @@ should create `delegation.cert` file.
 
 ## Get the transaction hash and index of the UTXO to spend
 ```
-cardano-cli shelley query utxo \
+cardano-cli query utxo \
 --address $(cat payment.addr) \
 --mainnet
 ```
@@ -63,19 +63,21 @@ example return:
 
 ## Draft the transaction
 ```
-cardano-cli shelley transaction build-raw \
---tx-in 2a602e9ad218967602b4ca7be48648224e07f34fb0059f164ea3f99dbbfee1cb#0 \
+cardano-cli transaction build-raw \
+--tx-in "2a602e9ad218967602b4ca7be48648224e07f34fb0059f164ea3f99dbbfee1cb#0" \
 --tx-out $(cat payment.addr)+0 \
 --ttl 0 \
 --fee 0 \
 --certificate-file delegation.cert \
---out-file tx.draft
+--out-file tx.draft \
+--alonzo-era \
+--cddl-format
 ```
 should create `tx.draft` file.
 
 ## Calculate the fee
 ```
-cardano-cli shelley transaction calculate-min-fee \
+cardano-cli transaction calculate-min-fee \
 --tx-body-file tx.draft \
 --tx-in-count 1 \
 --tx-out-count 1 \
@@ -91,41 +93,60 @@ example return:
 
 ## Determine the TTL for the transaction
 ```
-cardano-cli shelley query tip --mainnet
+cardano-cli query tip --mainnet
 ```
 
 ## Build the transaction
 ```
-cardano-cli shelley transaction build-raw \
---tx-in 2a602e9ad218967602b4ca7be48648224e07f34fb0059f164ea3f99dbbfee1cb#0 \
+cardano-cli transaction build-raw \
+--tx-in "2a602e9ad218967602b4ca7be48648224e07f34fb0059f164ea3f99dbbfee1cb#0" \
 --tx-out $(cat payment.addr)+1783847 \
 --ttl 13909233 \
 --fee 199845 \
 --certificate-file delegation.cert \
---out-file tx.raw
+--out-file tx.raw \
+--alonzo-era \
+--cddl-format
 ```
 
-## Sign the transaction
+## Transform the transaction
+HW wallets expect the transaction CBOR to be in *canonical* format. Unfortunately, cardano-cli sometimes produces incorrectly formatted tx files. Use the following command to fix the formatting issues.
 ```
-cardano-hw-cli transaction sign \
---tx-body-file tx.raw \
+cardano-hw-cli transaction transform \
+--tx-file tx.raw \
+--out-file tx.transformed
+```
+
+## Witness the transaction
+```
+cardano-hw-cli transaction witness \
+--tx-file tx.transformed \
 --hw-signing-file payment.hwsfile \
 --hw-signing-file stake.hwsfile \
 --mainnet \
+--out-file payment.witness \
+--out-file stake.witness
+```
+
+## Assemble the transaction
+```
+cardano-cli transaction assemble \
+--tx-body-file tx.transformed \
+--witness-file payment.witness \
+--witness-file stake.witness \
 --out-file tx.signed
 ```
-should return `tx.signed` file.
 
 ## Submit the transaction
 ```
-cardano-cli shelley transaction submit \
+cardano-cli transaction submit \
 --tx-file tx.signed \
 --mainnet
 ```
 
 ## Check the balances
 ```
-cardano-cli shelley query utxo \
+cardano-cli query utxo \
 --address $(cat payment.addr) \
 --mainnet
 ```

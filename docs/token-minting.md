@@ -58,7 +58,11 @@ cardano-cli transaction policyid --script-file policy.script
 
 ## Creating a transaction with token minting
 *Note: This part of the guide assumes you already have some funded address from which you are going to make this transaction, located in a file named `payment.addr`.*
-In this transaction we are going to mint `1000000` tokens named `C0in`.
+
+In this transaction we are going to mint `1000000` tokens named `C0in`. First, we need to encode the token name:
+```sh
+TOKEN_NAME=$(echo -n "C0in" | xxd -b -ps -c 80 | tr -d '\n')
+```
 
 ### Querying the UTxO
 First as with every transaction you need to query for the UTxO (substitute `--mainnet` for `--testnet-magic 1097911063` if you are using testnet):
@@ -79,21 +83,22 @@ Example return:
 Now we can draft the transaction:
 ```sh
 cardano-cli transaction build-raw \
---mary-era \
+--alonzo-era \
 --tx-in "1626d02eac494bfbbf0b725ad617fca9fa9b6c9f5b6dcd5e62aa1f9cc3efe731#0" \
---tx-out "$(cat payment.addr)"+0+"1000000 $(cat policyId).C0in" \
---mint "1000000 $(cat policyId).C0in" \
+--tx-out "$(cat payment.addr)"+0+"1000000 $(cat policyId).$TOKEN_NAME" \
+--mint "1000000 $(cat policyId).$TOKEN_NAME" \
 --minting-script-file policy.script \
 --fee 0 \
---out-file tx.draft
+--out-file tx.draft \
+--cddl-format
 ```
 
 ### Calculating the fee
-*Note: if you don't have a `protocol.json` file available you obtain it with `cardano-cli`:*
+*Note: if you don't have a `protocol.json` file available you can obtain it with `cardano-cli`:*
 ```sh
 cardano-cli query protocol-parameters \
 --out-file protocol.json \
---testnet-magic 1097911063
+--mainnet
 ```
 
 Then we can calculate the fee (substitute `--mainnet` for `--testnet-magic 1097911063` if you are using testnet):
@@ -110,7 +115,7 @@ Example output:
 ```
 200701 Lovelace
 ```
-Note that our policy script is of type all and therefore requires to be signed with all the nested scripts. In this case it means it needs signatures from both the public keys, therefore we need 2 witnesses only for the policy script plus witnesses needed for the payment address (here we assumed the payment address is a ordinary one, but if it was multisig address it could require more signatures).
+Note that our policy script is of type "all" and therefore requires to be signed with all the nested scripts. In this case it means it needs signatures from both the public keys, therefore we need 2 witnesses only for the policy script plus witnesses needed for the payment address (here we assumed the payment address is an ordinary one, but if it was multisig address it could require more signatures).
 
 ### Creating the unsigned transaction
 Then we can calculate the output amount (input minus the fee) and create the unsigned transaction.
@@ -119,34 +124,43 @@ expr 995124450 - 200701
 ```
 ```sh
 cardano-cli transaction build-raw \
---mary-era \
+--alonzo-era \
 --tx-in "1626d02eac494bfbbf0b725ad617fca9fa9b6c9f5b6dcd5e62aa1f9cc3efe731#0" \
---tx-out "$(cat payment.addr)"+994923749+"1000000 $(cat policyId).C0in" \
---mint "1000000 $(cat policyId).C0in" \
+--tx-out "$(cat payment.addr)"+994923749+"1000000 $(cat policyId).$TOKEN_NAME" \
+--mint "1000000 $(cat policyId).$TOKEN_NAME" \
 --minting-script-file policy.script \
 --fee 200701 \
---out-file tx.raw
+--out-file tx.raw \
+--cddl-format
+```
+
+### Transforming the unsigned transaction
+HW wallets expect the transaction CBOR to be in *canonical* format. Unfortunately, cardano-cli sometimes produces incorrectly formatted tx files. Use the following command to fix the formatting issues.
+```
+cardano-hw-cli transaction transform \
+--tx-file tx.raw \
+--out-file tx.transformed
 ```
 
 ### Signing the transaction
 Now we can proceed to signing the transaction. Aside from the witness needed for the payment address, our transaction needs to be signed by the `cardano-cli` generated key and hardware wallet generated one:
 ```sh
 cardano-cli transaction witness \
---tx-body-file tx.raw \
+--tx-body-file tx.transformed \
 --signing-key-file mint-cli.skey \
 --out-file mint-cli.witness \
 --mainnet
 
 cardano-hw-cli transaction witness \
---tx-body-file tx.raw \
+--tx-file tx.transformed \
 --hw-signing-file mint-hw.hwsfile \
 --out-file mint-hw.witness \
 --mainnet
 ```
-We should now have two witness files available `mint-cli.witness` and `mint-hw.witness` and together with any other witnesses we can assemble them together into a signed transaction:
+We should now have two witness files available: `mint-cli.witness` and `mint-hw.witness`. Together with any other witnesses we can assemble them together into a signed transaction:
 ```
 cardano-cli transaction assemble \
---tx-body-file tx.raw \
+--tx-body-file tx.transformed \
 --witness-file payment.witness \
 --witness-file mint-hw.witness \
 --witness-file mint-cli.witness \
@@ -155,7 +169,7 @@ cardano-cli transaction assemble \
 The `--witness-file payment.witness` is just an example, you might have more of other required witnesses or have them named differently.
 
 ### Submitting the transaction
-We can now submit the signed transaction onto the blockchain:
+We can now submit the signed transaction to the blockchain:
 ```sh
 cardano-cli transaction submit \
 --tx-file tx.signed \

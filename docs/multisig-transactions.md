@@ -8,7 +8,7 @@ Before we create the transaction itself we will create a multisig address first.
 To create a multisig address you need a payment native script and a stake native script. All public keys used inside the scripts need to be derived using the `1854H` paths.
 
 #### Payment key
-The derivation path is described in [CIP-1854](https://github.com/cardano-foundation/CIPs/blob/master/CIP-1854/CIP-1854.md), but it is similar to the `1852H` derivation path, but beginning with `1854H` instead. We can generate the payment key like this:
+The derivation path is described in [CIP-1854](https://github.com/cardano-foundation/CIPs/blob/master/CIP-1854/CIP-1854.md). It is similar to the `1852H` derivation path, but it begins with `1854H` instead. We can generate the payment key like this:
 ```sh
 cardano-hw-cli address key-gen \
 --path 1854H/1815H/0H/0/0 \
@@ -28,7 +28,7 @@ cardano-hw-cli address key-gen \
 ### Creating the native scripts
 
 #### Payment script
-The payment native script will be in this example an all script with two public key hashes. One public key will be the one we generated above on the hardware wallet. The second one we will generate using `cardano-cli`.
+The payment native script will be in this example an "all" script with two public key hashes. One public key will be the one we generated above on the hardware wallet. The second one we will generate using `cardano-cli`.
 ```sh
 cardano-cli address key-gen \
 --normal-key \
@@ -77,7 +77,7 @@ cardano-cli address build \
 Or you can swap `--mainnet` for `--testnet-magic 1097911063` if you want to create a testnet address.
 
 ## Creating the transaction
-Now we have created a multisig address and we are able to continue with creating a simple transaction. We will assume you have already send some funds to your newly created address (for testnet addresses you can use the [Faucet](https://testnets.cardano.org/en/testnets/cardano/tools/faucet/)).
+Now we have created a multisig address and we are able to continue with creating a simple transaction. We will assume you have already sent some funds to your newly created address (for testnet addresses you can use the [Faucet](https://testnets.cardano.org/en/testnets/cardano/tools/faucet/)).
 
 ### Querying the UTxO
 First we need to query for the UTxO:
@@ -97,20 +97,21 @@ Example return:
 ### Drafting the transaction
 ```sh
 cardano-cli transaction build-raw \
---mary-era \
+--alonzo-era \
 --tx-in "94461e17271b4a108f679eb7b6947aea29573296a5edca635d583fb40785e05d#0" \
 --tx-in-script-file payment.script \
 --tx-out "$(cat payment.addr)"+0 \
 --fee 0 \
---out-file tx.draft
+--out-file tx.draft \
+--cddl-format
 ```
 
 ### Calculating the fee
-*Note: if you don't have a `protocol.json` file available you obtain it with `cardano-cli`:*
+*Note: if you don't have a `protocol.json` file available you can obtain it with `cardano-cli`:*
 ```sh
 cardano-cli query protocol-parameters \
 --out-file protocol.json \
---testnet-magic 1097911063
+--mainnet
 ```
 
 Then we can calculate the fee:
@@ -136,26 +137,35 @@ expr 1000000000 - 194654
 ```
 ```sh
 cardano-cli transaction build-raw \
---mary-era \
+--alonzo-era \
 --tx-in "94461e17271b4a108f679eb7b6947aea29573296a5edca635d583fb40785e05d#0" \
 --tx-in-script-file payment.script \
 --tx-out "$(cat payment.addr)"+999805346 \
 --fee 194654 \
---out-file tx.raw
+--out-file tx.raw \
+--cddl-format
 ```
 At this point, the native script is present in the transaction witness set - now we only need to add the witnesses with signatures.
+
+### Transforming the transaction
+HW wallets expect the transaction CBOR to be in *canonical* format. Unfortunately, cardano-cli sometimes produces incorrectly formatted tx files. Use the following command to fix the formatting issues.
+```
+cardano-hw-cli transaction transform \
+--tx-file tx.raw \
+--out-file tx.transformed
+```
 
 ### Signing the transaction
 Because we need two witnesses, one from the key from hardware wallet and one from the key from `cardano-cli`, we will create them separately and afterwards assemble them together to create a signed transaction.
 ```sh
 cardano-hw-cli transaction witness \
---tx-body-file tx.raw \
+--tx-file tx.transformed \
 --hw-signing-file payment-hw.hwsfile \
 --out-file payment-hw.witness \
 --mainnet
 
 cardano-cli transaction witness \
---tx-body-file tx.raw \
+--tx-body-file tx.transformed \
 --signing-key-file payment-cli.skey \
 --out-file payment-cli.witness \
 --mainnet
@@ -163,14 +173,14 @@ cardano-cli transaction witness \
 And now assembling:
 ```sh
 cardano-cli transaction assemble \
---tx-body-file tx.raw \
+--tx-body-file tx.transformed \
 --witness-file payment-hw.witness \
 --witness-file payment-cli.witness \
 --out-file tx.signed
 ```
 
 ### Submitting the transaction
-We now have the signed transaction ready and we can submit to blockchain:
+We now have the signed transaction ready and we can submit it to the blockchain:
 ```sh
 cardano-cli transaction submit \
 --tx-file tx.signed \
