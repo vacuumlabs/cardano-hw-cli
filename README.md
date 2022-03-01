@@ -151,7 +151,7 @@ cardano-hw-cli device version
 - [Basic transaction](docs/transaction-example.md)
 - [Stake delegation](docs/delegation-example.md)
 - [Catalyst voting registration](docs/catalyst-voting-registration-example.md)
-- [Stake pool registration](docs/poolRegistration.md)
+- [Stake pool registration](docs/pool-registration.md)
 - [Public keys bulk export](docs/public-keys-bulk-export-example.md)
 
 # Running from source
