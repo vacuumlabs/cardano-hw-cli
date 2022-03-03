@@ -166,7 +166,10 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
       ? prepareTokenBundle(output.amount.multiasset) : null
     const datumHashHex = output.datumHash?.toString('hex')
 
-    if (changeAddressParams && signingMode === SigningMode.ORDINARY_TRANSACTION) {
+    const addressParamsAllowed = [
+      SigningMode.ORDINARY_TRANSACTION, SigningMode.PLUTUS_TRANSACTION,
+    ].includes(signingMode)
+    if (changeAddressParams && addressParamsAllowed) {
       return prepareChangeOutput(output.amount.coin, changeAddressParams, tokenBundle, datumHashHex)
     }
 
