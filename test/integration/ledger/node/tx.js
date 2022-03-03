@@ -1,11 +1,11 @@
 /* eslint-disable max-len */
 const assert = require('assert')
-const { decodeRawTx } = require('cardano-hw-interop-lib')
+const { decodeRawTx, decodeTx } = require('cardano-hw-interop-lib')
 const { LedgerCryptoProvider } = require('../../../../src/crypto-providers/ledgerCryptoProvider')
 const { NETWORKS } = require('../../../../src/constants')
 const { determineSigningMode, getTxBodyHash } = require('../../../../src/crypto-providers/util')
 const { validateSigning, validateWitnessing } = require('../../../../src/crypto-providers/signingValidation')
-const { validateRawTxBeforeSigning } = require('../../../../src/transaction/transactionValidation')
+const { validateRawTxBeforeSigning, validateTxBeforeSigning } = require('../../../../src/transaction/transactionValidation')
 
 const { signingFiles } = require('./signingFiles')
 
@@ -251,6 +251,55 @@ const transactions = {
     signedTxCborHex: '83a60082825820169422f7193e3418318c2420590778e68619119403472f70c0bb9e9feb2b457100825820cba5f1dd03010380d5c1a6471e7223ac48a7baf75c76e3824896d4398fe0155e000183825839306665c42b15b35c7937381bd545c5e7b6b3a03a24cf0383d409ac4583381f757b787201d66ae47603d1abd06ceaa031188e923568c937e8bc821a27aa98ffa1581c13a36080b2263de3bf122d69f680eff37f8f640dac951e6048abd664a1444b6f6a6e1a000927c082583930de685e72586c4269087e282c9c7e78ba22082bce4a674977b4000e99b494d35f236093e7caed75d2b99b1e523cde935a6f4a2d276b9fb401821a27aa98ffa1581c13a36080b2263de3bf122d69f680eff37f8f640dac951e6048abd664a1444b6f6a6e1a00061a80825839000743d16cfe3c4fcc0c11c2403bbc10dbc7ecdd4477e053481a368e7a06e2ae44dff6770dc0f4ada3cf4cf2605008e27aecdb332ad349fda71a27aa98fe021a0003ba51048182018201581cb494d35f236093e7caed75d2b99b1e523cde935a6f4a2d276b9fb40105a1581df0381f757b787201d66ae47603d1abd06ceaa031188e923568c937e8bc0009a1581c13a36080b2263de3bf122d69f680eff37f8f640dac951e6048abd664a1444b6f6a6e1a000f4240a20087825820b9de636bf236e5543377e4b4d6b63613f188fb65b83b8a61c4b68be0c196c3d858405b7ea7fcdf9c16e465f1ea02ccf0c2b3e99db8f7a94bf0865766a79d2db8c90244580442810fec40fed90a234ccc1f817cfc7a2963ff00dcf4250920c8002f05825820f87ee3ee2316d92f73dca6112a197340a1eae157574765099dd631132818bc1558405ccdd2985d3d91b0b170f5dca1698ca7990016203247c16306e536d75d58a35e1becb9f8a0dcd8535d6e95fb9820864d470a69ad9c654c618ff0902e79e518008258202573f7cde2d182ebbcd63dc0940fd53064824e716a6d0238fa3780bac2933e2e58406e6fc694006adbf112a61a3e342e2e86511e45044c67598d4cf2f21d1ceb74017921c9cc696ee9274afca3a7d7efa2442bf83ab6115631b903d4d5348e7c720a825820d6718e4553626239ef7470b9287340490fe71d084039f21f5b10c84e29bf3e815840b9047ab4029958ffd9bbc4a4b6c4891a015828a1d30981bc2c1add7463a6066e41ac4c9d8550ed8546b9dd060ca3559cab810e5da30dada6b6c89d26b4e532038258200fa60d5831ee0be1f221ff93ba0a4fdeca5a5866e47569607b04e287fc9b5ec05840cf364809f1e57bfa7c85cf648c704fff96dbcbe3d9b3e75e62b12d1b72979f0fffa6db9caec02f15c95d2f96b2c90bea0d62015acdd0e694590879d4c8b87d0c82582091e2647a4db84e47c895160b1f534d72c24c5eaf0aefb5f72dbfdea9913d96c658406a6fd7a0109be3f2d3c9d0c41b046081c92eff3cb0bef7663294709858ee044a98dfbb0a61ecb669632d51de98c79f22d6a1b3ebe6c0d57cd6f443f3d1682c0a825820b58d0c958e7e76f7cac5f3e696285ce955750967972af13ba7427cd91808a560584096e00570ee0117af841a8db8772681fc470232c2f60ca524c7cd58450c4ac9c916f72099308399da2ff8e6f085df593af1736f24e410cb88af721ac8faf01b0a01858200581c9a70dd7c77e9db9442b560a11446962e9d7c595274c587a62f8a0b618201828200581c9205690f6ea4b76742c6bdc5b79fb8a1727260089c71a64c7275320e8200581c3d926054e17d9ed8374d0e1d18c765209dd0c249f954214c45417fea8200581cf699c6400f85bdca54e44d0cad1f6141ce049a411c0d695fc30c3f738201828200581cf699c6400f85bdca54e44d0cad1f6141ce049a411c0d695fc30c3f738200581c4c139dd7e3a600fd1a4855b38cf8f731f39d3051791a5ede1f553d6c8201828200581c43040068ce85252be6164296d6dca9595644bbf424b56b74244582278200581c46b9d3c2f37b1013265f6abf21400f0e4cf21ddb2088bfe58058e1caf6',
     network: 'TESTNET_LEGACY',
   },
+  ordinary_withOutputDatumHash: {
+    // cardano-cli transaction build-raw \
+    //     --alonzo-era \
+    //     --tx-in "dbc2334398601986d7479e813a30acaebb544a4dd8ccbedc63e8911ae32a7e36#0" \
+    //     --tx-out addr_test1wz293phjmaeag8gnsl2zrt862wvaa9ugh4y34fc4kdnesec6qr6xk+990000000 \
+    //     --tx-out-datum-hash-value '"chocolate"' \
+    //     --tx-out addr_test1qrkecp93wdrus6l6ga97m966qyjp7t8qj8acyf27z6l63p8ecjewxgyxvj48wwntvnujh78vpajtzdjs993jalfwlyush4k89u+9000000 \
+    //     --fee 1000000 \
+    //     --out-file tx.raw \
+    //     --cddl-format
+    // cardano-hw-cli transaction transform --tx-file tx.raw --out-file tx.transformed
+    cborHex: '84a30081825820dbc2334398601986d7479e813a30acaebb544a4dd8ccbedc63e8911ae32a7e3600018283581d70945886f2df73d41d1387d421acfa5399de9788bd491aa715b36798671a3b0233805820bb292f5270d8b30482d91ee44de4ffcb50c1efeb1c219d9cd08eda0f9242a7b582583900ed9c04b17347c86bfa474bed975a01241f2ce091fb82255e16bfa884f9c4b2e3208664aa773a6b64f92bf8ec0f64b1365029632efd2ef9391a00895440021a000f4240a0f5f6',
+    hwSigningFiles: [signingFiles.payment0],
+    witnesses: [{
+      key: 0,
+      data: [
+        Buffer.from('cd2b047d1a803eee059769cffb3dfd0a4b9327e55bc78aa962d9bd4f720db0b2', 'hex'),
+        Buffer.from('607b1d1ebee1dc26c833abd58aa984cb0962be9ffe07a0018909ce660755b090420f0a1ae0a6b14c014cc4ff2fbf554d1da06aa9be243698b8cf22b494660e0c', 'hex'),
+      ],
+    }],
+    network: 'TESTNET',
+  },
+  plutus_spendFromScript: {
+    // cardano-cli transaction build-raw \
+    //     --alonzo-era \
+    //     --tx-in "1789f11f03143338cfcc0dbf3a93ad8f177e8698fc37ab3ab17c954cf2b28ee8#0" \
+    //     --tx-in-script-file docs/data/datum-equals-redeemer.plutus \
+    //     --tx-in-datum-value '"chocolate"' \
+    //     --tx-in-redeemer-value '"chocolate"' \
+    //     --tx-in-execution-units "(2000000, 6000)" \
+    //     --tx-in-collateral "1789f11f03143338cfcc0dbf3a93ad8f177e8698fc37ab3ab17c954cf2b28ee8#1" \
+    //     --tx-out addr_test1qrkecp93wdrus6l6ga97m966qyjp7t8qj8acyf27z6l63p8ecjewxgyxvj48wwntvnujh78vpajtzdjs993jalfwlyush4k89u+989817867 \
+    //     --required-signer-hash $(cardano-cli address key-hash --payment-verification-key-file test/integration/ledger/cli/keyFiles/payment.vkey) \
+    //     --fee 182133 \
+    //     --protocol-params-file protocol.json \
+    //     --out-file tx.raw \
+    //     --cddl-format
+    // cardano-hw-cli transaction transform --tx-file tx.raw --out-file tx.transformed
+    cborHex: '84a600818258201789f11f03143338cfcc0dbf3a93ad8f177e8698fc37ab3ab17c954cf2b28ee800018182583900ed9c04b17347c86bfa474bed975a01241f2ce091fb82255e16bfa884f9c4b2e3208664aa773a6b64f92bf8ec0f64b1365029632efd2ef9391a3aff6c0b021a0002c7750b582013a83818f68bb170dff0ab8a8c0098c5a14db0e43e04c9661dd3f64deb8241c20d818258201789f11f03143338cfcc0dbf3a93ad8f177e8698fc37ab3ab17c954cf2b28ee8010e81581c14c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f1124a3038158425840010000332233322222253353004333573466ebc00c00801801440204c98d4c01ccd5ce2481094e6f7420457175616c000084984880084880048004480048004104814963686f636f6c61746505818400004963686f636f6c617465821917701a001e8480f5f6',
+    hwSigningFiles: [signingFiles.payment0],
+    witnesses: [{
+      key: 0,
+      data: [
+        Buffer.from('cd2b047d1a803eee059769cffb3dfd0a4b9327e55bc78aa962d9bd4f720db0b2', 'hex'),
+        Buffer.from('da6fb8cfa34194a3ab800de32f1f0f02af30ef5d5271758f211e7f7803b85fab1f2d79d7936a732c2a8bf2a4faeb8585366bb901d005abd0d85a3a58e1ac9906', 'hex'),
+      ],
+    }],
+    network: 'TESTNET',
+  },
 }
 
 async function testTxSigning(cryptoProvider, transaction) {
@@ -270,13 +319,24 @@ async function testTxSigning(cryptoProvider, transaction) {
 }
 
 async function testTxWitnessing(cryptoProvider, transaction) {
-  validateRawTxBeforeSigning(transaction.unsignedCborHex)
-  const rawTx = decodeRawTx(transaction.unsignedCborHex)
-  const signingMode = determineSigningMode(rawTx.body, transaction.hwSigningFiles)
+  let rawTx
+  let tx
+  if (transaction.unsignedCborHex) {
+    validateRawTxBeforeSigning(transaction.unsignedCborHex)
+    const rawTxCbor = Buffer.from(transaction.unsignedCborHex, 'hex')
+    rawTx = decodeRawTx(rawTxCbor)
+  } else {
+    validateTxBeforeSigning(transaction.cborHex)
+    const txCbor = Buffer.from(transaction.cborHex, 'hex')
+    tx = decodeTx(txCbor)
+  }
+
+  const txBody = rawTx ? rawTx.body : tx.body
   const signingParameters = {
-    signingMode,
+    signingMode: determineSigningMode(txBody, transaction.hwSigningFiles),
     rawTx,
-    txBodyHashHex: getTxBodyHash(rawTx.body),
+    tx,
+    txBodyHashHex: getTxBodyHash(txBody),
     hwSigningFileData: transaction.hwSigningFiles,
     network: NETWORKS[transaction.network],
   }
