@@ -96,7 +96,7 @@ cardano-hw-cli transaction transform
 --out-file FILE                        Output filepath of the tx.
 ```
 
-# Show address on device
+## Show address on device
 ```
 cardano-hw-cli address show
 --payment-path PAYMENTPATH    Payment derivation path.
@@ -104,7 +104,7 @@ cardano-hw-cli address show
 --address-file ADDRESS        Input filepath of the address.
 ```
 
-# Issue operational certificate
+## Issue operational certificate
 ```
 cardano-hw-cli node issue-op-cert
 --kes-verification-key-file FILE                  Input filepath of the file with KES vkey.
@@ -114,7 +114,7 @@ cardano-hw-cli node issue-op-cert
 --hw-signing-file FILE                            Input filepath of the hardware wallet signing file.
 ```
 
-# Catalyst voting registration
+## Catalyst voting registration
 ```
 cardano-hw-cli catalyst voting-key-registration-metadata
 --mainnet | --testnet-magic NATURAL    Use the mainnet magic id or specify testnet magic id.
@@ -128,7 +128,7 @@ cardano-hw-cli catalyst voting-key-registration-metadata
 
 see [Catalyst voting registration example](docs/catalyst-voting-registration-example.md)
 
-# Policy id generation
+## Policy id generation
 ```
 cardano-hw-cli transaction policyid
 --script-file      Path to a native script file
@@ -147,11 +147,14 @@ cardano-hw-cli version
 cardano-hw-cli device version
 ```
 
-## Examples/Guides
+# Examples/Guides
 - [Basic transaction](docs/transaction-example.md)
 - [Stake delegation](docs/delegation-example.md)
 - [Catalyst voting registration](docs/catalyst-voting-registration-example.md)
 - [Stake pool registration](docs/pool-registration.md)
+- [Token minting](docs/token-minting.md)
+- [Multisig transactions](docs/multisig-transactions.md)
+- [Plutus transactions](docs/plutus-transactions.md)
 - [Public keys bulk export](docs/public-keys-bulk-export-example.md)
 
 # Running from source
