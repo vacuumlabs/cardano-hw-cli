@@ -35,7 +35,7 @@
   "homepage": "https://github.com/vacuumlabs/cardano-hw-cli#readme",
   "dependencies": {
     "@babel/runtime": "^7.11.2",
-    "@cardano-foundation/ledgerjs-hw-app-cardano": "./ledgerjs-alonzo-15.tgz",
+    "@cardano-foundation/ledgerjs-hw-app-cardano": "https://github.com/vacuumlabs/ledgerjs-cardano-shelley/releases/download/v5.0.0-rc4/cardano-foundation-ledgerjs-hw-app-cardano-v5.0.0-rc4.tgz",
     "@emurgo/cardano-serialization-lib-nodejs": "^8.0.0",
     "@ledgerhq/hw-transport-node-hid": "^5.25.0",
     "argparse": "^2.0.1",
@@ -46,7 +46,7 @@
     "cbor": "^7.0.4",
     "lodash": "^4.17.21",
     "rw": "1.3.3",
-    "trezor-connect": "./trezor-connect-alonzo-5.tgz"
+    "trezor-connect": "https://github.com/vacuumlabs/connect/releases/download/8.2.5-rc.1-alonzo/trezor-connect-v8.2.5-rc.1-alonzo-extended.tgz"
   },
   "devDependencies": {
     "@types/argparse": "^2.0.10",
