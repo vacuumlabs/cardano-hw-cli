@@ -18,7 +18,7 @@ Currently only Ledger supports signing and creating payment/pool witnesses.
 
 ## Create pool keys
 
-These commands create stake pool keys - VRF, KES. The process is similar with the official documentation found [here](hhttps://github.com/input-output-hk/cardano-node/blob/master/doc/stake-pool-operations/node_keys.md). All of these keys will be required for further steps and for running a block producing node, therefore keep them very secure and do not share them with anyone.
+These commands create stake pool keys - VRF, KES. The process is similar with the official documentation found [here](https://github.com/input-output-hk/cardano-node/blob/master/doc/stake-pool-operations/node_keys.md). All of these keys will be required for further steps and for running a block producing node, therefore keep them very secure and do not share them with anyone.
 
 ```
 cardano-cli node key-gen-VRF \
@@ -244,7 +244,7 @@ cardano-cli transaction build-raw \
 
 ## Transform the transaction
 
-HW wallets expect the transaction CBOR to be in *canonical* format. Unfortunately, cardano-cli sometimes produces incorrectly formatted tx files. Use the following command to fix the formatting issues.
+HW wallets expect the transaction CBOR to be in *canonical* format (see CIP-0021). Unfortunately, cardano-cli sometimes produces tx files not compliant with CIP-0021. Use the following command to fix the formatting issues.
 ```
 cardano-hw-cli transaction transform \
 --tx-file tx.raw \
@@ -293,7 +293,7 @@ cardano-cli transaction witness \
 
 ## Create signed transaction
 
-Use witnesses from previous step to assemble the signed pool registration transaction
+Use witnesses from the previous step to assemble the signed pool registration transaction:
 
 ```
 cardano-cli transaction assemble \

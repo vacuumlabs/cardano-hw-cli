@@ -32,7 +32,7 @@ cardano-cli query utxo \
 ```
 
 ## Spending from the script
-This transaction will be the one involving Plutus script evaluation. Therefore, we need to provide a redeemer and a collateral. The collateral will need to be witnessed by the `payment` key. The Plutus script itself could require some signatures, too. Even though our script doesn't require any signatures, we will add `payment.vkey` as a required signer anyway (as a demonstration). We will send the funds to `payment.addr` (i.e. back to the address you funded the script from).
+This transaction will be the one involving Plutus script evaluation. Therefore, we need to provide a redeemer and some collateral. The collateral input will need to be witnessed by the `payment` key. The Plutus script itself could require some signatures, too. Even though our script doesn't require any signatures, we will add `payment.vkey` as a required signer anyway (as a demonstration). We will send the funds to `payment.addr` (i.e. back to the address you funded the script from).
 
 ### Querying the UTxOs
 First we need to query for the eUTxO owned by the script:
@@ -49,7 +49,7 @@ Example return:
 1789f11f03143338cfcc0dbf3a93ad8f177e8698fc37ab3ab17c954cf2b28ee8     0        990000000 lovelace + TxOutDatumHash ScriptDataInAlonzoEra "bb292f5270d8b30482d91ee44de4ffcb50c1efeb1c219d9cd08eda0f9242a7b5"
 ```
 
-The collateral has to be a UTxO owned by a regular payment key, so we expect you to have a suitable UTxO goverened by `payment.addr` ready. Beware - if the script evaluation fails, the collateral will be consumed, therefore we recommend using only a small Ada amout (let's say 4 Ada) as a collateral. You can split a larger UTxO into two using an ordinary transaction (tutorial [here](./transaction-example.md)).
+The collateral has to be a UTxO owned by a regular payment key, so we expect you to have a suitable UTxO governed by `payment.addr` ready. Beware - if the script evaluation fails, the whole collateral will be consumed, therefore we recommend using only a small Ada amout (let's say 4 Ada) as a collateral. You can split a larger UTxO into two using an ordinary transaction (tutorial [here](./transaction-example.md)).
 ```sh
 cardano-cli query utxo \
 --address $(cat payment.addr) \
@@ -129,7 +129,7 @@ cardano-cli transaction build-raw \
 At this point, the Plutus script is present in the transaction witness set - now we only need to add the witness with signature.
 
 ### Transforming the transaction
-HW wallets expect the transaction CBOR to be in *canonical* format. Unfortunately, cardano-cli sometimes produces incorrectly formatted tx files. Use the following command to fix the formatting issues.
+HW wallets expect the transaction CBOR to be in *canonical* format (see CIP-0021). Unfortunately, cardano-cli sometimes produces tx files not compliant with CIP-0021. Use the following command to fix the formatting issues.
 ```
 cardano-hw-cli transaction transform \
 --tx-file tx.raw \
