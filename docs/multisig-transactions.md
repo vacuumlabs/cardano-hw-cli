@@ -148,7 +148,7 @@ cardano-cli transaction build-raw \
 At this point, the native script is present in the transaction witness set - now we only need to add the witnesses with signatures.
 
 ### Transforming the transaction
-HW wallets expect the transaction CBOR to be in *canonical* format. Unfortunately, cardano-cli sometimes produces incorrectly formatted tx files. Use the following command to fix the formatting issues.
+HW wallets expect the transaction CBOR to be in *canonical* format (see CIP-0021). Unfortunately, cardano-cli sometimes produces tx files not compliant with CIP-0021. Use the following command to fix the formatting issues.
 ```
 cardano-hw-cli transaction transform \
 --tx-file tx.raw \

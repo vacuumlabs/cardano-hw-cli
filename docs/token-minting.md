@@ -135,7 +135,7 @@ cardano-cli transaction build-raw \
 ```
 
 ### Transforming the unsigned transaction
-HW wallets expect the transaction CBOR to be in *canonical* format. Unfortunately, cardano-cli sometimes produces incorrectly formatted tx files. Use the following command to fix the formatting issues.
+HW wallets expect the transaction CBOR to be in *canonical* format (see CIP-0021). Unfortunately, cardano-cli sometimes produces tx files not compliant with CIP-0021. Use the following command to fix the formatting issues.
 ```
 cardano-hw-cli transaction transform \
 --tx-file tx.raw \
