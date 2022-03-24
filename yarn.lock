@@ -126,6 +126,16 @@
     "@ledgerhq/logs" "^6.10.0"
     node-hid "2.1.1"
 
+"@ledgerhq/hw-transport-node-speculos@^6.11.2":
+  version "6.24.1"
+  resolved "https://registry.yarnpkg.com/@ledgerhq/hw-transport-node-speculos/-/hw-transport-node-speculos-6.24.1.tgz#735617a70ec162fb7bb9401ebdcd95e74e7c0cfe"
+  integrity sha512-xkOqK7m1HOALqnwxMTxrBU8N54/PnQJpGx9Xg9RRUpLVEU7m84LAI9uXemx4AKfs6CEL8D5EP51WIRlQlnhdCQ==
+  dependencies:
+    "@ledgerhq/errors" "^6.10.0"
+    "@ledgerhq/hw-transport" "^6.24.1"
+    "@ledgerhq/logs" "^6.10.0"
+    rxjs "6"
+
 "@ledgerhq/hw-transport@^5.12.0":
   version "5.51.1"
   resolved "https://registry.yarnpkg.com/@ledgerhq/hw-transport/-/hw-transport-5.51.1.tgz#8dd14a8e58cbee4df0c29eaeef983a79f5f22578"
