@@ -14,8 +14,7 @@ mkdir ./build/windows
 mkdir ./build/windows/cardano-hw-cli
 
 # Build executable
-# TODO update version when Nexe supports 12.19.1 (or higher) https://github.com/nexe/nexe/issues/821
-yarn nexe ./dist/index.js -o ./build/windows/cardano-hw-cli/cardano-hw-cli -t windows-x64-12.18.2
+yarn pkg ./dist/index.js -o ./build/windows/cardano-hw-cli/cardano-hw-cli -t node14-win-x64
 
 # Copy dependencies
 cp _package.json ./build/windows/cardano-hw-cli/package.json

@@ -20,7 +20,7 @@
     "test-integration-ledger": "mocha -r ts-node/register 'test/integration/ledger/node/**/*.js' --exit",
     "test-integration-trezor": "mocha -r ts-node/register 'test/integration/trezor/node/**/*.js' --exit",
     "clean": "rm -rf ./dist && rm -rf ./node_modules",
-    "nexe": "nexe"
+    "pkg": "pkg"
   },
   "repository": {
     "type": "git",
@@ -56,7 +56,7 @@
     "eslint-config-airbnb-base": "^14.2.0",
     "eslint-plugin-import": "^2.21.2",
     "mocha": "^9.1.3",
-    "nexe": "^3.3.7",
+    "pkg": "^5.5.2",
     "ts-node": "^9.0.0",
     "typescript": "^4.0.3"
   }
