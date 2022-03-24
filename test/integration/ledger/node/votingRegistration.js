@@ -5,6 +5,7 @@ const { LedgerCryptoProvider } = require('../../../../src/crypto-providers/ledge
 const { NETWORKS } = require('../../../../src/constants')
 const { signingFiles } = require('./signingFiles')
 const { addresses } = require('./addresses')
+const { getTransport } = require('./speculos')
 
 const votingRegistrations = {
   withTestnetBaseAddress0: {
@@ -66,7 +67,7 @@ describe('Ledger sign voting registration metadata', () => {
   // eslint-disable-next-line func-names
   before(async function () {
     this.timeout(10000)
-    cryptoProvider = await LedgerCryptoProvider()
+    cryptoProvider = await LedgerCryptoProvider(await getTransport())
   })
   const votingRegistrationsToSign = Object.entries(votingRegistrations)
 
