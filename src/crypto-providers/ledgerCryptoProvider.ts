@@ -1,6 +1,6 @@
 import * as TxTypes from 'cardano-hw-interop-lib'
-import TransportNodeHid from '@ledgerhq/hw-transport-node-hid-noevents'
 import Ledger, * as LedgerTypes from '@cardano-foundation/ledgerjs-hw-app-cardano'
+import type Transport from '@ledgerhq/hw-transport'
 import { parseBIP32Path } from '../command-parser/parsers'
 import { Errors } from '../errors'
 import { isChainCodeHex, isPubKeyHex, isXPubKeyHex } from '../guards'
@@ -52,8 +52,7 @@ import {
 
 const { bech32 } = require('cardano-crypto.js')
 
-export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
-  const transport = await TransportNodeHid.create()
+export const LedgerCryptoProvider: (transport: Transport) => Promise<CryptoProvider> = async (transport) => {
   const ledger = new Ledger(transport)
 
   const getVersion = async (): Promise<string> => {
