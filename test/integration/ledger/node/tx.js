@@ -8,6 +8,7 @@ const { validateSigning, validateWitnessing } = require('../../../../src/crypto-
 const { validateRawTxBeforeSigning, validateTxBeforeSigning } = require('../../../../src/transaction/transactionValidation')
 
 const { signingFiles } = require('./signingFiles')
+const { getTransport } = require('./speculos')
 
 const transactions = {
   ordinary_InputAndOutput: {
@@ -350,7 +351,7 @@ describe('Ledger tx signing and witnessing', () => {
   // eslint-disable-next-line func-names
   before(async function () {
     this.timeout(10000)
-    cryptoProvider = await LedgerCryptoProvider()
+    cryptoProvider = await LedgerCryptoProvider(await getTransport())
   })
   const txs = Object.entries(transactions)
 

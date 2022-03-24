@@ -3,6 +3,7 @@ const assert = require('assert')
 const { LedgerCryptoProvider } = require('../../../../src/crypto-providers/ledgerCryptoProvider')
 
 const { signingFiles } = require('./signingFiles')
+const { getTransport } = require('./speculos')
 
 const opCerts = {
   opcert1: {
@@ -29,7 +30,7 @@ describe('Ledger operational certificate', () => {
   // eslint-disable-next-line func-names
   before(async function () {
     this.timeout(10000)
-    cryptoProvider = await LedgerCryptoProvider()
+    cryptoProvider = await LedgerCryptoProvider(await getTransport())
   })
   const opCertsToSign = Object.entries(opCerts)
   opCertsToSign.forEach(([opCertTestName, opCert]) => it(

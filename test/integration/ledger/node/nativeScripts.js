@@ -2,6 +2,7 @@ const assert = require('assert')
 const { LedgerCryptoProvider } = require('../../../../src/crypto-providers/ledgerCryptoProvider')
 const { NativeScriptType, NativeScriptDisplayFormat } = require('../../../../src/types')
 const { signingFiles } = require('./signingFiles')
+const { getTransport } = require('./speculos')
 
 const nativeScripts = {
   pubkey: {
@@ -152,7 +153,7 @@ describe('Ledger native script hash derivation', () => {
   // eslint-disable-next-line func-names
   before(async function () {
     this.timeout(10000)
-    cryptoProvider = await LedgerCryptoProvider()
+    cryptoProvider = await LedgerCryptoProvider(await getTransport())
   })
   const nativeScriptsToDerive = Object.entries(nativeScripts)
   nativeScriptsToDerive.forEach(([nativeScriptName, nativeScript]) => it(

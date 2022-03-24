@@ -18,6 +18,7 @@
     "test-unit": "mocha -r ts-node/register 'test/unit/**/*.js'",
     "test-bin": "yarn build && ./build/linux/archive/cardano-hw-cli/cardano-hw-cli --help",
     "test-integration-ledger": "mocha -r ts-node/register 'test/integration/ledger/node/**/*.js' --exit",
+    "test-integration-ledger-speculos": "LEDGER_TRANSPORT=speculos yarn test-integration-ledger",
     "test-integration-trezor": "mocha -r ts-node/register 'test/integration/trezor/node/**/*.js' --exit",
     "clean": "rm -rf ./dist && rm -rf ./node_modules",
     "nexe": "nexe"
@@ -50,6 +51,7 @@
     "trezor-connect": "https://github.com/vacuumlabs/connect/releases/download/8.2.5-rc.1-alonzo/trezor-connect-v8.2.5-rc.1-alonzo-extended.tgz"
   },
   "devDependencies": {
+    "@ledgerhq/hw-transport-node-speculos": "^6.11.2",
     "@types/argparse": "^2.0.10",
     "@types/promise.any": "^2.0.0",
     "@typescript-eslint/eslint-plugin": "^4.2.0",
