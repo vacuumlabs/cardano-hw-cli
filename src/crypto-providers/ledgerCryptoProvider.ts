@@ -78,9 +78,9 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
           type: addressType,
           params: {
             spendingPath: paymentPath,
-            spendingScriptHash: paymentScriptHash,
+            spendingScriptHashHex: paymentScriptHash,
             stakingPath,
-            stakingScriptHash,
+            stakingScriptHashHex: stakingScriptHash,
           },
         },
       })
@@ -204,7 +204,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
         if (signingMode === SigningMode.PLUTUS_TRANSACTION) {
           return {
             type: LedgerTypes.StakeCredentialParamsType.KEY_HASH,
-            keyHash: stakeCredential.hash.toString('hex'),
+            keyHashHex: stakeCredential.hash.toString('hex'),
           }
         }
         throw Error(Errors.MissingSigningFileForCertificateError)
@@ -212,7 +212,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
       case (TxTypes.StakeCredentialType.SCRIPT_HASH): {
         return {
           type: LedgerTypes.StakeCredentialParamsType.SCRIPT_HASH,
-          scriptHash: stakeCredential.hash.toString('hex'),
+          scriptHashHex: stakeCredential.hash.toString('hex'),
         }
       }
       default:
@@ -495,7 +495,7 @@ export const LedgerCryptoProvider: () => Promise<CryptoProvider> = async () => {
       }
       : {
         type: LedgerTypes.TxRequiredSignerType.HASH,
-        hash: requiredSigner.toString('hex'),
+        hashHex: requiredSigner.toString('hex'),
       }
   }
 
