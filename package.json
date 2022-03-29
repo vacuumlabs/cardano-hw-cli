@@ -2,7 +2,7 @@
   "name": "cardano-hw-cli",
   "version": "1.9.1",
   "engines": {
-    "node": "12.19.1"
+    "node": "14.15.3"
   },
   "description": "Cardano CLI tool for hardware wallets",
   "main": "src/index.ts",
@@ -37,7 +37,7 @@
     "@babel/runtime": "^7.11.2",
     "@cardano-foundation/ledgerjs-hw-app-cardano": "https://github.com/vacuumlabs/ledgerjs-cardano-shelley/releases/download/v5.0.0-rc4/cardano-foundation-ledgerjs-hw-app-cardano-v5.0.0-rc4.tgz",
     "@emurgo/cardano-serialization-lib-nodejs": "^8.0.0",
-    "@ledgerhq/hw-transport-node-hid": "^5.25.0",
+    "@ledgerhq/hw-transport-node-hid-noevents": "^6.24.1",
     "argparse": "^2.0.1",
     "bignumber": "^1.1.0",
     "borc": "^2.1.2",
@@ -45,18 +45,20 @@
     "cardano-hw-interop-lib": "./cardano-hw-interop-lib-v0.1.0-41.tgz",
     "cbor": "^7.0.4",
     "lodash": "^4.17.21",
+    "promise.any": "^2.0.3",
     "rw": "1.3.3",
     "trezor-connect": "https://github.com/vacuumlabs/connect/releases/download/8.2.5-rc.1-alonzo/trezor-connect-v8.2.5-rc.1-alonzo-extended.tgz"
   },
   "devDependencies": {
     "@types/argparse": "^2.0.10",
+    "@types/promise.any": "^2.0.0",
     "@typescript-eslint/eslint-plugin": "^4.2.0",
     "@typescript-eslint/parser": "^4.2.0",
     "eslint": "^7.9.0",
     "eslint-config-airbnb-base": "^14.2.0",
     "eslint-plugin-import": "^2.21.2",
     "mocha": "^9.1.3",
-    "nexe": "^3.3.7",
+    "nexe": "4.0.0-beta.19",
     "ts-node": "^9.0.0",
     "typescript": "^4.0.3"
   }

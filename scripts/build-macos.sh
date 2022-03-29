@@ -14,8 +14,7 @@ mkdir ./build/macos 2> /dev/null
 mkdir ./build/macos/cardano-hw-cli
 
 # Build executable
-# TODO update version when Nexe supports 12.19.1 (or higher) https://github.com/nexe/nexe/issues/821
-yarn nexe ./dist/index.js -o ./build/macos/cardano-hw-cli/cardano-hw-cli -t mac-x64-12.18.2
+yarn nexe ./dist/index.js -o ./build/macos/cardano-hw-cli/cardano-hw-cli -t mac-x64-14.15.3
 
 # Copy dependencies
 cp _package.json ./build/macos/cardano-hw-cli/package.json

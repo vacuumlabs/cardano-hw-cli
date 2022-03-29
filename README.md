@@ -158,9 +158,9 @@ cardano-hw-cli device version
 - [Public keys bulk export](docs/public-keys-bulk-export-example.md)
 
 # Running from source
-Install node version v12.19.1
+Install node version v14.15.3
 ```
-nvm i v12.19.1
+nvm i v14.15.3
 ```
 
 Install yarn:
@@ -184,9 +184,9 @@ yarn dev ...
 ```
 
 # Building from source
-Install node version v12.19.1
+Install node version v14.15.3
 ```
-nvm i v12.19.1
+nvm i v14.15.3
 ```
 
 Install yarn:
