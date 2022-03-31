@@ -74,3 +74,5 @@ export const cardanoEraToWitnessType: {[key in CardanoEra]: string} = {
   [CardanoEra.MARY]: 'TxWitness MaryEra',
   [CardanoEra.ALONZO]: 'TxWitness AlonzoEra',
 }
+
+export const txEnvelopeTypes: string[] = Object.keys(txTypeToCardanoEra)

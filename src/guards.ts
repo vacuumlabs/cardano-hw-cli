@@ -1,3 +1,4 @@
+import { txEnvelopeTypes } from './constants'
 import {
   BIP32Path,
   CborHex,
@@ -48,7 +49,9 @@ export const isRawTxFileData = (
 
 export const isTxFileData = (
   value: any,
-): value is TxFileData => isEra(value.era) && isCborHex(value.cborHex)
+): value is TxFileData => isEra(value.era)
+  && isCborHex(value.cborHex)
+  && txEnvelopeTypes.includes(value.envelopeType)
 
 export const isArrayOfType = <T>(
   value: any,
