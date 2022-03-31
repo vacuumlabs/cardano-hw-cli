@@ -1,5 +1,5 @@
-const SpeculosTransport = require('@ledgerhq/hw-transport-node-speculos')
-const TransportNodeHid = require('@ledgerhq/hw-transport-node-hid-noevents')
+const SpeculosTransport = require('@ledgerhq/hw-transport-node-speculos').default
+const TransportNodeHid = require('@ledgerhq/hw-transport-node-hid-noevents').default
 
 function shouldUseSpeculos() {
   return process.env.LEDGER_TRANSPORT === 'speculos'

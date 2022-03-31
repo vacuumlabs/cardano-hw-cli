@@ -143,7 +143,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
   const prepareInput = (
     input: TxTypes.TransactionInput, path: BIP32Path | null,
   ): TrezorTypes.CardanoInput => {
-    if (input.index < 0 || input.index > Number.MAX_SAFE_INTEGER) {
+    if (input.index > Number.MAX_SAFE_INTEGER) {
       throw Error(Errors.InvalidInputError)
     }
     return {
@@ -217,6 +217,11 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
   ): {path: BIP32Path} | {keyHash: string} | {scriptHash: string} => {
     switch (stakeCredential.type) {
       case (TxTypes.StakeCredentialType.KEY_HASH): {
+        // A key hash stake credential can be sent to the HW wallet either by the key derivation
+        // path or by the key hash (there are certain restrictions depending on signing mode). If we
+        // are given the appropriate signing file, we always send a path; if we are not, we send the
+        // key hash or throw an error depending on whether the signing mode allows it. This allows
+        // the user of hw-cli to stay in control.
         const path = findSigningPathForKeyHash(
           (stakeCredential as TxTypes.StakeCredentialKey).hash, stakeSigningFiles,
         )
@@ -275,7 +280,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     })
 
     const ownersWithPath = poolOwners.filter((owner) => owner.stakingKeyPath)
-    if (!ownersWithPath.length) throw Error(Errors.MissingSigningFileForCertificateError)
+    if (ownersWithPath.length === 0) throw Error(Errors.MissingSigningFileForCertificateError)
     if (ownersWithPath.length > 1) throw Error(Errors.OwnerMultipleTimesInTxError)
 
     return poolOwners
@@ -379,7 +384,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
   const prepareCollateralInput = (
     collateralInput: TxTypes.Collateral, path: BIP32Path | null,
   ): TrezorTypes.CardanoCollateralInput => {
-    if (collateralInput.index < 0 || collateralInput.index > Number.MAX_SAFE_INTEGER) {
+    if (collateralInput.index > Number.MAX_SAFE_INTEGER) {
       throw Error(Errors.InvalidCollateralInputError)
     }
     return {
@@ -420,19 +425,20 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
       throw Error(Errors.MissingHwSigningDataAtXPubKeyError)
     }
 
+    const transformedWitnesses = trezorWitnesses.map((witness) => {
+      const signingFile = getSigningFileDataByXPubKey(witness.pubKey as PubKeyHex)
+      return {
+        ...witness,
+        path: signingFile.path,
+        pubKey: Buffer.from(witness.pubKey, 'hex'),
+        chainCode: witness.chainCode
+          ? Buffer.from(witness.chainCode, 'hex')
+          : splitXPubKeyCborHex(signingFile.cborXPubKeyHex).chainCode,
+        signature: Buffer.from(witness.signature, 'hex'),
+      }
+    })
     const [byronWitnesses, shelleyWitnesses] = partition(
-      trezorWitnesses.map((witness) => {
-        const signingFile = getSigningFileDataByXPubKey(witness.pubKey as PubKeyHex)
-        return ({
-          ...witness,
-          path: signingFile.path,
-          pubKey: Buffer.from(witness.pubKey, 'hex'),
-          chainCode: witness.chainCode
-            ? Buffer.from(witness.chainCode, 'hex')
-            : splitXPubKeyCborHex(signingFile.cborXPubKeyHex).chainCode,
-          signature: Buffer.from(witness.signature, 'hex'),
-        })
-      }),
+      transformedWitnesses,
       (witness) => witness.type === TrezorTypes.CardanoTxWitnessType.BYRON_WITNESS,
     )
 
