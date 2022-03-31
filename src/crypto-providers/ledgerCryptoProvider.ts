@@ -109,7 +109,7 @@ export const LedgerCryptoProvider: (transport: Transport) => Promise<CryptoProvi
     const pathToUse = (signingMode === SigningMode.POOL_REGISTRATION_AS_OWNER)
       ? null // inputs are required to be given without path in this case
       : path
-    if (input.index < 0 || input.index > Number.MAX_SAFE_INTEGER) {
+    if (input.index > Number.MAX_SAFE_INTEGER) {
       throw Error(Errors.InvalidInputError)
     }
     return {
@@ -191,6 +191,11 @@ export const LedgerCryptoProvider: (transport: Transport) => Promise<CryptoProvi
   ): LedgerTypes.StakeCredentialParams => {
     switch (stakeCredential.type) {
       case (TxTypes.StakeCredentialType.KEY_HASH): {
+        // A key hash stake credential can be sent to the HW wallet either by the key derivation
+        // path or by the key hash (there are certain restrictions depending on signing mode). If we
+        // are given the appropriate signing file, we always send a path; if we are not, we send the
+        // key hash or throw an error depending on whether the signing mode allows it. This allows
+        // the user of hw-cli to stay in control.
         const path = findSigningPathForKeyHash(
           (stakeCredential as TxTypes.StakeCredentialKey).hash, stakeSigningFiles,
         )
@@ -313,10 +318,12 @@ export const LedgerCryptoProvider: (transport: Transport) => Promise<CryptoProvi
     })
 
     const ownersWithPath = poolOwners.filter((owner) => owner.type === LedgerTypes.PoolOwnerType.DEVICE_OWNED)
-    if (!ownersWithPath.length && signingMode === SigningMode.POOL_REGISTRATION_AS_OWNER) {
+    if (ownersWithPath.length === 0 && signingMode === SigningMode.POOL_REGISTRATION_AS_OWNER) {
       throw Error(Errors.MissingSigningFileForCertificateError)
     }
-    if (ownersWithPath.length > 1) throw Error(Errors.OwnerMultipleTimesInTxError)
+    if (ownersWithPath.length > 1) {
+      throw Error(Errors.OwnerMultipleTimesInTxError)
+    }
 
     return poolOwners
   }
@@ -473,7 +480,7 @@ export const LedgerCryptoProvider: (transport: Transport) => Promise<CryptoProvi
   const prepareCollateralInput = (
     collateralInput: TxTypes.Collateral, path: BIP32Path | null,
   ): LedgerTypes.TxInput => {
-    if (collateralInput.index < 0 || collateralInput.index > Number.MAX_SAFE_INTEGER) {
+    if (collateralInput.index > Number.MAX_SAFE_INTEGER) {
       throw Error(Errors.InvalidCollateralInputError)
     }
     return {
@@ -526,18 +533,19 @@ export const LedgerCryptoProvider: (transport: Transport) => Promise<CryptoProvi
 
     const isByronPath = (path: number[]) => classifyPath(path) === PathTypes.PATH_WALLET_SPENDING_KEY_BYRON
 
+    const witnessesWithKeys = ledgerWitnesses.map((witness) => {
+      const { pubKey, chainCode } = splitXPubKeyCborHex(
+        getSigningFileDataByPath(witness.path as BIP32Path).cborXPubKeyHex,
+      )
+      return {
+        path: witness.path,
+        signature: Buffer.from(witness.witnessSignatureHex, 'hex'),
+        pubKey,
+        chainCode,
+      }
+    })
     const [byronWitnesses, shelleyWitnesses] = partition(
-      ledgerWitnesses.map((witness) => {
-        const { pubKey, chainCode } = splitXPubKeyCborHex(
-          getSigningFileDataByPath(witness.path as BIP32Path).cborXPubKeyHex,
-        )
-        return ({
-          path: witness.path,
-          signature: Buffer.from(witness.witnessSignatureHex, 'hex'),
-          pubKey,
-          chainCode,
-        })
-      }),
+      witnessesWithKeys,
       (witness) => isByronPath(witness.path),
     )
 
