@@ -94,7 +94,7 @@ const transformRawTx = (args: ParsedTransactionTransformRawArguments): void => {
   }
   if (containsFixable) {
     // eslint-disable-next-line no-console
-    console.log('Fixed transaction will be written to the output file.')
+    console.log('Transformed transaction will be written to the output file.')
   }
   const rawTxCbor = Buffer.from(args.rawTxFileData.cborHex, 'hex')
   const transformedRawTx = InteropLib.transformRawTx(InteropLib.decodeRawTx(rawTxCbor))
@@ -116,7 +116,7 @@ const transformTx = (args: ParsedTransactionTransformArguments): void => {
       throw Error(Errors.CannotTransformSignedTx)
     }
     // eslint-disable-next-line no-console
-    console.log('Fixed transaction will be written to the output file.')
+    console.log('Transformed transaction will be written to the output file.')
   }
   const encodedTx = InteropLib.encodeTx(transformedTx).toString('hex') as CborHex
   write(args.outFile, constructTxFileOutput(args.txFileData.envelopeType, encodedTx))
