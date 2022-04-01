@@ -1,13 +1,14 @@
 {
-  "compilerOptions": {              
-    "target": "es2019",                          
+  "compilerOptions": {
+    "target": "es2019",
     "module": "commonjs",
     "moduleResolution": "node",
     "sourceMap": true,
-    "outDir": "dist",                    
+    "outDir": "dist",
     "strict": true,
-    "esModuleInterop": true,                 
+    "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "noImplicitAny": false,
+    "lib": ["es2020"]
   },
 }
