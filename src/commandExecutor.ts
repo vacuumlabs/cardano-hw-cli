@@ -56,10 +56,9 @@ const promiseTimeout = <T> (promise: Promise<T>, ms: number): Promise<T> => {
 }
 
 const getCryptoProvider = async (): Promise<CryptoProvider> => {
-  const cryptoProviderPromise = promiseAny([
-    LedgerCryptoProvider(await TransportNodeHid.create()),
-    TrezorCryptoProvider(),
-  ])
+  const ledgerPromise = async () => LedgerCryptoProvider(await TransportNodeHid.create())
+  const trezorPromise = async () => TrezorCryptoProvider()
+  const cryptoProviderPromise = promiseAny([ledgerPromise(), trezorPromise()])
 
   try {
     return await promiseTimeout(cryptoProviderPromise, 5000)
