@@ -38,15 +38,23 @@ const writeCbor = (path: string, data: Cbor) => (
   rw.writeFileSync(path, data)
 )
 
-const constructRawTxFileOutput = (era: CardanoEra, rawTxCborHex: RawTxCborHex): RawTxFileOutput => ({
+const constructRawTxFileOutput = (
+  era: CardanoEra,
+  description: string,
+  rawTxCborHex: RawTxCborHex,
+): RawTxFileOutput => ({
   type: cardanoEraToRawType[era],
-  description: '',
+  description,
   cborHex: rawTxCborHex,
 })
 
-const constructTxFileOutput = (envelopeType: string, txCborHex: TxCborHex): TxFileOutput => ({
+const constructTxFileOutput = (
+  envelopeType: string,
+  description: string,
+  txCborHex: TxCborHex,
+): TxFileOutput => ({
   type: envelopeType,
-  description: '',
+  description,
   cborHex: txCborHex,
 })
 

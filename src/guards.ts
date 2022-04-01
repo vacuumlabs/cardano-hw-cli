@@ -32,7 +32,7 @@ export const isCborHex = (value: any): value is CborHex => {
   }
 }
 
-const isString = (value: any): value is string => value && typeof value === 'string'
+const isString = (value: any): value is string => value != null && typeof value === 'string'
 
 export const isBIP32Path = (
   value: any,
@@ -45,11 +45,14 @@ export const isHwSigningData = (
 
 export const isRawTxFileData = (
   value: any,
-): value is RawTxFileData => isEra(value.era) && isCborHex(value.cborHex)
+): value is RawTxFileData => isEra(value.era)
+  && isString(value.description)
+  && isCborHex(value.cborHex)
 
 export const isTxFileData = (
   value: any,
 ): value is TxFileData => isEra(value.era)
+  && isString(value.description)
   && isCborHex(value.cborHex)
   && txEnvelopeTypes.includes(value.envelopeType)
 

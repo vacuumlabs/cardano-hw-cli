@@ -49,13 +49,13 @@ export type _ShelleyWitness = {
 
 export type RawTxFileOutput = {
   type: string,
-  description: '',
+  description: string,
   cborHex: RawTxCborHex,
 }
 
 export type TxFileOutput = {
   type: string,
-  description: '',
+  description: string,
   cborHex: TxCborHex,
 }
 

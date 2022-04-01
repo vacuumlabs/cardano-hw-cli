@@ -52,12 +52,14 @@ export type HwSigningData = {
 
 export type RawTxFileData = {
   era: CardanoEra,
-  cborHex: CborHex
+  description: string,
+  cborHex: CborHex,
 }
 
 export type TxFileData = {
   envelopeType: string,
   era: CardanoEra,
+  description: string,
   cborHex: CborHex,
 }
 

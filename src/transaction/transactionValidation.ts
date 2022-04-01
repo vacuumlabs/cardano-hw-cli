@@ -99,7 +99,12 @@ const transformRawTx = (args: ParsedTransactionTransformRawArguments): void => {
   const rawTxCbor = Buffer.from(args.rawTxFileData.cborHex, 'hex')
   const transformedRawTx = InteropLib.transformRawTx(InteropLib.decodeRawTx(rawTxCbor))
   const encodedRawTx = InteropLib.encodeRawTx(transformedRawTx).toString('hex') as CborHex
-  write(args.outFile, constructRawTxFileOutput(args.rawTxFileData.era, encodedRawTx))
+  const rawTxFileOutput = constructRawTxFileOutput(
+    args.rawTxFileData.era,
+    args.rawTxFileData.description,
+    encodedRawTx,
+  )
+  write(args.outFile, rawTxFileOutput)
 }
 
 const transformTx = (args: ParsedTransactionTransformArguments): void => {
@@ -119,7 +124,12 @@ const transformTx = (args: ParsedTransactionTransformArguments): void => {
     console.log('Transformed transaction will be written to the output file.')
   }
   const encodedTx = InteropLib.encodeTx(transformedTx).toString('hex') as CborHex
-  write(args.outFile, constructTxFileOutput(args.txFileData.envelopeType, encodedTx))
+  const txFileOutput = constructTxFileOutput(
+    args.txFileData.envelopeType,
+    args.txFileData.description,
+    encodedTx,
+  )
+  write(args.outFile, txFileOutput)
 }
 
 export {
