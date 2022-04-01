@@ -101,9 +101,9 @@ export const parseHwSigningFile = (path: string): HwSigningData => {
 export const parseRawTxFile = (path: string): RawTxFileData => {
   const json = JSON.parse(rw.readFileSync(path, 'utf8'))
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { type, description, ...parsedData } = json
+  const { type, description, cborHex } = json
   const era = invertObject(cardanoEraToRawType)[type]
-  const data = { ...parsedData, era }
+  const data = { era, description, cborHex }
   if (isRawTxFileData(data)) {
     return data
   }
@@ -113,11 +113,12 @@ export const parseRawTxFile = (path: string): RawTxFileData => {
 export const parseTxFile = (path: string): TxFileData => {
   const json = JSON.parse(rw.readFileSync(path, 'utf8'))
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { type, description, ...parsedData } = json
+  const { type, description, cborHex } = json
   const era = txTypeToCardanoEra[type]
   const data = {
-    ...parsedData,
     era,
+    description,
+    cborHex,
     envelopeType: type,
   }
   if (isTxFileData(data)) {

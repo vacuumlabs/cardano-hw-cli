@@ -131,9 +131,11 @@ const CommandExecutor = async () => {
       era,
     }
     validateSigning(signingParameters)
-    const signedTx = await cryptoProvider.signTx(signingParameters, args.changeOutputKeyFileData)
+
     const envelopeType = (args.txFileData?.envelopeType ?? cardanoEraToSignedType[era])!
-    write(args.outFile, constructTxFileOutput(envelopeType, signedTx))
+    const description = '' // we are creating a signed tx file, leave description empty
+    const signedTx = await cryptoProvider.signTx(signingParameters, args.changeOutputKeyFileData)
+    write(args.outFile, constructTxFileOutput(envelopeType, description, signedTx))
   }
 
   const createTxPolicyId = async (args: ParsedTransactionPolicyIdArguments) => {
