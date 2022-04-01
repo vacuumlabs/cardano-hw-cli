@@ -77,13 +77,15 @@ function testTransformRaw(rawTx) {
 describe('Validate and transform', () => {
   describe('Validate RawTx', () => {
     Object.entries(rawTransactions).forEach(([name, rawTx]) => it(
-      `Should validate rawTx ${name}`, () => testValidateRaw(rawTx),
+      `Should validate rawTx ${name}`,
+      () => testValidateRaw(rawTx),
     ))
   })
 
   describe('Transform RawTx', () => {
     Object.entries(rawTransactions).forEach(([name, rawTx]) => it(
-      `Should transform rawTx ${name}`, () => testTransformRaw(rawTx),
+      `Should transform rawTx ${name}`,
+      () => testTransformRaw(rawTx),
     ))
   })
 })

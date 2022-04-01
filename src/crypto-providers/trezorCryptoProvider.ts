@@ -142,7 +142,8 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
   }
 
   const prepareInput = (
-    input: TxTypes.TransactionInput, path: BIP32Path | null,
+    input: TxTypes.TransactionInput,
+    path: BIP32Path | null,
   ): TrezorTypes.CardanoInput => {
     if (input.index > Number.MAX_SAFE_INTEGER) {
       throw Error(Errors.InvalidInputError)
@@ -221,7 +222,8 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
         // key hash or throw an error depending on whether the signing mode allows it. This allows
         // the user of hw-cli to stay in control.
         const path = findSigningPathForKeyHash(
-          (stakeCredential as TxTypes.StakeCredentialKey).hash, stakeSigningFiles,
+          (stakeCredential as TxTypes.StakeCredentialKey).hash,
+          stakeSigningFiles,
         )
         if (path) {
           return { path }
@@ -268,7 +270,8 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
   })
 
   const preparePoolOwners = (
-    owners: Buffer[], stakeSigningFiles: HwSigningData[],
+    owners: Buffer[],
+    stakeSigningFiles: HwSigningData[],
   ): TrezorTypes.CardanoPoolOwner[] => {
     const poolOwners = owners.map((owner): TrezorTypes.CardanoPoolOwner => {
       const path = findSigningPathForKeyHash(owner, stakeSigningFiles)
@@ -380,7 +383,8 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
   ): string | undefined => scriptDataHash?.toString('hex')
 
   const prepareCollateralInput = (
-    collateralInput: TxTypes.Collateral, path: BIP32Path | null,
+    collateralInput: TxTypes.Collateral,
+    path: BIP32Path | null,
   ): TrezorTypes.CardanoCollateralInput => {
     if (collateralInput.index > Number.MAX_SAFE_INTEGER) {
       throw Error(Errors.InvalidCollateralInputError)
@@ -393,7 +397,8 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
   }
 
   const prepareRequiredSigner = (
-    requiredSigner: TxTypes.RequiredSigner, signingFiles: HwSigningData[],
+    requiredSigner: TxTypes.RequiredSigner,
+    signingFiles: HwSigningData[],
   ): TrezorTypes.CardanoRequiredSigner => {
     const path = findSigningPathForKeyHash(requiredSigner, signingFiles)
     return path
@@ -504,7 +509,8 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
       (collateralInput, i) => prepareCollateralInput(
         // first `inputs.length` signing files were assigned to inputs,
         // assign the following `collaterals.length` signing files to collateral inputs
-        collateralInput, getSigningPath(paymentSigningFiles, inputs.length + i),
+        collateralInput,
+        getSigningPath(paymentSigningFiles, inputs.length + i),
       ),
     )
     const requiredSigners = body.requiredSigners?.map(
@@ -623,7 +629,8 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
   })
 
   const prepareDummyTx = (
-    network: Network, auxiliaryData: TrezorTypes.CardanoAuxiliaryData,
+    network: Network,
+    auxiliaryData: TrezorTypes.CardanoAuxiliaryData,
   ): TrezorTypes.CommonParams & TrezorTypes.CardanoSignTransaction => ({
     signingMode: TrezorTypes.CardanoTxSigningMode.ORDINARY_TRANSACTION,
     protocolMagic: network.protocolMagic,

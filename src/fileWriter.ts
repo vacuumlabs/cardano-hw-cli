@@ -30,12 +30,12 @@ import { encodeCbor } from './util'
 
 const rw = require('rw')
 
-const write = (path: string, data: OutputData) => rw.writeFileSync(
-  path, JSON.stringify(data, null, 4), 'utf8',
+const write = (path: string, data: OutputData) => (
+  rw.writeFileSync(path, JSON.stringify(data, null, 4), 'utf8')
 )
 
-const writeCbor = (path: string, data: Cbor) => rw.writeFileSync(
-  path, data,
+const writeCbor = (path: string, data: Cbor) => (
+  rw.writeFileSync(path, data)
 )
 
 const constructRawTxFileOutput = (era: CardanoEra, rawTxCborHex: RawTxCborHex): RawTxFileOutput => ({
@@ -99,12 +99,6 @@ const verificationKeyDescription = (path: number[]): string => {
     case PathTypes.PATH_POOL_COLD_KEY:
       return 'Stake Pool Operator Verification Key'
 
-    case PathTypes.PATH_WALLET_SPENDING_KEY_BYRON:
-    case PathTypes.PATH_WALLET_ACCOUNT:
-    case PathTypes.PATH_INVALID:
-    default:
-      throw Error('not implemented')
-
     case PathTypes.PATH_WALLET_SPENDING_KEY_SHELLEY:
       return 'Payment Verification Key'
 
@@ -119,11 +113,18 @@ const verificationKeyDescription = (path: number[]): string => {
 
     case PathTypes.PATH_WALLET_MINTING_KEY:
       return 'Mint Verification Key'
+
+    case PathTypes.PATH_WALLET_SPENDING_KEY_BYRON:
+    case PathTypes.PATH_WALLET_ACCOUNT:
+    case PathTypes.PATH_INVALID:
+    default:
+      throw Error('not implemented')
   }
 }
 
 const constructVerificationKeyOutput = (
-  xPubKey: XPubKeyHex | XPubKeyCborHex, path: BIP32Path,
+  xPubKey: XPubKeyHex | XPubKeyCborHex,
+  path: BIP32Path,
 ): VerificationKeyOutput => {
   const pubKey = Buffer.from(xPubKey, 'hex').slice(-64).slice(0, 32)
   return {

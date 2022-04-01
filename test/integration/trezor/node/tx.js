@@ -279,11 +279,13 @@ describe('Trezor tx signing and witnessing', () => {
 
   const txsToSign = txs.filter(([, tx]) => !tx.witnesses)
   txsToSign.forEach(([txType, tx]) => it(
-    `Should sign tx ${txType}`, async () => testTxSigning(cryptoProvider, tx),
+    `Should sign tx ${txType}`,
+    async () => testTxSigning(cryptoProvider, tx),
   ).timeout(100000))
 
   const txsWithWitness = txs.filter(([, tx]) => tx.witnesses)
   txsWithWitness.forEach(([txType, tx]) => it(
-    `Should witness tx ${txType}`, async () => testTxWitnessing(cryptoProvider, tx),
+    `Should witness tx ${txType}`,
+    async () => testTxWitnessing(cryptoProvider, tx),
   ).timeout(100000))
 })
