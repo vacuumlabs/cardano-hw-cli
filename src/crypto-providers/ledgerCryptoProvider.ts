@@ -48,6 +48,7 @@ import {
   findSigningPathForKey,
   encodeVotingRegistrationMetaData,
   rewardAccountToStakeCredential,
+  areAddressParamsAllowed,
 } from './util'
 
 const { bech32 } = require('cardano-crypto.js')
@@ -164,10 +165,7 @@ export const LedgerCryptoProvider: (transport: Transport) => Promise<CryptoProvi
       ? prepareTokenBundle(output.amount.multiasset) : null
     const datumHashHex = output.datumHash?.toString('hex')
 
-    const addressParamsAllowed = [
-      SigningMode.ORDINARY_TRANSACTION, SigningMode.PLUTUS_TRANSACTION,
-    ].includes(signingMode)
-    if (changeAddressParams && addressParamsAllowed) {
+    if (changeAddressParams && areAddressParamsAllowed(signingMode)) {
       return prepareChangeOutput(output.amount.coin, changeAddressParams, tokenBundle, datumHashHex)
     }
 

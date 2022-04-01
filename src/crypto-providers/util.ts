@@ -202,9 +202,9 @@ const hwSigningFileToPubKey = (signingFile: HwSigningData): Buffer => (
   splitXPubKeyCborHex(signingFile.cborXPubKeyHex).pubKey
 )
 
-const hwSigningFileToPubKeyHash = (signingFile: HwSigningData): Uint8Array => {
+const hwSigningFileToPubKeyHash = (signingFile: HwSigningData): Buffer => {
   const pubKey = hwSigningFileToPubKey(signingFile)
-  return cardanoSerialization.PublicKey.from_bytes(pubKey).hash().to_bytes()
+  return Buffer.from(cardanoSerialization.PublicKey.from_bytes(pubKey).hash().to_bytes())
 }
 
 const findSigningPathForKey = (
@@ -400,6 +400,10 @@ const getAddressParameters = (
   }
 }
 
+const areAddressParamsAllowed = (signingMode: SigningMode) : boolean => (
+  [SigningMode.ORDINARY_TRANSACTION, SigningMode.PLUTUS_TRANSACTION].includes(signingMode)
+)
+
 const getAddressAttributes = (addressStr: Address): {
   addressType: number,
   networkId: number,
@@ -545,6 +549,7 @@ export {
   extractStakePubKeyFromHwSigningData,
   encodeAddress,
   getAddressParameters,
+  areAddressParamsAllowed,
   getAddressType,
   getAddressAttributes,
   ipv4ToString,
