@@ -12,7 +12,7 @@ export const NETWORKS: {[key: string]: Network} = {
     networkId: NetworkIds.TESTNET,
     protocolMagic: ProtocolMagics.TESTNET,
   },
-  TESTNET_LEGACY: {
+  TESTNET_LEGACY: { // we keep this because some test CBORs contain this network
     networkId: NetworkIds.TESTNET,
     protocolMagic: ProtocolMagics.TESTNET_LEGACY,
   },
