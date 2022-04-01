@@ -591,6 +591,7 @@ export const LedgerCryptoProvider: (transport: Transport) => Promise<CryptoProvi
     } = filterSigningFiles(hwSigningFileData)
 
     const inputs = body.inputs.map(
+      // assign first `inputs.length` signing files to inputs
       (input, i) => prepareInput(signingMode, input, getSigningPath(paymentSigningFiles, i)),
     )
     const outputs = body.outputs.map(
@@ -615,6 +616,8 @@ export const LedgerCryptoProvider: (transport: Transport) => Promise<CryptoProvi
     const scriptDataHashHex = prepareScriptDataHash(body.scriptDataHash)
     const collaterals = body.collaterals?.map(
       (collateralInput, i) => prepareCollateralInput(
+        // first `inputs.length` signing files were assigned to inputs,
+        // assign the following `collaterals.length` signing files to collateral inputs
         collateralInput, getSigningPath(paymentSigningFiles, inputs.length + i),
       ),
     )

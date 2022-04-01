@@ -484,6 +484,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     } = filterSigningFiles(hwSigningFileData)
 
     const inputs = body.inputs.map(
+      // assign first `inputs.length` signing files to inputs
       (input, i) => prepareInput(input, getSigningPath(paymentSigningFiles, i)),
     )
     const outputs = body.outputs.map(
@@ -503,6 +504,8 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     const scriptDataHash = prepareScriptDataHash(body.scriptDataHash)
     const collateralInputs = body.collaterals?.map(
       (collateralInput, i) => prepareCollateralInput(
+        // first `inputs.length` signing files were assigned to inputs,
+        // assign the following `collaterals.length` signing files to collateral inputs
         collateralInput, getSigningPath(paymentSigningFiles, inputs.length + i),
       ),
     )
