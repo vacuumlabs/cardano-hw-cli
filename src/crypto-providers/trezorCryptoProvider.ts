@@ -46,6 +46,7 @@ import {
   splitXPubKeyCborHex,
   encodeVotingRegistrationMetaData,
   rewardAccountToStakeCredential,
+  areAddressParamsAllowed,
 } from './util'
 import { Errors } from '../errors'
 import { partition } from '../util'
@@ -195,10 +196,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
       ? prepareTokenBundle(output.amount.multiasset, false) : []
     const datumHash = output.datumHash?.toString('hex')
 
-    const addressParamsAllowed = [
-      SigningMode.ORDINARY_TRANSACTION, SigningMode.PLUTUS_TRANSACTION,
-    ].includes(signingMode)
-    if (changeAddressParams && addressParamsAllowed) {
+    if (changeAddressParams && areAddressParamsAllowed(signingMode)) {
       return prepareChangeOutput(output.amount.coin, changeAddressParams, tokenBundle, datumHash)
     }
 
