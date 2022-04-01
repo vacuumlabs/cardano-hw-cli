@@ -103,7 +103,7 @@ export enum NetworkIds {
 export enum ProtocolMagics {
   MAINNET = 764824073,
   TESTNET = 1097911063,
-  TESTNET_LEGACY = 42,
+  TESTNET_LEGACY = 42, // we keep this because some test CBORs contain this magic
 }
 
 export type Network = {
