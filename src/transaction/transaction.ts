@@ -60,12 +60,12 @@ const _rawTxToTxSigned = (
     witnessSet.set(TxWitnessKeys.SHELLEY, shelleyWitnesses)
   }
 
-  if (nativeScriptWitnessList.length > 0) {
-    witnessSet.set(TxWitnessKeys.NATIVE_SCRIPTS, nativeScriptWitnessList)
-  }
-
   if (byronWitnesses.length > 0) {
     witnessSet.set(TxWitnessKeys.BYRON, byronWitnesses)
+  }
+
+  if (nativeScriptWitnessList.length > 0) {
+    witnessSet.set(TxWitnessKeys.NATIVE_SCRIPTS, nativeScriptWitnessList)
   }
 
   if (plutusScriptWitnessList.length > 0) {
@@ -95,6 +95,7 @@ const TxSigned = (
     return _rawTxToTxSigned(params, byronWitnesses, shelleyWitnesses)
   }
 
+  // we only add witnesses created by the HW wallet, all other witnesses stay the same
   const witnessSet = _parseWitnessSet(params.tx!.witnessSet)
 
   const shelleyWitnessesList = [
