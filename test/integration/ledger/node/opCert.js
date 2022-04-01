@@ -20,7 +20,10 @@ const opCerts = {
 
 async function testOpCertSigning(cryptoProvider, opCert) {
   const signedOpCertCborHex = await cryptoProvider.signOperationalCertificate(
-    opCert.kesVKey, opCert.kesPeriod, opCert.issueCounter, opCert.hwSigningFiles,
+    opCert.kesVKey,
+    opCert.kesPeriod,
+    opCert.issueCounter,
+    opCert.hwSigningFiles,
   )
   assert.deepStrictEqual(signedOpCertCborHex, opCert.signedOpCertCborHex)
 }
@@ -34,6 +37,7 @@ describe('Ledger operational certificate', () => {
   })
   const opCertsToSign = Object.entries(opCerts)
   opCertsToSign.forEach(([opCertTestName, opCert]) => it(
-    `Should sign operational certificate ${opCertTestName}`, async () => testOpCertSigning(cryptoProvider, opCert),
+    `Should sign operational certificate ${opCertTestName}`,
+    async () => testOpCertSigning(cryptoProvider, opCert),
   ).timeout(100000))
 })

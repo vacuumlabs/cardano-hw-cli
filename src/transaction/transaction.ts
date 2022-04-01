@@ -22,7 +22,10 @@ const _parseWitnessSet = (witnessSet: unknown): WitnessSet => {
 }
 
 const TxByronWitness = (
-  publicKey: Buffer, signature: Buffer, chaincode: Buffer, addressAttributes: object,
+  publicKey: Buffer,
+  signature: Buffer,
+  chaincode: Buffer,
+  addressAttributes: object,
 ): TxWitnessByron => [publicKey, signature, chaincode, encodeCbor(addressAttributes)]
 
 const TxShelleyWitness = (publicKey: Buffer, signature: Buffer): TxWitnessShelley => [publicKey, signature]

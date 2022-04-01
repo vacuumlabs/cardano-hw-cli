@@ -72,6 +72,7 @@ describe('Ledger sign voting registration metadata', () => {
   const votingRegistrationsToSign = Object.entries(votingRegistrations)
 
   votingRegistrationsToSign.forEach(([votingRegistrationTestName, votingRegistration]) => it(
-    `Should sign voting registration ${votingRegistrationTestName}`, async () => testVotingRegistrationMetaDataSigning(cryptoProvider, votingRegistration),
+    `Should sign voting registration ${votingRegistrationTestName}`,
+    async () => testVotingRegistrationMetaDataSigning(cryptoProvider, votingRegistration),
   ).timeout(100000))
 })

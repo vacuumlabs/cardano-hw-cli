@@ -86,7 +86,8 @@ const CommandExecutor = async () => {
     const xPubKeys = await cryptoProvider.getXPubKeys(paths)
     xPubKeys.forEach((xPubKey, i) => write(hwSigningFiles[i], constructHwSigningKeyOutput(xPubKey, paths[i])))
     xPubKeys.forEach((xPubKey, i) => write(
-      verificationKeyFiles[i], constructVerificationKeyOutput(xPubKey, paths[i]),
+      verificationKeyFiles[i],
+      constructVerificationKeyOutput(xPubKey, paths[i]),
     ))
   }
 
@@ -214,7 +215,10 @@ const CommandExecutor = async () => {
     const issueCounter = parseOpCertIssueCounterFile(args.issueCounterFile)
 
     const signedCertCborHex = await cryptoProvider.signOperationalCertificate(
-      args.kesVKey, args.kesPeriod, issueCounter, args.hwSigningFileData,
+      args.kesVKey,
+      args.kesPeriod,
+      issueCounter,
+      args.hwSigningFileData,
     )
 
     write(args.outFile, constructSignedOpCertOutput(signedCertCborHex))

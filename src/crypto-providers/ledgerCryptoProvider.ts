@@ -105,7 +105,9 @@ export const LedgerCryptoProvider: (transport: Transport) => Promise<CryptoProvi
   }
 
   const prepareInput = (
-    signingMode: SigningMode, input: TxTypes.TransactionInput, path: BIP32Path | null,
+    signingMode: SigningMode,
+    input: TxTypes.TransactionInput,
+    path: BIP32Path | null,
   ): LedgerTypes.TxInput => {
     const pathToUse = (signingMode === SigningMode.POOL_REGISTRATION_AS_OWNER)
       ? null // inputs are required to be given without path in this case
@@ -195,7 +197,8 @@ export const LedgerCryptoProvider: (transport: Transport) => Promise<CryptoProvi
         // key hash or throw an error depending on whether the signing mode allows it. This allows
         // the user of hw-cli to stay in control.
         const path = findSigningPathForKeyHash(
-          (stakeCredential as TxTypes.StakeCredentialKey).hash, stakeSigningFiles,
+          (stakeCredential as TxTypes.StakeCredentialKey).hash,
+          stakeSigningFiles,
         )
         if (path) {
           return {
@@ -257,7 +260,9 @@ export const LedgerCryptoProvider: (transport: Transport) => Promise<CryptoProvi
   })
 
   const preparePoolKey = (
-    signingMode: SigningMode, poolKeyHash: Buffer, poolKeyPath?: BIP32Path,
+    signingMode: SigningMode,
+    poolKeyHash: Buffer,
+    poolKeyPath?: BIP32Path,
   ): LedgerTypes.PoolKey => {
     switch (signingMode) {
       case SigningMode.POOL_REGISTRATION_AS_OPERATOR:
@@ -280,7 +285,9 @@ export const LedgerCryptoProvider: (transport: Transport) => Promise<CryptoProvi
   }
 
   const prepareRewardAccount = (
-    signingFiles: HwSigningData[], rewardAccount: Buffer, network: Network,
+    signingFiles: HwSigningData[],
+    rewardAccount: Buffer,
+    network: Network,
   ): LedgerTypes.PoolRewardAccount => {
     const addressParams = getAddressParameters(signingFiles, rewardAccount, network)
     if (addressParams) {
@@ -300,7 +307,9 @@ export const LedgerCryptoProvider: (transport: Transport) => Promise<CryptoProvi
   }
 
   const preparePoolOwners = (
-    signingMode: SigningMode, owners: Buffer[], stakeSigningFiles: HwSigningData[],
+    signingMode: SigningMode,
+    owners: Buffer[],
+    stakeSigningFiles: HwSigningData[],
   ): LedgerTypes.PoolOwner[] => {
     const poolOwners: LedgerTypes.PoolOwner[] = owners.map((owner) => {
       const path = findSigningPathForKeyHash(owner, stakeSigningFiles)
@@ -476,7 +485,8 @@ export const LedgerCryptoProvider: (transport: Transport) => Promise<CryptoProvi
   ): string | undefined => scriptDataHash?.toString('hex')
 
   const prepareCollateralInput = (
-    collateralInput: TxTypes.Collateral, path: BIP32Path | null,
+    collateralInput: TxTypes.Collateral,
+    path: BIP32Path | null,
   ): LedgerTypes.TxInput => {
     if (collateralInput.index > Number.MAX_SAFE_INTEGER) {
       throw Error(Errors.InvalidCollateralInputError)
@@ -489,7 +499,8 @@ export const LedgerCryptoProvider: (transport: Transport) => Promise<CryptoProvi
   }
 
   const prepareRequiredSigner = (
-    requiredSigner: TxTypes.RequiredSigner, signingFiles: HwSigningData[],
+    requiredSigner: TxTypes.RequiredSigner,
+    signingFiles: HwSigningData[],
   ): LedgerTypes.RequiredSigner => {
     const path = findSigningPathForKeyHash(requiredSigner, signingFiles)
     return path
@@ -517,9 +528,9 @@ export const LedgerCryptoProvider: (transport: Transport) => Promise<CryptoProvi
     ledgerWitnesses: LedgerTypes.Witness[],
     signingFiles: HwSigningData[],
   ): TxWitnesses => {
-    const pathEquals = (
-      path1: BIP32Path, path2: BIP32Path,
-    ) => path1.every((element, i) => element === path2[i])
+    const pathEquals = (path1: BIP32Path, path2: BIP32Path) => path1.every(
+      (element, i) => element === path2[i],
+    )
 
     const getSigningFileDataByPath = (
       path: BIP32Path,
@@ -616,7 +627,8 @@ export const LedgerCryptoProvider: (transport: Transport) => Promise<CryptoProvi
       (collateralInput, i) => prepareCollateralInput(
         // first `inputs.length` signing files were assigned to inputs,
         // assign the following `collaterals.length` signing files to collateral inputs
-        collateralInput, getSigningPath(paymentSigningFiles, inputs.length + i),
+        collateralInput,
+        getSigningPath(paymentSigningFiles, inputs.length + i),
       ),
     )
     const requiredSigners = body.requiredSigners?.map(
@@ -724,7 +736,8 @@ export const LedgerCryptoProvider: (transport: Transport) => Promise<CryptoProvi
   })
 
   const prepareDummyTx = (
-    network: LedgerTypes.Network, auxiliaryData: LedgerTypes.TxAuxiliaryData,
+    network: LedgerTypes.Network,
+    auxiliaryData: LedgerTypes.TxAuxiliaryData,
   ): LedgerTypes.SignTransactionRequest => ({
     signingMode: LedgerTypes.TransactionSigningMode.ORDINARY_TRANSACTION,
     tx: {

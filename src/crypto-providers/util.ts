@@ -156,7 +156,8 @@ const encodeAddress = (address: Buffer): string => {
 }
 
 const getSigningPath = (
-  signingFiles: HwSigningData[], i: number,
+  signingFiles: HwSigningData[],
+  i: number,
 ): BIP32Path | null => {
   if (signingFiles.length === 0) return null
   // in case signingFiles.length < input.length
@@ -208,14 +209,16 @@ const hwSigningFileToPubKeyHash = (signingFile: HwSigningData): Buffer => {
 }
 
 const findSigningPathForKey = (
-  keyHash: Buffer, signingFiles: HwSigningData[],
+  keyHash: Buffer,
+  signingFiles: HwSigningData[],
 ): BIP32Path | undefined => {
   const signingFile = signingFiles.find((file) => keyHash.equals(hwSigningFileToPubKey(file)))
   return signingFile?.path
 }
 
 const findSigningPathForKeyHash = (
-  keyHash: Buffer, signingFiles: HwSigningData[],
+  keyHash: Buffer,
+  signingFiles: HwSigningData[],
 ): BIP32Path | undefined => {
   const signingFile = signingFiles.find((file) => keyHash.equals(hwSigningFileToPubKeyHash(file)))
   return signingFile?.path
@@ -242,7 +245,8 @@ const certificatesWithStakeCredentials = (certificates: Certificate[]): (
 )
 
 const determineSigningMode = (
-  txBody: TransactionBody, signingFiles: HwSigningData[],
+  txBody: TransactionBody,
+  signingFiles: HwSigningData[],
 ): SigningMode => {
   const poolRegistrationCert = txBody.certificates?.find(
     (cert) => cert.type === CertificateType.POOL_REGISTRATION,
@@ -290,7 +294,8 @@ const validateKeyGenInputs = (
 }
 
 const _packByronAddress = (
-  paymentSigningFile: HwSigningData, network: Network,
+  paymentSigningFile: HwSigningData,
+  network: Network,
 ): _AddressParameters => {
   const { pubKey, chainCode } = splitXPubKeyCborHex(paymentSigningFile.cborXPubKeyHex)
   const xPubKey = Buffer.concat([pubKey, chainCode])
@@ -309,7 +314,9 @@ const _packByronAddress = (
 }
 
 const _packBaseAddress = (
-  paymentSigningFile: HwSigningData, stakeSigningFile: HwSigningData, network: Network,
+  paymentSigningFile: HwSigningData,
+  stakeSigningFile: HwSigningData,
+  network: Network,
 ): _AddressParameters => {
   const { pubKey: paymentPubKey } = splitXPubKeyCborHex(paymentSigningFile.cborXPubKeyHex)
   const { pubKey: stakePubKey } = splitXPubKeyCborHex(stakeSigningFile.cborXPubKeyHex)
@@ -327,7 +334,8 @@ const _packBaseAddress = (
 }
 
 const _packEnterpriseAddress = (
-  paymentSigningFile: HwSigningData, network: Network,
+  paymentSigningFile: HwSigningData,
+  network: Network,
 ): _AddressParameters => {
   const { pubKey: paymentPubKey } = splitXPubKeyCborHex(paymentSigningFile.cborXPubKeyHex)
   const address: Buffer = cardanoCrypto.packEnterpriseAddress(
@@ -342,7 +350,8 @@ const _packEnterpriseAddress = (
 }
 
 const _packRewardAddress = (
-  stakeSigningFile: HwSigningData, network: Network,
+  stakeSigningFile: HwSigningData,
+  network: Network,
 ): _AddressParameters => {
   const { pubKey: stakePubKey } = splitXPubKeyCborHex(stakeSigningFile.cborXPubKeyHex)
   const address: Buffer = cardanoCrypto.packRewardAddress(
