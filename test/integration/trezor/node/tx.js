@@ -206,21 +206,30 @@ const transactions = {
     //     --tx-in-execution-units "(2000000, 6000)" \
     //     --tx-in-collateral "1789f11f03143338cfcc0dbf3a93ad8f177e8698fc37ab3ab17c954cf2b28ee8#1" \
     //     --tx-out addr_test1qrkecp93wdrus6l6ga97m966qyjp7t8qj8acyf27z6l63p8ecjewxgyxvj48wwntvnujh78vpajtzdjs993jalfwlyush4k89u+989817867 \
-    //     --required-signer-hash $(cardano-cli address key-hash --payment-verification-key-file test/integration/trezor/cli/keyFiles/payment.vkey) \
+    //     --required-signer-hash $(cardano-cli stake-address key-hash --staking-verification-key-file test/integration/trezor/cli/keyFiles/stake.vkey) \
     //     --fee 182133 \
     //     --protocol-params-file protocol.json \
     //     --out-file tx.raw \
     //     --cddl-format
     // cardano-hw-cli transaction transform --tx-file tx.raw --out-file tx.transformed
-    cborHex: '84a600818258201789f11f03143338cfcc0dbf3a93ad8f177e8698fc37ab3ab17c954cf2b28ee800018182583900ed9c04b17347c86bfa474bed975a01241f2ce091fb82255e16bfa884f9c4b2e3208664aa773a6b64f92bf8ec0f64b1365029632efd2ef9391a3aff6c0b021a0002c7750b582013a83818f68bb170dff0ab8a8c0098c5a14db0e43e04c9661dd3f64deb8241c20d818258201789f11f03143338cfcc0dbf3a93ad8f177e8698fc37ab3ab17c954cf2b28ee8010e81581c80f9e2c88e6c817008f3a812ed889b4a4da8e0bd103f86e7335422aaa3038158425840010000332233322222253353004333573466ebc00c00801801440204c98d4c01ccd5ce2481094e6f7420457175616c000084984880084880048004480048004104814963686f636f6c61746505818400004963686f636f6c617465821917701a001e8480f5f6',
-    hwSigningFiles: [signingFiles.payment0],
-    witnesses: [{
-      key: 0,
-      data: [
-        Buffer.from('5d010cf16fdeff40955633d6c565f3844a288a24967cf6b76acbeb271b4f13c1', 'hex'),
-        Buffer.from('46e898ddab023859c3053be9a4dd7a78fb5e03d3be7c000d619081947d224eef50239b3dfeb2b235812d86619a79eb438df29498fa9397c6a0969a02d50d5009', 'hex'),
-      ],
-    }],
+    cborHex: '84a600818258201789f11f03143338cfcc0dbf3a93ad8f177e8698fc37ab3ab17c954cf2b28ee800018182583900ed9c04b17347c86bfa474bed975a01241f2ce091fb82255e16bfa884f9c4b2e3208664aa773a6b64f92bf8ec0f64b1365029632efd2ef9391a3aff6c0b021a0002c7750b582013a83818f68bb170dff0ab8a8c0098c5a14db0e43e04c9661dd3f64deb8241c20d818258201789f11f03143338cfcc0dbf3a93ad8f177e8698fc37ab3ab17c954cf2b28ee8010e81581c122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277a3038158425840010000332233322222253353004333573466ebc00c00801801440204c98d4c01ccd5ce2481094e6f7420457175616c000084984880084880048004480048004104814963686f636f6c61746505818400004963686f636f6c617465821917701a001e8480f5f6',
+    hwSigningFiles: [signingFiles.payment0, signingFiles.stake0],
+    witnesses: [
+      {
+        key: 0,
+        data: [
+          Buffer.from('5d010cf16fdeff40955633d6c565f3844a288a24967cf6b76acbeb271b4f13c1', 'hex'),
+          Buffer.from('09cb0c7dc23f6b0ff1a3a736c4c32662deb18b692e5f7eab91e1e899c0cbd9a6456636ebf953277ee739b022988af58ba7434682493a38c79c52e8da8359e108', 'hex'),
+        ],
+      },
+      {
+        key: 0,
+        data: [
+          Buffer.from('bc65be1b0b9d7531778a1317c2aa6de936963c3f9ac7d5ee9e9eda25e0c97c5e', 'hex'),
+          Buffer.from('f92cd0a7a47a97b034ccfa46e899dee01c3241cf23bf1eee1b9469ac1850a9fb5d967b3715ffc70a19ed58c004473f580144ae78bd694661f126dfb746f2e103', 'hex'),
+        ],
+      },
+    ],
     network: 'TESTNET',
   },
 }
