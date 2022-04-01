@@ -248,6 +248,10 @@ const determineSigningMode = (
     (cert) => cert.type === CertificateType.POOL_REGISTRATION,
   ) as PoolRegistrationCertificate | undefined
 
+  // If txBody contains pool registration certificate, we must use one of the POOL_REGISTRATION
+  // signing modes. If the user provides e.g. multisig signing files at the same time (which
+  // indicates that a mistake happened at some point), this attempt is refused by
+  // signingValidation.ts.
   if (poolRegistrationCert) {
     const poolKeyPath = findSigningPathForKeyHash(poolRegistrationCert.poolParams.operator, signingFiles)
     return poolKeyPath
@@ -255,10 +259,15 @@ const determineSigningMode = (
       : SigningMode.POOL_REGISTRATION_AS_OWNER
   }
 
+  // Collaterals an required signers are allowed only in the PLUTUS signing mode. Note that we have
+  // to consider PLUTUS signing mode before MULTISIG, because multisig signing files are allowed in
+  // PLUTUS signing mode, too.
   if (txBody.collaterals || txBody.requiredSigners) {
     return SigningMode.PLUTUS_TRANSACTION
   }
 
+  // If we got here, the tx should be a valid ORDINARY or MULTISIG tx. We cannot distinguish these
+  // two only by the txBody contents, so we need to make the decision based on signing files.
   return hasMultisigSigningFile(signingFiles)
     ? SigningMode.MULTISIG_TRANSACTION
     : SigningMode.ORDINARY_TRANSACTION
