@@ -55,6 +55,7 @@ const enum Errors {
   TxContainsFixableErrors = 'Transaction CBOR contains fixable errors, please run "transform" or "transform-raw" command first',
   CannotTransformSignedTx = 'Transaction contains vkey witnesses, transformation would invalidate them',
   NetworkIdMismatchError = 'Provided network id differs from network id included in transaction body',
+  NotEnoughOutFilesError = 'Not enough output files specified',
 }
 
 export {
