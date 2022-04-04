@@ -178,6 +178,13 @@ const CommandExecutor = async () => {
     }
     validateWitnessing(signingParameters)
     const txWitnesses = await cryptoProvider.witnessTx(signingParameters, args.changeOutputKeyFileData)
+    if (txWitnesses.length < args.outFiles.length) {
+      // eslint-disable-next-line no-console,max-len
+      console.log(`Warning! ${args.outFiles.length} output file(s) specified, but only ${txWitnesses.length} witness(es) generated. The remaining output file(s) were not written to.`)
+    }
+    if (txWitnesses.length > args.outFiles.length) {
+      throw Error(Errors.NotEnoughOutFilesError)
+    }
     for (let i = 0; i < txWitnesses.length; i += 1) {
       write(args.outFiles[i], constructTxWitnessOutput(era, txWitnesses[i]))
     }
