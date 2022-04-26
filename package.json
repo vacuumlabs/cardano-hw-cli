@@ -49,7 +49,7 @@
     "lodash": "^4.17.21",
     "promise.any": "^2.0.3",
     "rw": "1.3.3",
-    "trezor-connect": "8.2.8-beta.4"
+    "trezor-connect": "8.2.8-extended"
   },
   "devDependencies": {
     "@ledgerhq/hw-transport-node-speculos": "^6.11.2",
