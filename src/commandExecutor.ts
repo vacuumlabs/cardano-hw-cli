@@ -34,12 +34,14 @@ import {
   areHwSigningDataNonByron,
   determineSigningMode,
   getTxBodyHash,
+  pathEquals,
 } from './crypto-providers/util'
 import { Errors } from './errors'
 import { parseOpCertIssueCounterFile } from './command-parser/parsers'
 import { validateSigning, validateWitnessing } from './crypto-providers/signingValidation'
 import { validateRawTxBeforeSigning, validateTxBeforeSigning } from './transaction/transactionValidation'
 import { cardanoEraToSignedType } from './constants'
+import { WitnessOutput } from './transaction/types'
 
 const promiseTimeout = <T> (promise: Promise<T>, ms: number): Promise<T> => {
   const timeout: Promise<T> = new Promise((resolve, reject) => {
@@ -181,15 +183,28 @@ const CommandExecutor = async () => {
       byronWitnesses, shelleyWitnesses,
     } = await cryptoProvider.witnessTx(signingParameters, args.changeOutputKeyFileData)
     const txWitnesses = [...byronWitnesses, ...shelleyWitnesses]
-    if (txWitnesses.length < args.outFiles.length) {
-      // eslint-disable-next-line no-console,max-len
-      console.log(`Warning! ${args.outFiles.length} output file(s) specified, but only ${txWitnesses.length} witness(es) generated. The remaining output file(s) were not written to.`)
+
+    const txWitnessOutputs: WitnessOutput[] = []
+    for (let i = 0; i < args.hwSigningFileData.length; i += 1) {
+      const signingFilePath = args.hwSigningFileData[i].path
+      const witness = txWitnesses.find((w) => pathEquals(w.path, signingFilePath))
+      if (witness !== undefined) {
+        txWitnessOutputs.push(constructTxWitnessOutput(era, witness))
+      } else {
+        // eslint-disable-next-line no-console,max-len
+        console.log(`Warning! A superfluous HW signing file specified (${i + 1} of ${args.hwSigningFileData.length}), the witness was not created.`)
+      }
     }
-    if (txWitnesses.length > args.outFiles.length) {
+    if (txWitnessOutputs.length > args.outFiles.length) {
       throw Error(Errors.NotEnoughOutFilesError)
     }
-    for (let i = 0; i < txWitnesses.length; i += 1) {
-      write(args.outFiles[i], constructTxWitnessOutput(era, txWitnesses[i]))
+    for (let i = 0; i < args.outFiles.length; i += 1) {
+      if (i < txWitnessOutputs.length) {
+        write(args.outFiles[i], txWitnessOutputs[i])
+      } else {
+        // eslint-disable-next-line no-console,max-len
+        console.log(`Warning! A superfluous output file specified (${i + 1} of ${args.outFiles.length}), the file was not written to.`)
+      }
     }
   }
 
