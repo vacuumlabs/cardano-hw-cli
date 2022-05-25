@@ -2,8 +2,6 @@ import * as TxTypes from 'cardano-hw-interop-lib'
 import TrezorConnect, * as TrezorTypes from 'trezor-connect'
 import {
   TxCborHex,
-  _ByronWitness,
-  _ShelleyWitness,
   VotingRegistrationMetaDataCborHex,
   TxWitnesses,
   TxWitnessKeys,
@@ -15,8 +13,8 @@ import {
   SigningParameters,
 } from './types'
 import {
-  TxByronWitness,
-  TxShelleyWitness,
+  TxByronWitnessData,
+  TxShelleyWitnessData,
   TxSigned,
 } from '../transaction/transaction'
 import {
@@ -446,12 +444,16 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     )
 
     return {
-      byronWitnesses: byronWitnesses.map((witness) => (
-        TxByronWitness(witness.pubKey, witness.signature, witness.chainCode, {})
-      )),
-      shelleyWitnesses: shelleyWitnesses.map((witness) => (
-        TxShelleyWitness(witness.pubKey, witness.signature)
-      )),
+      byronWitnesses: byronWitnesses.map((witness) => ({
+        key: TxWitnessKeys.BYRON,
+        data: TxByronWitnessData(witness.pubKey, witness.signature, witness.chainCode, {}),
+        path: witness.path,
+      })),
+      shelleyWitnesses: shelleyWitnesses.map((witness) => ({
+        key: TxWitnessKeys.SHELLEY,
+        data: TxShelleyWitnessData(witness.pubKey, witness.signature),
+        path: witness.path,
+      })),
     }
   }
 
@@ -560,24 +562,16 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     changeOutputFiles: HwSigningData[],
   ): Promise<TxCborHex> => {
     const trezorWitnesses = await trezorSignTx(params, changeOutputFiles)
-    const { byronWitnesses, shelleyWitnesses } = createWitnesses(trezorWitnesses, params.hwSigningFileData)
-    return TxSigned(params, byronWitnesses, shelleyWitnesses)
+    const witnesses = createWitnesses(trezorWitnesses, params.hwSigningFileData)
+    return TxSigned(params, witnesses)
   }
 
   const witnessTx = async (
     params: SigningParameters,
     changeOutputFiles: HwSigningData[],
-  ): Promise<Array<_ByronWitness | _ShelleyWitness>> => {
+  ): Promise<TxWitnesses> => {
     const trezorWitnesses = await trezorSignTx(params, changeOutputFiles)
-    const { byronWitnesses, shelleyWitnesses } = createWitnesses(trezorWitnesses, params.hwSigningFileData)
-    const _byronWitnesses = byronWitnesses.map((byronWitness) => (
-      { key: TxWitnessKeys.BYRON, data: byronWitness }
-    ) as _ByronWitness)
-    const _shelleyWitnesses = shelleyWitnesses.map((shelleyWitness) => (
-      { key: TxWitnessKeys.SHELLEY, data: shelleyWitness }
-    ) as _ShelleyWitness)
-
-    return [..._shelleyWitnesses, ..._byronWitnesses]
+    return createWitnesses(trezorWitnesses, params.hwSigningFileData)
   }
 
   const prepareVoteAuxiliaryData = (

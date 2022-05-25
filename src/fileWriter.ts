@@ -11,9 +11,9 @@ import {
   RawTxFileOutput,
   TxCborHex,
   TxFileOutput,
+  TxWitnessByron,
+  TxWitnessShelley,
   WitnessOutput,
-  _ByronWitness,
-  _ShelleyWitness,
 } from './transaction/types'
 import {
   BIP32Path,
@@ -60,7 +60,7 @@ const constructTxFileOutput = (
 
 const constructTxWitnessOutput = (
   era: CardanoEra,
-  { key, data }: _ByronWitness | _ShelleyWitness,
+  { key, data }: TxWitnessByron | TxWitnessShelley,
 ): WitnessOutput => ({
   type: cardanoEraToWitnessType[era],
   description: '',

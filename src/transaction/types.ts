@@ -1,4 +1,4 @@
-import { CborHex } from '../types'
+import { BIP32Path, CborHex } from '../types'
 
 export const enum TxWitnessKeys {
   SHELLEY = 0,
@@ -9,17 +9,29 @@ export const enum TxWitnessKeys {
   REDEEMERS = 5,
 }
 
-export type TxWitnessByron = [
+export type TxWitnessByronData = [
   Buffer,
   Buffer,
   Buffer,
   Buffer,
 ]
 
-export type TxWitnessShelley = [
+export type TxWitnessShelleyData = [
   Buffer,
   Buffer,
 ]
+
+export type TxWitnessByron = {
+  key: TxWitnessKeys.BYRON,
+  data: TxWitnessByronData,
+  path: BIP32Path,
+}
+
+export type TxWitnessShelley = {
+  key: TxWitnessKeys.SHELLEY,
+  data: TxWitnessShelleyData,
+  path: BIP32Path,
+}
 
 export type TxWitnesses = {
   byronWitnesses: TxWitnessByron[]
@@ -35,16 +47,6 @@ export type TxWitnessCborHex = CborHex
 export type _XPubKey = {
   pubKey: Buffer,
   chainCode: Buffer,
-}
-
-export type _ByronWitness = {
-  key: TxWitnessKeys.BYRON,
-  data: TxWitnessByron
-}
-
-export type _ShelleyWitness = {
-  key: TxWitnessKeys.SHELLEY,
-  data: TxWitnessShelley,
 }
 
 export type RawTxFileOutput = {
