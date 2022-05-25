@@ -1,10 +1,11 @@
 import * as InteropLib from 'cardano-hw-interop-lib'
 import { isEqual, uniqWith, cloneDeep } from 'lodash'
 import {
-  TxWitnessByron,
-  TxWitnessShelley,
+  TxWitnessByronData,
+  TxWitnessShelleyData,
   TxCborHex,
   TxWitnessKeys,
+  TxWitnesses,
 } from './types'
 import { encodeCbor } from '../util'
 import { CardanoEra } from '../types'
@@ -21,19 +22,21 @@ const _parseWitnessSet = (witnessSet: unknown): WitnessSet => {
     : new Map(Object.entries(clonedWitnessSet as object)) as unknown as WitnessSet
 }
 
-const TxByronWitness = (
+const TxByronWitnessData = (
   publicKey: Buffer,
   signature: Buffer,
   chaincode: Buffer,
   addressAttributes: object,
-): TxWitnessByron => [publicKey, signature, chaincode, encodeCbor(addressAttributes)]
+): TxWitnessByronData => [publicKey, signature, chaincode, encodeCbor(addressAttributes)]
 
-const TxShelleyWitness = (publicKey: Buffer, signature: Buffer): TxWitnessShelley => [publicKey, signature]
+const TxShelleyWitnessData = (
+  publicKey: Buffer,
+  signature: Buffer,
+): TxWitnessShelleyData => [publicKey, signature]
 
 const _rawTxToTxSigned = (
   params: SigningParameters,
-  byronWitnesses: TxWitnessByron[],
-  shelleyWitnesses: TxWitnessShelley[],
+  witnesses: TxWitnesses,
 ): TxCborHex => {
   const {
     body, scriptWitnesses, datumWitnesses, redeemerWitnesses, scriptValidity, auxiliaryData,
@@ -59,12 +62,14 @@ const _rawTxToTxSigned = (
 
   const witnessSet: WitnessSet = new Map()
 
-  if (shelleyWitnesses.length > 0) {
-    witnessSet.set(TxWitnessKeys.SHELLEY, shelleyWitnesses)
+  const shelleyWitnessList = witnesses.shelleyWitnesses.map((w) => w.data)
+  if (shelleyWitnessList.length > 0) {
+    witnessSet.set(TxWitnessKeys.SHELLEY, shelleyWitnessList)
   }
 
-  if (byronWitnesses.length > 0) {
-    witnessSet.set(TxWitnessKeys.BYRON, byronWitnesses)
+  const byronWitnessList = witnesses.byronWitnesses.map((w) => w.data)
+  if (byronWitnessList.length > 0) {
+    witnessSet.set(TxWitnessKeys.BYRON, byronWitnessList)
   }
 
   if (nativeScriptWitnessList.length > 0) {
@@ -91,11 +96,10 @@ const _rawTxToTxSigned = (
 
 const TxSigned = (
   params: SigningParameters,
-  byronWitnesses: TxWitnessByron[],
-  shelleyWitnesses: TxWitnessShelley[],
+  witnesses: TxWitnesses,
 ): TxCborHex => {
   if (params.rawTx) {
-    return _rawTxToTxSigned(params, byronWitnesses, shelleyWitnesses)
+    return _rawTxToTxSigned(params, witnesses)
   }
 
   // we only add witnesses created by the HW wallet, all other witnesses stay the same
@@ -103,7 +107,7 @@ const TxSigned = (
 
   const shelleyWitnessesList = [
     ...(witnessSet.get(TxWitnessKeys.SHELLEY) ?? []),
-    ...shelleyWitnesses,
+    ...witnesses.shelleyWitnesses.map((w) => w.data),
   ]
   if (shelleyWitnessesList.length > 0) {
     // cardano-cli deduplicates the witnesses before adding them to the signed transaction
@@ -112,7 +116,7 @@ const TxSigned = (
 
   const byronWitnessesList = [
     ...witnessSet.get(TxWitnessKeys.BYRON) ?? [],
-    ...byronWitnesses,
+    ...witnesses.byronWitnesses.map((w) => w.data),
   ]
   if (byronWitnessesList.length > 0) {
     // cardano-cli deduplicates the witnesses before adding them to the signed transaction
@@ -131,7 +135,7 @@ export const containsVKeyWitnesses = (tx: InteropLib.Transaction): boolean => {
 }
 
 export {
-  TxByronWitness,
-  TxShelleyWitness,
+  TxByronWitnessData,
+  TxShelleyWitnessData,
   TxSigned,
 }

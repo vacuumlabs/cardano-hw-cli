@@ -7,11 +7,9 @@ import { isChainCodeHex, isPubKeyHex, isXPubKeyHex } from '../guards'
 import {
   KesVKey, OpCertIssueCounter, OpCertSigned, SignedOpCertCborHex,
 } from '../opCert/opCert'
-import { TxByronWitness, TxShelleyWitness, TxSigned } from '../transaction/transaction'
+import { TxByronWitnessData, TxShelleyWitnessData, TxSigned } from '../transaction/transaction'
 import {
   TxCborHex,
-  _ByronWitness,
-  _ShelleyWitness,
   TxWitnessKeys,
   VotingRegistrationMetaDataCborHex,
   TxWitnesses,
@@ -540,14 +538,14 @@ export const LedgerCryptoProvider: (transport: Transport) => Promise<CryptoProvi
       throw Error(Errors.MissingHwSigningDataAtPathError)
     }
 
-    const isByronPath = (path: number[]) => classifyPath(path) === PathTypes.PATH_WALLET_SPENDING_KEY_BYRON
+    const isByronPath = (path: BIP32Path) => classifyPath(path) === PathTypes.PATH_WALLET_SPENDING_KEY_BYRON
 
     const witnessesWithKeys = ledgerWitnesses.map((witness) => {
       const { pubKey, chainCode } = splitXPubKeyCborHex(
         getSigningFileDataByPath(witness.path as BIP32Path).cborXPubKeyHex,
       )
       return {
-        path: witness.path,
+        path: witness.path as BIP32Path,
         signature: Buffer.from(witness.witnessSignatureHex, 'hex'),
         pubKey,
         chainCode,
@@ -559,12 +557,16 @@ export const LedgerCryptoProvider: (transport: Transport) => Promise<CryptoProvi
     )
 
     return {
-      byronWitnesses: byronWitnesses.map((witness) => (
-        TxByronWitness(witness.pubKey, witness.signature, witness.chainCode, {})
-      )),
-      shelleyWitnesses: shelleyWitnesses.map((witness) => (
-        TxShelleyWitness(witness.pubKey, witness.signature)
-      )),
+      byronWitnesses: byronWitnesses.map((witness) => ({
+        key: TxWitnessKeys.BYRON,
+        data: TxByronWitnessData(witness.pubKey, witness.signature, witness.chainCode, {}),
+        path: witness.path,
+      })),
+      shelleyWitnesses: shelleyWitnesses.map((witness) => ({
+        key: TxWitnessKeys.SHELLEY,
+        data: TxShelleyWitnessData(witness.pubKey, witness.signature),
+        path: witness.path,
+      })),
     }
   }
 
@@ -674,24 +676,16 @@ export const LedgerCryptoProvider: (transport: Transport) => Promise<CryptoProvi
     changeOutputFiles: HwSigningData[],
   ): Promise<TxCborHex> => {
     const ledgerWitnesses = await ledgerSignTx(params, changeOutputFiles)
-    const { byronWitnesses, shelleyWitnesses } = createWitnesses(ledgerWitnesses, params.hwSigningFileData)
-    return TxSigned(params, byronWitnesses, shelleyWitnesses)
+    const witnesses = createWitnesses(ledgerWitnesses, params.hwSigningFileData)
+    return TxSigned(params, witnesses)
   }
 
   const witnessTx = async (
     params: SigningParameters,
     changeOutputFiles: HwSigningData[],
-  ): Promise<Array<_ShelleyWitness | _ByronWitness>> => {
+  ): Promise<TxWitnesses> => {
     const ledgerWitnesses = await ledgerSignTx(params, changeOutputFiles)
-    const { byronWitnesses, shelleyWitnesses } = createWitnesses(ledgerWitnesses, params.hwSigningFileData)
-    const _byronWitnesses = byronWitnesses.map((byronWitness) => (
-      { key: TxWitnessKeys.BYRON, data: byronWitness }
-    ) as _ByronWitness)
-    const _shelleyWitnesses = shelleyWitnesses.map((shelleyWitness) => (
-      { key: TxWitnessKeys.SHELLEY, data: shelleyWitness }
-    ) as _ShelleyWitness)
-
-    return [..._shelleyWitnesses, ..._byronWitnesses]
+    return createWitnesses(ledgerWitnesses, params.hwSigningFileData)
   }
 
   const prepareVoteAuxiliaryData = (
