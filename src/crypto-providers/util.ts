@@ -117,6 +117,10 @@ const classifyPath = (path: number[]): PathTypes => {
   return PathTypes.PATH_INVALID
 }
 
+const pathEquals = (path1: BIP32Path, path2: BIP32Path) => (
+  path1.length === path2.length && path1.every((element, i) => element === path2[i])
+)
+
 const splitXPubKeyCborHex = (xPubKeyCborHex: XPubKeyCborHex): _XPubKey => {
   const xPubKeyDecoded = decodeCbor(xPubKeyCborHex)
   const pubKey = xPubKeyDecoded.slice(0, 32)
@@ -558,6 +562,7 @@ const getTxBodyHash = (txBody: TransactionBody): string => (
 export {
   PathTypes,
   classifyPath,
+  pathEquals,
   splitXPubKeyCborHex,
   validateKeyGenInputs,
   getSigningPath,

@@ -47,6 +47,7 @@ import {
   encodeVotingRegistrationMetaData,
   rewardAccountToStakeCredential,
   areAddressParamsAllowed,
+  pathEquals,
 } from './util'
 
 const { bech32 } = require('cardano-crypto.js')
@@ -526,10 +527,6 @@ export const LedgerCryptoProvider: (transport: Transport) => Promise<CryptoProvi
     ledgerWitnesses: LedgerTypes.Witness[],
     signingFiles: HwSigningData[],
   ): TxWitnesses => {
-    const pathEquals = (path1: BIP32Path, path2: BIP32Path) => path1.every(
-      (element, i) => element === path2[i],
-    )
-
     const getSigningFileDataByPath = (
       path: BIP32Path,
     ): HwSigningData => {
