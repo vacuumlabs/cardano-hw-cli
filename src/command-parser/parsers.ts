@@ -165,8 +165,6 @@ export const parseOpCertIssueCounterFile = (path: string): OpCertIssueCounter =>
     throw Error(Errors.InvalidOpCertIssueCounterFileError)
   }
 
-  // TODO what about updating the counter in the file? should we? cardano-cli probably does that
-
   try {
     const decoded = decodeCbor(cborHex)
     if (decoded instanceof Array
