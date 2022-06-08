@@ -231,7 +231,7 @@ const CommandExecutor = async () => {
       write(verificationKeyFiles[i], constructVerificationKeyOutput(xPubKey, path))
 
       const issueCounter = {
-        counter: BigInt(1),
+        counter: BigInt(0),
         poolColdKey: Buffer.from(xPubKey, 'hex').slice(-64).slice(0, 32),
       }
       write(issueCounterFiles[i], constructOpCertIssueCounterOutput(issueCounter))
