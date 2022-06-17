@@ -9,7 +9,7 @@ import {
   CborHex,
   ExitCode,
 } from '../types'
-import { constructRawTxFileOutput, constructTxFileOutput, write } from '../fileWriter'
+import { constructRawTxFileOutput, constructTxFileOutput, writeOutputData } from '../fileWriter'
 import { containsVKeyWitnesses } from './transaction'
 
 const checkValidationErrors = (
@@ -104,7 +104,7 @@ const transformRawTx = (args: ParsedTransactionTransformRawArguments): void => {
     args.rawTxFileData.description,
     encodedRawTx,
   )
-  write(args.outFile, rawTxFileOutput)
+  writeOutputData(args.outFile, rawTxFileOutput)
 }
 
 const transformTx = (args: ParsedTransactionTransformArguments): void => {
@@ -129,7 +129,7 @@ const transformTx = (args: ParsedTransactionTransformArguments): void => {
     args.txFileData.description,
     encodedTx,
   )
-  write(args.outFile, txFileOutput)
+  writeOutputData(args.outFile, txFileOutput)
 }
 
 export {
