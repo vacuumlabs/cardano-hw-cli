@@ -4,13 +4,13 @@ import TransportNodeHid from '@ledgerhq/hw-transport-node-hid-noevents'
 import { CryptoProvider } from './crypto-providers/types'
 import {
   constructTxFileOutput,
-  write,
   constructHwSigningKeyOutput,
   constructVerificationKeyOutput,
   constructTxWitnessOutput,
   constructSignedOpCertOutput,
   constructOpCertIssueCounterOutput,
   writeCbor,
+  writeOutputData,
 } from './fileWriter'
 import {
   ParsedShowAddressArguments,
@@ -86,8 +86,11 @@ const CommandExecutor = async () => {
   ) => {
     validateKeyGenInputs(paths, hwSigningFiles, verificationKeyFiles)
     const xPubKeys = await cryptoProvider.getXPubKeys(paths)
-    xPubKeys.forEach((xPubKey, i) => write(hwSigningFiles[i], constructHwSigningKeyOutput(xPubKey, paths[i])))
-    xPubKeys.forEach((xPubKey, i) => write(
+    xPubKeys.forEach((xPubKey, i) => writeOutputData(
+      hwSigningFiles[i],
+      constructHwSigningKeyOutput(xPubKey, paths[i]),
+    ))
+    xPubKeys.forEach((xPubKey, i) => writeOutputData(
       verificationKeyFiles[i],
       constructVerificationKeyOutput(xPubKey, paths[i]),
     ))
@@ -96,7 +99,7 @@ const CommandExecutor = async () => {
   const createVerificationKeyFile = (
     { verificationKeyFile, hwSigningFileData }: ParsedVerificationKeyArguments,
   ) => {
-    write(verificationKeyFile, constructVerificationKeyOutput(
+    writeOutputData(verificationKeyFile, constructVerificationKeyOutput(
       hwSigningFileData.cborXPubKeyHex,
       hwSigningFileData.path,
     ))
@@ -137,7 +140,7 @@ const CommandExecutor = async () => {
     const envelopeType = cardanoEraToSignedType[era]
     const description = '' // we are creating a signed tx file, leave description empty
     const signedTx = await cryptoProvider.signTx(signingParameters, args.changeOutputKeyFileData)
-    write(args.outFile, constructTxFileOutput(envelopeType, description, signedTx))
+    writeOutputData(args.outFile, constructTxFileOutput(envelopeType, description, signedTx))
   }
 
   const createTxPolicyId = async (args: ParsedTransactionPolicyIdArguments) => {
@@ -200,7 +203,7 @@ const CommandExecutor = async () => {
     }
     for (let i = 0; i < args.outFiles.length; i += 1) {
       if (i < txWitnessOutputs.length) {
-        write(args.outFiles[i], txWitnessOutputs[i])
+        writeOutputData(args.outFiles[i], txWitnessOutputs[i])
       } else {
         // eslint-disable-next-line no-console,max-len
         console.log(`Warning! A superfluous output file specified (${i + 1} of ${args.outFiles.length}), the file was not written to.`)
@@ -227,14 +230,14 @@ const CommandExecutor = async () => {
       // eslint-disable-next-line no-await-in-loop
       const xPubKey = (await cryptoProvider.getXPubKeys([path]))[0]
 
-      write(hwSigningFiles[i], constructHwSigningKeyOutput(xPubKey, path))
-      write(verificationKeyFiles[i], constructVerificationKeyOutput(xPubKey, path))
+      writeOutputData(hwSigningFiles[i], constructHwSigningKeyOutput(xPubKey, path))
+      writeOutputData(verificationKeyFiles[i], constructVerificationKeyOutput(xPubKey, path))
 
       const issueCounter = {
         counter: BigInt(0),
         poolColdKey: Buffer.from(xPubKey, 'hex').slice(-64).slice(0, 32),
       }
-      write(issueCounterFiles[i], constructOpCertIssueCounterOutput(issueCounter))
+      writeOutputData(issueCounterFiles[i], constructOpCertIssueCounterOutput(issueCounter))
     }
   }
 
@@ -248,11 +251,11 @@ const CommandExecutor = async () => {
       args.hwSigningFileData,
     )
 
-    write(args.outFile, constructSignedOpCertOutput(signedCertCborHex))
+    writeOutputData(args.outFile, constructSignedOpCertOutput(signedCertCborHex))
 
     // TODO how to increment BigInt?
     issueCounter.counter = BigInt(issueCounter.counter as bigint) + BigInt(1)
-    write(args.issueCounterFile, constructOpCertIssueCounterOutput(issueCounter))
+    writeOutputData(args.issueCounterFile, constructOpCertIssueCounterOutput(issueCounter))
   }
 
   const createCatalystVotingKeyRegistrationMetadata = async (

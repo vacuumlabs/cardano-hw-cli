@@ -30,7 +30,7 @@ import { encodeCbor } from './util'
 
 const rw = require('rw')
 
-const write = (path: string, data: OutputData) => (
+const writeOutputData = (path: string, data: OutputData) => (
   rw.writeFileSync(path, JSON.stringify(data, null, 4), 'utf8')
 )
 
@@ -168,7 +168,7 @@ const constructOpCertIssueCounterOutput = (issueCounter: OpCertIssueCounter): Op
 })
 
 export {
-  write,
+  writeOutputData,
   writeCbor,
   constructRawTxFileOutput,
   constructTxFileOutput,
