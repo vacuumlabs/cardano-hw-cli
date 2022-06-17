@@ -10,15 +10,15 @@ export const enum TxWitnessKeys {
 }
 
 export type TxWitnessByronData = [
-  Buffer,
-  Buffer,
-  Buffer,
-  Buffer,
+  Buffer, // public key
+  Buffer, // signature
+  Buffer, // chain code
+  Buffer, // address attributes
 ]
 
 export type TxWitnessShelleyData = [
-  Buffer,
-  Buffer,
+  Buffer, // public key
+  Buffer, // signature
 ]
 
 export type TxWitnessByron = {
