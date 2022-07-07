@@ -155,6 +155,36 @@ export const LedgerCryptoProvider: (transport: Transport) => Promise<CryptoProvi
     datumHashHex,
   })
 
+  const prepareDatumHash = (
+    output: TxTypes.TransactionOutput,
+  ) => {
+    switch (output.type) {
+      case TxTypes.OutputType.ARRAY_LEGACY:
+        return output.datumHash?.hash.toString('hex')
+      case TxTypes.OutputType.MAP_BABBAGE:
+        return output.datum?.type === TxTypes.DatumType.HASH
+          ? output.datum.hash.toString('hex')
+          : undefined
+      default:
+        throw Error(Errors.Unreachable)
+    }
+  }
+
+  const prepareInlineDatum = (
+    output: TxTypes.TransactionOutput,
+  ) => {
+    switch (output.type) {
+      case TxTypes.OutputType.ARRAY_LEGACY:
+        return undefined
+      case TxTypes.OutputType.MAP_BABBAGE:
+        return output.datum?.type === TxTypes.DatumType.INLINE
+          ? output.datum?.bytes.toString('hex')
+          : undefined
+      default:
+        throw Error(Errors.Unreachable)
+    }
+  }
+
   const prepareOutput = (
     output: TxTypes.TransactionOutput,
     network: Network,
@@ -164,13 +194,23 @@ export const LedgerCryptoProvider: (transport: Transport) => Promise<CryptoProvi
     const changeAddressParams = getAddressParameters(changeOutputFiles, output.address, network)
     const tokenBundle = output.amount.type === TxTypes.AmountType.WITH_MULTIASSET
       ? prepareTokenBundle(output.amount.multiasset) : null
-    const datumHashHex = output.datumHash?.toString('hex')
+
+    const datumHashHex = prepareDatumHash(output)
+    const inlineDatum = prepareInlineDatum(output)
+
+    const referenceScript = output.type === TxTypes.OutputType.MAP_BABBAGE
+      ? output.referenceScript?.toString('hex')
+      : undefined
 
     if (changeAddressParams && areAddressParamsAllowed(signingMode)) {
       return prepareChangeOutput(output.amount.coin, changeAddressParams, tokenBundle, datumHashHex)
     }
 
     return {
+      // TODO GK
+      // format: output.type === OutputType.ARRAY_LEGACY
+      //   ? TrezorTypes.PROTO.CardanoTxOutputSerializationFormat.ARRAY_LEGACY
+      //   : TrezorTypes.PROTO.CardanoTxOutputSerializationFormat.MAP_BABBAGE,
       destination: {
         type: LedgerTypes.TxOutputDestinationType.THIRD_PARTY,
         params: {
@@ -180,6 +220,9 @@ export const LedgerCryptoProvider: (transport: Transport) => Promise<CryptoProvi
       amount: `${output.amount.coin}`,
       tokenBundle,
       datumHashHex,
+      // TODO GK
+      // inlineDatum,
+      // referenceScript,
     }
   }
 
@@ -637,6 +680,12 @@ export const LedgerCryptoProvider: (transport: Transport) => Promise<CryptoProvi
       ),
     )
     const includeNetworkId = body.networkId !== undefined
+    // TODO GK - changeOutputFiles ok? or should be a separate file?
+    const collateralReturn = body.collateralReturnOutput
+      ? prepareOutput(body.collateralReturnOutput, network, changeOutputFiles, signingMode)
+      : undefined
+    const totalCollateral = `${body.totalCollateral}`
+    const referenceInputs = body.collateralInputs?.map((ci) => prepareInput(signingMode, ci, null))
 
     const additionalWitnessRequests = prepareAdditionalWitnessRequests(mintSigningFiles, multisigSigningFiles)
 
@@ -657,6 +706,10 @@ export const LedgerCryptoProvider: (transport: Transport) => Promise<CryptoProvi
         collaterals,
         requiredSigners,
         includeNetworkId,
+        // TODO GK
+        // collateralReturn,
+        // totalCollateral,
+        // referenceInputs,
       },
       additionalWitnessPaths: additionalWitnessRequests,
     })
