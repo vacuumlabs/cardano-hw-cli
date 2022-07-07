@@ -134,26 +134,68 @@ export const LedgerCryptoProvider: (transport: Transport) => Promise<CryptoProvi
     }
   })
 
-  const prepareChangeOutput = (
-    lovelaceAmount: TxTypes.Uint,
-    changeOutput: _AddressParameters,
-    tokenBundle: LedgerTypes.AssetGroup[] | null,
-    datumHashHex?: string,
-  ): LedgerTypes.TxOutput => ({
-    destination: {
-      type: LedgerTypes.TxOutputDestinationType.DEVICE_OWNED,
-      params: {
-        type: changeOutput.addressType,
+  const prepareDestination = (
+    address: Buffer,
+    changeAddressParams: _AddressParameters | null,
+    signingMode: SigningMode,
+  ): LedgerTypes.TxOutputDestination => {
+    if (changeAddressParams && areAddressParamsAllowed(signingMode)) {
+      // paymentPath should always be defined if changeAddressParams are defined
+      if (!changeAddressParams.paymentPath) throw Error(Errors.Unreachable)
+
+      return {
+        type: LedgerTypes.TxOutputDestinationType.DEVICE_OWNED,
         params: {
-          spendingPath: changeOutput.paymentPath as BIP32Path,
-          stakingPath: changeOutput.stakePath,
+          type: changeAddressParams.addressType,
+          params: {
+            spendingPath: changeAddressParams.paymentPath,
+            stakingPath: changeAddressParams.stakePath,
+          },
         },
+      }
+    }
+
+    return {
+      type: LedgerTypes.TxOutputDestinationType.THIRD_PARTY,
+      params: {
+        addressHex: address.toString('hex'),
       },
-    },
-    amount: `${lovelaceAmount}`,
-    tokenBundle,
-    datumHashHex,
-  })
+    }
+  }
+
+  const prepareDatumHash = (
+    output: TxTypes.TransactionOutput,
+  ): string | undefined => {
+    switch (output.format) {
+      case TxTypes.TxOutputFormat.ARRAY_LEGACY:
+        return output.datumHash?.hash.toString('hex')
+      case TxTypes.TxOutputFormat.MAP_BABBAGE:
+        return undefined
+      default:
+        throw Error(Errors.Unreachable)
+    }
+  }
+
+  const prepareDatum = (
+    output: TxTypes.TransactionOutput,
+  ): LedgerTypes.Datum | undefined => {
+    switch (output.format) {
+      case TxTypes.TxOutputFormat.ARRAY_LEGACY:
+        return undefined
+      case TxTypes.TxOutputFormat.MAP_BABBAGE:
+        if (!output.datum) return undefined
+
+        return output.datum?.type === TxTypes.DatumType.HASH ? {
+          type: TxTypes.DatumType.HASH,
+          datumHashHex: output.datum.hash.toString('hex'),
+        } : {
+          type: TxTypes.DatumType.INLINE,
+          datumHex: output.datum.bytes.toString('hex'),
+        }
+      default:
+        throw Error(Errors.Unreachable)
+    }
+  }
 
   const prepareOutput = (
     output: TxTypes.TransactionOutput,
@@ -162,24 +204,28 @@ export const LedgerCryptoProvider: (transport: Transport) => Promise<CryptoProvi
     signingMode: SigningMode,
   ): LedgerTypes.TxOutput => {
     const changeAddressParams = getAddressParameters(changeOutputFiles, output.address, network)
-    const tokenBundle = output.amount.type === TxTypes.AmountType.WITH_MULTIASSET
-      ? prepareTokenBundle(output.amount.multiasset) : null
-    const datumHashHex = output.datumHash?.toString('hex')
+    const destination = prepareDestination(output.address, changeAddressParams, signingMode)
 
-    if (changeAddressParams && areAddressParamsAllowed(signingMode)) {
-      return prepareChangeOutput(output.amount.coin, changeAddressParams, tokenBundle, datumHashHex)
-    }
+    const tokenBundle = output.amount.type === TxTypes.AmountType.WITH_MULTIASSET
+      ? prepareTokenBundle(output.amount.multiasset) : undefined
+
+    const datumHashHex = prepareDatumHash(output)
+    const datum = prepareDatum(output)
+
+    const scriptHex = output.format === TxTypes.TxOutputFormat.MAP_BABBAGE
+      ? output.referenceScript?.toString('hex')
+      : undefined
 
     return {
-      destination: {
-        type: LedgerTypes.TxOutputDestinationType.THIRD_PARTY,
-        params: {
-          addressHex: output.address.toString('hex'),
-        },
-      },
+      format: output.format === TxTypes.TxOutputFormat.ARRAY_LEGACY
+        ? LedgerTypes.TxOutputFormat.ARRAY_LEGACY
+        : LedgerTypes.TxOutputFormat.MAP_BABBAGE,
+      destination,
       amount: `${output.amount.coin}`,
       tokenBundle,
       datumHashHex,
+      datum,
+      scriptHex,
     }
   }
 
@@ -622,7 +668,7 @@ export const LedgerCryptoProvider: (transport: Transport) => Promise<CryptoProvi
     const auxiliaryData = prepareMetaDataHashHex(body.metadataHash)
     const mint = body.mint ? prepareTokenBundle(body.mint) : null
     const scriptDataHashHex = prepareScriptDataHash(body.scriptDataHash)
-    const collaterals = body.collateralInputs?.map(
+    const collateralInputs = body.collateralInputs?.map(
       (collateralInput, i) => prepareCollateralInput(
         // first `inputs.length` signing files were assigned to inputs,
         // assign the following `collaterals.length` signing files to collateral inputs
@@ -637,6 +683,13 @@ export const LedgerCryptoProvider: (transport: Transport) => Promise<CryptoProvi
       ),
     )
     const includeNetworkId = body.networkId !== undefined
+    const collateralOutput = body.collateralReturnOutput
+      ? prepareOutput(body.collateralReturnOutput, network, changeOutputFiles, signingMode)
+      : undefined
+    const totalCollateral = body.totalCollateral !== undefined ? `${body.totalCollateral}` : undefined
+    const referenceInputs = body.referenceInputs?.map(
+      (referenceInput) => prepareInput(signingMode, referenceInput, null),
+    )
 
     const additionalWitnessRequests = prepareAdditionalWitnessRequests(mintSigningFiles, multisigSigningFiles)
 
@@ -654,9 +707,12 @@ export const LedgerCryptoProvider: (transport: Transport) => Promise<CryptoProvi
         validityIntervalStart,
         mint,
         scriptDataHashHex,
-        collaterals,
+        collateralInputs,
         requiredSigners,
         includeNetworkId,
+        collateralOutput,
+        totalCollateral,
+        referenceInputs,
       },
       additionalWitnessPaths: additionalWitnessRequests,
     })
