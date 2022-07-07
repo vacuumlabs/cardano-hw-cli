@@ -175,6 +175,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     tokenBundle?: TrezorTypes.CardanoAssetGroup[],
     datumHash?: string,
   ): TrezorTypes.CardanoOutput => ({
+    format: TrezorEnums.CardanoTxOutputSerializationFormat.MAP_BABBAGE,
     amount: `${lovelaceAmount}`,
     addressParameters: {
       addressType: changeAddress.addressType,
@@ -185,26 +186,69 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     datumHash,
   })
 
+  const prepareDatumHash = (
+    output: TxTypes.TransactionOutput,
+  ): string | undefined => {
+    switch (output.format) {
+      case TxTypes.TxOutputFormat.ARRAY_LEGACY:
+        return output.datumHash?.hash.toString('hex')
+      case TxTypes.TxOutputFormat.MAP_BABBAGE:
+        return output.datum?.type === TxTypes.DatumType.HASH
+          ? output.datum.hash.toString('hex')
+          : undefined
+      default:
+        throw Error(Errors.Unreachable)
+    }
+  }
+
+  const prepareInlineDatum = (
+    output: TxTypes.TransactionOutput,
+  ): string | undefined => {
+    switch (output.format) {
+      case TxTypes.TxOutputFormat.ARRAY_LEGACY:
+        return undefined
+      case TxTypes.TxOutputFormat.MAP_BABBAGE:
+        return output.datum?.type === TxTypes.DatumType.INLINE
+          ? output.datum?.bytes.toString('hex')
+          : undefined
+      default:
+        throw Error(Errors.Unreachable)
+    }
+  }
+
   const prepareOutput = (
     output: TxTypes.TransactionOutput,
     network: Network,
     changeOutputFiles: HwSigningData[],
     signingMode: SigningMode,
   ): TrezorTypes.CardanoOutput => {
+    const format = output.format === TxTypes.TxOutputFormat.ARRAY_LEGACY
+      ? TrezorEnums.CardanoTxOutputSerializationFormat.ARRAY_LEGACY
+      : TrezorEnums.CardanoTxOutputSerializationFormat.MAP_BABBAGE
+
     const changeAddressParams = getAddressParameters(changeOutputFiles, output.address, network)
     const tokenBundle = output.amount.type === TxTypes.AmountType.WITH_MULTIASSET
       ? prepareTokenBundle(output.amount.multiasset, false) : []
-    const datumHash = output.datumHash?.toString('hex')
+
+    const datumHash = prepareDatumHash(output)
+    const inlineDatum = prepareInlineDatum(output)
+
+    const referenceScript = output.format === TxTypes.TxOutputFormat.MAP_BABBAGE
+      ? output.referenceScript?.toString('hex')
+      : undefined
 
     if (changeAddressParams && areAddressParamsAllowed(signingMode)) {
       return prepareChangeOutput(output.amount.coin, changeAddressParams, tokenBundle, datumHash)
     }
 
     return {
+      format,
       address: encodeAddress(output.address),
       amount: `${output.amount.coin}`,
       tokenBundle,
       datumHash,
+      inlineDatum,
+      referenceScript,
     }
   }
 
@@ -523,6 +567,11 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
       ),
     )
     const includeNetworkId = body.networkId !== undefined
+    const collateralReturn = body.collateralReturnOutput
+      ? prepareOutput(body.collateralReturnOutput, network, changeOutputFiles, signingMode)
+      : undefined
+    const totalCollateral = body.totalCollateral !== undefined ? `${body.totalCollateral}` : undefined
+    const referenceInputs = body.referenceInputs?.map((referenceInput) => prepareInput(referenceInput, null))
 
     const additionalWitnessRequests = prepareAdditionalWitnessRequests(mintSigningFiles, multisigSigningFiles)
 
@@ -544,6 +593,9 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
       requiredSigners,
       additionalWitnessRequests,
       includeNetworkId,
+      collateralReturn,
+      totalCollateral,
+      referenceInputs,
     }
 
     const response = await TrezorConnect.cardanoSignTransaction(request)
