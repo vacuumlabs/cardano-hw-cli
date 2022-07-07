@@ -484,7 +484,7 @@ export const LedgerCryptoProvider: (transport: Transport) => Promise<CryptoProvi
   ): string | undefined => scriptDataHash?.toString('hex')
 
   const prepareCollateralInput = (
-    collateralInput: TxTypes.Collateral,
+    collateralInput: TxTypes.TransactionInput,
     path: BIP32Path | null,
   ): LedgerTypes.TxInput => {
     if (collateralInput.index > Number.MAX_SAFE_INTEGER) {
@@ -622,7 +622,7 @@ export const LedgerCryptoProvider: (transport: Transport) => Promise<CryptoProvi
     const auxiliaryData = prepareMetaDataHashHex(body.metadataHash)
     const mint = body.mint ? prepareTokenBundle(body.mint) : null
     const scriptDataHashHex = prepareScriptDataHash(body.scriptDataHash)
-    const collaterals = body.collaterals?.map(
+    const collaterals = body.collateralInputs?.map(
       (collateralInput, i) => prepareCollateralInput(
         // first `inputs.length` signing files were assigned to inputs,
         // assign the following `collaterals.length` signing files to collateral inputs

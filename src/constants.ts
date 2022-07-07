@@ -32,6 +32,7 @@ export const cardanoEraToRawType: {[key in CardanoEra]: string} = {
   [CardanoEra.ALLEGRA]: 'TxBodyAllegra',
   [CardanoEra.MARY]: 'TxBodyMary',
   [CardanoEra.ALONZO]: 'TxBodyAlonzo',
+  [CardanoEra.BABBAGE]: 'TxBodyBabbage',
 }
 
 // Unwitnessed, Witnessed and Signed types follow the same CDDL format, they are just used
@@ -43,6 +44,7 @@ export const cardanoEraToUnwitnessedType: {[key in CardanoEra]: string} = {
   [CardanoEra.ALLEGRA]: 'Unwitnessed Tx AllegraEra',
   [CardanoEra.MARY]: 'Unwitnessed Tx MaryEra',
   [CardanoEra.ALONZO]: 'Unwitnessed Tx AlonzoEra',
+  [CardanoEra.BABBAGE]: 'Unwitnessed Tx BabbageEra',
 }
 
 export const cardanoEraToWitnessedType: {[key in CardanoEra]: string} = {
@@ -51,6 +53,7 @@ export const cardanoEraToWitnessedType: {[key in CardanoEra]: string} = {
   [CardanoEra.ALLEGRA]: 'Witnessed Tx AllegraEra',
   [CardanoEra.MARY]: 'Witnessed Tx MaryEra',
   [CardanoEra.ALONZO]: 'Witnessed Tx AlonzoEra',
+  [CardanoEra.BABBAGE]: 'Witnessed Tx BabbageEra',
 }
 
 export const cardanoEraToSignedType: {[key in CardanoEra]: string} = {
@@ -59,6 +62,7 @@ export const cardanoEraToSignedType: {[key in CardanoEra]: string} = {
   [CardanoEra.ALLEGRA]: 'Tx AllegraEra',
   [CardanoEra.MARY]: 'Tx MaryEra',
   [CardanoEra.ALONZO]: 'Tx AlonzoEra',
+  [CardanoEra.BABBAGE]: 'Tx BabbageEra',
 }
 
 export const txTypeToCardanoEra: {[key: string]: string} = {
@@ -73,6 +77,7 @@ export const cardanoEraToWitnessType: {[key in CardanoEra]: string} = {
   [CardanoEra.ALLEGRA]: 'TxWitness AllegraEra',
   [CardanoEra.MARY]: 'TxWitness MaryEra',
   [CardanoEra.ALONZO]: 'TxWitness AlonzoEra',
+  [CardanoEra.BABBAGE]: 'TxWitness BabbageEra',
 }
 
 export const txEnvelopeTypes: string[] = Object.keys(txTypeToCardanoEra)
