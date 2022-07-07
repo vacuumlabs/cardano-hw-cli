@@ -339,6 +339,70 @@ const transactions = {
     },
     network: 'TESTNET',
   },
+  babbage_inlineDatumAndReferenceScript: {
+    // cardano-cli transaction build-raw \
+    //   --babbage-era \
+    //   --tx-in "d44c3a039c9f4c4a117f91f7475974f64e51a3bfbc7729132f2ef0b025f76e06#1" \
+    //   --tx-out addr_test1wr0u45k44cxpjt3dhnql4dmc85flsc4qd779n078xfz9w6cv7yy37+10000000 \
+    //   --tx-out-inline-datum-value '"yet another chocolate"' \
+    //   --tx-out addr_test1qzq0nckg3ekgzuqg7w5p9mvgnd9ym28qh5grlph8xd2z92sj922xhxkn6twlq2wn4q50q352annk3903tj00h45mgfmsu8d9w5+5000000 \
+    //   --tx-out-reference-script-file docs/data/datum-equals-redeemer-v2.plutus \
+    //   --tx-out addr_test1qzq0nckg3ekgzuqg7w5p9mvgnd9ym28qh5grlph8xd2z92sj922xhxkn6twlq2wn4q50q352annk3903tj00h45mgfmsu8d9w5+31000000 \
+    //   --fee 4000000 \
+    //   --out-file tx.raw \
+    //   --cddl-format
+    cborHex: '84a30081825820d44c3a039c9f4c4a117f91f7475974f64e51a3bfbc7729132f2ef0b025f76e06010183a300581d70dfcad2d5ae0c192e2dbcc1fab7783d13f862a06fbc59bfc73244576b011a00989680028201d818565579657420616e6f746865722063686f636f6c617465a30058390080f9e2c88e6c817008f3a812ed889b4a4da8e0bd103f86e7335422aa122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277011a004c4b4003d8185846820258425840010000332233322222253353004333573466ebc00c00801801440204c98d4c01ccd5ce2481094e6f7420457175616c0000849848800848800480044800480041a20058390080f9e2c88e6c817008f3a812ed889b4a4da8e0bd103f86e7335422aa122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277011a01d905c0021a003d0900a0f5f6',
+    hwSigningFiles: [signingFiles.payment0],
+    witnesses: {
+      byronWitnesses: [],
+      shelleyWitnesses: [
+        {
+          key: 0,
+          data: [
+            Buffer.from('cd2b047d1a803eee059769cffb3dfd0a4b9327e55bc78aa962d9bd4f720db0b2', 'hex'),
+            Buffer.from('1134dcc754e30ef2cf7d5d38e43f9cc1f5f49316e1004f2f616663e35698a9b237a74094d3c6f7b79b32e908344cd6f4f0c6a824ea393dda727a59ecb86d1501', 'hex'),
+          ],
+          path: signingFiles.payment0.path,
+        },
+      ],
+    },
+    network: 'TESTNET',
+  },
+  babbage_plutus_v2: {
+    // cardano-cli transaction build-raw \
+    //   --babbage-era \
+    //   --tx-in "c16cd7176f1814396bb5437da4f97e92e8a166f374c3aa92124625b31b92d2c9#0" \
+    //   --spending-tx-in-reference "c16cd7176f1814396bb5437da4f97e92e8a166f374c3aa92124625b31b92d2c9#1" \
+    //   --spending-plutus-script-v2 \
+    //   --spending-reference-tx-in-inline-datum-present \
+    //   --spending-reference-tx-in-redeemer-value '"yet another chocolate"' \
+    //   --spending-reference-tx-in-execution-units "(2356125, 5002)" \
+    //   --tx-in-collateral "c16cd7176f1814396bb5437da4f97e92e8a166f374c3aa92124625b31b92d2c9#2" \
+    //   --tx-out-return-collateral "addr_test1qzq0nckg3ekgzuqg7w5p9mvgnd9ym28qh5grlph8xd2z92sj922xhxkn6twlq2wn4q50q352annk3903tj00h45mgfmsu8d9w5+23000000" \
+    //   --tx-out "addr_test1qzq0nckg3ekgzuqg7w5p9mvgnd9ym28qh5grlph8xd2z92sj922xhxkn6twlq2wn4q50q352annk3903tj00h45mgfmsu8d9w5+6000000" \
+    //   --fee 4000000 \
+    //   --tx-total-collateral 8000000 \
+    //   --protocol-params-file protocol.json \
+    //   --out-file tx.raw \
+    //   --cddl-format
+    // cardano-hw-cli transaction transform --tx-file tx.raw --out-file tx.transformed
+    cborHex: '84a80081825820c16cd7176f1814396bb5437da4f97e92e8a166f374c3aa92124625b31b92d2c9000181a20058390080f9e2c88e6c817008f3a812ed889b4a4da8e0bd103f86e7335422aa122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277011a005b8d80021a003d09000b582083664b0bce93f500e9eee751375bbc58dfd8c7ed87ce577193082f2965e96d480d81825820c16cd7176f1814396bb5437da4f97e92e8a166f374c3aa92124625b31b92d2c90210a20058390080f9e2c88e6c817008f3a812ed889b4a4da8e0bd103f86e7335422aa122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277011a015ef3c0111a007a12001281825820c16cd7176f1814396bb5437da4f97e92e8a166f374c3aa92124625b31b92d2c901a105818400005579657420616e6f746865722063686f636f6c6174658219138a1a0023f39df5f6',
+    hwSigningFiles: [signingFiles.payment0],
+    witnesses: {
+      byronWitnesses: [],
+      shelleyWitnesses: [
+        {
+          key: 0,
+          data: [
+            Buffer.from('cd2b047d1a803eee059769cffb3dfd0a4b9327e55bc78aa962d9bd4f720db0b2', 'hex'),
+            Buffer.from('3c92f3bf17a20040459cb9ce5f5bc6ce525d531c7bc4b229741a7133440e87e9975993106dc3acf91e256cbdedcdee4ee1371df3a35fc53f75e1573f6b85d60f', 'hex'),
+          ],
+          path: signingFiles.payment0.path,
+        },
+      ],
+    },
+    network: 'TESTNET',
+  },
 }
 
 async function testTxSigning(cryptoProvider, transaction) {
