@@ -1,5 +1,6 @@
 import * as TxTypes from 'cardano-hw-interop-lib'
-import TrezorConnect, * as TrezorTypes from 'trezor-connect'
+import TrezorConnect, * as TrezorTypes from '@trezor/connect'
+import { PROTO as TrezorEnums } from '@trezor/connect'
 import {
   TxCborHex,
   VotingRegistrationMetaDataCborHex,
@@ -244,7 +245,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     stakeSigningFiles: HwSigningData[],
     signingMode: SigningMode,
   ): TrezorTypes.CardanoCertificate => ({
-    type: TrezorTypes.CardanoCertificateType.STAKE_REGISTRATION,
+    type: TrezorEnums.CardanoCertificateType.STAKE_REGISTRATION,
     ...(_prepareStakeCredential(cert.stakeCredential, stakeSigningFiles, signingMode)),
   })
 
@@ -253,7 +254,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     stakeSigningFiles: HwSigningData[],
     signingMode: SigningMode,
   ): TrezorTypes.CardanoCertificate => ({
-    type: TrezorTypes.CardanoCertificateType.STAKE_DEREGISTRATION,
+    type: TrezorEnums.CardanoCertificateType.STAKE_DEREGISTRATION,
     ...(_prepareStakeCredential(cert.stakeCredential, stakeSigningFiles, signingMode)),
   })
 
@@ -262,7 +263,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     stakeSigningFiles: HwSigningData[],
     signingMode: SigningMode,
   ): TrezorTypes.CardanoCertificate => ({
-    type: TrezorTypes.CardanoCertificateType.STAKE_DELEGATION,
+    type: TrezorEnums.CardanoCertificateType.STAKE_DELEGATION,
     ...(_prepareStakeCredential(cert.stakeCredential, stakeSigningFiles, signingMode)),
     pool: cert.poolKeyHash.toString('hex'),
   })
@@ -325,7 +326,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     }
 
     return {
-      type: TrezorTypes.CardanoCertificateType.STAKE_POOL_REGISTRATION,
+      type: TrezorEnums.CardanoCertificateType.STAKE_POOL_REGISTRATION,
       path: null as any, // path can be null here, library type definition is wrong
       poolParameters,
     }
@@ -381,7 +382,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
   ): string | undefined => scriptDataHash?.toString('hex')
 
   const prepareCollateralInput = (
-    collateralInput: TxTypes.Collateral,
+    collateralInput: TxTypes.TransactionInput,
     path: BIP32Path | null,
   ): TrezorTypes.CardanoCollateralInput => {
     if (collateralInput.index > Number.MAX_SAFE_INTEGER) {
@@ -440,7 +441,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     })
     const [byronWitnesses, shelleyWitnesses] = partition(
       transformedWitnesses,
-      (witness) => witness.type === TrezorTypes.CardanoTxWitnessType.BYRON_WITNESS,
+      (witness) => witness.type === TrezorEnums.CardanoTxWitnessType.BYRON_WITNESS,
     )
 
     return {
@@ -459,18 +460,18 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
 
   const signingModeToTrezorType = (
     signingMode: SigningMode,
-  ): TrezorTypes.CardanoTxSigningMode => {
+  ): TrezorEnums.CardanoTxSigningMode => {
     switch (signingMode) {
       case SigningMode.ORDINARY_TRANSACTION:
-        return TrezorTypes.CardanoTxSigningMode.ORDINARY_TRANSACTION
+        return TrezorEnums.CardanoTxSigningMode.ORDINARY_TRANSACTION
       case SigningMode.POOL_REGISTRATION_AS_OWNER:
-        return TrezorTypes.CardanoTxSigningMode.POOL_REGISTRATION_AS_OWNER
+        return TrezorEnums.CardanoTxSigningMode.POOL_REGISTRATION_AS_OWNER
       case SigningMode.POOL_REGISTRATION_AS_OPERATOR:
         throw Error(Errors.TrezorPoolRegistrationAsOperatorNotSupported)
       case SigningMode.MULTISIG_TRANSACTION:
-        return TrezorTypes.CardanoTxSigningMode.MULTISIG_TRANSACTION
+        return TrezorEnums.CardanoTxSigningMode.MULTISIG_TRANSACTION
       case SigningMode.PLUTUS_TRANSACTION:
-        return TrezorTypes.CardanoTxSigningMode.PLUTUS_TRANSACTION
+        return TrezorEnums.CardanoTxSigningMode.PLUTUS_TRANSACTION
       default:
         throw Error(Errors.Unreachable)
     }
@@ -507,7 +508,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     const auxiliaryData = prepareMetaDataHashHex(body.metadataHash)
     const mint = body.mint ? prepareTokenBundle(body.mint, true) : undefined
     const scriptDataHash = prepareScriptDataHash(body.scriptDataHash)
-    const collateralInputs = body.collaterals?.map(
+    const collateralInputs = body.collateralInputs?.map(
       (collateralInput, i) => prepareCollateralInput(
         // first `inputs.length` signing files were assigned to inputs,
         // assign the following `collaterals.length` signing files to collateral inputs
@@ -581,14 +582,14 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     nonce: BigInt,
   ): TrezorTypes.CardanoAuxiliaryData => {
     const prepareAddressParameters = () => {
-      if (addressParameters.addressType === TrezorTypes.CardanoAddressType.BASE) {
+      if (addressParameters.addressType === TrezorEnums.CardanoAddressType.BASE) {
         return {
           addressType: addressParameters.addressType,
           path: addressParameters.paymentPath as BIP32Path,
           stakingPath: addressParameters.stakePath,
         }
       }
-      if (addressParameters.addressType === TrezorTypes.CardanoAddressType.REWARD) {
+      if (addressParameters.addressType === TrezorEnums.CardanoAddressType.REWARD) {
         return {
           addressType: addressParameters.addressType,
           stakingPath: addressParameters.stakePath as BIP32Path,
@@ -615,7 +616,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
 
   const prepareDummyOutput = (): TrezorTypes.CardanoOutput => ({
     addressParameters: {
-      addressType: TrezorTypes.CardanoAddressType.BASE,
+      addressType: TrezorEnums.CardanoAddressType.BASE,
       path: parseBIP32Path('1852H/1815H/0H/0/0'),
       stakingPath: parseBIP32Path('1852H/1815H/0H/2/0'),
     },
@@ -626,7 +627,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     network: Network,
     auxiliaryData: TrezorTypes.CardanoAuxiliaryData,
   ): TrezorTypes.CommonParams & TrezorTypes.CardanoSignTransaction => ({
-    signingMode: TrezorTypes.CardanoTxSigningMode.ORDINARY_TRANSACTION,
+    signingMode: TrezorEnums.CardanoTxSigningMode.ORDINARY_TRANSACTION,
     protocolMagic: network.protocolMagic,
     networkId: network.networkId,
     inputs: [prepareDummyInput()],
@@ -693,39 +694,39 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
         const path = findSigningPathForKeyHash(Buffer.from(nativeScript.keyHash, 'hex'), signingFiles)
         if (path) {
           return {
-            type: TrezorTypes.CardanoNativeScriptType.PUB_KEY,
+            type: TrezorEnums.CardanoNativeScriptType.PUB_KEY,
             keyPath: path,
           }
         }
         return {
-          type: TrezorTypes.CardanoNativeScriptType.PUB_KEY,
+          type: TrezorEnums.CardanoNativeScriptType.PUB_KEY,
           keyHash: nativeScript.keyHash,
         }
       }
       case NativeScriptType.ALL:
         return {
-          type: TrezorTypes.CardanoNativeScriptType.ALL,
+          type: TrezorEnums.CardanoNativeScriptType.ALL,
           scripts: nativeScript.scripts.map((s) => nativeScriptToTrezorTypes(s, signingFiles)),
         }
       case NativeScriptType.ANY:
         return {
-          type: TrezorTypes.CardanoNativeScriptType.ANY,
+          type: TrezorEnums.CardanoNativeScriptType.ANY,
           scripts: nativeScript.scripts.map((s) => nativeScriptToTrezorTypes(s, signingFiles)),
         }
       case NativeScriptType.N_OF_K:
         return {
-          type: TrezorTypes.CardanoNativeScriptType.N_OF_K,
+          type: TrezorEnums.CardanoNativeScriptType.N_OF_K,
           requiredSignaturesCount: Number(nativeScript.required),
           scripts: nativeScript.scripts.map((s) => nativeScriptToTrezorTypes(s, signingFiles)),
         }
       case NativeScriptType.INVALID_BEFORE:
         return {
-          type: TrezorTypes.CardanoNativeScriptType.INVALID_BEFORE,
+          type: TrezorEnums.CardanoNativeScriptType.INVALID_BEFORE,
           invalidBefore: nativeScript.slot.toString(10),
         }
       case NativeScriptType.INVALID_HEREAFTER:
         return {
-          type: TrezorTypes.CardanoNativeScriptType.INVALID_HEREAFTER,
+          type: TrezorEnums.CardanoNativeScriptType.INVALID_HEREAFTER,
           invalidHereafter: nativeScript.slot.toString(10),
         }
       default:
@@ -735,12 +736,12 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
 
   const nativeScriptDisplayFormatToTrezorType = (
     displayFormat: NativeScriptDisplayFormat,
-  ): TrezorTypes.CardanoNativeScriptHashDisplayFormat => {
+  ): TrezorEnums.CardanoNativeScriptHashDisplayFormat => {
     switch (displayFormat) {
       case NativeScriptDisplayFormat.BECH32:
-        return TrezorTypes.CardanoNativeScriptHashDisplayFormat.BECH32
+        return TrezorEnums.CardanoNativeScriptHashDisplayFormat.BECH32
       case NativeScriptDisplayFormat.POLICY_ID:
-        return TrezorTypes.CardanoNativeScriptHashDisplayFormat.POLICY_ID
+        return TrezorEnums.CardanoNativeScriptHashDisplayFormat.POLICY_ID
       default:
         throw Error(Errors.Unreachable)
     }
