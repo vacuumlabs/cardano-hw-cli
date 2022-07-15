@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "es2019",
+    "target": "es2021",
     "module": "commonjs",
     "moduleResolution": "node",
     "sourceMap": true,
@@ -10,6 +10,6 @@
     "forceConsistentCasingInFileNames": true,
     "noImplicitAny": false,
     "skipLibCheck": true,
-    "lib": ["es2020"]
+    "lib": ["es2021"]
   },
 }

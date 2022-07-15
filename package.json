@@ -1,8 +1,9 @@
 {
   "name": "cardano-hw-cli",
   "version": "1.10.0",
+  "commit": "cd28f24c19c32ad2087944a2faff76714bfbdf77",
   "engines": {
-    "node": "14.17.6"
+    "node": "16.16.0"
   },
   "description": "Cardano CLI tool for hardware wallets",
   "main": "src/index.ts",
@@ -10,18 +11,18 @@
     "build-js": "tsc",
     "dev": "yarn build-js && node dist/index.js",
     "eslint": "eslint src/ test/ --max-warnings=0 --ext .ts,.js",
-    "build": "./scripts/build-all.sh && rm _package.json",
-    "build-linux-deb": "./scripts/build-common.sh && ./scripts/build-linux-deb-package.sh && rm _package.json",
-    "build-linux-tar": "./scripts/build-common.sh && ./scripts/build-linux-tar-gz.sh && rm _package.json",
-    "build-windows": "./scripts/build-common.sh && ./scripts/build-windows.sh && rm _package.json",
-    "build-macos": "./scripts/build-common.sh && ./scripts/build-macos.sh && rm _package.json",
+    "build": "./scripts/build-all.sh",
+    "build-linux-deb": "./scripts/build-common.sh && ./scripts/build-linux-deb-package.sh",
+    "build-linux-tar": "./scripts/build-common.sh && ./scripts/build-linux-tar-gz.sh",
+    "build-windows": "./scripts/build-common.sh && ./scripts/build-windows.sh",
+    "build-macos": "./scripts/build-common.sh && ./scripts/build-macos.sh",
     "test-unit": "mocha -r ts-node/register 'test/unit/**/*.js'",
     "test-bin": "yarn build && ./build/linux/archive/cardano-hw-cli/cardano-hw-cli --help",
     "test-integration-ledger": "mocha -r ts-node/register 'test/integration/ledger/node/**/*.js' --exit",
     "test-integration-ledger-speculos": "LEDGER_TRANSPORT=speculos yarn test-integration-ledger",
     "test-integration-trezor": "mocha -r ts-node/register 'test/integration/trezor/node/**/*.js' --exit",
     "clean": "rm -rf ./dist && rm -rf ./node_modules",
-    "nexe": "nexe"
+    "pkg": "pkg"
   },
   "repository": {
     "type": "git",
@@ -48,21 +49,22 @@
     "cardano-hw-interop-lib": "https://github.com/vacuumlabs/cardano-hw-interop-lib/releases/download/v1.0.0-rc.1/cardano-hw-interop-lib-v1.0.0-rc.1.tgz",
     "cbor": "^7.0.4",
     "lodash": "^4.17.21",
-    "promise.any": "^2.0.3",
     "rw": "1.3.3"
   },
   "devDependencies": {
     "@ledgerhq/hw-transport-node-speculos": "^6.11.2",
     "@types/argparse": "^2.0.10",
-    "@types/promise.any": "^2.0.0",
     "@typescript-eslint/eslint-plugin": "^5.17.0",
     "@typescript-eslint/parser": "^5.17.0",
     "eslint": "^8.12.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-plugin-import": "^2.25.4",
     "mocha": "^9.1.3",
-    "nexe": "4.0.0-beta.19",
+    "pkg": "^5.8.0",
     "ts-node": "^9.0.0",
     "typescript": "^4.0.3"
+  },
+  "pkg": {
+    "assets": "package.json"
   }
 }

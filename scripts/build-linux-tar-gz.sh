@@ -14,11 +14,10 @@ mkdir ./build/linux/archive
 mkdir ./build/linux/archive/cardano-hw-cli
 
 # Build executable
-yarn nexe ./dist/index.js -o ./build/linux/archive/cardano-hw-cli/cardano-hw-cli -t linux-x64-14.15.3
+yarn pkg ./dist/index.js -o ./build/linux/archive/cardano-hw-cli/cardano-hw-cli -c package.json -t node16-linux-x64
 
 # Copy dependencies
-cp _package.json ./build/linux/archive/cardano-hw-cli/package.json
-cp -R ./build/dependencies/linux/Release ./build/linux/archive/cardano-hw-cli/Release
+cp -R ./build/dependencies/linux/* ./build/linux/archive/cardano-hw-cli/
 
 # Archive
 cd ./build/linux/archive

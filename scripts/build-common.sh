@@ -7,8 +7,6 @@ yarn clean
 yarn install
 yarn build-js
 
-# Create _package.json with latest commit hash
-rm _package.json 2> /dev/null
-cp package.json _package.json
+# Update commit hash in package.json
 COMMIT_HASH=$(git rev-parse HEAD)
-sed -i '2 i \ \ "commit":"'${COMMIT_HASH}'",' _package.json
+sed -i '/"commit":.*,/d' package.json && sed -i '4 i \  "commit": "'${COMMIT_HASH}'",\' package.json
