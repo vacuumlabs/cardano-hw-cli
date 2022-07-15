@@ -1,0 +1,5 @@
+{
+    "type": "Unwitnessed Tx AlonzoEra",
+    "description": "Ledger Cddl Format",
+    "cborHex": "84a40081825820bc8bf52ea894fb8e442fe3eea628be87d0c9a37baef185b70eb00a5c8a849d3b0001818258390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c1a0023583c021a00029b75031a01a3bd8fa0f5f6"
+}

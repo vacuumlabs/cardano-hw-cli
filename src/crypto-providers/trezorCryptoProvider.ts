@@ -604,6 +604,8 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
       throw Error(Errors.TxSerializationMismatchError)
     }
 
+    console.log({ trezorHash: response.payload.hash, txBodyHashHex })
+
     return response.payload.witnesses
   }
 

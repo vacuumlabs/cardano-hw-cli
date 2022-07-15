@@ -714,6 +714,8 @@ export const LedgerCryptoProvider: (transport: Transport) => Promise<CryptoProvi
       additionalWitnessPaths: additionalWitnessRequests,
     })
 
+    console.log({ ledgerHash: response.txHashHex, txBodyHashHex })
+
     if (response.txHashHex !== txBodyHashHex) {
       throw Error(Errors.TxSerializationMismatchError)
     }
