@@ -14,11 +14,10 @@ mkdir ./build/windows
 mkdir ./build/windows/cardano-hw-cli
 
 # Build executable
-yarn nexe ./dist/index.js -o ./build/windows/cardano-hw-cli/cardano-hw-cli -t windows-x64-14.15.3
+yarn pkg ./dist/index.js -o ./build/windows/cardano-hw-cli/cardano-hw-cli -c package.json -t node16-win-x64
 
 # Copy dependencies
-cp _package.json ./build/windows/cardano-hw-cli/package.json
-cp -R ./build/dependencies/windows/Release ./build/windows/cardano-hw-cli/Release
+cp -R ./build/dependencies/windows/* ./build/windows/cardano-hw-cli/
 
 # Archive
 cd ./build/windows
