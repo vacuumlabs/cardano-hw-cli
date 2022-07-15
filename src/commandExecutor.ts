@@ -1,5 +1,4 @@
 import * as InteropLib from 'cardano-hw-interop-lib'
-import promiseAny from 'promise.any'
 import TransportNodeHid from '@ledgerhq/hw-transport-node-hid-noevents'
 import { CryptoProvider } from './crypto-providers/types'
 import {
@@ -60,7 +59,7 @@ const promiseTimeout = <T> (promise: Promise<T>, ms: number): Promise<T> => {
 const getCryptoProvider = async (): Promise<CryptoProvider> => {
   const ledgerPromise = async () => LedgerCryptoProvider(await TransportNodeHid.create())
   const trezorPromise = async () => TrezorCryptoProvider()
-  const cryptoProviderPromise = promiseAny([ledgerPromise(), trezorPromise()])
+  const cryptoProviderPromise = Promise.any([ledgerPromise(), trezorPromise()])
 
   try {
     return await promiseTimeout(cryptoProviderPromise, 5000)

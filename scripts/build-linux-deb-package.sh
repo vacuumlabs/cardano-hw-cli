@@ -26,11 +26,10 @@ mkdir ./build/linux/deb/${PACKAGE}_${VERSION}/usr/share/cardano-hw-cli
 mkdir ./build/linux/deb/${PACKAGE}_${VERSION}/DEBIAN
 
 # Build executable
-yarn nexe ./dist/index.js -o ./build/linux/deb/cardano-hw-cli -t linux-x64-14.15.3
+yarn pkg ./dist/index.js -o ./build/linux/deb/cardano-hw-cli -c package.json -t node16-linux-x64
 
 # Copy files to package structure
-cp -R ./build/dependencies/linux/Release ./build/linux/deb/${PACKAGE}_${VERSION}/usr/share/cardano-hw-cli
-cp ./_package.json ./build/linux/deb/${PACKAGE}_${VERSION}/usr/share/cardano-hw-cli/package.json
+cp -R ./build/dependencies/linux/* ./build/linux/deb/${PACKAGE}_${VERSION}/usr/share/cardano-hw-cli
 cp ./build/linux/deb/cardano-hw-cli ./build/linux/deb/${PACKAGE}_${VERSION}/usr/share/cardano-hw-cli
 ln -s /usr/share/cardano-hw-cli/cardano-hw-cli ./build/linux/deb/${PACKAGE}_${VERSION}/usr/bin
 
