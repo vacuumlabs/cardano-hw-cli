@@ -1,9 +1,9 @@
 {
   "name": "cardano-hw-cli",
-  "version": "1.11.0-rc.1",
-  "commit": "cd28f24c19c32ad2087944a2faff76714bfbdf77",
+  "version": "1.11.0-rc.2",
+  "commit": "8872718cebdfc2b509ebad5121e4a7324d99e8e8",
   "engines": {
-    "node": "16.16.0"
+    "node": "18.7.0"
   },
   "description": "Cardano CLI tool for hardware wallets",
   "main": "src/index.ts",

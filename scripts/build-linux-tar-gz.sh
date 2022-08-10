@@ -14,7 +14,7 @@ mkdir ./build/linux/archive
 mkdir ./build/linux/archive/cardano-hw-cli
 
 # Build executable
-yarn pkg ./dist/index.js -o ./build/linux/archive/cardano-hw-cli/cardano-hw-cli -c package.json -t node16-linux-x64
+yarn pkg ./dist/index.js -o ./build/linux/archive/cardano-hw-cli/cardano-hw-cli -c package.json -t node18-linux-x64
 
 # Copy dependencies
 cp -R ./build/dependencies/linux/* ./build/linux/archive/cardano-hw-cli/
