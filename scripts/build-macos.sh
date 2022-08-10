@@ -14,7 +14,7 @@ mkdir ./build/macos 2> /dev/null
 mkdir ./build/macos/cardano-hw-cli
 
 # Build executable
-yarn pkg ./dist/index.js -o ./build/macos/cardano-hw-cli/cardano-hw-cli -c package.json -t node16-macos
+yarn pkg ./dist/index.js -o ./build/macos/cardano-hw-cli/cardano-hw-cli -c package.json -t node18-macos
 
 # Copy dependencies
 cp -R ./build/dependencies/macos/* ./build/macos/cardano-hw-cli/

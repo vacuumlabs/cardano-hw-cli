@@ -14,7 +14,7 @@ mkdir ./build/windows
 mkdir ./build/windows/cardano-hw-cli
 
 # Build executable
-yarn pkg ./dist/index.js -o ./build/windows/cardano-hw-cli/cardano-hw-cli -c package.json -t node16-win-x64
+yarn pkg ./dist/index.js -o ./build/windows/cardano-hw-cli/cardano-hw-cli -c package.json -t node18-win-x64
 
 # Copy dependencies
 cp -R ./build/dependencies/windows/* ./build/windows/cardano-hw-cli/
