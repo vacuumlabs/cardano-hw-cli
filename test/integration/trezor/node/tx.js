@@ -123,6 +123,7 @@ const transactions = {
   withMultiAssetInputAndOutput: {
     unsignedCborHex: '82a30081825820ac9f9da514965a72270f3dea9f401e509a8e8f8af2716e88a182b399adc233c60101818258390080f9e2c88e6c817008f3a812ed889b4a4da8e0bd103f86e7335422aa122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277821a00958940a2581c0b1bda00e69de8d554eeafe22b04541fbb2ff89a61d12049f55ba688a14a6669727374617373657401581c95a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39a24a66697273746173736574014b7365636f6e64617373657401021a00030d40f6',
     hwSigningFiles: [signingFiles.payment0],
+    changeOutputFiles: [signingFiles.payment0, signingFiles.stake0],
     signedTxCborHex: '83a30081825820ac9f9da514965a72270f3dea9f401e509a8e8f8af2716e88a182b399adc233c60101818258390080f9e2c88e6c817008f3a812ed889b4a4da8e0bd103f86e7335422aa122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277821a00958940a2581c0b1bda00e69de8d554eeafe22b04541fbb2ff89a61d12049f55ba688a14a6669727374617373657401581c95a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39a24a66697273746173736574014b7365636f6e64617373657401021a00030d40a100818258205d010cf16fdeff40955633d6c565f3844a288a24967cf6b76acbeb271b4f13c15840dfa1fdf3c3e4c2eb4e6afb9ff4ec5cf9b9ee25016787eac9f22ae5963b35c6c3295064d4ef141d2a68e218553c0a3c282d74cf3d796f42f9dc00d178ec604b04f6',
     network: 'TESTNET_LEGACY',
   },
@@ -267,6 +268,7 @@ const transactions = {
     //   --cddl-format
     cborHex: '84a30081825820d44c3a039c9f4c4a117f91f7475974f64e51a3bfbc7729132f2ef0b025f76e06010183a300581d70dfcad2d5ae0c192e2dbcc1fab7783d13f862a06fbc59bfc73244576b011a00989680028201d818565579657420616e6f746865722063686f636f6c617465a30058390080f9e2c88e6c817008f3a812ed889b4a4da8e0bd103f86e7335422aa122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277011a004c4b4003d8185846820258425840010000332233322222253353004333573466ebc00c00801801440204c98d4c01ccd5ce2481094e6f7420457175616c0000849848800848800480044800480041a20058390080f9e2c88e6c817008f3a812ed889b4a4da8e0bd103f86e7335422aa122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277011a01d905c0021a003d0900a0f5f6',
     hwSigningFiles: [signingFiles.payment0],
+    changeOutputFiles: [signingFiles.payment0, signingFiles.stake0],
     witnesses: {
       byronWitnesses: [],
       shelleyWitnesses: [
@@ -330,8 +332,9 @@ async function testTxSigning(cryptoProvider, transaction) {
     hwSigningFileData: transaction.hwSigningFiles,
     network: NETWORKS[transaction.network],
   }
+  const changeOutputFiles = transaction.changeOutputFiles || []
   validateSigning(signingParameters)
-  const signedTxCborHex = await cryptoProvider.signTx(signingParameters, [])
+  const signedTxCborHex = await cryptoProvider.signTx(signingParameters, changeOutputFiles)
   assert.deepStrictEqual(signedTxCborHex, transaction.signedTxCborHex)
 }
 
@@ -357,8 +360,9 @@ async function testTxWitnessing(cryptoProvider, transaction) {
     hwSigningFileData: transaction.hwSigningFiles,
     network: NETWORKS[transaction.network],
   }
+  const changeOutputFiles = transaction.changeOutputFiles || []
   validateWitnessing(signingParameters)
-  const witnesses = await cryptoProvider.witnessTx(signingParameters, [])
+  const witnesses = await cryptoProvider.witnessTx(signingParameters, changeOutputFiles)
   assert.deepStrictEqual(witnesses, transaction.witnesses)
 }
 
