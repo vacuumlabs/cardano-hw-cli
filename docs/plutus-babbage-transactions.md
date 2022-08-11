@@ -29,7 +29,7 @@ cardano-cli transaction build-raw \
 ### Creating the unsigned transaction
 ```sh
 cardano-cli transaction build-raw \
---alonzo-era \
+--babbage-era \
 --tx-in "1789f11f03143338cfcc0dbf3a93ad8f177e8698fc37ab3ab17c954cf2b28ee8#0" \
 --spending-tx-in-reference "1789f11f03143338cfcc0dbf3a93ad8f177e8698fc37ab3ab17c954cf2b28ee8#1" \
 --spending-plutus-script-v2 \
