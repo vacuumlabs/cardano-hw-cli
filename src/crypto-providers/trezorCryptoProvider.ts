@@ -169,23 +169,6 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     }
   })
 
-  const prepareChangeOutput = (
-    lovelaceAmount: TxTypes.Uint,
-    changeAddress: _AddressParameters,
-    tokenBundle?: TrezorTypes.CardanoAssetGroup[],
-    datumHash?: string,
-  ): TrezorTypes.CardanoOutput => ({
-    format: TrezorEnums.CardanoTxOutputSerializationFormat.MAP_BABBAGE,
-    amount: `${lovelaceAmount}`,
-    addressParameters: {
-      addressType: changeAddress.addressType,
-      path: changeAddress.paymentPath as BIP32Path,
-      stakingPath: changeAddress.stakePath,
-    },
-    tokenBundle,
-    datumHash,
-  })
-
   const prepareDatumHash = (
     output: TxTypes.TransactionOutput,
   ): string | undefined => {
@@ -216,6 +199,31 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     }
   }
 
+  const prepareDestination = (
+    address: Buffer,
+    changeAddressParams: _AddressParameters | null,
+    signingMode: SigningMode,
+  ): {
+    address: string
+  } | {
+    addressParameters: TrezorTypes.CardanoAddressParameters
+  } => {
+    if (changeAddressParams && areAddressParamsAllowed(signingMode)) {
+      // paymentPath should always be defined if changeAddressParams are defined
+      if (!changeAddressParams.paymentPath) throw Error(Errors.Unreachable)
+
+      return {
+        addressParameters: {
+          addressType: changeAddressParams.addressType,
+          path: changeAddressParams.paymentPath,
+          stakingPath: changeAddressParams.stakePath,
+        },
+      }
+    }
+
+    return { address: encodeAddress(address) }
+  }
+
   const prepareOutput = (
     output: TxTypes.TransactionOutput,
     network: Network,
@@ -237,13 +245,9 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
       ? output.referenceScript?.toString('hex')
       : undefined
 
-    if (changeAddressParams && areAddressParamsAllowed(signingMode)) {
-      return prepareChangeOutput(output.amount.coin, changeAddressParams, tokenBundle, datumHash)
-    }
-
     return {
       format,
-      address: encodeAddress(output.address),
+      ...prepareDestination(output.address, changeAddressParams, signingMode),
       amount: `${output.amount.coin}`,
       tokenBundle,
       datumHash,
