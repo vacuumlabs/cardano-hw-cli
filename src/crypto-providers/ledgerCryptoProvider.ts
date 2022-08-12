@@ -212,7 +212,7 @@ export const LedgerCryptoProvider: (transport: Transport) => Promise<CryptoProvi
     const datumHashHex = prepareDatumHash(output)
     const datum = prepareDatum(output)
 
-    const scriptHex = output.format === TxTypes.TxOutputFormat.MAP_BABBAGE
+    const referenceScriptHex = output.format === TxTypes.TxOutputFormat.MAP_BABBAGE
       ? output.referenceScript?.toString('hex')
       : undefined
 
@@ -225,7 +225,7 @@ export const LedgerCryptoProvider: (transport: Transport) => Promise<CryptoProvi
       tokenBundle,
       datumHashHex,
       datum,
-      scriptHex,
+      referenceScriptHex,
     }
   }
 
