@@ -631,6 +631,11 @@ available-typed-arrays@^1.0.5:
   resolved "https://registry.yarnpkg.com/available-typed-arrays/-/available-typed-arrays-1.0.5.tgz#92f95616501069d07d10edb2fc37d3e1c65123b7"
   integrity sha512-DMD0KiN46eipeziST1LPP/STfDU0sufISXmjSgvVsoU2tqxctQeASejWcfNtxYKqETM1UxQ8sp2OrSBWpHY6sw==
 
+b4a@^1.0.1:
+  version "1.6.0"
+  resolved "https://registry.yarnpkg.com/b4a/-/b4a-1.6.0.tgz#5430a9cac1af388910dd1a1c1aa9d3a0a796ed68"
+  integrity sha512-fsTxXxj1081Yq5MOQ06gZ5+e2QcSyP2U6NofdOWyq+lrNI4IjkZ+fLVmoQ6uUCiNg1NWePMMVq93vOTdbJmErw==
+
 balanced-match@^1.0.0:
   version "1.0.2"
   resolved "https://registry.yarnpkg.com/balanced-match/-/balanced-match-1.0.2.tgz#e83e3a7e3f300b34cb9d87f615fa0cbf357690ee"
@@ -746,6 +751,22 @@ blake2@^4.0.2:
   integrity sha512-HUmkY0MUDUVgejJVNrpNKAva8C4IWD/Rd862sdexoSibu86b6iu0gO0/RjovO2lM5+w6JqjIEmkuAgGhfHlnJw==
   dependencies:
     nan "^2.15.0"
+
+blake2b-wasm@^2.4.0:
+  version "2.4.0"
+  resolved "https://registry.yarnpkg.com/blake2b-wasm/-/blake2b-wasm-2.4.0.tgz#9115649111edbbd87eb24ce7c04b427e4e2be5be"
+  integrity sha512-S1kwmW2ZhZFFFOghcx73+ZajEfKBqhP82JMssxtLVMxlaPea1p9uoLiUZ5WYyHn0KddwbLc+0vh4wR0KBNoT5w==
+  dependencies:
+    b4a "^1.0.1"
+    nanoassert "^2.0.0"
+
+blake2b@^2.1.4:
+  version "2.1.4"
+  resolved "https://registry.yarnpkg.com/blake2b/-/blake2b-2.1.4.tgz#817d278526ddb4cd673bfb1af16d1ad61e393ba3"
+  integrity sha512-AyBuuJNI64gIvwx13qiICz6H6hpmjvYS5DGkG6jbXMOT8Z3WUJ3V1X0FlhIoT1b/5JtHE3ki+xjtMvu1nn+t9A==
+  dependencies:
+    blake2b-wasm "^2.4.0"
+    nanoassert "^2.0.0"
 
 blakejs@^1.2.1:
   version "1.2.1"
@@ -885,11 +906,12 @@ cardano-crypto.js@^5.3.6-rc.6:
     borc "^2.1.1"
     pbkdf2 "^3.0.17"
 
-cardano-hw-interop-lib@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/cardano-hw-interop-lib/-/cardano-hw-interop-lib-1.0.0.tgz#347b8908786e0e1197b940e59fb88a1e16267303"
-  integrity sha512-zePiz2ojd2Hlzbmf3vfj3T8aP7Zv8SeGmayO80uUg/WOjT67q9NjDZMfRiVVa0tjR2s7nr3NYgNPNUKUCFBLZg==
+cardano-hw-interop-lib@^1.1.0:
+  version "1.1.0"
+  resolved "https://registry.yarnpkg.com/cardano-hw-interop-lib/-/cardano-hw-interop-lib-1.1.0.tgz#819dacda60c6ffaadeafb36f0331f10f821e6686"
+  integrity sha512-ltwVMmTNfPudYioXvmnlhPuTEVbSF/AfXScHS1S5p1580xYikEzmVeCyj6U51E9/wBFLUhyGcpPC7Yvf5+8LCQ==
   dependencies:
+    blake2b "^2.1.4"
     cbor "^8.1.0"
 
 cashaddrjs@0.4.4:
@@ -2263,6 +2285,11 @@ nan@^2.13.2, nan@^2.15.0:
   version "2.16.0"
   resolved "https://registry.yarnpkg.com/nan/-/nan-2.16.0.tgz#664f43e45460fb98faf00edca0bb0d7b8dce7916"
   integrity sha512-UdAqHyFngu7TfQKsCBgAA6pWDkT8MAO7d0jyOecVhN5354xbLqdn8mV9Tat9gepAupm0bt2DbeaSC8vS52MuFA==
+
+nanoassert@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/nanoassert/-/nanoassert-2.0.0.tgz#a05f86de6c7a51618038a620f88878ed1e490c09"
+  integrity sha512-7vO7n28+aYO4J+8w96AzhmU8G+Y/xpPDJz/se19ICsqj/momRbb9mh9ZUtkoJ5X3nTnPdhEJyc0qnM6yAsHBaA==
 
 nanoid@3.3.1:
   version "3.3.1"
