@@ -514,13 +514,13 @@ export const LedgerCryptoProvider: (transport: Transport) => Promise<CryptoProvi
     validityIntervalStart: TxTypes.Uint | undefined,
   ): string | undefined => validityIntervalStart?.toString()
 
-  const prepareMetaDataHashHex = (
-    metaDataHash: Buffer | undefined,
+  const prepareAuxiliaryDataHashHex = (
+    auxiliaryDataHash: Buffer | undefined,
   ): LedgerTypes.TxAuxiliaryData | undefined => (
-    metaDataHash ? ({
+    auxiliaryDataHash ? ({
       type: LedgerTypes.TxAuxiliaryDataType.ARBITRARY_HASH,
       params: {
-        hashHex: metaDataHash.toString('hex'),
+        hashHex: auxiliaryDataHash.toString('hex'),
       },
     }) : undefined
   )
@@ -665,7 +665,7 @@ export const LedgerCryptoProvider: (transport: Transport) => Promise<CryptoProvi
     const withdrawals = body.withdrawals?.map(
       (withdrawal) => prepareWithdrawal(withdrawal, stakeSigningFiles, signingMode),
     )
-    const auxiliaryData = prepareMetaDataHashHex(body.metadataHash)
+    const auxiliaryData = prepareAuxiliaryDataHashHex(body.auxiliaryDataHash)
     const mint = body.mint ? prepareTokenBundle(body.mint) : null
     const scriptDataHashHex = prepareScriptDataHash(body.scriptDataHash)
     const collateralInputs = body.collateralInputs?.map(

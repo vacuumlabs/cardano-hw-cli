@@ -417,11 +417,11 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     validityIntervalStart: TxTypes.Uint | undefined,
   ): string | undefined => validityIntervalStart?.toString()
 
-  const prepareMetaDataHashHex = (
-    metaDataHash: Buffer | undefined,
+  const prepareAuxiliaryDataHashHex = (
+    auxiliaryDataHash: Buffer | undefined,
   ): TrezorTypes.CardanoAuxiliaryData | undefined => (
-    metaDataHash ? ({
-      hash: metaDataHash.toString('hex'),
+    auxiliaryDataHash ? ({
+      hash: auxiliaryDataHash.toString('hex'),
     }) : undefined
   )
 
@@ -553,7 +553,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     const withdrawals = body.withdrawals?.map(
       (withdrawal) => prepareWithdrawal(withdrawal, stakeSigningFiles, signingMode),
     )
-    const auxiliaryData = prepareMetaDataHashHex(body.metadataHash)
+    const auxiliaryData = prepareAuxiliaryDataHashHex(body.auxiliaryDataHash)
     const mint = body.mint ? prepareTokenBundle(body.mint, true) : undefined
     const scriptDataHash = prepareScriptDataHash(body.scriptDataHash)
     const collateralInputs = body.collateralInputs?.map(
