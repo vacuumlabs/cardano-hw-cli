@@ -1,7 +1,7 @@
 {
   "name": "cardano-hw-cli",
   "version": "1.11.0-rc.4",
-  "commit": "8872718cebdfc2b509ebad5121e4a7324d99e8e8",
+  "commit": "48631c15c123523599ff75cc7151e3400aeeeb89",
   "engines": {
     "node": "18.7.0"
   },
@@ -66,5 +66,8 @@
   },
   "pkg": {
     "assets": "package.json"
+  },
+  "resolutions": {
+    "node-abi": "^3.24.0"
   }
 }
