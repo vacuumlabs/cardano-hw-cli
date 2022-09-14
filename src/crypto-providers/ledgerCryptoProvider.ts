@@ -33,7 +33,6 @@ import {
 } from './types'
 import {
   findSigningPathForKeyHash,
-  getSigningPath,
   PathTypes,
   classifyPath,
   getAddressAttributes,
@@ -104,18 +103,13 @@ export const LedgerCryptoProvider: (transport: Transport) => Promise<CryptoProvi
   }
 
   const prepareInput = (
-    signingMode: SigningMode,
     input: TxTypes.TransactionInput,
-    path: BIP32Path | null,
   ): LedgerTypes.TxInput => {
-    const pathToUse = (signingMode === SigningMode.POOL_REGISTRATION_AS_OWNER)
-      ? null // inputs are required to be given without path in this case
-      : path
     if (input.index > Number.MAX_SAFE_INTEGER) {
       throw Error(Errors.InvalidInputError)
     }
     return {
-      path: pathToUse,
+      path: null, // all payment paths are added added as additionalWitnessRequests
       txHashHex: input.transactionId.toString('hex'),
       outputIndex: Number(input.index),
     }
@@ -531,13 +525,12 @@ export const LedgerCryptoProvider: (transport: Transport) => Promise<CryptoProvi
 
   const prepareCollateralInput = (
     collateralInput: TxTypes.TransactionInput,
-    path: BIP32Path | null,
   ): LedgerTypes.TxInput => {
     if (collateralInput.index > Number.MAX_SAFE_INTEGER) {
       throw Error(Errors.InvalidCollateralInputError)
     }
     return {
-      path,
+      path: null, // all payment paths are added added as additionalWitnessRequests
       txHashHex: collateralInput.transactionId.toString('hex'),
       outputIndex: Number(collateralInput.index),
     }
@@ -560,13 +553,15 @@ export const LedgerCryptoProvider: (transport: Transport) => Promise<CryptoProvi
   }
 
   const prepareAdditionalWitnessRequests = (
+    paymentSigningFiles: HwSigningData[],
     mintSigningFiles: HwSigningData[],
     multisigSigningFiles: HwSigningData[],
   ) => (
-    // Even though Plutus txs might require additional payment/stake signatures, Plutus scripts
+    // Payment signing files are always added here, so that the inputs are witnessed.
+    // Even though Plutus txs might require additional stake signatures, Plutus scripts
     // don't see signatures directly - they can only access requiredSigners, and their witnesses
     // are gathered above.
-    [...mintSigningFiles, ...multisigSigningFiles].map((f) => f.path)
+    [...paymentSigningFiles, ...mintSigningFiles, ...multisigSigningFiles].map((f) => f.path)
   )
 
   const createWitnesses = (
@@ -644,10 +639,7 @@ export const LedgerCryptoProvider: (transport: Transport) => Promise<CryptoProvi
       paymentSigningFiles, stakeSigningFiles, poolColdSigningFiles, mintSigningFiles, multisigSigningFiles,
     } = filterSigningFiles(hwSigningFileData)
 
-    const inputs = body.inputs.map(
-      // assign first `inputs.length` signing files to inputs
-      (input, i) => prepareInput(signingMode, input, getSigningPath(paymentSigningFiles, i)),
-    )
+    const inputs = body.inputs.map(prepareInput)
     const outputs = body.outputs.map(
       (output) => prepareOutput(output, network, changeOutputFiles, signingMode),
     )
@@ -668,14 +660,7 @@ export const LedgerCryptoProvider: (transport: Transport) => Promise<CryptoProvi
     const auxiliaryData = prepareAuxiliaryDataHashHex(body.auxiliaryDataHash)
     const mint = body.mint ? prepareTokenBundle(body.mint) : null
     const scriptDataHashHex = prepareScriptDataHash(body.scriptDataHash)
-    const collateralInputs = body.collateralInputs?.map(
-      (collateralInput, i) => prepareCollateralInput(
-        // first `inputs.length` signing files were assigned to inputs,
-        // assign the following `collaterals.length` signing files to collateral inputs
-        collateralInput,
-        getSigningPath(paymentSigningFiles, inputs.length + i),
-      ),
-    )
+    const collateralInputs = body.collateralInputs?.map(prepareCollateralInput)
     const requiredSigners = body.requiredSigners?.map(
       (requiredSigner) => prepareRequiredSigner(
         requiredSigner,
@@ -687,11 +672,13 @@ export const LedgerCryptoProvider: (transport: Transport) => Promise<CryptoProvi
       ? prepareOutput(body.collateralReturnOutput, network, changeOutputFiles, signingMode)
       : undefined
     const totalCollateral = body.totalCollateral !== undefined ? `${body.totalCollateral}` : undefined
-    const referenceInputs = body.referenceInputs?.map(
-      (referenceInput) => prepareInput(signingMode, referenceInput, null),
-    )
+    const referenceInputs = body.referenceInputs?.map(prepareInput)
 
-    const additionalWitnessRequests = prepareAdditionalWitnessRequests(mintSigningFiles, multisigSigningFiles)
+    const additionalWitnessRequests = prepareAdditionalWitnessRequests(
+      paymentSigningFiles,
+      mintSigningFiles,
+      multisigSigningFiles,
+    )
 
     const response = await ledger.signTransaction({
       signingMode: signingModeToLedgerType(signingMode),
