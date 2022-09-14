@@ -224,6 +224,10 @@ const extractStakePubKeyFromHwSigningData = (signingFile: HwSigningData): PubKey
   throw Error(Errors.InternalInvalidTypeError)
 }
 
+const hasPaymentSigningFile = (signingFiles: HwSigningData[]): boolean => (
+  signingFiles.some((signingFile) => signingFile.type === HwSigningType.Payment)
+)
+
 const hasMultisigSigningFile = (signingFiles: HwSigningData[]): boolean => (
   signingFiles.some((signingFile) => signingFile.type === HwSigningType.MultiSig)
 )
@@ -251,7 +255,8 @@ const determineSigningMode = (
   // signingValidation.ts.
   if (poolRegistrationCert) {
     const poolKeyPath = findSigningPathForKeyHash(poolRegistrationCert.poolParams.operator, signingFiles)
-    return poolKeyPath
+    const isPaying = hasPaymentSigningFile(signingFiles)
+    return (poolKeyPath || isPaying)
       ? SigningMode.POOL_REGISTRATION_AS_OPERATOR
       : SigningMode.POOL_REGISTRATION_AS_OWNER
   }
