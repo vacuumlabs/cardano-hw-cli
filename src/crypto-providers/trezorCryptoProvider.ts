@@ -55,6 +55,18 @@ import { parseBIP32Path } from '../command-parser/parsers'
 const { bech32 } = require('cardano-crypto.js')
 
 const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
+  const getVersion = async (): Promise<string> => {
+    const { payload: features } = await TrezorConnect.getFeatures()
+    const isSuccessful = (
+      value: any,
+    ): value is TrezorTypes.Features => !value.error
+
+    if (!isSuccessful(features)) throw Error(Errors.TrezorVersionError)
+
+    const { major_version: major, minor_version: minor, patch_version: patch } = features
+    return `Trezor app version ${major}.${minor}.${patch}`
+  }
+
   const initTrezorConnect = async (): Promise<void> => {
     TrezorConnect.manifest({
       email: 'adalite@vacuumlabs.com',
@@ -80,22 +92,12 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
       }
     })
 
-    await TrezorConnect.getFeatures()
+    // If Trezor Bridge is not running, the previous code doesn't throw an error. We need to make
+    // sure that there is a working connection to a Trezor device e.g. by getting its version.
+    await getVersion()
   }
 
   await initTrezorConnect()
-
-  const getVersion = async (): Promise<string> => {
-    const { payload: features } = await TrezorConnect.getFeatures()
-    const isSuccessful = (
-      value: any,
-    ): value is TrezorTypes.Features => !value.error
-
-    if (!isSuccessful(features)) throw Error(Errors.TrezorVersionError)
-
-    const { major_version: major, minor_version: minor, patch_version: patch } = features
-    return `Trezor app version ${major}.${minor}.${patch}`
-  }
 
   const showAddress = async (
     {
