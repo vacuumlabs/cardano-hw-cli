@@ -37,7 +37,6 @@ import {
   filterSigningFiles,
   findSigningPathForKeyHash,
   getAddressAttributes,
-  getSigningPath,
   ipv4ToString,
   ipv6ToString,
   getAddressParameters,
@@ -144,13 +143,12 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
 
   const prepareInput = (
     input: TxTypes.TransactionInput,
-    path: BIP32Path | null,
   ): TrezorTypes.CardanoInput => {
     if (input.index > Number.MAX_SAFE_INTEGER) {
       throw Error(Errors.InvalidInputError)
     }
     return {
-      path: path || undefined,
+      path: undefined, // all payment paths are added added as additionalWitnessRequests
       prev_hash: input.transactionId.toString('hex'),
       prev_index: Number(input.index),
     }
@@ -433,13 +431,12 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
 
   const prepareCollateralInput = (
     collateralInput: TxTypes.TransactionInput,
-    path: BIP32Path | null,
   ): TrezorTypes.CardanoCollateralInput => {
     if (collateralInput.index > Number.MAX_SAFE_INTEGER) {
       throw Error(Errors.InvalidCollateralInputError)
     }
     return {
-      path: path || undefined,
+      path: undefined, // all payment paths are added as added additionalWitnessRequests
       prev_hash: collateralInput.transactionId.toString('hex'),
       prev_index: Number(collateralInput.index),
     }
@@ -456,13 +453,15 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
   }
 
   const prepareAdditionalWitnessRequests = (
+    paymentSigningFiles: HwSigningData[],
     mintSigningFiles: HwSigningData[],
     multisigSigningFiles: HwSigningData[],
   ) => (
-    // Even though Plutus txs might require additional payment/stake signatures, Plutus scripts
+    // Payment signing files are always added here, so that the inputs are witnessed.
+    // Even though Plutus txs might require additional stake signatures, Plutus scripts
     // don't see signatures directly - they can only access requiredSigners, and their witnesses
     // are gathered above.
-    [...mintSigningFiles, ...multisigSigningFiles].map((f) => f.path)
+    [...paymentSigningFiles, ...mintSigningFiles, ...multisigSigningFiles].map((f) => f.path)
   )
 
   const createWitnesses = (
@@ -539,10 +538,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
       paymentSigningFiles, stakeSigningFiles, mintSigningFiles, multisigSigningFiles,
     } = filterSigningFiles(hwSigningFileData)
 
-    const inputs = body.inputs.map(
-      // assign first `inputs.length` signing files to inputs
-      (input, i) => prepareInput(input, getSigningPath(paymentSigningFiles, i)),
-    )
+    const inputs = body.inputs.map(prepareInput)
     const outputs = body.outputs.map(
       (output) => prepareOutput(output, network, changeOutputFiles, signingMode),
     )
@@ -558,14 +554,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     const auxiliaryData = prepareAuxiliaryDataHashHex(body.auxiliaryDataHash)
     const mint = body.mint ? prepareTokenBundle(body.mint, true) : undefined
     const scriptDataHash = prepareScriptDataHash(body.scriptDataHash)
-    const collateralInputs = body.collateralInputs?.map(
-      (collateralInput, i) => prepareCollateralInput(
-        // first `inputs.length` signing files were assigned to inputs,
-        // assign the following `collaterals.length` signing files to collateral inputs
-        collateralInput,
-        getSigningPath(paymentSigningFiles, inputs.length + i),
-      ),
-    )
+    const collateralInputs = body.collateralInputs?.map(prepareCollateralInput)
     const requiredSigners = body.requiredSigners?.map(
       (requiredSigner) => prepareRequiredSigner(
         requiredSigner,
@@ -577,9 +566,13 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
       ? prepareOutput(body.collateralReturnOutput, network, changeOutputFiles, signingMode)
       : undefined
     const totalCollateral = body.totalCollateral !== undefined ? `${body.totalCollateral}` : undefined
-    const referenceInputs = body.referenceInputs?.map((referenceInput) => prepareInput(referenceInput, null))
+    const referenceInputs = body.referenceInputs?.map(prepareInput)
 
-    const additionalWitnessRequests = prepareAdditionalWitnessRequests(mintSigningFiles, multisigSigningFiles)
+    const additionalWitnessRequests = prepareAdditionalWitnessRequests(
+      paymentSigningFiles,
+      mintSigningFiles,
+      multisigSigningFiles,
+    )
 
     const request: TrezorTypes.CardanoSignTransaction = {
       signingMode: signingModeToTrezorType(signingMode),

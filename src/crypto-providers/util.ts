@@ -159,17 +159,6 @@ const encodeAddress = (address: Buffer): string => {
   return bech32.encode(addressPrefix, address)
 }
 
-const getSigningPath = (
-  signingFiles: HwSigningData[],
-  i: number,
-): BIP32Path | null => {
-  if (signingFiles.length === 0) return null
-  // in case signingFiles.length < input.length
-  // we return the first path since all we need is to pass all the paths
-  // disregarding their order
-  return signingFiles[i] ? signingFiles[i].path : signingFiles[0].path
-}
-
 const filterSigningFiles = (
   signingFiles: HwSigningData[],
 ): {
@@ -565,7 +554,6 @@ export {
   pathEquals,
   splitXPubKeyCborHex,
   validateKeyGenInputs,
-  getSigningPath,
   filterSigningFiles,
   findSigningPathForKeyHash,
   findSigningPathForKey,
