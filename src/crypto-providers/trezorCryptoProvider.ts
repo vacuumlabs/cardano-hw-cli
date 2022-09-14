@@ -31,6 +31,7 @@ import {
   XPubKeyHex,
   NativeScriptType,
   ParsedShowAddressArguments,
+  DerivationType,
 } from '../types'
 import {
   encodeAddress,
@@ -98,9 +99,26 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
 
   await initTrezorConnect()
 
+  const derivationTypeToTrezorType = (
+    derivationType?: DerivationType,
+  ): TrezorEnums.CardanoDerivationType | undefined => {
+    switch (derivationType) {
+      case undefined:
+        return undefined
+      case DerivationType.LEDGER:
+        return TrezorEnums.CardanoDerivationType.LEDGER
+      case DerivationType.ICARUS:
+        return TrezorEnums.CardanoDerivationType.ICARUS
+      case DerivationType.ICARUS_TREZOR:
+        return TrezorEnums.CardanoDerivationType.ICARUS_TREZOR
+      default:
+        throw Error(Errors.Unreachable)
+    }
+  }
+
   const showAddress = async (
     {
-      paymentPath, paymentScriptHash, stakingPath, stakingScriptHash, address,
+      paymentPath, paymentScriptHash, stakingPath, stakingScriptHash, address, derivationType,
     }: ParsedShowAddressArguments,
   ): Promise<void> => {
     const { addressType, networkId, protocolMagic } = getAddressAttributes(address)
@@ -115,6 +133,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
       },
       networkId,
       protocolMagic,
+      derivationType: derivationTypeToTrezorType(derivationType),
       showOnTrezor: true,
     })
 
@@ -123,11 +142,15 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     }
   }
 
-  const getXPubKeys = async (paths: BIP32Path[]): Promise<XPubKeyHex[]> => {
+  const getXPubKeys = async (
+    paths: BIP32Path[],
+    derivationType?: DerivationType,
+  ): Promise<XPubKeyHex[]> => {
     const { payload } = await TrezorConnect.cardanoGetPublicKey({
       bundle: paths.map((path) => ({
         path,
         showOnTrezor: true,
+        derivationType: derivationTypeToTrezorType(derivationType),
       })),
     })
 
@@ -531,7 +554,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     changeOutputFiles: HwSigningData[],
   ): Promise<TrezorTypes.CardanoSignedTxWitness[]> => {
     const {
-      signingMode, rawTx, tx, txBodyHashHex, hwSigningFileData, network,
+      signingMode, rawTx, tx, txBodyHashHex, hwSigningFileData, network, derivationType,
     } = params
     const body = (rawTx?.body ?? tx?.body)!
     const {
@@ -595,6 +618,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
       collateralReturn,
       totalCollateral,
       referenceInputs,
+      derivationType: derivationTypeToTrezorType(derivationType),
     }
 
     const response = await TrezorConnect.cardanoSignTransaction(request)
@@ -695,6 +719,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     votePublicKeyHex: VotePublicKeyHex,
     network: Network,
     nonce: BigInt,
+    derivationType?: DerivationType,
   ): Promise<VotingRegistrationMetaDataCborHex> => {
     const { data: address } : { data: Buffer } = bech32.decode(rewardAddressBech32)
     const addressParams = getAddressParameters(rewardAddressSigningFiles, address, network)
@@ -707,7 +732,10 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     const trezorAuxData = prepareVoteAuxiliaryData(hwStakeSigningFile, votePublicKeyHex, addressParams, nonce)
     const dummyTx = prepareDummyTx(network, trezorAuxData)
 
-    const response = await TrezorConnect.cardanoSignTransaction(dummyTx)
+    const response = await TrezorConnect.cardanoSignTransaction({
+      ...dummyTx,
+      derivationType: derivationTypeToTrezorType(derivationType),
+    })
     if (!response.success) {
       throw Error(response.payload.error)
     }
@@ -802,10 +830,12 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     nativeScript: NativeScript,
     signingFiles: HwSigningData[],
     displayFormat: NativeScriptDisplayFormat,
+    derivationType?: DerivationType,
   ): Promise<NativeScriptHashKeyHex> => {
     const response = await TrezorConnect.cardanoGetNativeScriptHash({
       script: nativeScriptToTrezorTypes(nativeScript, signingFiles),
       displayFormat: nativeScriptDisplayFormatToTrezorType(displayFormat),
+      derivationType: derivationTypeToTrezorType(derivationType),
     })
     if (!response.success) {
       throw Error(response.payload.error)

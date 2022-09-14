@@ -11,7 +11,17 @@ import {
   parseVotePubFile,
   parseScriptHashHex,
   parseNativeScriptFile,
+  parseDerivationType,
 } from './parsers'
+
+const derivationTypeArg = {
+  '--derivation-type': {
+    required: false,
+    type: (name?: string) => parseDerivationType(name),
+    dest: 'derivationType',
+    help: 'Derivation type - currently applies only to Trezor. Options: LEDGER, ICARUS or ICARUS_TREZOR (default).',
+  },
+}
 
 const keyGenArgs = {
   '--path': {
@@ -33,6 +43,7 @@ const keyGenArgs = {
     dest: 'verificationKeyFiles',
     help: 'Output filepath of the hardware wallet signing file.',
   },
+  ...derivationTypeArg,
 }
 
 const nodeKeyGenArgs = {
@@ -103,6 +114,7 @@ const txSigningArgs = {
     type: (path: string) => parseHwSigningFile(path),
     help: 'Input filepath of change output file.',
   },
+  ...derivationTypeArg,
 }
 
 const opCertSigningArgs = {
@@ -210,6 +222,7 @@ export const parserConfig = {
         dest: 'address',
         help: 'Input filepath of the address.',
       },
+      ...derivationTypeArg,
     },
   },
   'transaction': {
@@ -235,6 +248,7 @@ export const parserConfig = {
         type: (path: string) => parseHwSigningFile(path),
         help: 'Input filepath of the hardware wallet signing file.',
       },
+      ...derivationTypeArg,
     },
     'witness': {
       ...txSigningArgs,
@@ -342,6 +356,7 @@ export const parserConfig = {
         dest: 'outFile',
         help: 'Output metadata cbor filepath.',
       },
+      ...derivationTypeArg,
     },
   },
 }

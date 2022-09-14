@@ -7,12 +7,19 @@ import {
   txTypeToCardanoEra,
 } from '../constants'
 import {
-  isBIP32Path, isCborHex, isHwSigningData, isRawTxFileData, isTxFileData, isVotePublicKeyHex,
+  isBIP32Path,
+  isCborHex,
+  isDerivationType,
+  isHwSigningData,
+  isRawTxFileData,
+  isTxFileData,
+  isVotePublicKeyHex,
 } from '../guards'
 import { Errors } from '../errors'
 import {
   Address,
   BIP32Path,
+  DerivationType,
   HwSigningData,
   HwSigningType,
   NativeScript,
@@ -266,4 +273,12 @@ export const parseNativeScriptFile = (path: string): NativeScript => {
   const data = JSON.parse(rw.readFileSync(path, 'utf8'))
 
   return parseNativeScriptData(data)
+}
+
+export const parseDerivationType = (
+  name?: string,
+): DerivationType | undefined => {
+  if (!name) return undefined
+  if (isDerivationType(name)) return name
+  throw Error(Errors.InvalidDerivationTypeError)
 }

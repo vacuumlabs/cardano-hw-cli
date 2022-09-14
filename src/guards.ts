@@ -18,6 +18,7 @@ import {
   X_PUB_KEY_HEX_LENGTH,
   X_PUB_KEY_CBOR_HEX_LENGTH,
   VOTE_PUBLIC_KEY_HEX_LENGTH,
+  DerivationType,
 } from './types'
 import { decodeCbor } from './util'
 
@@ -86,3 +87,7 @@ export const isXPubKeyCborHex = (
 export const isVotePublicKeyHex = (
   value: any,
 ): value is VotePublicKeyHex => typeof value === 'string' && value.length === VOTE_PUBLIC_KEY_HEX_LENGTH * 2
+
+export const isDerivationType = (
+  value: any,
+): value is DerivationType => typeof value === 'string' && value in DerivationType
