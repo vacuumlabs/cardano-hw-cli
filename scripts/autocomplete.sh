@@ -56,7 +56,7 @@ _cardano_hw_cli_completions()
                 COMPREPLY=( $(compgen -W "--path --hw-signing-file --cold-verification-key-file --operational-certificate-issue-counter-file" -- "${COMP_WORDS[-1]}") )
             fi
             if [ "${COMP_WORDS[2]}" = "issue-op-cert" ]; then
-                COMPREPLY=( $(compgen -W "--kes-verification-key-file --kes-period --operational-certificate-issue-counter --hw-signing-file --out-file" -- "${COMP_WORDS[-1]}") )
+                COMPREPLY=( $(compgen -W "--kes-verification-key-file --kes-period --operational-certificate-issue-counter-file --hw-signing-file --out-file" -- "${COMP_WORDS[-1]}") )
             fi
             if [ "${COMP_WORDS[2]}" = "voting-key-registration-metadata" ]; then
                 COMPREPLY=( $(compgen -W "--mainnet --testnet-magic --vote-public-key --reward-address --stake-signing-key --nonce --reward-address-signing-key --metadata-cbor-out-file" -- "${COMP_WORDS[-1]}") )

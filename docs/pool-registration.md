@@ -70,7 +70,7 @@ This step creates an operational certificate. It is required for running the blo
 cardano-hw-cli node issue-op-cert \
 --kes-verification-key-file kes.vkey \
 --hw-signing-file cold.hwsfile \
---operational-certificate-issue-counter cold.counter \
+--operational-certificate-issue-counter-file cold.counter \
 --kes-period 99 \
 --out-file node.cert
 ```
