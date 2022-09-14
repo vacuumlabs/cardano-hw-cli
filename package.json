@@ -68,6 +68,7 @@
     "assets": "package.json"
   },
   "resolutions": {
+    "//": "This is a workaround for pkg (otherwise, it prints an error when building)",
     "node-abi": "^3.24.0"
   }
 }
