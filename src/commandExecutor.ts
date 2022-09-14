@@ -1,6 +1,6 @@
 import * as InteropLib from 'cardano-hw-interop-lib'
 import TransportNodeHid from '@ledgerhq/hw-transport-node-hid-noevents'
-import { CryptoProvider } from './crypto-providers/types'
+import { CryptoProvider, SigningParameters } from './crypto-providers/types'
 import {
   constructTxFileOutput,
   constructHwSigningKeyOutput,
@@ -81,10 +81,12 @@ const CommandExecutor = async () => {
   }
 
   const createSigningKeyFile = async (
-    { paths, hwSigningFiles, verificationKeyFiles }: ParsedAddressKeyGenArguments,
+    {
+      paths, hwSigningFiles, verificationKeyFiles, derivationType,
+    }: ParsedAddressKeyGenArguments,
   ) => {
     validateKeyGenInputs(paths, hwSigningFiles, verificationKeyFiles)
-    const xPubKeys = await cryptoProvider.getXPubKeys(paths)
+    const xPubKeys = await cryptoProvider.getXPubKeys(paths, derivationType)
     xPubKeys.forEach((xPubKey, i) => writeOutputData(
       hwSigningFiles[i],
       constructHwSigningKeyOutput(xPubKey, paths[i]),
@@ -125,7 +127,7 @@ const CommandExecutor = async () => {
 
     const txBody = (rawTx?.body ?? tx?.body)!
     const era = (args.rawTxFileData?.era ?? args.txFileData?.era)!
-    const signingParameters = {
+    const signingParameters: SigningParameters = {
       signingMode: determineSigningMode(txBody, args.hwSigningFileData),
       rawTx,
       tx,
@@ -133,6 +135,7 @@ const CommandExecutor = async () => {
       hwSigningFileData: args.hwSigningFileData,
       network: args.network,
       era,
+      derivationType: args.derivationType,
     }
     validateSigning(signingParameters)
 
@@ -147,6 +150,7 @@ const CommandExecutor = async () => {
       args.nativeScript,
       args.hwSigningFileData,
       NativeScriptDisplayFormat.POLICY_ID,
+      args.derivationType,
     )
 
     // eslint-disable-next-line no-console
@@ -171,7 +175,7 @@ const CommandExecutor = async () => {
 
     const txBody = (rawTx?.body ?? tx?.body)!
     const era = (args.rawTxFileData?.era ?? args.txFileData?.era)!
-    const signingParameters = {
+    const signingParameters: SigningParameters = {
       signingMode: determineSigningMode(txBody, args.hwSigningFileData),
       rawTx,
       tx,
@@ -179,6 +183,7 @@ const CommandExecutor = async () => {
       hwSigningFileData: args.hwSigningFileData,
       network: args.network,
       era,
+      derivationType: args.derivationType,
     }
     validateWitnessing(signingParameters)
     const {
@@ -271,6 +276,7 @@ const CommandExecutor = async () => {
       args.votePublicKey,
       args.network,
       args.nonce,
+      args.derivationType,
     )
 
     writeCbor(args.outFile, Buffer.from(votingRegistrationMetaData, 'hex') as Cbor)

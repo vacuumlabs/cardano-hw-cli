@@ -1,7 +1,12 @@
 /* eslint-disable max-len */
 const assert = require('assert')
 const { CommandType, parse } = require('../../../src/command-parser/commandParser')
-const { CardanoEra, HwSigningType, NativeScriptType } = require('../../../src/types')
+const {
+  CardanoEra,
+  HwSigningType,
+  NativeScriptType,
+  DerivationType,
+} = require('../../../src/types')
 const { cardanoEraToSignedType, NETWORKS } = require('../../../src/constants')
 
 const resFolder = 'test/unit/commandParser/res/'
@@ -29,6 +34,34 @@ describe('Command parser', () => {
       stakingPath: undefined,
       stakingScriptHash: '14c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f1124',
       address: 'addr1qxq0nckg3ekgzuqg7w5p9mvgnd9ym28qh5grlph8xd2z92sj922xhxkn6twlq2wn4q50q352annk3903tj00h45mgfmsl3s9zt',
+      derivationType: undefined,
+    }
+    assert.deepStrictEqual(parsedArgs, expectedResult)
+  })
+
+  it('Should parse address show command with a derivation type set', () => {
+    const args = pad([
+      'shelley',
+      'address',
+      'show',
+      '--payment-path',
+      '1852H/1815H/0H/0/0',
+      '--staking-script-hash',
+      '14c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f1124',
+      '--address-file',
+      prefix('payment.addr'),
+      '--derivation-type',
+      'ICARUS',
+    ])
+    const { parsedArgs } = parse(args)
+    const expectedResult = {
+      command: CommandType.SHOW_ADDRESS,
+      paymentPath: [2147485500, 2147485463, 2147483648, 0, 0],
+      paymentScriptHash: undefined,
+      stakingPath: undefined,
+      stakingScriptHash: '14c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f1124',
+      address: 'addr1qxq0nckg3ekgzuqg7w5p9mvgnd9ym28qh5grlph8xd2z92sj922xhxkn6twlq2wn4q50q352annk3903tj00h45mgfmsl3s9zt',
+      derivationType: DerivationType.ICARUS,
     }
     assert.deepStrictEqual(parsedArgs, expectedResult)
   })
@@ -51,6 +84,7 @@ describe('Command parser', () => {
       paths: [[2147485500, 2147485463, 2147483648, 0, 0]],
       hwSigningFiles: ['test/unit/commandParser/res/payment.hwsfile'],
       verificationKeyFiles: ['test/unit/commandParser/res/payment.vkey'],
+      derivationType: undefined,
     }
     assert.deepStrictEqual(parsedArgs, expectedResult)
   })
@@ -111,6 +145,7 @@ describe('Command parser', () => {
       ],
       outFile: 'test/unit/commandParser/res/tx.signed',
       changeOutputKeyFileData: [],
+      derivationType: undefined,
     }
     assert.deepStrictEqual(parsedArgs, expectedResult)
   })
@@ -147,6 +182,7 @@ describe('Command parser', () => {
       }],
       outFiles: ['test/unit/commandParser/res/witness.out'],
       changeOutputKeyFileData: [],
+      derivationType: undefined,
     }
     assert.deepStrictEqual(parsedArgs, expectedResult)
   })
@@ -188,6 +224,7 @@ describe('Command parser', () => {
         path: [2147485500, 2147485463, 2147483648, 0, 0],
         cborXPubKeyHex: '5880e0d9c2e5b...7277e7db',
       }],
+      derivationType: undefined,
     }
     assert.deepStrictEqual(parsedArgs, expectedResult)
   })
@@ -238,6 +275,7 @@ describe('Command parser', () => {
       outFile: 'voting_registration.cbor',
       rewardAddress: 'adr_test1qq2vzmtlgvjrhkq50rngh8d482zj3l20kyrc6kx4ffl3zfqayfawlf9hwv2fzuygt2km5v92kvf8e3s3mk7ynxw77cwq2glhm4',
       votePublicKey: '3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7',
+      derivationType: undefined,
     }
     assert.deepStrictEqual(parsedArgs, expectedResult)
   })
@@ -307,6 +345,7 @@ describe('Command parser', () => {
         ],
       },
       hwSigningFileData: undefined,
+      derivationType: undefined,
     }
     assert.deepStrictEqual(parsedArgs, expectedResult)
   })

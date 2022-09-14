@@ -9,6 +9,7 @@ const enum Errors {
   InvalidKesVKeyFileError = 'Invalid KES verification key file',
   InvalidOpCertIssueCounterFileError = 'Invalid operational certificate issue counter file',
   InvalidNodeKeyGenInputsError = 'Invalid node key-gen inputs',
+  InvalidDerivationTypeError = 'Invalid derivation type',
   TxSerializationMismatchError = 'Tx serialization mismatch',
   MetadataSerializationMismatchError = 'Metadata serialization mismatch',
   MissingHwSigningDataAtPathError = 'Can not find hw signing data by path',

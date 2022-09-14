@@ -16,6 +16,7 @@ import {
   NativeScriptDisplayFormat,
   ParsedShowAddressArguments,
   CardanoEra,
+  DerivationType,
 } from '../types'
 
 export enum SigningMode {
@@ -34,6 +35,7 @@ export type SigningParameters = {
   hwSigningFileData: HwSigningData[],
   network: Network,
   era: CardanoEra,
+  derivationType?: DerivationType,
 }
 
 export type CryptoProvider = {
@@ -49,7 +51,10 @@ export type CryptoProvider = {
     params: SigningParameters,
     changeOutputFiles: HwSigningData[],
   ) => Promise<TxWitnesses>,
-  getXPubKeys: (paths: BIP32Path[]) => Promise<XPubKeyHex[]>,
+  getXPubKeys: (
+    paths: BIP32Path[],
+    derivationType?: DerivationType,
+  ) => Promise<XPubKeyHex[]>,
   signOperationalCertificate: (
     kesVKey: KesVKey,
     kesPeriod: BigInt,
@@ -63,11 +68,13 @@ export type CryptoProvider = {
     votePublicKeyHex: VotePublicKeyHex,
     network: Network,
     nonce: BigInt,
+    derivationType?: DerivationType,
   ) => Promise<VotingRegistrationMetaDataCborHex>
   deriveNativeScriptHash: (
     nativeScript: NativeScript,
     signingFiles: HwSigningData[],
     displayFormat: NativeScriptDisplayFormat,
+    derivationType?: DerivationType,
   ) => Promise<NativeScriptHashKeyHex>,
 }
 

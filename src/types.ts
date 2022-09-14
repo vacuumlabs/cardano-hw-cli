@@ -66,6 +66,12 @@ export type TxFileData = {
 
 export type Address = string
 
+export enum DerivationType {
+  LEDGER = 'LEDGER',
+  ICARUS = 'ICARUS',
+  ICARUS_TREZOR = 'ICARUS_TREZOR',
+}
+
 export type ParsedAppVersionArguments = {
   command: CommandType.APP_VERSION,
 }
@@ -83,6 +89,7 @@ export type ParsedShowAddressArguments = {
   stakingPath: BIP32Path,
   stakingScriptHash: string,
   address: Address,
+  derivationType?: DerivationType,
 }
 
 export type ParsedAddressKeyGenArguments = {
@@ -90,6 +97,7 @@ export type ParsedAddressKeyGenArguments = {
   paths: BIP32Path[],
   hwSigningFiles: string[],
   verificationKeyFiles: string[],
+  derivationType?: DerivationType,
 }
 
 export type ParsedVerificationKeyArguments = {
@@ -124,6 +132,7 @@ export type ParsedTransactionSignArguments = {
   hwSigningFileData: HwSigningData[],
   outFile: string,
   changeOutputKeyFileData: HwSigningData[],
+  derivationType?: DerivationType,
 }
 
 export enum NativeScriptType {
@@ -159,6 +168,7 @@ export type ParsedTransactionPolicyIdArguments = {
   command: CommandType.DERIVE_NATIVE_SCRIPT_HASH,
   nativeScript: NativeScript,
   hwSigningFileData: HwSigningData[],
+  derivationType?: DerivationType,
 }
 
 // exctly one of rawTxFileData vs. txFileData should be present
@@ -171,6 +181,7 @@ export type ParsedTransactionWitnessArguments = {
   hwSigningFileData: HwSigningData[],
   outFiles: string[],
   changeOutputKeyFileData: HwSigningData[],
+  derivationType?: DerivationType,
 }
 
 export type ParsedTransactionValidateRawArguments = {
@@ -221,6 +232,7 @@ export type ParsedCatalystVotingKeyRegistrationMetadataArguments = {
   nonce: BigInt,
   rewardAddressSigningKeyData: HwSigningData[],
   outFile: string,
+  derivationType?: DerivationType,
 }
 
 export type ParsedArguments =

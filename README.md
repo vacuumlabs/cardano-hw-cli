@@ -18,6 +18,7 @@ cardano-hw-cli address key-gen
 --path PATH                     Derivation path to the key we want to sign with.
 --verification-key-file FILE    Output filepath of the verification key.
 --hw-signing-file FILE          Output filepath of the hardware wallet signing file.
+--derivation-type TYPE          Derivation type - currently applies only to Trezor. Options: LEDGER, ICARUS or ICARUS_TREZOR (default).
 ```
 Arguments can be specified multiple times for bulk export.
 
@@ -39,6 +40,7 @@ cardano-hw-cli transaction sign
 --change-output-key-file FILE          Input filepath of the hardware wallet signing file (so hw cli can match the keys of the change address, if present, and let the device hide it).
 --mainnet | --testnet-magic NATURAL    Use the mainnet magic id or specify testnet magic id.
 --out-file FILE                        Output filepath of the Tx.
+--derivation-type TYPE                 Derivation type - currently applies only to Trezor. Options: LEDGER, ICARUS or ICARUS_TREZOR (default).
 ```
 
 ## Witness transaction
@@ -50,6 +52,7 @@ cardano-hw-cli transaction witness
 --change-output-key-file FILE          Input filepath of the hardware wallet signing file (so hw cli can match the keys of the change address, if present, and let the device hide it).
 --mainnet | --testnet-magic NATURAL    Use the mainnet magic id or specify testnet magic id.
 --out-file FILE                        Output filepath of the witness (one or more witness files can be specified).
+--derivation-type TYPE                 Derivation type - currently applies only to Trezor. Options: LEDGER, ICARUS or ICARUS_TREZOR (default).
 ```
 
 ## Validate raw transaction
@@ -102,6 +105,7 @@ cardano-hw-cli address show
 --payment-path PAYMENTPATH    Payment derivation path.
 --staking-path STAKINGPATH    Stake derivation path.
 --address-file ADDRESS        Input filepath of the address.
+--derivation-type TYPE        Derivation type - currently applies only to Trezor. Options: LEDGER, ICARUS or ICARUS_TREZOR (default).
 ```
 
 ## Issue operational certificate
@@ -125,6 +129,7 @@ cardano-hw-cli catalyst voting-key-registration-metadata
 --nonce NONCE                          Current slot number.
 --reward-address-signing-key FILE      Input filepath of the reward address signing files.
 --metadata-cbor-out-file FILE          Output filepath of metadata cbor.
+--derivation-type TYPE                 Derivation type - currently applies only to Trezor. Options: LEDGER, ICARUS or ICARUS_TREZOR (default).
 ```
 
 see [Catalyst voting registration example](docs/catalyst-voting-registration-example.md)
@@ -132,8 +137,9 @@ see [Catalyst voting registration example](docs/catalyst-voting-registration-exa
 ## Policy id generation
 ```
 cardano-hw-cli transaction policyid
---script-file      Path to a native script file
---hw-signing-file  Input filepath of the hardware wallet signing file
+--script-file             Path to a native script file
+--hw-signing-file         Input filepath of the hardware wallet signing file
+--derivation-type TYPE    Derivation type - currently applies only to Trezor. Options: LEDGER, ICARUS or ICARUS_TREZOR (default).
 ```
 
 see [Policy id](docs/token-minting.md#policy-id)
