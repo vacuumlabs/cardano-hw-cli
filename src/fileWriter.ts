@@ -4,7 +4,7 @@ import {
   HARDENED_THRESHOLD,
   PathLabel,
 } from './constants'
-import { classifyPath, PathTypes } from './crypto-providers/util'
+import { classifyPath, isByronPath, PathTypes } from './crypto-providers/util'
 import { OpCertIssueCounter, SignedOpCertCborHex } from './opCert/opCert'
 import {
   RawTxCborHex,
@@ -71,11 +71,12 @@ const constructBIP32PathOutput = (path: BIP32Path): string => path
   .map((value) => (value >= HARDENED_THRESHOLD ? `${value - HARDENED_THRESHOLD}H` : `${value}`))
   .join('/')
 
-const bip32PathLabel = (path: number[]): PathLabel => {
+const bip32PathLabel = (path: BIP32Path): PathLabel => {
   switch (classifyPath(path)) {
     case PathTypes.PATH_POOL_COLD_KEY:
       return PathLabel.POOL_COLD
 
+    case PathTypes.PATH_WALLET_SPENDING_KEY_BYRON:
     case PathTypes.PATH_WALLET_SPENDING_KEY_SHELLEY:
     case PathTypes.PATH_WALLET_SPENDING_KEY_MULTISIG:
     case PathTypes.PATH_WALLET_MINTING_KEY:
@@ -90,19 +91,14 @@ const bip32PathLabel = (path: number[]): PathLabel => {
   }
 }
 
-const verificationKeyType = (path: number[]): string => {
-  const pathType = classifyPath(path)
-  const isShelleyEnvelope = pathType === PathTypes.PATH_WALLET_ACCOUNT
-    || pathType === PathTypes.PATH_WALLET_SPENDING_KEY_SHELLEY
-    || pathType === PathTypes.PATH_WALLET_STAKING_KEY
-    || pathType === PathTypes.PATH_WALLET_ACCOUNT_MULTISIG
-    || pathType === PathTypes.PATH_WALLET_SPENDING_KEY_MULTISIG
-    || pathType === PathTypes.PATH_WALLET_STAKING_KEY_MULTISIG
-    || pathType === PathTypes.PATH_WALLET_MINTING_KEY
-  return `${bip32PathLabel(path)}VerificationKey${isShelleyEnvelope ? 'Shelley' : ''}_ed25519`
+const verificationKeyType = (path: BIP32Path): string => {
+  const label = bip32PathLabel(path)
+  return isByronPath(path)
+    ? `${label}VerificationKeyByron_ed25519_bip32`
+    : `${label}VerificationKeyShelley_ed25519`
 }
 
-const verificationKeyDescription = (path: number[]): string => {
+const verificationKeyDescription = (path: BIP32Path): string => {
   switch (classifyPath(path)) {
     case PathTypes.PATH_POOL_COLD_KEY:
       return 'Stake Pool Operator Verification Key'
@@ -123,6 +119,8 @@ const verificationKeyDescription = (path: number[]): string => {
       return 'Mint Verification Key'
 
     case PathTypes.PATH_WALLET_SPENDING_KEY_BYRON:
+      return 'Payment Verification Key'
+
     case PathTypes.PATH_WALLET_ACCOUNT:
     case PathTypes.PATH_INVALID:
     default:
@@ -144,8 +142,11 @@ const constructVerificationKeyOutput = (
 
 const constructHwSigningKeyOutput = (xPubKey: XPubKeyHex, path: BIP32Path): HwSigningOutput => {
   const label = bip32PathLabel(path)
+  const type = isByronPath(path)
+    ? `${label}HWSigningFileByron_ed25519_bip32`
+    : `${label}HWSigningFileShelley_ed25519`
   return {
-    type: `${label}HWSigningFileShelley_ed25519`,
+    type,
     description: `${label} Hardware Signing File`,
     path: constructBIP32PathOutput(path),
     cborXPubKeyHex: encodeCbor(Buffer.from(xPubKey, 'hex')).toString('hex'),

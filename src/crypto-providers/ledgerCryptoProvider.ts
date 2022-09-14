@@ -33,8 +33,6 @@ import {
 } from './types'
 import {
   findSigningPathForKeyHash,
-  PathTypes,
-  classifyPath,
   getAddressAttributes,
   ipv4ToString,
   ipv6ToString,
@@ -47,6 +45,7 @@ import {
   rewardAccountToStakeCredential,
   areAddressParamsAllowed,
   pathEquals,
+  isByronPath,
 } from './util'
 
 const { bech32 } = require('cardano-crypto.js')
@@ -575,8 +574,6 @@ export const LedgerCryptoProvider: (transport: Transport) => Promise<CryptoProvi
       if (hwSigningData) return hwSigningData
       throw Error(Errors.MissingHwSigningDataAtPathError)
     }
-
-    const isByronPath = (path: BIP32Path) => classifyPath(path) === PathTypes.PATH_WALLET_SPENDING_KEY_BYRON
 
     const witnessesWithKeys = ledgerWitnesses.map((witness) => {
       const { pubKey, chainCode } = splitXPubKeyCborHex(
