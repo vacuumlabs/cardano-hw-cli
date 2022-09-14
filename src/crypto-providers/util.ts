@@ -263,10 +263,10 @@ const determineSigningMode = (
       : SigningMode.POOL_REGISTRATION_AS_OWNER
   }
 
-  // Collaterals an required signers are allowed only in the PLUTUS signing mode. Note that we have
-  // to consider PLUTUS signing mode before MULTISIG, because multisig signing files are allowed in
-  // PLUTUS signing mode, too.
-  if (txBody.collateralInputs || txBody.requiredSigners) {
+  // Collaterals are allowed only in the PLUTUS signing mode. Note that we have to consider PLUTUS
+  // signing mode before MULTISIG, because multisig signing files are allowed in PLUTUS signing
+  // mode, too.
+  if (txBody.collateralInputs) {
     return SigningMode.PLUTUS_TRANSACTION
   }
 
