@@ -911,10 +911,10 @@ cardano-crypto.js@^5.3.6-rc.6:
     borc "^2.1.1"
     pbkdf2 "^3.0.17"
 
-cardano-hw-interop-lib@^1.1.0:
-  version "1.1.0"
-  resolved "https://registry.yarnpkg.com/cardano-hw-interop-lib/-/cardano-hw-interop-lib-1.1.0.tgz#819dacda60c6ffaadeafb36f0331f10f821e6686"
-  integrity sha512-ltwVMmTNfPudYioXvmnlhPuTEVbSF/AfXScHS1S5p1580xYikEzmVeCyj6U51E9/wBFLUhyGcpPC7Yvf5+8LCQ==
+cardano-hw-interop-lib@^1.1.1:
+  version "1.1.1"
+  resolved "https://registry.yarnpkg.com/cardano-hw-interop-lib/-/cardano-hw-interop-lib-1.1.1.tgz#b70d4c73374990deda79c3228bdc184dc3dd1c81"
+  integrity sha512-Qqnka/3J2CS6uk3unjyB3thYpYO/3Mqm8doOwRIrOcyWZMekdtaILxdvrusJblaJ4L+jaxNt/nxdFB4GNMoHnQ==
   dependencies:
     blake2b "^2.1.4"
     cbor "^8.1.0"
