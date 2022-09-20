@@ -26,19 +26,19 @@ _cardano_hw_cli_completions()
             ;;
         *)
             if [ "${COMP_WORDS[1]}" = "address" ] && [ "${COMP_WORDS[2]}" = "key-gen" ]; then
-                COMPREPLY=( $(compgen -W "--path --hw-signing-file --verification-key-file" -- "${COMP_WORDS[-1]}") )
+                COMPREPLY=( $(compgen -W "--path --hw-signing-file --verification-key-file --derivation-type" -- "${COMP_WORDS[-1]}") )
             fi
             if [ "${COMP_WORDS[2]}" = "show" ]; then
-                COMPREPLY=( $(compgen -W "--payment-path --staking-path --address-file" -- "${COMP_WORDS[-1]}") )
+                COMPREPLY=( $(compgen -W "--payment-path --staking-path --address-file --derivation-type" -- "${COMP_WORDS[-1]}") )
             fi
             if [ "${COMP_WORDS[2]}" = "verification-key" ]; then
                 COMPREPLY=( $(compgen -W "--hw-signing-file --verification-key-file" -- "${COMP_WORDS[-1]}") )
             fi
             if [ "${COMP_WORDS[2]}" = "sign" ] || [ "${COMP_WORDS[2]}" = "witness" ]; then
-                COMPREPLY=( $(compgen -W "--mainnet --testnet-magic --tx-body-file --hw-signing-file --change-output-key-file --out-file" -- "${COMP_WORDS[-1]}") )
+                COMPREPLY=( $(compgen -W "--mainnet --testnet-magic --tx-body-file --hw-signing-file --change-output-key-file --out-file --derivation-type" -- "${COMP_WORDS[-1]}") )
             fi
             if [ "${COMP_WORDS[2]}" = "policyid" ]; then
-                COMPREPLY=( $(compgen -W "--script-file --hw-signing-file" -- "${COMP_WORDS[-1]}") )
+                COMPREPLY=( $(compgen -W "--script-file --hw-signing-file --derivation-type" -- "${COMP_WORDS[-1]}") )
             fi
             if [ "${COMP_WORDS[2]}" = "validate-raw" ]; then
                 COMPREPLY=( $(compgen -W "--tx-body-file" -- "${COMP_WORDS[-1]}") )
@@ -59,7 +59,7 @@ _cardano_hw_cli_completions()
                 COMPREPLY=( $(compgen -W "--kes-verification-key-file --kes-period --operational-certificate-issue-counter-file --hw-signing-file --out-file" -- "${COMP_WORDS[-1]}") )
             fi
             if [ "${COMP_WORDS[2]}" = "voting-key-registration-metadata" ]; then
-                COMPREPLY=( $(compgen -W "--mainnet --testnet-magic --vote-public-key --reward-address --stake-signing-key --nonce --reward-address-signing-key --metadata-cbor-out-file" -- "${COMP_WORDS[-1]}") )
+                COMPREPLY=( $(compgen -W "--mainnet --testnet-magic --vote-public-key --reward-address --stake-signing-key --nonce --reward-address-signing-key --metadata-cbor-out-file --derivation-type" -- "${COMP_WORDS[-1]}") )
             fi
             ;;
     esac
