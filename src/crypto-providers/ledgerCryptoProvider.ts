@@ -45,7 +45,8 @@ import {
   rewardAccountToStakeCredential,
   areAddressParamsAllowed,
   pathEquals,
-  isByronPath,
+  classifyPath,
+  PathTypes,
 } from './util'
 
 const { bech32 } = require('cardano-crypto.js')
@@ -588,7 +589,7 @@ export const LedgerCryptoProvider: (transport: Transport) => Promise<CryptoProvi
     })
     const [byronWitnesses, shelleyWitnesses] = partition(
       witnessesWithKeys,
-      (witness) => isByronPath(witness.path),
+      (witness) => classifyPath(witness.path) === PathTypes.PATH_WALLET_SPENDING_KEY_BYRON,
     )
 
     return {
