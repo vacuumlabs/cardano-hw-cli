@@ -1,6 +1,6 @@
 {
   "name": "cardano-hw-cli",
-  "version": "1.11.0",
+  "version": "1.12.0",
   "commit": "e07e140a937052390b9fb4c58e4d65c3fad76eef",
   "engines": {
     "node": "18.7.0"
