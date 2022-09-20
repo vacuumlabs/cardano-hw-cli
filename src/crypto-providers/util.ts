@@ -121,8 +121,6 @@ const pathEquals = (path1: BIP32Path, path2: BIP32Path) => (
   path1.length === path2.length && path1.every((element, i) => element === path2[i])
 )
 
-const isByronPath = (path: BIP32Path) => classifyPath(path) === PathTypes.PATH_WALLET_SPENDING_KEY_BYRON
-
 const splitXPubKeyCborHex = (xPubKeyCborHex: XPubKeyCborHex): _XPubKey => {
   const xPubKeyDecoded = decodeCbor(xPubKeyCborHex)
   const pubKey = xPubKeyDecoded.slice(0, 32)
@@ -559,7 +557,6 @@ export {
   PathTypes,
   classifyPath,
   pathEquals,
-  isByronPath,
   splitXPubKeyCborHex,
   validateKeyGenInputs,
   filterSigningFiles,

@@ -4,7 +4,7 @@ import {
   HARDENED_THRESHOLD,
   PathLabel,
 } from './constants'
-import { classifyPath, isByronPath, PathTypes } from './crypto-providers/util'
+import { classifyPath, PathTypes } from './crypto-providers/util'
 import { OpCertIssueCounter, SignedOpCertCborHex } from './opCert/opCert'
 import {
   RawTxCborHex,
@@ -93,7 +93,7 @@ const bip32PathLabel = (path: BIP32Path): PathLabel => {
 
 const verificationKeyType = (path: BIP32Path): string => {
   const label = bip32PathLabel(path)
-  return isByronPath(path)
+  return classifyPath(path) === PathTypes.PATH_WALLET_SPENDING_KEY_BYRON
     ? `${label}VerificationKeyByron_ed25519_bip32`
     : `${label}VerificationKeyShelley_ed25519`
 }
@@ -142,7 +142,7 @@ const constructVerificationKeyOutput = (
 
 const constructHwSigningKeyOutput = (xPubKey: XPubKeyHex, path: BIP32Path): HwSigningOutput => {
   const label = bip32PathLabel(path)
-  const type = isByronPath(path)
+  const type = classifyPath(path) === PathTypes.PATH_WALLET_SPENDING_KEY_BYRON
     ? `${label}HWSigningFileByron_ed25519_bip32`
     : `${label}HWSigningFileShelley_ed25519`
   return {
