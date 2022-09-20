@@ -66,6 +66,11 @@ export type TxFileData = {
 
 export type Address = string
 
+/* eslint-disable max-len */
+// Currently, this is used only by Trezor. Relevant docs:
+// https://github.com/trezor/trezor-suite/blob/1a0125c9e1d738f5750f935f1aed4d17a37e69ba/docs/packages/connect/methods/cardanoSignTransaction.md#params
+// https://github.com/trezor/trezor-firmware/blob/4bed278e80d23077676128eba8cb2478fcd31120/core/src/apps/cardano/README.md#seed-derivation-schemes
+/* eslint-enable max-len */
 export enum DerivationType {
   LEDGER = 'LEDGER',
   ICARUS = 'ICARUS',
