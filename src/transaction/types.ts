@@ -67,7 +67,8 @@ export type WitnessOutput = {
   cborHex: TxWitnessCborHex,
 }
 
-export type VotingRegistrationMetaData = Map<number, Map<number, Buffer | BigInt>>
+export type VotingRegistrationMetaDataPayloadItem = [Buffer, BigInt][] | Buffer | BigInt
+export type VotingRegistrationMetaData = Map<number, Map<number, VotingRegistrationMetaDataPayloadItem>>
 export type VotingRegistrationMetaDataCborHex = CborHex
 
 export type VotingRegistrationAuxiliaryData = [VotingRegistrationMetaData, []]

@@ -10,13 +10,13 @@ import {
   BIP32Path,
   Network,
   XPubKeyHex,
-  VotePublicKeyHex,
   NativeScript,
   NativeScriptHashKeyHex,
   NativeScriptDisplayFormat,
   ParsedShowAddressArguments,
   CardanoEra,
   DerivationType,
+  GovernanceVotingDelegation,
 } from '../types'
 
 export enum SigningMode {
@@ -62,12 +62,13 @@ export type CryptoProvider = {
     signingFile: HwSigningData[],
   ) => Promise<SignedOpCertCborHex>
   signVotingRegistrationMetaData: (
-    rewardAddressSigningFiles: HwSigningData[],
-    hwStakeSigningFile: HwSigningData,
+    delegations: GovernanceVotingDelegation[],
+    hwStakeSigningFile: HwSigningData, // describes stake_credential
     rewardAddressBech32: string,
-    votePublicKeyHex: VotePublicKeyHex,
-    network: Network,
     nonce: BigInt,
+    votingPurpose: BigInt,
+    network: Network,
+    rewardAddressSigningFiles: HwSigningData[],
     derivationType?: DerivationType,
   ) => Promise<VotingRegistrationMetaDataCborHex>
   deriveNativeScriptHash: (

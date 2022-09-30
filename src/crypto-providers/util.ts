@@ -14,18 +14,20 @@ import {
   KeyHash,
   ScriptHash,
 } from 'cardano-hw-interop-lib'
-import { HARDENED_THRESHOLD } from '../constants'
+import { GOVERNANCE_VOTING_PURPOSE_CATALYST, HARDENED_THRESHOLD } from '../constants'
 import { Errors } from '../errors'
 import { isBIP32Path, isPubKeyHex } from '../guards'
 import {
   VotingRegistrationAuxiliaryData,
   VotingRegistrationMetaData,
+  VotingRegistrationMetaDataPayloadItem,
   _XPubKey,
 } from '../transaction/types'
 import {
   Address,
   AddressType,
   BIP32Path,
+  GovernanceVotingDelegation,
   HexString,
   HwSigningData,
   HwSigningType,
@@ -33,7 +35,6 @@ import {
   NetworkIds,
   ProtocolMagics,
   PubKeyHex,
-  VotePublicKeyHex,
   XPubKeyCborHex,
 } from '../types'
 import { decodeCbor, encodeCbor } from '../util'
@@ -485,20 +486,22 @@ const rewardAccountToStakeCredential = (address: RewardAccount): StakeCredential
 }
 
 const formatVotingRegistrationMetaData = (
-  votingPublicKey: Buffer,
+  delegations: [Buffer, BigInt][],
   stakePub: Buffer,
   address: Buffer,
   nonce: BigInt,
+  votingPurpose: BigInt,
   signature: Buffer,
 ): VotingRegistrationMetaData => (
-  new Map<number, Map<number, Buffer | BigInt>>([
+  new Map<number, Map<number, VotingRegistrationMetaDataPayloadItem>>([
     [
       61284,
-      new Map<number, Buffer | BigInt>([
-        [1, votingPublicKey],
+      new Map<number, VotingRegistrationMetaDataPayloadItem>([
+        [1, delegations],
         [2, stakePub],
         [3, address],
         [4, nonce],
+        [5, votingPurpose],
       ]),
     ],
     [
@@ -511,22 +514,33 @@ const formatVotingRegistrationMetaData = (
 )
 
 const encodeVotingRegistrationMetaData = (
+  delegations: GovernanceVotingDelegation[],
   hwStakeSigningFile: HwSigningData,
-  votePublicKeyHex: VotePublicKeyHex,
   address: Buffer,
   nonce: BigInt,
+  votingPurpose: BigInt,
   auxiliaryDataHashHex: HexString,
-  catalystRegistrationSignatureHex: HexString,
+  votingRegistrationSignatureHex: HexString,
 ) => {
+  const serializedDelegations: [Buffer, BigInt][] = delegations.map(
+    ({ votePublicKey, voteWeight }) => [
+      Buffer.from(votePublicKey, 'hex'),
+      voteWeight,
+    ],
+  )
   const stakePubHex = extractStakePubKeyFromHwSigningData(hwStakeSigningFile)
+
   const votingRegistrationMetaData = formatVotingRegistrationMetaData(
-    Buffer.from(votePublicKeyHex, 'hex'),
+    serializedDelegations,
     Buffer.from(stakePubHex, 'hex'),
     address,
     nonce,
-    Buffer.from(catalystRegistrationSignatureHex, 'hex'),
+    votingPurpose,
+    Buffer.from(votingRegistrationSignatureHex, 'hex'),
   )
 
+  // we serialize the entire (Mary-era formatted) auxiliary data only to check that its hash
+  // matches the hash computed by the HW wallet
   const auxiliaryData: VotingRegistrationAuxiliaryData = [votingRegistrationMetaData, []]
   const auxiliaryDataCbor = encodeCbor(auxiliaryData)
 

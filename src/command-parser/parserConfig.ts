@@ -306,8 +306,8 @@ export const parserConfig = {
     'key-gen': nodeKeyGenArgs,
     'issue-op-cert': opCertSigningArgs,
   },
-  'catalyst': {
-    'voting-key-registration-metadata': {
+  'governance': {
+    'voting-registration-metadata': {
       '--mainnet': {
         nargs: '?',
         dest: 'network',
@@ -323,9 +323,18 @@ export const parserConfig = {
       },
       '--vote-public-key': {
         required: true,
-        dest: 'votePublicKey',
+        dest: 'votePublicKeys',
+        action: 'append',
         type: (path: string) => parseVotePubFile(path),
-        help: 'Input filepath to vote public key in ed25519extended.',
+        help: 'Input filepath to vote public key in ed25519extended format (one or more keys can be provided).',
+      },
+      '--vote-weight': {
+        required: false, // we append 1 in commandExecutor.ts if there is only a single vote public key and its weight is not specified
+        dest: 'voteWeights',
+        action: 'append',
+        type: (weight: string) => BigInt(weight),
+        default: [],
+        help: 'Voting power weight assigned to vote public key.',
       },
       '--stake-signing-key': {
         required: true,
@@ -343,6 +352,12 @@ export const parserConfig = {
         dest: 'nonce',
         type: (nonce: string) => BigInt(nonce),
         help: 'Current slot number.',
+      },
+      '--voting-purpose': {
+        required: false,
+        dest: 'votingPurpose',
+        type: (votingPurpose: string) => BigInt(votingPurpose),
+        help: 'Voting purpose.',
       },
       '--reward-address-signing-key': {
         action: 'append',

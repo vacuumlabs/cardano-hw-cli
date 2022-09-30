@@ -1,8 +1,12 @@
 # Requirements
-Ledger users: Cardano Ledger app versions 2.3.1 and higher is needed in order to register your vote. In order to install app 2.3.1 you need Ledger firmware 2.0.0 or higher. Both these updates can be done in Ledger Live > Manager section. If you don't see the option to update the firmware to 2.0.0, please re-install Ledger Live.
 
-# Create catalyst voting keys
-To get private/public voting key you must use another tool, you can use jcli to generate your private/public voting key:
+[TODO add Ledger app and Trezor Firmware versions]
+
+# Create governance voting keys
+
+You may want to keep your voting keys stored on a Ledger Nano hardware device (the key derivation schema is described in [CIP-36](https://cips.cardano.org/cips/cip36/)). Consequently, you will have to sign all voting on the HW device storing the keys. For Trezor, this is not supported.
+
+It is possible to register and use keys generated in other ways, e.g. as follows:
 ```
 wget https://github.com/input-output-hk/jormungandr/releases/download/v0.9.3/jormungandr-0.9.3-x86_64-unknown-linux-gnu-generic.tar.gz
 tar -xf jormungandr-0.9.3-x86_64-unknown-linux-gnu-generic.tar.gz
@@ -10,7 +14,8 @@ tar -xf jormungandr-0.9.3-x86_64-unknown-linux-gnu-generic.tar.gz
 ./jcli key to-public < catalyst-vote.skey > catalyst-vote.pkey
 ```
 
-# Create catalyst voting registration metadata
+# Create governance voting registration metadata
+
 Generate stake hardware wallet signing file and verification file with `cardano-hw-cli`:
 ```
 cardano-hw-cli address key-gen \
@@ -19,12 +24,12 @@ cardano-hw-cli address key-gen \
 --hw-signing-file stake.hwsfile
 ```
 
-Get slot number from `cardano-cli`, use slot number as `nonce` in catalyst voting registration command:
+Get slot number from `cardano-cli`, use slot number as `nonce` in governance voting registration command:
 ```
 cardano-cli query tip --mainnet
 ```
 
-Get stake address from `cardano-cli`, use it as `reward-address` and `reward-address-signing-key` in catalyst voting registration command:
+Get stake address from `cardano-cli`, use it as `reward-address` and `reward-address-signing-key` in governance voting registration command:
 ```
 cardano-cli stake-address build \
 --stake-verification-key-file stake.vkey \
@@ -32,9 +37,9 @@ cardano-cli stake-address build \
 --mainnet
 ```
 
-Create catalyst voting registration metadata with `cardano-hw-cli`:
+Create governance voting registration metadata with `cardano-hw-cli`:
 ```
-cardano-hw-cli catalyst voting-key-registration-metadata \
+cardano-hw-cli governance voting-registration-metadata \
 --mainnet \
 --vote-public-key catalyst-vote.pkey \
 --reward-address $(cat stake.addr) \
@@ -43,6 +48,24 @@ cardano-hw-cli catalyst voting-key-registration-metadata \
 --reward-address-signing-key stake.hwsfile \
 --metadata-cbor-out-file voting_registration.cbor
 ```
+(You should add `--voting-purpose` to change the voting purpose to something other than Catalyst.)
+
+Alternatively, in case you want to split your voting power among several voting keys, the keys and their voting power weights can be specified like this:
+```
+cardano-hw-cli governance voting-registration-metadata \
+--mainnet \
+--vote-public-key catalyst-vote1.pkey \
+--vote-weight 1 \
+--vote-public-key catalyst-vote2.pkey \
+--vote-weight 10 \
+--reward-address $(cat stake.addr) \
+--stake-signing-key stake.hwsfile \
+--nonce 29747977 \
+--reward-address-signing-key stake.hwsfile \
+--metadata-cbor-out-file voting_registration.cbor
+```
+
+Note: The governance registration auxiliary data are formatted according to [CIP-36](https://cips.cardano.org/cips/cip36/).
 
 # Create and submit transaction
 Create raw transaction with `cardano-cli`, if you don't know how to create simple transaction, check https://github.com/vacuumlabs/cardano-hw-cli/blob/develop/docs/transaction-example.md

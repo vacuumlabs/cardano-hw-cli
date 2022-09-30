@@ -228,16 +228,23 @@ export type ParsedNodeKeyGenArguments = {
   issueCounterFiles: string[],
 }
 
-export type ParsedCatalystVotingKeyRegistrationMetadataArguments = {
-  command: CommandType.CATALYST_VOTING_KEY_REGISTRATION_METADATA,
-  network: Network,
-  votePublicKey: VotePublicKeyHex,
+export type ParsedGovernanceVotingKeyRegistrationMetadataArguments = {
+  command: CommandType.GOVERNANCE_VOTING_REGISTRATION_METADATA,
+  votePublicKeys: VotePublicKeyHex[],
+  voteWeights: BigInt[],
   hwStakeSigningFileData: HwSigningData,
   rewardAddress: string,
   nonce: BigInt,
+  votingPurpose: BigInt,
+  network: Network,
   rewardAddressSigningKeyData: HwSigningData[],
   outFile: string,
   derivationType?: DerivationType,
+}
+
+export type GovernanceVotingDelegation = {
+  votePublicKey: VotePublicKeyHex,
+  voteWeight: BigInt,
 }
 
 export type ParsedArguments =
@@ -255,7 +262,7 @@ export type ParsedArguments =
   | ParsedTransactionTransformArguments
   | ParsedNodeKeyGenArguments
   | ParsedOpCertArguments
-  | ParsedCatalystVotingKeyRegistrationMetadataArguments
+  | ParsedGovernanceVotingKeyRegistrationMetadataArguments
 
 export type HwSigningOutput = {
   type: string,

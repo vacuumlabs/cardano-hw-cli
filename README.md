@@ -119,20 +119,22 @@ cardano-hw-cli node issue-op-cert
 --hw-signing-file FILE                               Input filepath of the hardware wallet signing file.
 ```
 
-## Catalyst voting registration
+## Governance voting registration
 ```
-cardano-hw-cli catalyst voting-key-registration-metadata
+cardano-hw-cli governance voting-registration-metadata
 --mainnet | --testnet-magic NATURAL    Use the mainnet magic id or specify testnet magic id.
---vote-public-key FILE                 Input filepath of vote public key in ed25519extended.
+--vote-public-key FILE                 Input filepath to vote public key in ed25519extended format (one or more keys can be provided).
+--vote-weight WEIGHT                   Voting power weight assigned to vote public key.
 --stake-signing-key FILE               Input filepath of the hardware wallet stake signing file, which will be used to to sign the voting registration.
 --reward-address REWARDADDRESS         Staking address which will receive voting rewards.
 --nonce NONCE                          Current slot number.
+--voting-purpose VOTINGPURPOSE         Voting purpose (optional)
 --reward-address-signing-key FILE      Input filepath of the reward address signing files.
 --metadata-cbor-out-file FILE          Output filepath of metadata cbor.
 --derivation-type TYPE                 Derivation type - currently applies only to Trezor. Options: LEDGER, ICARUS or ICARUS_TREZOR (default).
 ```
 
-see [Catalyst voting registration example](docs/catalyst-voting-registration-example.md)
+see [Governance voting registration example](docs/governance-voting-registration-example.md)
 
 ## Policy id generation
 ```
@@ -157,7 +159,7 @@ cardano-hw-cli device version
 # Examples/Guides
 - [Basic transaction](docs/transaction-example.md)
 - [Stake delegation](docs/delegation-example.md)
-- [Catalyst voting registration](docs/catalyst-voting-registration-example.md)
+- [Governance voting registration](docs/governance-voting-registration-example.md)
 - [Stake pool registration](docs/pool-registration.md)
 - [Token minting](docs/token-minting.md)
 - [Multisig transactions](docs/multisig-transactions.md)
