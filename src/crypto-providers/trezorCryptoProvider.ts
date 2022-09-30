@@ -27,11 +27,11 @@ import {
   NativeScriptHashKeyHex,
   Network,
   PubKeyHex,
-  VotePublicKeyHex,
   XPubKeyHex,
   NativeScriptType,
   ParsedShowAddressArguments,
   DerivationType,
+  GovernanceVotingDelegation,
 } from '../types'
 import {
   encodeAddress,
@@ -650,11 +650,26 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     return createWitnesses(trezorWitnesses, params.hwSigningFileData)
   }
 
+  const prepareVoteDelegations = (
+    delegations: GovernanceVotingDelegation[],
+  ): TrezorTypes.CardanoGovernanceRegistrationDelegation[] => (
+    delegations.map(({ votePublicKey, voteWeight }) => {
+      if (Number(voteWeight) > Number.MAX_SAFE_INTEGER) {
+        throw Error(Errors.InvalidGovernanceVotingWeight)
+      }
+      return {
+        votingPublicKey: votePublicKey,
+        weight: Number(voteWeight),
+      }
+    })
+  )
+
   const prepareVoteAuxiliaryData = (
+    delegations: GovernanceVotingDelegation[],
     hwStakeSigningFile: HwSigningData,
-    votingPublicKeyHex: VotePublicKeyHex,
     addressParameters: _AddressParameters,
     nonce: BigInt,
+    votingPurpose: BigInt,
   ): TrezorTypes.CardanoAuxiliaryData => {
     const prepareAddressParameters = () => {
       if (addressParameters.addressType === TrezorEnums.CardanoAddressType.BASE) {
@@ -674,11 +689,14 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     }
 
     return {
-      catalystRegistrationParameters: {
-        votingPublicKey: votingPublicKeyHex,
+      governanceRegistrationParameters: {
+        format: TrezorEnums.CardanoGovernanceRegistrationFormat.CIP36,
+        delegations: prepareVoteDelegations(delegations),
         stakingPath: hwStakeSigningFile.path,
         rewardAddressParameters: prepareAddressParameters(),
         nonce: `${nonce}`,
+        // TODO change the type in Trezor Connect? or do some validation here
+        votingPurpose: Number(votingPurpose),
       },
     }
   }
@@ -713,12 +731,13 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
   })
 
   const signVotingRegistrationMetaData = async (
-    rewardAddressSigningFiles: HwSigningData[],
-    hwStakeSigningFile: HwSigningData,
+    delegations: GovernanceVotingDelegation[],
+    hwStakeSigningFile: HwSigningData, // describes stake_credential
     rewardAddressBech32: string,
-    votePublicKeyHex: VotePublicKeyHex,
-    network: Network,
     nonce: BigInt,
+    votingPurpose: BigInt,
+    network: Network,
+    rewardAddressSigningFiles: HwSigningData[],
     derivationType?: DerivationType,
   ): Promise<VotingRegistrationMetaDataCborHex> => {
     const { data: address } : { data: Buffer } = bech32.decode(rewardAddressBech32)
@@ -729,7 +748,13 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
 
     validateVotingRegistrationAddressType(addressParams.addressType)
 
-    const trezorAuxData = prepareVoteAuxiliaryData(hwStakeSigningFile, votePublicKeyHex, addressParams, nonce)
+    const trezorAuxData = prepareVoteAuxiliaryData(
+      delegations,
+      hwStakeSigningFile,
+      addressParams,
+      nonce,
+      votingPurpose,
+    )
     const dummyTx = prepareDummyTx(network, trezorAuxData)
 
     const response = await TrezorConnect.cardanoSignTransaction({
@@ -740,17 +765,18 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
       throw Error(response.payload.error)
     }
     if (!response.payload.auxiliaryDataSupplement) throw Error(Errors.MissingAuxiliaryDataSupplement)
-    if (!response.payload.auxiliaryDataSupplement.catalystSignature) {
-      throw Error(Errors.MissingCatalystVotingSignature)
+    if (!response.payload.auxiliaryDataSupplement.governanceSignature) {
+      throw Error(Errors.MissingGovernanceVotingSignature)
     }
 
     return encodeVotingRegistrationMetaData(
+      delegations,
       hwStakeSigningFile,
-      votePublicKeyHex,
       address,
       nonce,
+      votingPurpose,
       response.payload.auxiliaryDataSupplement.auxiliaryDataHash as HexString,
-      response.payload.auxiliaryDataSupplement.catalystSignature as HexString,
+      response.payload.auxiliaryDataSupplement.governanceSignature as HexString,
     )
   }
 

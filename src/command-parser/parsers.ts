@@ -196,9 +196,9 @@ export const parseVotePubFile = (path: string): VotePublicKeyHex => {
     const hexString = bech32.decode(data).data.toString('hex')
     if (isVotePublicKeyHex(hexString)) return hexString
   } catch (e) {
-    throw Error(Errors.InvalidCatalystVotePublicKey)
+    throw Error(Errors.InvalidGovernanceVotingPublicKey)
   }
-  throw Error(Errors.InvalidCatalystVotePublicKey)
+  throw Error(Errors.InvalidGovernanceVotingPublicKey)
 }
 
 const SCRIPT_HASH_LENGTH = 28

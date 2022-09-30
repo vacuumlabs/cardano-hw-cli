@@ -7,6 +7,7 @@ const { signingFiles } = require('./signingFiles')
 const { addresses } = require('./addresses')
 const { getTransport } = require('./speculos')
 
+// TODO add cip36 ones
 const votingRegistrations = {
   withTestnetBaseAddress0: {
     network: 'TESTNET_LEGACY',
@@ -51,12 +52,13 @@ async function testVotingRegistrationMetaDataSigning(cryptoProvider, votingRegis
 
   assert.deepStrictEqual(
     await cryptoProvider.signVotingRegistrationMetaData(
-      args.auxiliarySigningFiles,
+      args.delegations,
       args.hwStakeSigningFile,
       args.rewardAddressBech32,
-      args.votePublicKeyHex,
-      NETWORKS[args.network],
       args.nonce,
+      args.votingPurpose,
+      NETWORKS[args.network],
+      args.auxiliarySigningFiles,
     ),
     signedVotingRegistrationMetaDataHex,
   )

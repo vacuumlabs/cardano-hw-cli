@@ -20,6 +20,9 @@ export const NETWORKS: {[key: string]: Network} = {
 
 export const HARDENED_THRESHOLD = 0x80000000
 
+// the 'Catalyst' value for voting_purpose in https://cips.cardano.org/cips/cip36/
+export const GOVERNANCE_VOTING_PURPOSE_CATALYST = 0
+
 export enum PathLabel {
   PAYMENT = 'Payment',
   STAKE = 'Stake',

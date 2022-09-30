@@ -20,9 +20,10 @@ import {
   ParsedVerificationKeyArguments,
   ParsedOpCertArguments,
   ParsedNodeKeyGenArguments,
-  ParsedCatalystVotingKeyRegistrationMetadataArguments,
+  ParsedGovernanceVotingKeyRegistrationMetadataArguments,
   Cbor,
   NativeScriptDisplayFormat,
+  GovernanceVotingDelegation,
 } from './types'
 import { LedgerCryptoProvider } from './crypto-providers/ledgerCryptoProvider'
 import { TrezorCryptoProvider } from './crypto-providers/trezorCryptoProvider'
@@ -39,7 +40,7 @@ import { Errors } from './errors'
 import { parseOpCertIssueCounterFile } from './command-parser/parsers'
 import { validateSigning, validateWitnessing } from './crypto-providers/signingValidation'
 import { validateRawTxBeforeSigning, validateTxBeforeSigning } from './transaction/transactionValidation'
-import { cardanoEraToSignedType } from './constants'
+import { cardanoEraToSignedType, GOVERNANCE_VOTING_PURPOSE_CATALYST } from './constants'
 import { WitnessOutput } from './transaction/types'
 
 const promiseTimeout = <T> (promise: Promise<T>, ms: number): Promise<T> => {
@@ -262,20 +263,39 @@ const CommandExecutor = async () => {
     writeOutputData(args.issueCounterFile, constructOpCertIssueCounterOutput(issueCounter))
   }
 
-  const createCatalystVotingKeyRegistrationMetadata = async (
-    args: ParsedCatalystVotingKeyRegistrationMetadataArguments,
+  const createGovernanceVotingKeyRegistrationMetadata = async (
+    args: ParsedGovernanceVotingKeyRegistrationMetadataArguments,
   ) => {
     if (!areHwSigningDataNonByron([...args.rewardAddressSigningKeyData, args.hwStakeSigningFileData])) {
       throw Error(Errors.ByronSigningFilesFoundInVotingRegistration)
     }
 
+    const votePublicKeyCount = args.votePublicKeys.length
+    const voteWeightCount = args.voteWeights.length
+    if (votePublicKeyCount === 1 && voteWeightCount === 0) {
+      // delegate the whole voting power to the single vote public key
+      args.voteWeights.push(BigInt(1))
+    } else if (votePublicKeyCount > 0 && votePublicKeyCount === voteWeightCount) {
+      // the vote public keys and vote weights are provided correctly
+      // nothing to do
+    } else {
+      throw Error(Errors.InvalidGovernanceVotingDelegations)
+    }
+    const delegations: GovernanceVotingDelegation[] = args.votePublicKeys.map((votePublicKey, index) => ({
+      votePublicKey,
+      voteWeight: args.voteWeights[index],
+    }))
+
+    const votingPurpose = args.votingPurpose || GOVERNANCE_VOTING_PURPOSE_CATALYST
+
     const votingRegistrationMetaData = await cryptoProvider.signVotingRegistrationMetaData(
-      args.rewardAddressSigningKeyData,
+      delegations,
       args.hwStakeSigningFileData,
       args.rewardAddress,
-      args.votePublicKey,
-      args.network,
       args.nonce,
+      votingPurpose,
+      args.network,
+      args.rewardAddressSigningKeyData,
       args.derivationType,
     )
 
@@ -292,7 +312,7 @@ const CommandExecutor = async () => {
     createTxWitnesses,
     createNodeSigningKeyFiles,
     createSignedOperationalCertificate,
-    createCatalystVotingKeyRegistrationMetadata,
+    createGovernanceVotingRegistrationMetadata: createGovernanceVotingKeyRegistrationMetadata,
   }
 }
 

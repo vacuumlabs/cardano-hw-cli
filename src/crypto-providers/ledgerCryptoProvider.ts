@@ -16,6 +16,7 @@ import {
 } from '../transaction/types'
 import {
   BIP32Path,
+  GovernanceVotingDelegation,
   HexString,
   HwSigningData,
   NativeScript,
@@ -51,6 +52,8 @@ import {
 
 const { bech32 } = require('cardano-crypto.js')
 
+// TODO remove
+// @ts-ignore
 export const LedgerCryptoProvider: (transport: Transport) => Promise<CryptoProvider> = async (transport) => {
   const ledger = new Ledger(transport)
 
@@ -731,10 +734,11 @@ export const LedgerCryptoProvider: (transport: Transport) => Promise<CryptoProvi
     votingPublicKeyHex: VotePublicKeyHex,
     addressParameters: _AddressParameters,
     nonce: BigInt,
+    votingPurpose: BigInt,
   ): LedgerTypes.TxAuxiliaryData => ({
     type: LedgerTypes.TxAuxiliaryDataType.CATALYST_REGISTRATION,
     params: {
-      votingPublicKeyHex,
+      votingPublicKeyHex, // TODO update to cip36
       stakingPath: hwStakeSigningFile.path,
       rewardsDestination: {
         type: addressParameters.addressType,
@@ -744,6 +748,7 @@ export const LedgerCryptoProvider: (transport: Transport) => Promise<CryptoProvi
         },
       },
       nonce: `${nonce}`,
+      votingPurpose: `${votingPurpose}`,
     },
   })
 
@@ -787,12 +792,13 @@ export const LedgerCryptoProvider: (transport: Transport) => Promise<CryptoProvi
   })
 
   const signVotingRegistrationMetaData = async (
-    rewardAddressSigningFiles: HwSigningData[],
-    hwStakeSigningFile: HwSigningData,
+    delegations: GovernanceVotingDelegation[],
+    hwStakeSigningFile: HwSigningData, // describes stake_credential
     rewardAddressBech32: string,
-    votePublicKeyHex: VotePublicKeyHex,
-    network: Network,
     nonce: BigInt,
+    votingPurpose: BigInt,
+    network: Network,
+    rewardAddressSigningFiles: HwSigningData[],
   ): Promise<VotingRegistrationMetaDataCborHex> => {
     const { data: address } : { data: Buffer } = bech32.decode(rewardAddressBech32)
     const addressParams = getAddressParameters(rewardAddressSigningFiles, address, network)
@@ -802,17 +808,20 @@ export const LedgerCryptoProvider: (transport: Transport) => Promise<CryptoProvi
 
     validateVotingRegistrationAddressType(addressParams.addressType)
 
-    const ledgerAuxData = prepareVoteAuxiliaryData(hwStakeSigningFile, votePublicKeyHex, addressParams, nonce)
+    const ledgerAuxData = prepareVoteAuxiliaryData(hwStakeSigningFile, votePublicKeyHex, addressParams, nonce, votingPurpose)
     const dummyTx = prepareDummyTx(network, ledgerAuxData)
 
     const response = await ledger.signTransaction(dummyTx)
     if (!response.auxiliaryDataSupplement) throw Error(Errors.MissingAuxiliaryDataSupplement)
 
     return encodeVotingRegistrationMetaData(
-      hwStakeSigningFile,
+      // TODO remove
+      // @ts-ignore
       votePublicKeyHex,
+      hwStakeSigningFile,
       address,
       nonce,
+      votingPurpose,
       response.auxiliaryDataSupplement.auxiliaryDataHashHex as HexString,
       response.auxiliaryDataSupplement.catalystRegistrationSignatureHex as HexString,
     )
