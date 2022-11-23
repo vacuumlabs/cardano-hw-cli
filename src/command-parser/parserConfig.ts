@@ -23,6 +23,17 @@ const derivationTypeArg = {
   },
 }
 
+const pubkeyArgs = {
+  '--path': {
+    required: true,
+    action: 'append',
+    type: (path: string) => parseBIP32Path(path),
+    dest: 'paths',
+    help: 'Derivation path to the key to sign with.',
+  },
+  ...derivationTypeArg,
+}
+
 const keyGenArgs = {
   '--path': {
     required: true,
@@ -183,6 +194,9 @@ export const parserConfig = {
         help: 'Output filepath of the verification key.',
       },
     },
+  },
+  'pubkey': {
+    'query': pubkeyArgs,
   },
 
   // ===============  commands taken from cardano-cli interface  ===============
