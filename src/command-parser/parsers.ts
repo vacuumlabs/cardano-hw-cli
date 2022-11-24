@@ -92,17 +92,25 @@ export const parseFileTypeMagic = (fileTypeMagic: string, pathType: PathTypes): 
   }
 }
 
-export const parseHwSigningFile = (path: string): HwSigningData => {
-  const data = JSON.parse(rw.readFileSync(path, 'utf8'))
-  data.path = parseBIP32Path(data.path)
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { type: fileTypeMagic, description, ...parsedData } = data
-
-  const result = { type: parseFileTypeMagic(fileTypeMagic, classifyPath(data.path)), ...parsedData }
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+export const extractHWSigningData = ({
+  type: fileTypeMagic, description, path: bip32pathstr, ...parsedData
+}: any): HwSigningData => {
+  const path = parseBIP32Path(bip32pathstr)
+  const result = {
+    type: parseFileTypeMagic(fileTypeMagic, classifyPath(path)),
+    path,
+    ...parsedData,
+  }
   if (isHwSigningData(result)) {
     return result
   }
   throw Error(Errors.InvalidHwSigningFileError)
+}
+
+export const parseHwSigningFile = (path: string): HwSigningData => {
+  const data = JSON.parse(rw.readFileSync(path, 'utf8'))
+  return extractHWSigningData(data)
 }
 
 export const parseRawTxFile = (path: string): RawTxFileData => {
