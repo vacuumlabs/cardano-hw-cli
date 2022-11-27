@@ -93,9 +93,16 @@ const bip32PathLabel = (path: BIP32Path): PathLabel => {
 
 const verificationKeyType = (path: BIP32Path): string => {
   const label = bip32PathLabel(path)
-  return classifyPath(path) === PathTypes.PATH_WALLET_SPENDING_KEY_BYRON
-    ? `${label}VerificationKeyByron_ed25519_bip32`
-    : `${label}VerificationKeyShelley_ed25519`
+  switch (classifyPath(path)) {
+    case PathTypes.PATH_POOL_COLD_KEY:
+      return `${label}VerificationKey_ed25519`
+
+    case PathTypes.PATH_WALLET_SPENDING_KEY_BYRON:
+      return `${label}VerificationKeyByron_ed25519_bip32`
+
+    default:
+      return `${label}VerificationKeyShelley_ed25519`
+  }
 }
 
 const verificationKeyDescription = (path: BIP32Path): string => {
