@@ -112,50 +112,12 @@ describe('Command parser', () => {
     assert.deepStrictEqual(parsedArgs, expectedResult)
   })
 
-  it('Should parse sign transaction', () => {
-    const args = pad([
-      'shelley',
-      'transaction',
-      'sign',
-      '--tx-body-file',
-      prefix('tx.raw'),
-      '--hw-signing-file',
-      prefix('payment.hwsfile'),
-      '--mainnet',
-      '--out-file',
-      prefix('tx.signed'),
-    ])
-    const { parsedArgs } = parse(args)
-    const expectedResult = {
-      command: CommandType.SIGN_TRANSACTION,
-      network: NETWORKS.MAINNET,
-      txFileData: undefined,
-      rawTxFileData: {
-        era: CardanoEra.SHELLEY,
-        description: '',
-        // eslint-disable-next-line max-len
-        cborHex: '82a40081825820941a33cf9d39bba4102c4eff8bd54efd72cf93e65a023a4475ba48a58fc0de000001818258390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c1a002b2b4b021a00029b75031a00a8474cf6',
-      },
-      hwSigningFileData: [
-        {
-          type: 0,
-          path: [2147485500, 2147485463, 2147483648, 0, 0],
-          cborXPubKeyHex: '5880e0d9c2e5b...7277e7db',
-        },
-      ],
-      outFile: 'test/unit/commandParser/res/tx.signed',
-      changeOutputKeyFileData: [],
-      derivationType: undefined,
-    }
-    assert.deepStrictEqual(parsedArgs, expectedResult)
-  })
-
   it('Should parse witness transaction', () => {
     const args = pad([
       'shelley',
       'transaction',
       'witness',
-      '--tx-body-file',
+      '--tx-file',
       prefix('tx.raw'),
       '--hw-signing-file',
       prefix('payment.hwsfile'),
@@ -168,12 +130,12 @@ describe('Command parser', () => {
     const expectedResult = {
       command: CommandType.WITNESS_TRANSACTION,
       network: NETWORKS.TESTNET_LEGACY,
-      txFileData: undefined,
-      rawTxFileData: {
+      txFileData: {
         era: CardanoEra.SHELLEY,
         description: '',
+        envelopeType: 'Unwitnessed Tx ShelleyEra',
         // eslint-disable-next-line max-len
-        cborHex: '82a40081825820941a33cf9d39bba4102c4eff8bd54efd72cf93e65a023a4475ba48a58fc0de000001818258390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c1a002b2b4b021a00029b75031a00a8474cf6',
+        cborHex: '83a40081825820941a33cf9d39bba4102c4eff8bd54efd72cf93e65a023a4475ba48a58fc0de000001818258390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c1a002b2b4b021a00029b75031a00a8474ca0f6',
       },
       hwSigningFileData: [{
         type: 0,
@@ -187,12 +149,12 @@ describe('Command parser', () => {
     assert.deepStrictEqual(parsedArgs, expectedResult)
   })
 
-  it('Should parse sign transaction with change', () => {
+  it('Should parse witness transaction with change', () => {
     const args = pad([
       'shelley',
       'transaction',
-      'sign',
-      '--tx-body-file',
+      'witness',
+      '--tx-file',
       prefix('tx.raw'),
       '--hw-signing-file',
       prefix('payment.hwsfile'),
@@ -204,21 +166,23 @@ describe('Command parser', () => {
     ])
     const { parsedArgs } = parse(args)
     const expectedResult = {
-      command: CommandType.SIGN_TRANSACTION,
+      command: CommandType.WITNESS_TRANSACTION,
       network: NETWORKS.MAINNET,
-      txFileData: undefined,
-      rawTxFileData: {
+      txFileData: {
         era: CardanoEra.SHELLEY,
         description: '',
+        envelopeType: 'Unwitnessed Tx ShelleyEra',
         // eslint-disable-next-line max-len
-        cborHex: '82a40081825820941a33cf9d39bba4102c4eff8bd54efd72cf93e65a023a4475ba48a58fc0de000001818258390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c1a002b2b4b021a00029b75031a00a8474cf6',
+        cborHex: '83a40081825820941a33cf9d39bba4102c4eff8bd54efd72cf93e65a023a4475ba48a58fc0de000001818258390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c1a002b2b4b021a00029b75031a00a8474ca0f6',
       },
       hwSigningFileData: [{
         type: 0,
         path: [2147485500, 2147485463, 2147483648, 0, 0],
         cborXPubKeyHex: '5880e0d9c2e5b...7277e7db',
       }],
-      outFile: 'test/unit/commandParser/res/tx.signed',
+      outFiles: [
+        'test/unit/commandParser/res/tx.signed',
+      ],
       changeOutputKeyFileData: [{
         type: 0,
         path: [2147485500, 2147485463, 2147483648, 0, 0],
@@ -416,26 +380,6 @@ describe('Command parser', () => {
     assert.deepStrictEqual(parsedArgs, expectedResult)
   })
 
-  it('Should parse validate-raw transaction', () => {
-    const args = pad([
-      'transaction',
-      'validate-raw',
-      '--tx-body-file',
-      prefix('tx.raw'),
-    ])
-    const { parsedArgs } = parse(args)
-    const expectedResult = {
-      command: CommandType.VALIDATE_RAW_TRANSACTION,
-      rawTxFileData: {
-        era: CardanoEra.SHELLEY,
-        description: '',
-        // eslint-disable-next-line max-len
-        cborHex: '82a40081825820941a33cf9d39bba4102c4eff8bd54efd72cf93e65a023a4475ba48a58fc0de000001818258390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c1a002b2b4b021a00029b75031a00a8474cf6',
-      },
-    }
-    assert.deepStrictEqual(parsedArgs, expectedResult)
-  })
-
   it('Should parse validate transaction', () => {
     const args = pad([
       'transaction',
@@ -453,29 +397,6 @@ describe('Command parser', () => {
         // eslint-disable-next-line max-len
         cborHex: '83a40081825820941a33cf9d39bba4102c4eff8bd54efd72cf93e65a023a4475ba48a58fc0de000001818258390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c1a002b2b4b021a00029b75031a00a8474ca10081825820cd2b047d1a803eee059769cffb3dfd0a4b9327e55bc78aa962d9bd4f720db0b2584093cbb49246dffb2cb2ca2c18e75039bdb4f80730bb9478045c4b8ef5494145a71bd59a478df4ec0dd22e78c9fc919918f4404115fafb10fa4f218b269d3e220af6',
       },
-    }
-    assert.deepStrictEqual(parsedArgs, expectedResult)
-  })
-
-  it('Should parse transform-raw transaction', () => {
-    const args = pad([
-      'transaction',
-      'transform-raw',
-      '--tx-body-file',
-      prefix('tx.raw'),
-      '--out-file',
-      prefix('fixed.raw'),
-    ])
-    const { parsedArgs } = parse(args)
-    const expectedResult = {
-      command: CommandType.TRANSFORM_RAW_TRANSACTION,
-      rawTxFileData: {
-        era: CardanoEra.SHELLEY,
-        description: '',
-        // eslint-disable-next-line max-len
-        cborHex: '82a40081825820941a33cf9d39bba4102c4eff8bd54efd72cf93e65a023a4475ba48a58fc0de000001818258390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c1a002b2b4b021a00029b75031a00a8474cf6',
-      },
-      outFile: 'test/unit/commandParser/res/fixed.raw',
     }
     assert.deepStrictEqual(parsedArgs, expectedResult)
   })

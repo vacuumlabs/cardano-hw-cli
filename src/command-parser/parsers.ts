@@ -1,6 +1,5 @@
 import fsPath from 'path'
 import {
-  cardanoEraToRawType,
   HARDENED_THRESHOLD,
   NETWORKS,
   PathLabel,
@@ -11,7 +10,6 @@ import {
   isCborHex,
   isDerivationType,
   isHwSigningData,
-  isRawTxFileData,
   isTxFileData,
   isVotePublicKeyHex,
 } from '../guards'
@@ -24,12 +22,11 @@ import {
   HwSigningType,
   NativeScript,
   NativeScriptType,
-  RawTxFileData,
   TxFileData,
   VotePublicKeyHex,
 } from '../types'
 import { KesVKey, OpCertIssueCounter } from '../opCert/opCert'
-import { decodeCbor, invertObject } from '../util'
+import { decodeCbor } from '../util'
 import { classifyPath, PathTypes } from '../crypto-providers/util'
 
 const { bech32 } = require('cardano-crypto.js')
@@ -103,18 +100,6 @@ export const parseHwSigningFile = (path: string): HwSigningData => {
     return result
   }
   throw Error(Errors.InvalidHwSigningFileError)
-}
-
-export const parseRawTxFile = (path: string): RawTxFileData => {
-  const json = JSON.parse(rw.readFileSync(path, 'utf8'))
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { type, description, cborHex } = json
-  const era = invertObject(cardanoEraToRawType)[type]
-  const data = { era, description, cborHex }
-  if (isRawTxFileData(data)) {
-    return data
-  }
-  throw Error(Errors.InvalidRawTxFileError)
 }
 
 export const parseTxFile = (path: string): TxFileData => {

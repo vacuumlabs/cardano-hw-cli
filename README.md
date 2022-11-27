@@ -29,24 +29,9 @@ cardano-hw-cli key verification-key
 --verification-key-file FILE    Output filepath of the verification key.
 ```
 
-## Sign transaction
-
-This call is DEPRECATED and will be REMOVED in Oct 2022. Please use witness call instead.
-```
-cardano-hw-cli transaction sign
---tx-body-file FILE                    Input filepath of the TxBody. Warning! This option is DEPRECATED and will be REMOVED in Oct 2022. Please use --tx-file instead.
---tx-file FILE                         Input filepath of the tx. Use --cddl-format when building transactions with cardano-cli.
---hw-signing-file FILE                 Input filepath of the hardware wallet signing file (one or more files can be specified).
---change-output-key-file FILE          Input filepath of the hardware wallet signing file (so hw cli can match the keys of the change address, if present, and let the device hide it).
---mainnet | --testnet-magic NATURAL    Use the mainnet magic id or specify testnet magic id.
---out-file FILE                        Output filepath of the Tx.
---derivation-type TYPE                 Derivation type - currently applies only to Trezor. Options: LEDGER, ICARUS or ICARUS_TREZOR (default).
-```
-
 ## Witness transaction
 ```
 cardano-hw-cli transaction witness
---tx-body-file FILE                    Input filepath of the TxBody. Warning! This option is DEPRECATED and will be REMOVED in Oct 2022. Please use --tx-file instead.
 --tx-file FILE                         Input filepath of the tx. Use --cddl-format when building transactions with cardano-cli.
 --hw-signing-file FILE                 Input filepath of the hardware wallet signing file (one or more files can be specified).
 --change-output-key-file FILE          Input filepath of the hardware wallet signing file (so hw cli can match the keys of the change address, if present, and let the device hide it).
@@ -54,20 +39,6 @@ cardano-hw-cli transaction witness
 --out-file FILE                        Output filepath of the witness (one or more witness files can be specified).
 --derivation-type TYPE                 Derivation type - currently applies only to Trezor. Options: LEDGER, ICARUS or ICARUS_TREZOR (default).
 ```
-
-## Validate raw transaction
-Verifies whether the tx body file (i.e. raw transaction) complies with [restrictions](https://github.com/cardano-foundation/CIPs/blob/master/CIP-0021/README.md) imposed by hardware wallets.
-
-This call is DEPRECATED and will be REMOVED in Oct 2022. Please use validate call instead.
-```
-cardano-hw-cli transaction validate-raw
---tx-body-file FILE                    Input filepath of the raw tx.
-```
-Exit code meaning:
-- `0` transaction complies with all restrictions
-- `1` an error occured (e.g. the transaction could not be parsed)
-- `2` transaction contains validation errrors that cannot be fixed automatically (e.g. too many tx inputs)
-- `3` transaction contains validation errrors that can be fixed by running `transaction transform-raw` (e.g. non-canonical CBOR)
 
 ## Validate transaction
 Verifies whether the tx file complies with [restrictions](https://github.com/cardano-foundation/CIPs/blob/master/CIP-0021/README.md) imposed by hardware wallets.
@@ -80,16 +51,6 @@ Exit code meaning:
 - `1` an error occured (e.g. the transaction could not be parsed)
 - `2` transaction contains validation errrors that cannot be fixed automatically (e.g. too many tx inputs)
 - `3` transaction contains validation errrors that can be fixed by running `transaction transform` (e.g. non-canonical CBOR)
-
-## Transform raw transaction
-Tries to non-destructively transform the tx body file (i.e. raw transaction), so that it complies with [restrictions](https://github.com/cardano-foundation/CIPs/blob/master/CIP-0021/README.md) imposed by hardware wallets.
-
-This call is DEPRECATED and will be REMOVED in Oct 2022. Please use transform call instead.
-```
-cardano-hw-cli transaction transform-raw
---tx-body-file FILE                    Input filepath of the raw tx.
---out-file FILE                        Output filepath of the raw tx.
-```
 
 ## Transform transaction
 Tries to non-destructively transform the tx file, so that it complies with [restrictions](https://github.com/cardano-foundation/CIPs/blob/master/CIP-0021/README.md) imposed by hardware wallets.

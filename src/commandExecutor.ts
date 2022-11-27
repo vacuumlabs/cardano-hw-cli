@@ -2,7 +2,6 @@ import * as InteropLib from 'cardano-hw-interop-lib'
 import TransportNodeHid from '@ledgerhq/hw-transport-node-hid-noevents'
 import { CryptoProvider, SigningParameters } from './crypto-providers/types'
 import {
-  constructTxFileOutput,
   constructHwSigningKeyOutput,
   constructVerificationKeyOutput,
   constructTxWitnessOutput,
@@ -14,7 +13,6 @@ import {
 import {
   ParsedShowAddressArguments,
   ParsedAddressKeyGenArguments,
-  ParsedTransactionSignArguments,
   ParsedTransactionPolicyIdArguments,
   ParsedTransactionWitnessArguments,
   ParsedVerificationKeyArguments,
@@ -38,10 +36,10 @@ import {
 } from './crypto-providers/util'
 import { Errors } from './errors'
 import { parseOpCertIssueCounterFile } from './command-parser/parsers'
-import { validateSigning, validateWitnessing } from './crypto-providers/signingValidation'
-import { validateRawTxBeforeSigning, validateTxBeforeSigning } from './transaction/transactionValidation'
-import { cardanoEraToSignedType, GOVERNANCE_VOTING_PURPOSE_CATALYST } from './constants'
+import { GOVERNANCE_VOTING_PURPOSE_CATALYST } from './constants'
+import { validateWitnessing } from './crypto-providers/signingValidation'
 import { WitnessOutput } from './transaction/types'
+import { validateTxBeforeSigning } from './transaction/transactionValidation'
 
 const promiseTimeout = <T> (promise: Promise<T>, ms: number): Promise<T> => {
   const timeout: Promise<T> = new Promise((resolve, reject) => {
@@ -107,45 +105,6 @@ const CommandExecutor = async () => {
     ))
   }
 
-  const createSignedTx = async (args: ParsedTransactionSignArguments) => {
-    // eslint-disable-next-line no-console,max-len
-    console.log('Warning! This call is DEPRECATED and will be REMOVED in Oct 2022. Please use witness call instead.')
-
-    let rawTx: InteropLib.RawTransaction | undefined
-    let tx: InteropLib.Transaction | undefined
-    if (args.rawTxFileData) {
-      validateRawTxBeforeSigning(args.rawTxFileData.cborHex)
-      // eslint-disable-next-line no-console,max-len
-      console.log('Warning! The --tx-body-file option is DEPRECATED and will be REMOVED in Oct 2022. Please use --tx-file instead (use --cddl-format when building transactions with cardano-cli).')
-
-      const rawTxCbor = Buffer.from(args.rawTxFileData.cborHex, 'hex')
-      rawTx = InteropLib.decodeRawTx(rawTxCbor)
-    } else {
-      validateTxBeforeSigning(args.txFileData!.cborHex)
-      const txCbor = Buffer.from(args.txFileData!.cborHex, 'hex')
-      tx = InteropLib.decodeTx(txCbor)
-    }
-
-    const txBody = (rawTx?.body ?? tx?.body)!
-    const era = (args.rawTxFileData?.era ?? args.txFileData?.era)!
-    const signingParameters: SigningParameters = {
-      signingMode: determineSigningMode(txBody, args.hwSigningFileData),
-      rawTx,
-      tx,
-      txBodyHashHex: getTxBodyHash(txBody),
-      hwSigningFileData: args.hwSigningFileData,
-      network: args.network,
-      era,
-      derivationType: args.derivationType,
-    }
-    validateSigning(signingParameters)
-
-    const envelopeType = cardanoEraToSignedType[era]
-    const description = '' // we are creating a signed tx file, leave description empty
-    const signedTx = await cryptoProvider.signTx(signingParameters, args.changeOutputKeyFileData)
-    writeOutputData(args.outFile, constructTxFileOutput(envelopeType, description, signedTx))
-  }
-
   const createTxPolicyId = async (args: ParsedTransactionPolicyIdArguments) => {
     const scriptHashHex = await cryptoProvider.deriveNativeScriptHash(
       args.nativeScript,
@@ -159,28 +118,15 @@ const CommandExecutor = async () => {
   }
 
   const createTxWitnesses = async (args: ParsedTransactionWitnessArguments) => {
-    let rawTx: InteropLib.RawTransaction | undefined
-    let tx: InteropLib.Transaction | undefined
-    if (args.rawTxFileData) {
-      // eslint-disable-next-line no-console,max-len
-      console.log('Warning! The --tx-body-file option is DEPRECATED and will be REMOVED in Oct 2022. Please use --tx-file instead (use --cddl-format when building transactions with cardano-cli).')
+    validateTxBeforeSigning(args.txFileData!.cborHex)
+    const txCbor = Buffer.from(args.txFileData!.cborHex, 'hex')
+    const tx = InteropLib.decodeTx(txCbor)
 
-      validateRawTxBeforeSigning(args.rawTxFileData.cborHex)
-      const rawTxCbor = Buffer.from(args.rawTxFileData.cborHex, 'hex')
-      rawTx = InteropLib.decodeRawTx(rawTxCbor)
-    } else {
-      validateTxBeforeSigning(args.txFileData!.cborHex)
-      const txCbor = Buffer.from(args.txFileData!.cborHex, 'hex')
-      tx = InteropLib.decodeTx(txCbor)
-    }
-
-    const txBody = (rawTx?.body ?? tx?.body)!
-    const era = (args.rawTxFileData?.era ?? args.txFileData?.era)!
+    const { era } = args.txFileData
     const signingParameters: SigningParameters = {
-      signingMode: determineSigningMode(txBody, args.hwSigningFileData),
-      rawTx,
+      signingMode: determineSigningMode(tx.body, args.hwSigningFileData),
       tx,
-      txBodyHashHex: getTxBodyHash(txBody),
+      txBodyHashHex: getTxBodyHash(tx.body),
       hwSigningFileData: args.hwSigningFileData,
       network: args.network,
       era,
@@ -307,7 +253,6 @@ const CommandExecutor = async () => {
     showAddress,
     createSigningKeyFile,
     createVerificationKeyFile,
-    createSignedTx,
     createTxPolicyId,
     createTxWitnesses,
     createNodeSigningKeyFiles,

@@ -2,7 +2,6 @@ import * as TxTypes from 'cardano-hw-interop-lib'
 import TrezorConnect, * as TrezorTypes from '@trezor/connect'
 import { PROTO as TrezorEnums } from '@trezor/connect'
 import {
-  TxCborHex,
   VotingRegistrationMetaDataCborHex,
   TxWitnesses,
   TxWitnessKeys,
@@ -16,7 +15,6 @@ import {
 import {
   TxByronWitnessData,
   TxShelleyWitnessData,
-  TxSigned,
 } from '../transaction/transaction'
 import {
   BIP32Path,
@@ -554,42 +552,41 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     changeOutputFiles: HwSigningData[],
   ): Promise<TrezorTypes.CardanoSignedTxWitness[]> => {
     const {
-      signingMode, rawTx, tx, txBodyHashHex, hwSigningFileData, network, derivationType,
+      signingMode, tx, txBodyHashHex, hwSigningFileData, network, derivationType,
     } = params
-    const body = (rawTx?.body ?? tx?.body)!
     const {
       paymentSigningFiles, stakeSigningFiles, mintSigningFiles, multisigSigningFiles,
     } = filterSigningFiles(hwSigningFileData)
 
-    const inputs = body.inputs.map(prepareInput)
-    const outputs = body.outputs.map(
+    const inputs = tx.body.inputs.map(prepareInput)
+    const outputs = tx.body.outputs.map(
       (output) => prepareOutput(output, network, changeOutputFiles, signingMode),
     )
-    const certificates = body.certificates?.map(
+    const certificates = tx.body.certificates?.map(
       (certificate) => prepareCertificate(certificate, stakeSigningFiles, signingMode),
     )
-    const fee = `${body.fee}`
-    const ttl = prepareTtl(body.ttl)
-    const validityIntervalStart = prepareValidityIntervalStart(body.validityIntervalStart)
-    const withdrawals = body.withdrawals?.map(
+    const fee = `${tx.body.fee}`
+    const ttl = prepareTtl(tx.body.ttl)
+    const validityIntervalStart = prepareValidityIntervalStart(tx.body.validityIntervalStart)
+    const withdrawals = tx.body.withdrawals?.map(
       (withdrawal) => prepareWithdrawal(withdrawal, stakeSigningFiles, signingMode),
     )
-    const auxiliaryData = prepareAuxiliaryDataHashHex(body.auxiliaryDataHash)
-    const mint = body.mint ? prepareTokenBundle(body.mint, true) : undefined
-    const scriptDataHash = prepareScriptDataHash(body.scriptDataHash)
-    const collateralInputs = body.collateralInputs?.map(prepareCollateralInput)
-    const requiredSigners = body.requiredSigners?.map(
+    const auxiliaryData = prepareAuxiliaryDataHashHex(tx.body.auxiliaryDataHash)
+    const mint = tx.body.mint ? prepareTokenBundle(tx.body.mint, true) : undefined
+    const scriptDataHash = prepareScriptDataHash(tx.body.scriptDataHash)
+    const collateralInputs = tx.body.collateralInputs?.map(prepareCollateralInput)
+    const requiredSigners = tx.body.requiredSigners?.map(
       (requiredSigner) => prepareRequiredSigner(
         requiredSigner,
         [...paymentSigningFiles, ...stakeSigningFiles, ...mintSigningFiles, ...multisigSigningFiles],
       ),
     )
-    const includeNetworkId = body.networkId !== undefined
-    const collateralReturn = body.collateralReturnOutput
-      ? prepareOutput(body.collateralReturnOutput, network, changeOutputFiles, signingMode)
+    const includeNetworkId = tx.body.networkId !== undefined
+    const collateralReturn = tx.body.collateralReturnOutput
+      ? prepareOutput(tx.body.collateralReturnOutput, network, changeOutputFiles, signingMode)
       : undefined
-    const totalCollateral = body.totalCollateral !== undefined ? `${body.totalCollateral}` : undefined
-    const referenceInputs = body.referenceInputs?.map(prepareInput)
+    const totalCollateral = tx.body.totalCollateral !== undefined ? `${tx.body.totalCollateral}` : undefined
+    const referenceInputs = tx.body.referenceInputs?.map(prepareInput)
 
     const additionalWitnessRequests = prepareAdditionalWitnessRequests(
       paymentSigningFiles,
@@ -631,15 +628,6 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     }
 
     return response.payload.witnesses
-  }
-
-  const signTx = async (
-    params: SigningParameters,
-    changeOutputFiles: HwSigningData[],
-  ): Promise<TxCborHex> => {
-    const trezorWitnesses = await trezorSignTx(params, changeOutputFiles)
-    const witnesses = createWitnesses(trezorWitnesses, params.hwSigningFileData)
-    return TxSigned(params, witnesses)
   }
 
   const witnessTx = async (
@@ -873,7 +861,6 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     getVersion,
     showAddress,
     witnessTx,
-    signTx,
     getXPubKeys,
     signOperationalCertificate,
     signVotingRegistrationMetaData,

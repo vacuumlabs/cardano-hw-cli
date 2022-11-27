@@ -29,15 +29,6 @@ export enum PathLabel {
   POOL_COLD = 'StakePool',
 }
 
-export const cardanoEraToRawType: {[key in CardanoEra]: string} = {
-  [CardanoEra.BYRON]: 'TxUnsignedByron',
-  [CardanoEra.SHELLEY]: 'TxUnsignedShelley',
-  [CardanoEra.ALLEGRA]: 'TxBodyAllegra',
-  [CardanoEra.MARY]: 'TxBodyMary',
-  [CardanoEra.ALONZO]: 'TxBodyAlonzo',
-  [CardanoEra.BABBAGE]: 'TxBodyBabbage',
-}
-
 // Unwitnessed, Witnessed and Signed types follow the same CDDL format, they are just used
 // in different contexts
 
