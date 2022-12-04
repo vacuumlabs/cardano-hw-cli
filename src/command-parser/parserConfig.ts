@@ -361,7 +361,7 @@ export const parserConfig = {
       },
       '--reward-address-signing-key': {
         action: 'append',
-        required: true,
+        required: false,
         dest: 'rewardAddressSigningKeyData',
         type: (path: string) => parseHwSigningFile(path),
         help: 'Input filepath of the reward address signing file.',

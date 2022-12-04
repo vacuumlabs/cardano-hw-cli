@@ -37,7 +37,7 @@
   "homepage": "https://github.com/vacuumlabs/cardano-hw-cli#readme",
   "dependencies": {
     "@babel/runtime": "^7.11.2",
-    "@cardano-foundation/ledgerjs-hw-app-cardano": "^5.1.0",
+    "@cardano-foundation/ledgerjs-hw-app-cardano": "https://github.com/vacuumlabs/ledgerjs-cardano-shelley/releases/download/v6.0.0-rc1/cardano-foundation-ledgerjs-hw-app-cardano-v6.0.0-rc1.tgz",
     "@emurgo/cardano-serialization-lib-nodejs": "^8.0.0",
     "@ledgerhq/hw-transport": "^5.12.0",
     "@ledgerhq/hw-transport-node-hid-noevents": "^6.24.1",

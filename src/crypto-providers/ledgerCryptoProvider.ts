@@ -1,6 +1,10 @@
 import * as TxTypes from 'cardano-hw-interop-lib'
 import Ledger, * as LedgerTypes from '@cardano-foundation/ledgerjs-hw-app-cardano'
 import type Transport from '@ledgerhq/hw-transport'
+import {
+  GovernanceVotingDelegationType,
+  TxOutputDestination,
+} from '@cardano-foundation/ledgerjs-hw-app-cardano'
 import { parseBIP32Path } from '../command-parser/parsers'
 import { Errors } from '../errors'
 import { isChainCodeHex, isPubKeyHex, isXPubKeyHex } from '../guards'
@@ -25,7 +29,6 @@ import {
   NativeScriptType,
   Network,
   ParsedShowAddressArguments,
-  VotePublicKeyHex,
   XPubKeyHex,
 } from '../types'
 import { partition } from '../util'
@@ -52,8 +55,6 @@ import {
 
 const { bech32 } = require('cardano-crypto.js')
 
-// TODO remove
-// @ts-ignore
 export const LedgerCryptoProvider: (transport: Transport) => Promise<CryptoProvider> = async (transport) => {
   const ledger = new Ledger(transport)
 
@@ -729,24 +730,36 @@ export const LedgerCryptoProvider: (transport: Transport) => Promise<CryptoProvi
     return createWitnesses(ledgerWitnesses, params.hwSigningFileData)
   }
 
+  const prepareVoteDelegations = (
+    delegations: GovernanceVotingDelegation[],
+  ): LedgerTypes.GovernanceVotingDelegation[] => (
+    delegations.map(({ votePublicKey, voteWeight }) => {
+      if (Number(voteWeight) > Number.MAX_SAFE_INTEGER) {
+        throw Error(Errors.InvalidGovernanceVotingWeight)
+      }
+      return {
+        // TODO what about using a path from signing files instead of the key?
+        type: GovernanceVotingDelegationType.KEY,
+        // TODO vote vs. voting in names
+        votingPublicKeyHex: votePublicKey,
+        weight: Number(voteWeight),
+      }
+    })
+  )
+
   const prepareVoteAuxiliaryData = (
+    delegations: GovernanceVotingDelegation[],
     hwStakeSigningFile: HwSigningData,
-    votingPublicKeyHex: VotePublicKeyHex,
-    addressParameters: _AddressParameters,
+    rewardsDestination: TxOutputDestination,
     nonce: BigInt,
     votingPurpose: BigInt,
   ): LedgerTypes.TxAuxiliaryData => ({
-    type: LedgerTypes.TxAuxiliaryDataType.CATALYST_REGISTRATION,
+    type: LedgerTypes.TxAuxiliaryDataType.GOVERNANCE_VOTING_REGISTRATION,
     params: {
-      votingPublicKeyHex, // TODO update to cip36
+      format: LedgerTypes.GovernanceVotingRegistrationFormat.CIP_36,
+      delegations: prepareVoteDelegations(delegations),
       stakingPath: hwStakeSigningFile.path,
-      rewardsDestination: {
-        type: addressParameters.addressType,
-        params: {
-          spendingPath: addressParameters.paymentPath as BIP32Path,
-          stakingPath: addressParameters.stakePath as BIP32Path,
-        },
-      },
+      rewardsDestination,
       nonce: `${nonce}`,
       votingPurpose: `${votingPurpose}`,
     },
@@ -801,29 +814,50 @@ export const LedgerCryptoProvider: (transport: Transport) => Promise<CryptoProvi
     rewardAddressSigningFiles: HwSigningData[],
   ): Promise<VotingRegistrationMetaDataCborHex> => {
     const { data: address } : { data: Buffer } = bech32.decode(rewardAddressBech32)
+
+    let destination: TxOutputDestination
     const addressParams = getAddressParameters(rewardAddressSigningFiles, address, network)
-    if (!addressParams) {
-      throw Error(Errors.AuxSigningFileNotFoundForVotingRewardAddress)
+    if (addressParams) {
+      validateVotingRegistrationAddressType(addressParams.addressType)
+      destination = {
+        type: LedgerTypes.TxOutputDestinationType.DEVICE_OWNED,
+        params: {
+          type: addressParams.addressType,
+          params: {
+            spendingPath: addressParams.paymentPath as BIP32Path,
+            stakingPath: addressParams.stakePath as BIP32Path,
+          },
+        },
+      }
+    } else {
+      destination = {
+        type: LedgerTypes.TxOutputDestinationType.THIRD_PARTY,
+        params: {
+          addressHex: address.toString('hex'),
+        },
+      }
     }
 
-    validateVotingRegistrationAddressType(addressParams.addressType)
-
-    const ledgerAuxData = prepareVoteAuxiliaryData(hwStakeSigningFile, votePublicKeyHex, addressParams, nonce, votingPurpose)
+    const ledgerAuxData = prepareVoteAuxiliaryData(
+      delegations,
+      hwStakeSigningFile,
+      destination,
+      nonce,
+      votingPurpose,
+    )
     const dummyTx = prepareDummyTx(network, ledgerAuxData)
 
     const response = await ledger.signTransaction(dummyTx)
     if (!response.auxiliaryDataSupplement) throw Error(Errors.MissingAuxiliaryDataSupplement)
 
     return encodeVotingRegistrationMetaData(
-      // TODO remove
-      // @ts-ignore
-      votePublicKeyHex,
+      delegations,
       hwStakeSigningFile,
       address,
       nonce,
       votingPurpose,
       response.auxiliaryDataSupplement.auxiliaryDataHashHex as HexString,
-      response.auxiliaryDataSupplement.catalystRegistrationSignatureHex as HexString,
+      response.auxiliaryDataSupplement.governanceVotingRegistrationSignatureHex as HexString,
     )
   }
 
