@@ -7,43 +7,85 @@ const { signingFiles } = require('./signingFiles')
 const { addresses } = require('./addresses')
 const { getTransport } = require('./speculos')
 
-// TODO add cip36 ones
 const votingRegistrations = {
   withTestnetBaseAddress0: {
-    network: 'TESTNET_LEGACY',
-    auxiliarySigningFiles: [signingFiles.payment0, signingFiles.stake0],
+    delegations: [
+      {
+        votePublicKey: '3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7',
+        voteWeight: 2,
+      },
+    ],
     hwStakeSigningFile: signingFiles.stake0,
     rewardAddressBech32: addresses.testnet.base0,
-    votePublicKeyHex: '3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7',
     nonce: 165564,
-    signedVotingRegistrationMetaDataHex: 'a219ef64a40158203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b702582066610efd336e1137c525937b76511fbcf2a0e6bcf0d340a67bcb39bc870d85e80358390014c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c041a000286bc19ef65a10158408a8cca0fbc26626c65eaf28608da21527c70c8f6136e3eb5166e8d665ef4f9f55e0b8063393d63bfa0104a1ac737a10c1c41a93a68d101a4cb0b405ec5bb6707',
+    votingPurpose: 0,
+    network: 'TESTNET_LEGACY',
+    auxiliarySigningFiles: [signingFiles.payment0, signingFiles.stake0],
+    signedVotingRegistrationMetaDataHex: 'a219ef64a501818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b70202582066610efd336e1137c525937b76511fbcf2a0e6bcf0d340a67bcb39bc870d85e80358390014c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c041a000286bc050019ef65a101584031aafad1223d2ac49584e55cf1232221bdb2312b826fef7c901d5802f987a391f4a57b82416de34d60ee13b3a823a61aadec0b0cf09c529efe56922ec3c1ab0c',
   },
   withMainnetBaseAddress0: {
-    network: 'MAINNET',
-    auxiliarySigningFiles: [signingFiles.payment0, signingFiles.stake0],
+    delegations: [
+      {
+        votePublicKey: '3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7',
+        voteWeight: 2,
+      },
+    ],
     hwStakeSigningFile: signingFiles.stake0,
     rewardAddressBech32: addresses.mainnet.base0,
-    votePublicKeyHex: '3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7',
     nonce: 165564,
-    signedVotingRegistrationMetaDataHex: 'a219ef64a40158203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b702582066610efd336e1137c525937b76511fbcf2a0e6bcf0d340a67bcb39bc870d85e80358390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c041a000286bc19ef65a101584031e0da1b744776cec0f1dd9a4668b0a92dd61d8ca62fb1f923f469ff8f2c3c30034ad9e4d23a22ee92984efb12dbf5bc1ec5bdb8aa9073fb03f7e994cb061004',
+    votingPurpose: 1,
+    network: 'MAINNET',
+    auxiliarySigningFiles: [signingFiles.payment0, signingFiles.stake0],
+    signedVotingRegistrationMetaDataHex: 'a219ef64a501818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b70202582066610efd336e1137c525937b76511fbcf2a0e6bcf0d340a67bcb39bc870d85e80358390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c041a000286bc050119ef65a1015840fc76d0ef0e195b8d03a8988f7983c2d881b2fa1098762010d8a61270a779620a4a98361879344f1bc3bda7d33736ae3536d89aec65e4e6adaef15ccc90fa4704',
   },
   withTestnetRewardAddress0: {
-    network: 'TESTNET_LEGACY',
-    auxiliarySigningFiles: [signingFiles.stake0],
+    delegations: [
+      {
+        votePublicKey: '3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7',
+        voteWeight: 1,
+      },
+    ],
     hwStakeSigningFile: signingFiles.stake0,
     rewardAddressBech32: addresses.testnet.reward0,
-    votePublicKeyHex: '3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7',
     nonce: 165564,
-    signedVotingRegistrationMetaDataHex: 'a219ef64a40158203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b702582066610efd336e1137c525937b76511fbcf2a0e6bcf0d340a67bcb39bc870d85e803581de01d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c041a000286bc19ef65a1015840d4401401a6f447c3e906c4dde2193f19a7c9085040c73f7941bb4cda212ada78a9c21f0b6e1afc54a34e17ecfc9e31bc46bb7836ffddf94b985e78f490159b06',
-  },
-  withMainnetRewardAddress0: {
-    network: 'MAINNET',
+    votingPurpose: 0,
+    network: 'TESTNET_LEGACY',
     auxiliarySigningFiles: [signingFiles.stake0],
+    signedVotingRegistrationMetaDataHex: 'a219ef64a501818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b70102582066610efd336e1137c525937b76511fbcf2a0e6bcf0d340a67bcb39bc870d85e803581de01d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c041a000286bc050019ef65a1015840b8d4e3315af77091fc78e1aef92d07121f8d767b65940ad46632d9a835d709aa2f64293beaa077c5c094e43e0bfc479717e6cc54842cdc28cecb2f34ec315507',
+  },
+  withMultipleDelegations: {
+    delegations: [
+      {
+        votePublicKey: '3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7',
+        voteWeight: 1,
+      },
+      {
+        votePublicKey: '3eadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef',
+        voteWeight: 3,
+      },
+    ],
     hwStakeSigningFile: signingFiles.stake0,
     rewardAddressBech32: addresses.mainnet.reward0,
-    votePublicKeyHex: '3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7',
     nonce: 165564,
-    signedVotingRegistrationMetaDataHex: 'a219ef64a40158203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b702582066610efd336e1137c525937b76511fbcf2a0e6bcf0d340a67bcb39bc870d85e803581de11d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c041a000286bc19ef65a1015840269e36e855a7200606be820f369f83ee4e942594900ca20c8a28ef4a21ed77fd17bba7236096a7873ef026cc912708d9014a436f074fe300e86a9c1e4da52909',
+    votingPurpose: 0,
+    network: 'MAINNET',
+    auxiliarySigningFiles: [signingFiles.stake0],
+    signedVotingRegistrationMetaDataHex: 'a219ef64a501828258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7018258203eadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef0302582066610efd336e1137c525937b76511fbcf2a0e6bcf0d340a67bcb39bc870d85e803581de11d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c041a000286bc050019ef65a10158401500c4a09b763d5d396933f264d93e51e2aaf85ea41958d3425f1248c72b9d75215857eec227a21a14341efab85ac68882ed246a124398c9f9645b1921cd460c',
+  },
+  withThirdPartyRewardAddress: {
+    delegations: [
+      {
+        votePublicKey: '3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7',
+        voteWeight: 2,
+      },
+    ],
+    hwStakeSigningFile: signingFiles.stake0,
+    rewardAddressBech32: addresses.mainnet.base0,
+    nonce: 165564,
+    votingPurpose: 1,
+    network: 'MAINNET',
+    auxiliarySigningFiles: [],
+    signedVotingRegistrationMetaDataHex: 'a219ef64a501818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b70202582066610efd336e1137c525937b76511fbcf2a0e6bcf0d340a67bcb39bc870d85e80358390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c041a000286bc050119ef65a1015840fc76d0ef0e195b8d03a8988f7983c2d881b2fa1098762010d8a61270a779620a4a98361879344f1bc3bda7d33736ae3536d89aec65e4e6adaef15ccc90fa4704',
   },
 }
 

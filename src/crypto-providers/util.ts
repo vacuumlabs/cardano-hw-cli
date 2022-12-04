@@ -14,7 +14,7 @@ import {
   KeyHash,
   ScriptHash,
 } from 'cardano-hw-interop-lib'
-import { GOVERNANCE_VOTING_PURPOSE_CATALYST, HARDENED_THRESHOLD } from '../constants'
+import { HARDENED_THRESHOLD } from '../constants'
 import { Errors } from '../errors'
 import { isBIP32Path, isPubKeyHex } from '../guards'
 import {
@@ -364,6 +364,13 @@ const _packRewardAddress = (
   }
 }
 
+/*
+ * Turns binary address into address parameters. Useful for nicer UI:
+ * HW wallets can show key derivation paths etc.
+ *
+ * If there is not enough signing data (e.g. when the address is third-party),
+ * returns null.
+ */
 const getAddressParameters = (
   hwSigningData: HwSigningData[],
   address: Buffer,
