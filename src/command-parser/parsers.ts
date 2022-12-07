@@ -70,6 +70,7 @@ export const parseFileTypeMagic = (fileTypeMagic: string, pathType: PathTypes): 
     case PathTypes.PATH_WALLET_STAKING_KEY_MULTISIG:
       checkFileTypeStartsWith(PathLabel.STAKE)
       return HwSigningType.MultiSig
+
     case PathTypes.PATH_WALLET_ACCOUNT:
     case PathTypes.PATH_WALLET_SPENDING_KEY_BYRON:
     case PathTypes.PATH_WALLET_SPENDING_KEY_SHELLEY:
@@ -78,12 +79,19 @@ export const parseFileTypeMagic = (fileTypeMagic: string, pathType: PathTypes): 
     case PathTypes.PATH_WALLET_STAKING_KEY:
       checkFileTypeStartsWith(PathLabel.STAKE)
       return HwSigningType.Stake
+
     case PathTypes.PATH_WALLET_MINTING_KEY:
       checkFileTypeStartsWith(PathLabel.PAYMENT)
       return HwSigningType.Mint
     case PathTypes.PATH_POOL_COLD_KEY:
       checkFileTypeStartsWith(PathLabel.POOL_COLD)
       return HwSigningType.PoolCold
+
+    case PathTypes.PATH_GOVERNANCE_VOTING_ACCOUNT:
+    case PathTypes.PATH_GOVERNANCE_VOTING_KEY:
+      checkFileTypeStartsWith(PathLabel.GOVERNANCE_VOTING)
+      return HwSigningType.GovernanceVoting
+
     default:
       throw Error(Errors.InvalidFileTypeError)
   }
