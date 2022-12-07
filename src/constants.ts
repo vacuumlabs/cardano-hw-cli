@@ -27,6 +27,7 @@ export enum PathLabel {
   PAYMENT = 'Payment',
   STAKE = 'Stake',
   POOL_COLD = 'StakePool',
+  GOVERNANCE_VOTING = 'GovernanceVoting',
 }
 
 // Unwitnessed, Witnessed and Signed types follow the same CDDL format, they are just used
