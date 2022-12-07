@@ -7,10 +7,13 @@ import {
   parseBIP32Path,
   parseTxFile,
   parseKesVKeyFile,
-  parseVotePubFile,
+  parseVotePubFileJcli,
   parseScriptHashHex,
   parseNativeScriptFile,
   parseDerivationType,
+  parseVotePubKeyBech32,
+  parseVotePubFileHw,
+  parseVotePubFileCli,
 } from './parsers'
 
 const derivationTypeArg = {
@@ -285,13 +288,38 @@ export const parserConfig = {
         type: (magic: string) => parseNetwork('TESTNET', magic),
         help: 'Protocol magic number.',
       },
-      '--vote-public-key': {
-        required: true,
+
+      // several ways of describing voting keys
+      '--vote-public-key-jcli': {
+        // jormungandr jcli format
+        required: false,
         dest: 'votePublicKeys',
         action: 'append',
-        type: (path: string) => parseVotePubFile(path),
+        type: (path: string) => parseVotePubFileJcli(path),
         help: 'Input filepath to vote public key in ed25519extended format (one or more keys can be provided).',
       },
+      '--vote-public-key-string': {
+        required: false,
+        dest: 'votePublicKeys',
+        action: 'append',
+        type: (str: string) => parseVotePubKeyBech32(str),
+        help: 'Bech32-encoded governance voting key (one or more keys can be provided).',
+      },
+      '--vote-public-key-hw': {
+        required: false,
+        dest: 'votePublicKeys',
+        action: 'append',
+        type: (path: string) => parseVotePubFileHw(path),
+        help: 'Input filepath to vote public key in hw-signing-file format (one or more keys can be provided).',
+      },
+      '--vote-public-key-file': {
+        required: false,
+        dest: 'votePublicKeys',
+        action: 'append',
+        type: (path: string) => parseVotePubFileCli(path),
+        help: 'Input filepath to vote public key in cardano-cli file format (one or more keys can be provided).',
+      },
+
       '--vote-weight': {
         required: false, // we append 1 in commandExecutor.ts if there is only a single vote public key and its weight is not specified
         dest: 'voteWeights',
@@ -300,7 +328,7 @@ export const parserConfig = {
         default: [],
         help: 'Voting power weight assigned to vote public key.',
       },
-      '--stake-signing-key': {
+      '--stake-signing-key-hw': {
         required: true,
         dest: 'hwStakeSigningFileData',
         type: (path: string) => parseHwSigningFile(path),
@@ -323,7 +351,7 @@ export const parserConfig = {
         type: (votingPurpose: string) => BigInt(votingPurpose),
         help: 'Voting purpose.',
       },
-      '--reward-address-signing-key': {
+      '--reward-address-signing-key-hw': {
         action: 'append',
         required: false,
         dest: 'rewardAddressSigningKeyData',

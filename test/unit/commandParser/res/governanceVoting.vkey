@@ -1,0 +1,5 @@
+{
+    "type": "GovernanceVotingVerificationKey_ed25519",
+    "description": "Hardware Governance Voting Verification Key",
+    "cborHex": "5820aac861247bd24cae705bca1d1c9763f19c19188fb0faf257c50ed69b8157bced"
+}

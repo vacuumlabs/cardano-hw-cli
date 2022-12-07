@@ -87,6 +87,10 @@ const verificationKeyType = (path: BIP32Path): string => {
     case PathTypes.PATH_POOL_COLD_KEY:
       return `${label}VerificationKey_ed25519`
 
+    case PathTypes.PATH_GOVERNANCE_VOTING_KEY:
+    case PathTypes.PATH_GOVERNANCE_VOTING_ACCOUNT:
+      return `${label}VerificationKey_ed25519`
+
     case PathTypes.PATH_WALLET_SPENDING_KEY_BYRON:
       return `${label}VerificationKeyByron_ed25519_bip32`
 
@@ -142,13 +146,25 @@ const constructVerificationKeyOutput = (
   }
 }
 
+const getHwSigningFileType = (label: PathLabel, pathType: PathTypes): string => {
+  switch (pathType) {
+    case PathTypes.PATH_WALLET_SPENDING_KEY_BYRON:
+      return `${label}HWSigningFileByron_ed25519_bip32`
+
+    case PathTypes.PATH_GOVERNANCE_VOTING_ACCOUNT:
+    case PathTypes.PATH_GOVERNANCE_VOTING_KEY:
+      return `${label}HWSigningFile_ed25519`
+
+    default:
+      return `${label}HWSigningFileShelley_ed25519`
+  }
+}
+
 const constructHwSigningKeyOutput = (xPubKey: XPubKeyHex, path: BIP32Path): HwSigningOutput => {
   const label = bip32PathLabel(path)
-  const type = classifyPath(path) === PathTypes.PATH_WALLET_SPENDING_KEY_BYRON
-    ? `${label}HWSigningFileByron_ed25519_bip32`
-    : `${label}HWSigningFileShelley_ed25519`
+
   return {
-    type,
+    type: getHwSigningFileType(label, classifyPath(path)),
     description: `${label} Hardware Signing File`,
     path: constructBIP32PathOutput(path),
     cborXPubKeyHex: encodeCbor(Buffer.from(xPubKey, 'hex')).toString('hex'),
@@ -175,6 +191,7 @@ export {
   writeCbor,
   constructTxFileOutput,
   constructTxWitnessOutput,
+  getHwSigningFileType,
   constructHwSigningKeyOutput,
   constructVerificationKeyOutput,
   constructSignedOpCertOutput,
