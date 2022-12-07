@@ -60,9 +60,6 @@ const constructBIP32PathOutput = (path: BIP32Path): string => path
 
 const bip32PathLabel = (path: BIP32Path): PathLabel => {
   switch (classifyPath(path)) {
-    case PathTypes.PATH_POOL_COLD_KEY:
-      return PathLabel.POOL_COLD
-
     case PathTypes.PATH_WALLET_SPENDING_KEY_BYRON:
     case PathTypes.PATH_WALLET_SPENDING_KEY_SHELLEY:
     case PathTypes.PATH_WALLET_SPENDING_KEY_MULTISIG:
@@ -72,6 +69,12 @@ const bip32PathLabel = (path: BIP32Path): PathLabel => {
     case PathTypes.PATH_WALLET_STAKING_KEY:
     case PathTypes.PATH_WALLET_STAKING_KEY_MULTISIG:
       return PathLabel.STAKE
+
+    case PathTypes.PATH_POOL_COLD_KEY:
+      return PathLabel.POOL_COLD
+
+    case PathTypes.PATH_GOVERNANCE_VOTING_KEY:
+      return PathLabel.GOVERNANCE_VOTING
 
     default:
       throw Error('not implemented')
@@ -94,28 +97,33 @@ const verificationKeyType = (path: BIP32Path): string => {
 
 const verificationKeyDescription = (path: BIP32Path): string => {
   switch (classifyPath(path)) {
-    case PathTypes.PATH_POOL_COLD_KEY:
-      return 'Stake Pool Operator Verification Key'
+    case PathTypes.PATH_WALLET_SPENDING_KEY_BYRON:
+      return 'Hardware Payment Verification Key'
 
     case PathTypes.PATH_WALLET_SPENDING_KEY_SHELLEY:
-      return 'Payment Verification Key'
+      return 'Hardware Payment Verification Key'
 
     case PathTypes.PATH_WALLET_STAKING_KEY:
-      return 'Stake Verification Key'
+      return 'Hardware Stake Verification Key'
 
     case PathTypes.PATH_WALLET_SPENDING_KEY_MULTISIG:
-      return 'Script Payment Verification Key'
+      return 'Hardware Script Payment Verification Key'
 
     case PathTypes.PATH_WALLET_STAKING_KEY_MULTISIG:
-      return 'Script Stake Verification Key'
+      return 'Hardware Script Stake Verification Key'
 
     case PathTypes.PATH_WALLET_MINTING_KEY:
-      return 'Mint Verification Key'
+      return 'Hardware Mint Verification Key'
 
-    case PathTypes.PATH_WALLET_SPENDING_KEY_BYRON:
-      return 'Payment Verification Key'
+    case PathTypes.PATH_POOL_COLD_KEY:
+      return 'Hardware Stake Pool Operator Verification Key'
+
+    case PathTypes.PATH_GOVERNANCE_VOTING_KEY:
+      return 'Hardware Governance Voting Verification Key'
 
     case PathTypes.PATH_WALLET_ACCOUNT:
+    case PathTypes.PATH_WALLET_ACCOUNT_MULTISIG:
+    case PathTypes.PATH_GOVERNANCE_VOTING_ACCOUNT:
     case PathTypes.PATH_INVALID:
     default:
       throw Error('not implemented')

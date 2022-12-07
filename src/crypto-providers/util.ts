@@ -59,11 +59,8 @@ enum PathTypes {
   PATH_WALLET_SPENDING_KEY_BYRON,
   PATH_WALLET_SPENDING_KEY_SHELLEY,
 
-  // hd wallet reward adress, withdrawal witness, pool owner
+  // hd wallet reward address, withdrawal witness, pool owner
   PATH_WALLET_STAKING_KEY,
-
-  // pool cold key in pool registrations and retirements
-  PATH_POOL_COLD_KEY,
 
   // hd wallet multisig account
   PATH_WALLET_ACCOUNT_MULTISIG,
@@ -74,8 +71,15 @@ enum PathTypes {
   // hd wallet multisig staking key
   PATH_WALLET_STAKING_KEY_MULTISIG,
 
-  // key used for token miting
+  // key used for token minting
   PATH_WALLET_MINTING_KEY,
+
+  // pool cold key in pool registrations and retirements
+  PATH_POOL_COLD_KEY,
+
+  // governance voting CIP-36
+  PATH_GOVERNANCE_VOTING_ACCOUNT,
+  PATH_GOVERNANCE_VOTING_KEY,
 
   // not one of the above
   PATH_INVALID,
@@ -110,6 +114,10 @@ const classifyPath = (path: number[]): PathTypes => {
       break
     case 1855 + HD:
       if (path.length === 3 && path[2] >= 0 + HD) return PathTypes.PATH_WALLET_MINTING_KEY
+      break
+    case 1694 + HD:
+      if (path.length === 3 && path[2] >= 0 + HD) return PathTypes.PATH_GOVERNANCE_VOTING_ACCOUNT
+      if (path.length === 5 && path[2] >= 0 + HD && path[3] === 0) return PathTypes.PATH_GOVERNANCE_VOTING_KEY
       break
     default:
       break
