@@ -28,6 +28,7 @@ import {
 import { KesVKey, OpCertIssueCounter } from '../opCert/opCert'
 import { decodeCbor } from '../util'
 import { classifyPath, PathTypes } from '../crypto-providers/util'
+import { getHwSigningFileType } from '../fileWriter'
 
 const { bech32 } = require('cardano-crypto.js')
 const rw = require('rw')
@@ -183,14 +184,50 @@ export const parseOpCertIssueCounterFile = (path: string): OpCertIssueCounter =>
   throw Error(Errors.InvalidOpCertIssueCounterFileError)
 }
 
-export const parseVotePubFile = (path: string): VotePublicKeyHex => {
-  const data: string = rw.readFileSync(path, 'utf8').trim()
+export const parseVotePubKeyBech32 = (keyStr: string): VotePublicKeyHex => {
   try {
-    const hexString = bech32.decode(data).data.toString('hex')
+    const hexString = bech32.decode(keyStr).data.toString('hex')
     if (isVotePublicKeyHex(hexString)) return hexString
   } catch (e) {
     throw Error(Errors.InvalidGovernanceVotingPublicKey)
   }
+  throw Error(Errors.InvalidGovernanceVotingPublicKey)
+}
+
+export const parseVotePubFileJcli = (path: string): VotePublicKeyHex => {
+  const data: string = rw.readFileSync(path, 'utf8').trim()
+  return parseVotePubKeyBech32(data)
+}
+
+export const parseVotePubFileCli = (path: string): VotePublicKeyHex => {
+  const data = JSON.parse(rw.readFileSync(path, 'utf8'))
+  const { type, cborHex } = data
+
+  if (type === `${PathLabel.GOVERNANCE_VOTING}VerificationKey_ed25519`) {
+    if (isCborHex(cborHex)) {
+      const keyHex = decodeCbor(cborHex).toString('hex')
+      if (isVotePublicKeyHex(keyHex)) {
+        return keyHex
+      }
+    }
+  }
+
+  throw Error(Errors.InvalidGovernanceVotingPublicKey)
+}
+
+export const parseVotePubFileHw = (path: string): VotePublicKeyHex => {
+  const data = JSON.parse(rw.readFileSync(path, 'utf8'))
+  const { type, cborXPubKeyHex } = data
+
+  if (type === getHwSigningFileType(PathLabel.GOVERNANCE_VOTING, PathTypes.PATH_GOVERNANCE_VOTING_KEY)) {
+    if (isCborHex(cborXPubKeyHex)) {
+      const keyHex = decodeCbor(cborXPubKeyHex).slice(0, 32).toString('hex')
+      if (isVotePublicKeyHex(keyHex)) {
+        return keyHex
+      }
+    }
+  }
+
   throw Error(Errors.InvalidGovernanceVotingPublicKey)
 }
 
