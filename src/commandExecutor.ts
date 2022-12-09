@@ -118,8 +118,8 @@ const CommandExecutor = async () => {
   }
 
   const createTxWitnesses = async (args: ParsedTransactionWitnessArguments) => {
-    validateTxBeforeSigning(args.txFileData!.cborHex)
-    const txCbor = Buffer.from(args.txFileData!.cborHex, 'hex')
+    validateTxBeforeSigning(args.txFileData.cborHex)
+    const txCbor = Buffer.from(args.txFileData.cborHex, 'hex')
     const tx = InteropLib.decodeTx(txCbor)
 
     const { era } = args.txFileData
