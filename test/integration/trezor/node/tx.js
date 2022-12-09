@@ -4,8 +4,8 @@ const { decodeTx } = require('cardano-hw-interop-lib')
 const { TrezorCryptoProvider } = require('../../../../src/crypto-providers/trezorCryptoProvider')
 const { NETWORKS } = require('../../../../src/constants')
 const { determineSigningMode, getTxBodyHash } = require('../../../../src/crypto-providers/util')
-const { validateWitnessing } = require('../../../../src/crypto-providers/signingValidation')
-const { validateTxBeforeSigning } = require('../../../../src/transaction/transactionValidation')
+const { validateWitnessing } = require('../../../../src/crypto-providers/witnessingValidation')
+const { validateTxBeforeWitnessing } = require('../../../../src/transaction/transactionValidation')
 
 const { signingFiles } = require('./signingFiles')
 
@@ -352,7 +352,7 @@ const transactions = {
 }
 
 async function testTxWitnessing(cryptoProvider, transaction) {
-  validateTxBeforeSigning(transaction.cborHex)
+  validateTxBeforeWitnessing(transaction.cborHex)
   const txCbor = Buffer.from(transaction.cborHex, 'hex')
   const tx = decodeTx(txCbor)
 

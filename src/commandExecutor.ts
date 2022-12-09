@@ -37,9 +37,9 @@ import {
 import { Errors } from './errors'
 import { parseOpCertIssueCounterFile } from './command-parser/parsers'
 import { GOVERNANCE_VOTING_PURPOSE_CATALYST } from './constants'
-import { validateWitnessing } from './crypto-providers/signingValidation'
+import { validateWitnessing } from './crypto-providers/witnessingValidation'
 import { WitnessOutput } from './transaction/types'
-import { validateTxBeforeSigning } from './transaction/transactionValidation'
+import { validateTxBeforeWitnessing } from './transaction/transactionValidation'
 
 const promiseTimeout = <T> (promise: Promise<T>, ms: number): Promise<T> => {
   const timeout: Promise<T> = new Promise((resolve, reject) => {
@@ -118,7 +118,7 @@ const CommandExecutor = async () => {
   }
 
   const createTxWitnesses = async (args: ParsedTransactionWitnessArguments) => {
-    validateTxBeforeSigning(args.txFileData.cborHex)
+    validateTxBeforeWitnessing(args.txFileData.cborHex)
     const txCbor = Buffer.from(args.txFileData.cborHex, 'hex')
     const tx = InteropLib.decodeTx(txCbor)
 

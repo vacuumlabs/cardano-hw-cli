@@ -39,7 +39,7 @@ const checkValidationErrors = (
   return { containsUnfixable: unfixableErrors.length > 0, containsFixable: fixableErrors.length > 0 }
 }
 
-const validateTxBeforeSigning = (txCborHex: CborHex): void => {
+const validateTxBeforeWitnessing = (txCborHex: CborHex): void => {
   const {
     containsUnfixable, containsFixable,
   } = checkValidationErrors(txCborHex, InteropLib.validateTx, true, false)
@@ -88,7 +88,7 @@ const transformTx = (args: ParsedTransactionTransformArguments): void => {
 
 export {
   checkValidationErrors,
-  validateTxBeforeSigning,
+  validateTxBeforeWitnessing,
   validateTx,
   transformTx,
 }
