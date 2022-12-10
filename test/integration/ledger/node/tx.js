@@ -258,7 +258,6 @@ const transactions = {
   ordinary_CertificateDelegation_HwsfilesSwappedOrder: {
     cborHex: '83a5008182582071b1f4d93070d035b27ce482784617238f75342d7d2da77a97828c9f561bff380001818258390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c1a00286a2a021a0002e630031a00ac3962048183028200581c1d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c581c04c60c78417132a195cbb74975346462410f72612952a7c4ade7e438a0f6',
     hwSigningFiles: [signingFiles.stake0, signingFiles.payment0],
-    signedTxCborHex: '83a5008182582071b1f4d93070d035b27ce482784617238f75342d7d2da77a97828c9f561bff380001818258390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c1a00286a2a021a0002e630031a00ac3962048183028200581c1d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c581c04c60c78417132a195cbb74975346462410f72612952a7c4ade7e438a1008282582066610efd336e1137c525937b76511fbcf2a0e6bcf0d340a67bcb39bc870d85e858409ed729fd0cd2b44a24aaceb4b0ba5d67c1130d1e6e23fdd8f696d873e4ccd4337aea112323ccdcc12eb9db1d89760dd9577e86e4b722618e997d7d4d1bf9130c825820cd2b047d1a803eee059769cffb3dfd0a4b9327e55bc78aa962d9bd4f720db0b2584047d07eb25370e2c90b894aae04de382d49186645f67467e58a1af0ede05e1e00c0baf09dd277dfc7c8f2cd77f014ff120eb823d62f900dd98fd71093740fdd02f6',
     network: 'MAINNET',
     witnesses: {
       byronWitnesses: [],
@@ -910,7 +909,7 @@ async function testTxWitnessing(cryptoProvider, transaction) {
   assert.deepStrictEqual(witnesses, transaction.witnesses)
 }
 
-describe('Ledger tx signing and witnessing', () => {
+describe('Ledger tx witnessing', () => {
   let cryptoProvider
   // eslint-disable-next-line func-names
   before(async function () {
