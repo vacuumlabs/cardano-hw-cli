@@ -9,31 +9,11 @@ const { validateTxBeforeWitnessing } = require('../../../../src/transaction/tran
 
 const { signingFiles } = require('./signingFiles')
 
-// TODO unsignedCborHex -> cborHex everywhere, the ones with unsignedcborhex are the old internal cli format
-
-// mostly the required change is one the following:
-// 1. replace 82a4 with 83a4 at the beginning the cbor hex and
-//    add a0 between the last two "ff" at the end of the cbor hex
-// 2. replace a section 9f82...fff6 with a0f6 (this cuts out some native scripts, but those are irrelevant for this purpose)
-
-// a section "witnesses" should be added (as is already done in many tests)
-// to get the values for witnesses, I used (in testTxWitnessing)
-// const witnesses = await cryptoProvider.witnessTx(signingParameters, [])
-// -  console.log('---------------------- byron')
-// -  console.log(witnesses.byronWitnesses.forEach((w) => {
-// -    console.log(w.data[0].toString('hex'))
-// -    console.log(w.data[1].toString('hex'))
-// -    console.log(w.data[2].toString('hex'))
-// -    console.log(w.data[3].toString('hex'))
-// -  }))
-// -  console.log('---------------------- shelley')
-// -  console.log(witnesses.shelleyWitnesses.forEach((w) => {
-// -    console.log(w.data[0].toString('hex'))
-// -    console.log(w.data[1].toString('hex'))
-// -  }))
-
-// signedTxCborHex should be removed, but before that, we may parse it (e.g. https://cbor.nemo157.com/)
-// and check if the signatures are the same as the ones we are adding as witnesses
+// Note for future readers (Dec 2022): The tests in this file were created in the cardano-cli's
+// internal raw tx format. When we removed support for this format in favor of the CDDL-compliant
+// format, we manually converted the test cases to the new format. Thus it is possible that some
+// of the test cases would not be generated exactly as they are now by the cardano-cli - e.g. some
+// native script witnesses might be missing due to the manual conversion.
 
 const transactions = {
   withInputAndOutput: {

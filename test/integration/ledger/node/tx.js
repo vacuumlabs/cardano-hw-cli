@@ -10,6 +10,12 @@ const { validateTxBeforeWitnessing } = require('../../../../src/transaction/tran
 const { signingFiles } = require('./signingFiles')
 const { getTransport } = require('./speculos')
 
+// Note for future readers (Dec 2022): The tests in this file were created in the cardano-cli's
+// internal raw tx format. When we removed support for this format in favor of the CDDL-compliant
+// format, we manually converted the test cases to the new format. Thus it is possible that some
+// of the test cases would not be generated exactly as they are now by the cardano-cli - e.g. some
+// native script witnesses might be missing due to the manual conversion.
+
 const transactions = {
 
   ordinary_InputAndOutput: {
