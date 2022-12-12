@@ -1,7 +1,6 @@
-import { RawTransaction, Transaction } from 'cardano-hw-interop-lib'
+import { Transaction } from 'cardano-hw-interop-lib'
 import { KesVKey, OpCertIssueCounter, SignedOpCertCborHex } from '../opCert/opCert'
 import {
-  TxCborHex,
   TxWitnesses,
   VotingRegistrationMetaDataCborHex,
 } from '../transaction/types'
@@ -29,8 +28,7 @@ export enum SigningMode {
 
 export type SigningParameters = {
   signingMode: SigningMode,
-  rawTx?: RawTransaction,
-  tx?: Transaction,
+  tx: Transaction,
   txBodyHashHex: string,
   hwSigningFileData: HwSigningData[],
   network: Network,
@@ -43,10 +41,6 @@ export type CryptoProvider = {
   showAddress: (
     args: ParsedShowAddressArguments,
   ) => Promise<void>,
-  signTx: (
-    params: SigningParameters,
-    changeOutputFiles: HwSigningData[],
-  ) => Promise<TxCborHex>,
   witnessTx: (
     params: SigningParameters,
     changeOutputFiles: HwSigningData[],

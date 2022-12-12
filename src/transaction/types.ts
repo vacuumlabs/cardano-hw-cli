@@ -38,8 +38,6 @@ export type TxWitnesses = {
   shelleyWitnesses: TxWitnessShelley[]
 }
 
-export type RawTxCborHex = CborHex
-
 export type TxCborHex = CborHex
 
 export type TxWitnessCborHex = CborHex
@@ -47,12 +45,6 @@ export type TxWitnessCborHex = CborHex
 export type _XPubKey = {
   pubKey: Buffer,
   chainCode: Buffer,
-}
-
-export type RawTxFileOutput = {
-  type: string,
-  description: string,
-  cborHex: RawTxCborHex,
 }
 
 export type TxFileOutput = {

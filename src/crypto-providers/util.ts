@@ -253,7 +253,7 @@ const determineSigningMode = (
   // If txBody contains pool registration certificate, we must use one of the POOL_REGISTRATION
   // signing modes. If the user provides e.g. multisig signing files at the same time (which
   // indicates that a mistake happened at some point), this attempt is refused by
-  // signingValidation.ts.
+  // witnessingValidation.ts.
   if (poolRegistrationCert) {
     const poolKeyPath = findSigningPathForKeyHash(poolRegistrationCert.poolParams.operator, signingFiles)
     const isPaying = hasPaymentSigningFile(signingFiles)

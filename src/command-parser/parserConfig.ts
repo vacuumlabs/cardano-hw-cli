@@ -5,7 +5,6 @@ import {
   parseHwSigningFile,
   parseNetwork,
   parseBIP32Path,
-  parseRawTxFile,
   parseTxFile,
   parseKesVKeyFile,
   parseVotePubFile,
@@ -88,17 +87,11 @@ const txSigningArgs = {
     type: (magic: string) => parseNetwork('TESTNET', magic),
     help: 'Protocol magic number.',
   },
-  '_mutually-exclusive-group-required-tx-file': {
-    '--tx-body-file': {
-      dest: 'rawTxFileData',
-      type: (path: string) => parseRawTxFile(path),
-      help: 'Input filepath of the TxBody. Warning! This option is DEPRECATED and will be REMOVED in Oct 2022. Please use --tx-file instead.',
-    },
-    '--tx-file': {
-      dest: 'txFileData',
-      type: (path: string) => parseTxFile(path),
-      help: 'Input filepath of the tx. Use --cddl-format when building transactions with cardano-cli.',
-    },
+  '--tx-file': {
+    dest: 'txFileData',
+    required: true,
+    type: (path: string) => parseTxFile(path),
+    help: 'Input filepath of the tx. Use --cddl-format when building transactions with cardano-cli.',
   },
   '--hw-signing-file': {
     dest: 'hwSigningFileData',
@@ -226,14 +219,6 @@ export const parserConfig = {
     },
   },
   'transaction': {
-    'sign': {
-      ...txSigningArgs,
-      '--out-file': {
-        required: true,
-        dest: 'outFile',
-        help: 'Output filepath. Warning! This call is DEPRECATED and will be REMOVED in Oct 2022. Please use witness call instead.',
-      },
-    },
     'policyid': {
       '--script-file': {
         required: true,
@@ -259,33 +244,12 @@ export const parserConfig = {
         help: 'Output filepath.',
       },
     },
-    'validate-raw': {
-      '--tx-body-file': {
-        required: true,
-        dest: 'rawTxFileData',
-        type: (path: string) => parseRawTxFile(path),
-        help: 'Input filepath of the raw tx. Warning! This call is DEPRECATED and will be REMOVED in Oct 2022. Please use validate call instead.',
-      },
-    },
     'validate': {
       '--tx-file': {
         required: true,
         dest: 'txFileData',
         type: (path: string) => parseTxFile(path),
         help: 'Input filepath of the tx. Use --cddl-format when building transactions with cardano-cli.',
-      },
-    },
-    'transform-raw': {
-      '--tx-body-file': {
-        required: true,
-        dest: 'rawTxFileData',
-        type: (path: string) => parseRawTxFile(path),
-        help: 'Input filepath of the raw tx. Warning! This call is DEPRECATED and will be REMOVED in Oct 2022. Please use transform call instead.',
-      },
-      '--out-file': {
-        required: true,
-        dest: 'outFile',
-        help: 'Output filepath.',
       },
     },
     'transform': {
