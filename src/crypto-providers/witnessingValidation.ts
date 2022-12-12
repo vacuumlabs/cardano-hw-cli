@@ -58,31 +58,6 @@ const validateOrdinaryWitnesses = (body: TransactionBody, hwSigningFileData: HwS
   }
 }
 
-const validateOrdinarySigning = (body: TransactionBody, hwSigningFileData: HwSigningData[]) => {
-  validateOrdinaryWitnesses(body, hwSigningFileData)
-  // these checks should be performed only with createSignedTx call (when the signing file set is
-  // expected to be complete) on top of validateOrdinaryWitnesses
-
-  const {
-    paymentSigningFiles, stakeSigningFiles, poolColdSigningFiles,
-  } = filterSigningFiles(hwSigningFileData)
-
-  if (paymentSigningFiles.length === 0) {
-    throw Error(Errors.MissingPaymentSigningFileError)
-  }
-
-  const {
-    numStakeOtherItems, numPoolColdItems,
-  } = _countWitnessableItems(body)
-
-  if (numStakeOtherItems > 0 && (stakeSigningFiles.length === 0)) {
-    throw Error(Errors.MissingStakeSigningFileError)
-  }
-  if (numPoolColdItems > 0 && (poolColdSigningFiles.length === 0)) {
-    throw Error(Errors.MissingPoolColdSigningFileError)
-  }
-}
-
 const validatePoolOwnerWitnesses = (body: TransactionBody, hwSigningFileData: HwSigningData[]) => {
   const {
     paymentSigningFiles, stakeSigningFiles, poolColdSigningFiles, mintSigningFiles, multisigSigningFiles,
@@ -152,22 +127,12 @@ const validateMultisigWitnesses = (body: TransactionBody, hwSigningFileData: HwS
   }
 }
 
-const validateMultisigSigning = (body: TransactionBody, hwSigningFileData: HwSigningData[]) => {
-  validateMultisigWitnesses(body, hwSigningFileData)
-  // there are no checks that can be done (except those in validateMultisigWitnesses)
-}
-
 const validatePlutusWitnesses = (body: TransactionBody, hwSigningFileData: HwSigningData[]) => {
   const { poolColdSigningFiles } = filterSigningFiles(hwSigningFileData)
 
   if (poolColdSigningFiles.length > 0) {
     throw Error(Errors.TooManyPoolColdSigningFilesError)
   }
-}
-
-const validatePlutusSigning = (body: TransactionBody, hwSigningFileData: HwSigningData[]) => {
-  validatePlutusWitnesses(body, hwSigningFileData)
-  // there are no checks that can be done (except those in validatePlutusWitnesses)
 }
 
 const validateNetworkId = (cliNetworkId: number, bodyNetworkId: Uint | undefined): void => {
@@ -178,7 +143,7 @@ const validateNetworkId = (cliNetworkId: number, bodyNetworkId: Uint | undefined
 
 const validateWitnessing = (params: SigningParameters): void => {
   // verifies whether signing parameters correspond to each other
-  const body = (params.rawTx?.body ?? params.tx?.body)!
+  const { body } = params.tx
   const { hwSigningFileData } = params
 
   validateNetworkId(params.network.networkId, body.networkId)
@@ -209,35 +174,6 @@ const validateWitnessing = (params: SigningParameters): void => {
   }
 }
 
-const validateSigning = (params: SigningParameters): void => {
-  const body = (params.rawTx?.body ?? params.tx?.body)!
-  const { hwSigningFileData } = params
-
-  validateNetworkId(params.network.networkId, body.networkId)
-
-  switch (params.signingMode) {
-    case SigningMode.ORDINARY_TRANSACTION:
-      validateOrdinarySigning(body, hwSigningFileData)
-      break
-
-    case SigningMode.POOL_REGISTRATION_AS_OWNER:
-    case SigningMode.POOL_REGISTRATION_AS_OPERATOR:
-      throw Error(Errors.CantSignTxWithPoolRegError)
-
-    case SigningMode.MULTISIG_TRANSACTION:
-      validateMultisigSigning(body, hwSigningFileData)
-      break
-
-    case SigningMode.PLUTUS_TRANSACTION:
-      validatePlutusSigning(body, hwSigningFileData)
-      break
-
-    default:
-      throw Error(Errors.Unreachable)
-  }
-}
-
 export {
-  validateSigning,
   validateWitnessing,
 }

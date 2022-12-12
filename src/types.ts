@@ -1,4 +1,4 @@
-import { RawTxFileOutput, TxFileOutput, WitnessOutput } from './transaction/types'
+import { TxFileOutput, WitnessOutput } from './transaction/types'
 import { CommandType } from './command-parser/commandParser'
 import { KesVKey } from './opCert/opCert'
 
@@ -49,12 +49,6 @@ export type HwSigningData = {
   type: HwSigningType
   path: BIP32Path,
   cborXPubKeyHex: XPubKeyCborHex
-}
-
-export type RawTxFileData = {
-  era: CardanoEra,
-  description: string,
-  cborHex: CborHex,
 }
 
 export type TxFileData = {
@@ -127,19 +121,6 @@ export type Network = {
   protocolMagic: number,
 }
 
-// exctly one of rawTxFileData vs. txFileData should be present
-// (the result of parse() complies with this)
-export type ParsedTransactionSignArguments = {
-  command: CommandType.SIGN_TRANSACTION,
-  network: Network,
-  rawTxFileData?: RawTxFileData,
-  txFileData?: TxFileData,
-  hwSigningFileData: HwSigningData[],
-  outFile: string,
-  changeOutputKeyFileData: HwSigningData[],
-  derivationType?: DerivationType,
-}
-
 export enum NativeScriptType {
   PUBKEY,
   ALL,
@@ -176,33 +157,19 @@ export type ParsedTransactionPolicyIdArguments = {
   derivationType?: DerivationType,
 }
 
-// exctly one of rawTxFileData vs. txFileData should be present
-// (the result of parse() complies with this)
 export type ParsedTransactionWitnessArguments = {
   command: CommandType.WITNESS_TRANSACTION,
   network: Network,
-  rawTxFileData?: RawTxFileData,
-  txFileData?: TxFileData,
+  txFileData: TxFileData,
   hwSigningFileData: HwSigningData[],
   outFiles: string[],
   changeOutputKeyFileData: HwSigningData[],
   derivationType?: DerivationType,
 }
 
-export type ParsedTransactionValidateRawArguments = {
-  command: CommandType.VALIDATE_RAW_TRANSACTION,
-  rawTxFileData: RawTxFileData,
-}
-
 export type ParsedTransactionValidateArguments = {
   command: CommandType.VALIDATE_TRANSACTION,
   txFileData: TxFileData,
-}
-
-export type ParsedTransactionTransformRawArguments = {
-  command: CommandType.TRANSFORM_RAW_TRANSACTION,
-  rawTxFileData: RawTxFileData,
-  outFile: string,
 }
 
 export type ParsedTransactionTransformArguments = {
@@ -253,12 +220,9 @@ export type ParsedArguments =
   | ParsedShowAddressArguments
   | ParsedAddressKeyGenArguments
   | ParsedVerificationKeyArguments
-  | ParsedTransactionSignArguments
   | ParsedTransactionPolicyIdArguments
   | ParsedTransactionWitnessArguments
-  | ParsedTransactionValidateRawArguments
   | ParsedTransactionValidateArguments
-  | ParsedTransactionTransformRawArguments
   | ParsedTransactionTransformArguments
   | ParsedNodeKeyGenArguments
   | ParsedOpCertArguments
@@ -285,7 +249,6 @@ export type OpCertIssueCounterOutput = {
 }
 
 export type OutputData =
-  | RawTxFileOutput
   | TxFileOutput
   | WitnessOutput
   | HwSigningOutput

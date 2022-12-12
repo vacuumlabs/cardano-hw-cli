@@ -1,5 +1,4 @@
 import {
-  cardanoEraToRawType,
   cardanoEraToWitnessType,
   HARDENED_THRESHOLD,
   PathLabel,
@@ -7,8 +6,6 @@ import {
 import { classifyPath, PathTypes } from './crypto-providers/util'
 import { OpCertIssueCounter, SignedOpCertCborHex } from './opCert/opCert'
 import {
-  RawTxCborHex,
-  RawTxFileOutput,
   TxCborHex,
   TxFileOutput,
   TxWitnessByron,
@@ -37,16 +34,6 @@ const writeOutputData = (path: string, data: OutputData) => (
 const writeCbor = (path: string, data: Cbor) => (
   rw.writeFileSync(path, data)
 )
-
-const constructRawTxFileOutput = (
-  era: CardanoEra,
-  description: string,
-  rawTxCborHex: RawTxCborHex,
-): RawTxFileOutput => ({
-  type: cardanoEraToRawType[era],
-  description,
-  cborHex: rawTxCborHex,
-})
 
 const constructTxFileOutput = (
   envelopeType: string,
@@ -178,7 +165,6 @@ const constructOpCertIssueCounterOutput = (issueCounter: OpCertIssueCounter): Op
 export {
   writeOutputData,
   writeCbor,
-  constructRawTxFileOutput,
   constructTxFileOutput,
   constructTxWitnessOutput,
   constructHwSigningKeyOutput,

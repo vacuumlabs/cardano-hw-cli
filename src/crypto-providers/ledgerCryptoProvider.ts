@@ -11,9 +11,8 @@ import { isChainCodeHex, isPubKeyHex, isXPubKeyHex } from '../guards'
 import {
   KesVKey, OpCertIssueCounter, OpCertSigned, SignedOpCertCborHex,
 } from '../opCert/opCert'
-import { TxByronWitnessData, TxShelleyWitnessData, TxSigned } from '../transaction/transaction'
+import { TxByronWitnessData, TxShelleyWitnessData } from '../transaction/transaction'
 import {
-  TxCborHex,
   TxWitnessKeys,
   VotingRegistrationMetaDataCborHex,
   TxWitnesses,
@@ -634,18 +633,17 @@ export const LedgerCryptoProvider: (transport: Transport) => Promise<CryptoProvi
     changeOutputFiles: HwSigningData[],
   ): Promise<LedgerTypes.Witness[]> => {
     const {
-      signingMode, rawTx, tx, txBodyHashHex, hwSigningFileData, network,
+      signingMode, tx, txBodyHashHex, hwSigningFileData, network,
     } = params
-    const body = (rawTx?.body ?? tx?.body)!
     const {
       paymentSigningFiles, stakeSigningFiles, poolColdSigningFiles, mintSigningFiles, multisigSigningFiles,
     } = filterSigningFiles(hwSigningFileData)
 
-    const inputs = body.inputs.map(prepareInput)
-    const outputs = body.outputs.map(
+    const inputs = tx.body.inputs.map(prepareInput)
+    const outputs = tx.body.outputs.map(
       (output) => prepareOutput(output, network, changeOutputFiles, signingMode),
     )
-    const certificates = body.certificates?.map(
+    const certificates = tx.body.certificates?.map(
       (certificate) => prepareCertificate(
         certificate,
         [...stakeSigningFiles, ...poolColdSigningFiles],
@@ -653,28 +651,28 @@ export const LedgerCryptoProvider: (transport: Transport) => Promise<CryptoProvi
         signingMode,
       ),
     )
-    const fee = `${body.fee}`
-    const ttl = prepareTtl(body.ttl)
-    const validityIntervalStart = prepareValidityIntervalStart(body.validityIntervalStart)
-    const withdrawals = body.withdrawals?.map(
+    const fee = `${tx.body.fee}`
+    const ttl = prepareTtl(tx.body.ttl)
+    const validityIntervalStart = prepareValidityIntervalStart(tx.body.validityIntervalStart)
+    const withdrawals = tx.body.withdrawals?.map(
       (withdrawal) => prepareWithdrawal(withdrawal, stakeSigningFiles, signingMode),
     )
-    const auxiliaryData = prepareAuxiliaryDataHashHex(body.auxiliaryDataHash)
-    const mint = body.mint ? prepareTokenBundle(body.mint) : null
-    const scriptDataHashHex = prepareScriptDataHash(body.scriptDataHash)
-    const collateralInputs = body.collateralInputs?.map(prepareCollateralInput)
-    const requiredSigners = body.requiredSigners?.map(
+    const auxiliaryData = prepareAuxiliaryDataHashHex(tx.body.auxiliaryDataHash)
+    const mint = tx.body.mint ? prepareTokenBundle(tx.body.mint) : null
+    const scriptDataHashHex = prepareScriptDataHash(tx.body.scriptDataHash)
+    const collateralInputs = tx.body.collateralInputs?.map(prepareCollateralInput)
+    const requiredSigners = tx.body.requiredSigners?.map(
       (requiredSigner) => prepareRequiredSigner(
         requiredSigner,
         [...paymentSigningFiles, ...stakeSigningFiles, ...mintSigningFiles, ...multisigSigningFiles],
       ),
     )
-    const includeNetworkId = body.networkId !== undefined
-    const collateralOutput = body.collateralReturnOutput
-      ? prepareOutput(body.collateralReturnOutput, network, changeOutputFiles, signingMode)
+    const includeNetworkId = tx.body.networkId !== undefined
+    const collateralOutput = tx.body.collateralReturnOutput
+      ? prepareOutput(tx.body.collateralReturnOutput, network, changeOutputFiles, signingMode)
       : undefined
-    const totalCollateral = body.totalCollateral !== undefined ? `${body.totalCollateral}` : undefined
-    const referenceInputs = body.referenceInputs?.map(prepareInput)
+    const totalCollateral = tx.body.totalCollateral !== undefined ? `${tx.body.totalCollateral}` : undefined
+    const referenceInputs = tx.body.referenceInputs?.map(prepareInput)
 
     const additionalWitnessRequests = prepareAdditionalWitnessRequests(
       paymentSigningFiles,
@@ -711,15 +709,6 @@ export const LedgerCryptoProvider: (transport: Transport) => Promise<CryptoProvi
     }
 
     return response.witnesses
-  }
-
-  const signTx = async (
-    params: SigningParameters,
-    changeOutputFiles: HwSigningData[],
-  ): Promise<TxCborHex> => {
-    const ledgerWitnesses = await ledgerSignTx(params, changeOutputFiles)
-    const witnesses = createWitnesses(ledgerWitnesses, params.hwSigningFileData)
-    return TxSigned(params, witnesses)
   }
 
   const witnessTx = async (
@@ -976,7 +965,6 @@ export const LedgerCryptoProvider: (transport: Transport) => Promise<CryptoProvi
   return {
     getVersion,
     showAddress,
-    signTx,
     witnessTx,
     getXPubKeys,
     signOperationalCertificate,
