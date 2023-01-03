@@ -48,6 +48,9 @@ const executeCommand = async (): Promise<ExitCode> => {
     case (CommandType.SHOW_ADDRESS):
       await commandExecutor.showAddress(parsedArgs)
       break
+    case (CommandType.PUBKEY_QUERY):
+      await commandExecutor.printPubkeys(parsedArgs)
+      break
     case (CommandType.ADDRESS_KEY_GEN):
       await commandExecutor.createSigningKeyFile(parsedArgs)
       break

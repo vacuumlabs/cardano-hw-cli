@@ -13,6 +13,7 @@ import {
 } from './fileWriter'
 import {
   ParsedShowAddressArguments,
+  ParsedPubkeyQueryArguments,
   ParsedAddressKeyGenArguments,
   ParsedTransactionSignArguments,
   ParsedTransactionPolicyIdArguments,
@@ -27,6 +28,7 @@ import {
 import { LedgerCryptoProvider } from './crypto-providers/ledgerCryptoProvider'
 import { TrezorCryptoProvider } from './crypto-providers/trezorCryptoProvider'
 import {
+  validBIP32Paths,
   validateKeyGenInputs,
   classifyPath,
   PathTypes,
@@ -78,6 +80,14 @@ const CommandExecutor = async () => {
     // eslint-disable-next-line no-console
     console.log(`address: ${args.address}`)
     return cryptoProvider.showAddress(args)
+  }
+
+  const printPubkeys = async ({ paths, derivationType }: ParsedPubkeyQueryArguments) => {
+    if (!validBIP32Paths(paths)) { throw Error(Errors.InvalidKeyGenInputsError) }
+
+    const xPubKeys = await cryptoProvider.getXPubKeys(paths, derivationType)
+    // eslint-disable-next-line no-console
+    console.log(JSON.stringify(paths.map((path, index) => [path, xPubKeys[index]])))
   }
 
   const createSigningKeyFile = async (
@@ -285,6 +295,7 @@ const CommandExecutor = async () => {
   return {
     printDeviceVersion,
     showAddress,
+    printPubkeys,
     createSigningKeyFile,
     createVerificationKeyFile,
     createSignedTx,

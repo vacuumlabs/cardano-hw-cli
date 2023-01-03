@@ -274,6 +274,7 @@ const determineSigningMode = (
     ? SigningMode.MULTISIG_TRANSACTION
     : SigningMode.ORDINARY_TRANSACTION
 }
+const validBIP32Paths = (paths: BIP32Path[]): boolean => Array.isArray(paths) && paths.every(isBIP32Path) && paths.length > 0
 
 const validateKeyGenInputs = (
   paths: BIP32Path[],
@@ -281,11 +282,9 @@ const validateKeyGenInputs = (
   verificationKeyFiles: string[],
 ): void => {
   if (
-    !Array.isArray(paths)
-    || !paths.every(isBIP32Path)
+    !validBIP32Paths
     || !Array.isArray(hwSigningFiles)
     || !Array.isArray(verificationKeyFiles)
-    || paths.length < 1
     || paths.length !== hwSigningFiles.length
     || paths.length !== verificationKeyFiles.length
   ) throw Error(Errors.InvalidKeyGenInputsError)
@@ -558,6 +557,7 @@ export {
   classifyPath,
   pathEquals,
   splitXPubKeyCborHex,
+  validBIP32Paths,
   validateKeyGenInputs,
   filterSigningFiles,
   findSigningPathForKeyHash,

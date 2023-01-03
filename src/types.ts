@@ -97,6 +97,12 @@ export type ParsedShowAddressArguments = {
   derivationType?: DerivationType,
 }
 
+export type ParsedPubkeyQueryArguments = {
+  command: CommandType.PUBKEY_QUERY,
+  paths: BIP32Path[],
+  derivationType?: DerivationType,
+}
+
 export type ParsedAddressKeyGenArguments = {
   command: CommandType.ADDRESS_KEY_GEN,
   paths: BIP32Path[],
@@ -244,6 +250,7 @@ export type ParsedArguments =
   | ParsedAppVersionArguments
   | ParsedDeviceVersionArguments
   | ParsedShowAddressArguments
+  | ParsedPubkeyQueryArguments
   | ParsedAddressKeyGenArguments
   | ParsedVerificationKeyArguments
   | ParsedTransactionSignArguments

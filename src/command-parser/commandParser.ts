@@ -18,6 +18,7 @@ export enum CommandType {
   SIGN_OPERATIONAL_CERTIFICATE = 'node.issue-op-cert',
   NODE_KEY_GEN = 'node.key-gen',
   CATALYST_VOTING_KEY_REGISTRATION_METADATA = 'catalyst.voting-key-registration-metadata',
+  PUBKEY_QUERY = 'pubkey.query',
 }
 
 const initParser = (parser: ArgumentParser | ArgumentGroup, config: any): void => {

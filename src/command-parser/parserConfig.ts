@@ -1,6 +1,7 @@
 /* eslint-disable max-len */
 /* eslint quote-props: ["error", "consistent"] */
 import {
+  extractHWSigningData,
   parseAddressFile,
   parseHwSigningFile,
   parseNetwork,
@@ -21,6 +22,17 @@ const derivationTypeArg = {
     dest: 'derivationType',
     help: 'Derivation type - currently applies only to Trezor. Options: LEDGER, ICARUS or ICARUS_TREZOR (default).',
   },
+}
+
+const pubkeyArgs = {
+  '--path': {
+    required: true,
+    action: 'append',
+    type: (path: string) => parseBIP32Path(path),
+    dest: 'paths',
+    help: 'Derivation path to the key to sign with.',
+  },
+  ...derivationTypeArg,
 }
 
 const keyGenArgs = {
@@ -100,12 +112,18 @@ const txSigningArgs = {
       help: 'Input filepath of the tx. Use --cddl-format when building transactions with cardano-cli.',
     },
   },
-  '--hw-signing-file': {
-    dest: 'hwSigningFileData',
-    required: true,
-    action: 'append',
-    type: (path: string) => parseHwSigningFile(path),
-    help: 'Input filepath of the hardware wallet signing file.',
+  '_mutually-exclusive-group-required-signing-files': {
+    '--hw-signing-file': {
+      dest: 'hwSigningFileData',
+      action: 'append',
+      type: (path: string) => parseHwSigningFile(path),
+      help: 'Input filepath of the hardware wallet signing file.',
+    },
+    '--sign-request': {
+      type: (str: string) => JSON.parse(str).map((request) => extractHWSigningData(request)),
+      dest: 'hwSigningFileData',
+      help: 'JSON string with the hardware wallet signature request',
+    },
   },
   '--change-output-key-file': {
     dest: 'changeOutputKeyFileData',
@@ -113,6 +131,12 @@ const txSigningArgs = {
     default: [],
     type: (path: string) => parseHwSigningFile(path),
     help: 'Input filepath of change output file.',
+  },
+  '--out-file': {
+    required: true,
+    action: 'append',
+    dest: 'outFiles',
+    help: 'Output filepath.',
   },
   ...derivationTypeArg,
 }
@@ -184,6 +208,9 @@ export const parserConfig = {
       },
     },
   },
+  'pubkey': {
+    'query': pubkeyArgs,
+  },
 
   // ===============  commands taken from cardano-cli interface  ===============
   'address': {
@@ -250,15 +277,7 @@ export const parserConfig = {
       },
       ...derivationTypeArg,
     },
-    'witness': {
-      ...txSigningArgs,
-      '--out-file': {
-        required: true,
-        action: 'append',
-        dest: 'outFiles',
-        help: 'Output filepath.',
-      },
-    },
+    'witness': txSigningArgs,
     'validate-raw': {
       '--tx-body-file': {
         required: true,
