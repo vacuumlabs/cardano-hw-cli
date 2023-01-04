@@ -306,7 +306,7 @@ export const parserConfig = {
         type: (str: string) => parseVotePubKeyBech32(str),
         help: 'Bech32-encoded governance voting key (one or more keys can be provided).',
       },
-      '--vote-public-key-hw': {
+      '--vote-public-key-hwsfile': {
         required: false,
         dest: 'votePublicKeys',
         action: 'append',
@@ -329,7 +329,7 @@ export const parserConfig = {
         default: [],
         help: 'Voting power weight assigned to vote public key.',
       },
-      '--stake-signing-key-hw': {
+      '--stake-signing-key-hwsfile': {
         required: true,
         dest: 'hwStakeSigningFileData',
         type: (path: string) => parseHwSigningFile(path),
@@ -352,13 +352,13 @@ export const parserConfig = {
         type: (votingPurpose: string) => BigInt(votingPurpose),
         help: 'Voting purpose.',
       },
-      '--reward-address-signing-key-hw': {
+      '--reward-address-signing-key-hwsfile': {
         required: false,
         dest: 'rewardAddressSigningKeyData',
         action: 'append',
         type: (path: string) => parseHwSigningFile(path),
         default: [],
-        help: 'Input filepath of the reward address signing file.',
+        help: 'Input filepath of the reward address hardware wallet signing file.',
       },
       '--metadata-cbor-out-file': {
         required: true,

@@ -41,11 +41,11 @@ Create governance voting registration metadata with `cardano-hw-cli`:
 ```
 cardano-hw-cli governance voting-registration-metadata \
 --mainnet \
---vote-public-key catalyst-vote.pkey \
+--vote-public-key-file catalyst-vote.pkey \
 --reward-address $(cat stake.addr) \
---stake-signing-key stake.hwsfile \
+--stake-signing-key-hwsfile stake.hwsfile \
 --nonce 29747977 \
---reward-address-signing-key stake.hwsfile \
+--reward-address-signing-key-hwsfile stake.hwsfile \
 --metadata-cbor-out-file voting_registration.cbor
 ```
 (You should add `--voting-purpose` to change the voting purpose to something other than Catalyst.)
@@ -54,14 +54,14 @@ Alternatively, in case you want to split your voting power among several voting 
 ```
 cardano-hw-cli governance voting-registration-metadata \
 --mainnet \
---vote-public-key catalyst-vote1.pkey \
+--vote-public-key-file catalyst-vote1.pkey \
 --vote-weight 1 \
---vote-public-key catalyst-vote2.pkey \
+--vote-public-key-file catalyst-vote2.pkey \
 --vote-weight 10 \
 --reward-address $(cat stake.addr) \
---stake-signing-key stake.hwsfile \
+--stake-signing-key-hwsfile stake.hwsfile \
 --nonce 29747977 \
---reward-address-signing-key stake.hwsfile \
+--reward-address-signing-key-hwsfile stake.hwsfile \
 --metadata-cbor-out-file voting_registration.cbor
 ```
 
