@@ -207,29 +207,15 @@ describe('Command parser', () => {
       prefix('stake.hwsfile'),
       '--nonce',
       '165564',
-      '--reward-address-signing-key-hw',
-      prefix('payment.hwsfile'),
-      '--reward-address-signing-key-hw',
-      prefix('stake.hwsfile'),
       '--metadata-cbor-out-file',
       'voting_registration.cbor',
     ])
     const { parsedArgs } = parse(args)
+
     const expectedResult = {
       command: CommandType.GOVERNANCE_VOTING_REGISTRATION_METADATA,
       network: NETWORKS.TESTNET_LEGACY,
-      rewardAddressSigningKeyData: [
-        {
-          type: 0,
-          path: [2147485500, 2147485463, 2147483648, 0, 0],
-          cborXPubKeyHex: '5880e0d9c2e5b...7277e7db',
-        },
-        {
-          type: 1,
-          path: [2147485500, 2147485463, 2147483648, 2, 0],
-          cborXPubKeyHex: '584066610efd336e1137c525937b76511fbcf2a0e6bcf0d340a67bcb39bc870d85e8e977e956d29810dbfbda9c8ea667585982454e401c68578623d4b86bc7eb7b58',
-        },
-      ],
+      rewardAddressSigningKeyData: [],
       hwStakeSigningFileData: {
         type: 1,
         path: [2147485500, 2147485463, 2147483648, 2, 0],
@@ -246,7 +232,7 @@ describe('Command parser', () => {
     assert.deepStrictEqual(parsedArgs, expectedResult)
   })
 
-  it('Should parse governance voting registration with several delegations', () => {
+  it('Should parse governance voting registration with several delegations and reward address hw signing files', () => {
     const args = pad([
       'governance',
       'voting-registration-metadata',
@@ -384,7 +370,7 @@ describe('Command parser', () => {
           },
         ],
       },
-      hwSigningFileData: undefined,
+      hwSigningFileData: [],
       derivationType: undefined,
     }
     assert.deepStrictEqual(parsedArgs, expectedResult)
