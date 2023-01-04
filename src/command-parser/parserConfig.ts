@@ -28,21 +28,21 @@ const derivationTypeArg = {
 const keyGenArgs = {
   '--path': {
     required: true,
+    dest: 'paths',
     action: 'append',
     type: (path: string) => parseBIP32Path(path),
-    dest: 'paths',
     help: 'Derivation path to the key to sign with.',
   },
   '--hw-signing-file': {
     required: true,
-    action: 'append',
     dest: 'hwSigningFiles',
+    action: 'append',
     help: 'Output filepath of the verification key.',
   },
   '--verification-key-file': {
     required: true,
-    action: 'append',
     dest: 'verificationKeyFiles',
+    action: 'append',
     help: 'Output filepath of the hardware wallet signing file.',
   },
   ...derivationTypeArg,
@@ -51,27 +51,27 @@ const keyGenArgs = {
 const nodeKeyGenArgs = {
   '--path': {
     required: true,
+    dest: 'paths',
     action: 'append',
     type: (path: string) => parseBIP32Path(path),
-    dest: 'paths',
     help: 'Derivation path to the key to sign with.',
   },
   '--hw-signing-file': {
     required: true,
-    action: 'append',
     dest: 'hwSigningFiles',
+    action: 'append',
     help: 'Output filepath of the verification key.',
   },
   '--cold-verification-key-file': {
     required: true,
-    action: 'append',
     dest: 'verificationKeyFiles',
+    action: 'append',
     help: 'Output filepath of the hardware wallet signing file.',
   },
   '--operational-certificate-issue-counter-file': {
     required: true,
-    action: 'append',
     dest: 'issueCounterFiles',
+    action: 'append',
     help: 'Output filepath of the issue counter file.',
   },
 }
@@ -91,14 +91,14 @@ const txSigningArgs = {
     help: 'Protocol magic number.',
   },
   '--tx-file': {
-    dest: 'txFileData',
     required: true,
+    dest: 'txFileData',
     type: (path: string) => parseTxFile(path),
     help: 'Input filepath of the tx. Use --cddl-format when building transactions with cardano-cli.',
   },
   '--hw-signing-file': {
-    dest: 'hwSigningFileData',
     required: true,
+    dest: 'hwSigningFileData',
     action: 'append',
     type: (path: string) => parseHwSigningFile(path),
     help: 'Input filepath of the hardware wallet signing file.',
@@ -106,8 +106,8 @@ const txSigningArgs = {
   '--change-output-key-file': {
     dest: 'changeOutputKeyFileData',
     action: 'append',
-    default: [],
     type: (path: string) => parseHwSigningFile(path),
+    default: [],
     help: 'Input filepath of change output file.',
   },
   ...derivationTypeArg,
@@ -137,8 +137,8 @@ const opCertSigningArgs = {
     },
   },
   '--hw-signing-file': {
-    dest: 'hwSigningFileData',
     required: true,
+    dest: 'hwSigningFileData',
     action: 'append',
     type: (path: string) => parseHwSigningFile(path),
     help: 'Input filepath of the hardware wallet signing file.',
@@ -190,32 +190,32 @@ export const parserConfig = {
     'show': { // hw-specific subpath
       '_mutually-exclusive-group-required-payment': {
         '--payment-path': {
-          type: (path: string) => parseBIP32Path(path),
           dest: 'paymentPath',
+          type: (path: string) => parseBIP32Path(path),
           help: 'Payment derivation path. Either this or payment script hash has to be specified.',
         },
         '--payment-script-hash': {
-          type: (hashHex: string) => parseScriptHashHex(hashHex),
           dest: 'paymentScriptHash',
+          type: (hashHex: string) => parseScriptHashHex(hashHex),
           help: 'Payment derivation script hash in hex format.',
         },
       },
       '_mutually-exclusive-group-required-staking': {
         '--staking-path': {
-          type: (path: string) => parseBIP32Path(path),
           dest: 'stakingPath',
+          type: (path: string) => parseBIP32Path(path),
           help: 'Stake derivation path. Either this or staking script hash has to be specified.',
         },
         '--staking-script-hash': {
-          type: (hashHex: string) => parseScriptHashHex(hashHex),
           dest: 'stakingScriptHash',
+          type: (hashHex: string) => parseScriptHashHex(hashHex),
           help: 'Stake derivation script hash in hex format',
         },
       },
       '--address-file': {
         required: true,
-        type: (path: string) => parseAddressFile(path),
         dest: 'address',
+        type: (path: string) => parseAddressFile(path),
         help: 'Input filepath of the address.',
       },
       ...derivationTypeArg,
@@ -225,16 +225,16 @@ export const parserConfig = {
     'policyid': {
       '--script-file': {
         required: true,
-        type: (path: string) => parseNativeScriptFile(path),
         dest: 'nativeScript',
+        type: (path: string) => parseNativeScriptFile(path),
         help: 'Filepath of the script.',
       },
       '--hw-signing-file': {
-        dest: 'hwSigningFileData',
         required: false,
+        dest: 'hwSigningFileData',
         action: 'append',
-        default: [],
         type: (path: string) => parseHwSigningFile(path),
+        default: [],
         help: 'Input filepath of the hardware wallet signing file.',
       },
       ...derivationTypeArg,
@@ -243,8 +243,8 @@ export const parserConfig = {
       ...txSigningArgs,
       '--out-file': {
         required: true,
-        action: 'append',
         dest: 'outFiles',
+        action: 'append',
         help: 'Output filepath.',
       },
     },
@@ -353,11 +353,11 @@ export const parserConfig = {
         help: 'Voting purpose.',
       },
       '--reward-address-signing-key-hw': {
-        action: 'append',
         required: false,
         dest: 'rewardAddressSigningKeyData',
-        default: [],
+        action: 'append',
         type: (path: string) => parseHwSigningFile(path),
+        default: [],
         help: 'Input filepath of the reward address signing file.',
       },
       '--metadata-cbor-out-file': {
