@@ -69,6 +69,7 @@
   },
   "resolutions": {
     "//": "This is a workaround for pkg (otherwise, it prints an error when building)",
-    "node-abi": "^3.24.0"
+    "node-abi": "^3.24.0",
+    "eslint-plugin-import/**/json5": "^1.0.2"
   }
 }
