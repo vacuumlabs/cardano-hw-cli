@@ -209,7 +209,7 @@ const CommandExecutor = async () => {
     writeOutputData(args.issueCounterFile, constructOpCertIssueCounterOutput(issueCounter))
   }
 
-  const createGovernanceVotingKeyRegistrationMetadata = async (
+  const createGovernanceVotingRegistrationMetadata = async (
     args: ParsedGovernanceVotingKeyRegistrationMetadataArguments,
   ) => {
     if (!areHwSigningDataNonByron([...args.rewardAddressSigningKeyData, args.hwStakeSigningFileData])) {
@@ -257,7 +257,7 @@ const CommandExecutor = async () => {
     createTxWitnesses,
     createNodeSigningKeyFiles,
     createSignedOperationalCertificate,
-    createGovernanceVotingRegistrationMetadata: createGovernanceVotingKeyRegistrationMetadata,
+    createGovernanceVotingRegistrationMetadata,
   }
 }
 
