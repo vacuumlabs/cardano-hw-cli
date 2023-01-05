@@ -254,6 +254,10 @@ describe('Command parser', () => {
       prefix('governanceVoting.hwsfile'),
       '--vote-weight',
       '4',
+      '--vote-public-key-file',
+      prefix('governanceVotingExtended.vkey'),
+      '--vote-weight',
+      '5',
       '--reward-address',
       'adr_test1qq2vzmtlgvjrhkq50rngh8d482zj3l20kyrc6kx4ffl3zfqayfawlf9hwv2fzuygt2km5v92kvf8e3s3mk7ynxw77cwq2glhm4',
       '--stake-signing-key-hwsfile',
@@ -299,8 +303,9 @@ describe('Command parser', () => {
         '3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7',
         'aac861247bd24cae705bca1d1c9763f19c19188fb0faf257c50ed69b8157bced',
         'aac861247bd24cae705bca1d1c9763f19c19188fb0faf257c50ed69b8157bced',
+        '423fa841abf9f7fa8dfa10dacdb6737b27fdb0d9bcd9b95d48cabb53047ab769',
       ],
-      voteWeights: [1n, 2n, 3n, 4n],
+      voteWeights: [1n, 2n, 3n, 4n, 5n],
       derivationType: undefined,
     }
     assert.deepStrictEqual(parsedArgs, expectedResult)
