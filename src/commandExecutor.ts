@@ -212,7 +212,10 @@ const CommandExecutor = async () => {
   const createGovernanceVotingRegistrationMetadata = async (
     args: ParsedGovernanceVotingKeyRegistrationMetadataArguments,
   ) => {
-    if (!areHwSigningDataNonByron([...args.rewardAddressSigningKeyData, args.hwStakeSigningFileData])) {
+    // adds stake signing data to reward address data so that it is not necessary to repeat the same
+    // staking key file in command line arguments
+    const hwSigningData = [...args.rewardAddressSigningKeyData, args.hwStakeSigningFileData]
+    if (!areHwSigningDataNonByron(hwSigningData)) {
       throw Error(Errors.ByronSigningFilesFoundInVotingRegistration)
     }
 
@@ -241,7 +244,7 @@ const CommandExecutor = async () => {
       args.nonce,
       votingPurpose,
       args.network,
-      args.rewardAddressSigningKeyData,
+      hwSigningData,
       args.derivationType,
     )
 
