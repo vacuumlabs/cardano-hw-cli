@@ -18,7 +18,7 @@ import {
   ParsedVerificationKeyArguments,
   ParsedOpCertArguments,
   ParsedNodeKeyGenArguments,
-  ParsedGovernanceVotingKeyRegistrationMetadataArguments,
+  ParsedGovernanceVoteKeyRegistrationMetadataArguments,
   Cbor,
   NativeScriptDisplayFormat,
   GovernanceVotingDelegation,
@@ -210,7 +210,7 @@ const CommandExecutor = async () => {
   }
 
   const createGovernanceVotingRegistrationMetadata = async (
-    args: ParsedGovernanceVotingKeyRegistrationMetadataArguments,
+    args: ParsedGovernanceVoteKeyRegistrationMetadataArguments,
   ) => {
     // adds stake signing data to reward address data so that it is not necessary to repeat the same
     // staking key file in command line arguments

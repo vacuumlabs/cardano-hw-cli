@@ -290,7 +290,7 @@ export const parserConfig = {
         help: 'Protocol magic number.',
       },
 
-      // several ways of describing voting keys
+      // several ways of describing vote keys
       '--vote-public-key-jcli': {
         // jormungandr jcli format
         required: false,
@@ -304,7 +304,7 @@ export const parserConfig = {
         dest: 'votePublicKeys',
         action: 'append',
         type: (str: string) => parseVotePubKeyBech32(str),
-        help: 'Bech32-encoded governance voting key (one or more keys can be provided).',
+        help: 'Bech32-encoded governance vote key (one or more keys can be provided).',
       },
       '--vote-public-key-hwsfile': {
         required: false,
