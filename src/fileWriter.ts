@@ -73,8 +73,8 @@ const bip32PathLabel = (path: BIP32Path): PathLabel => {
     case PathTypes.PATH_POOL_COLD_KEY:
       return PathLabel.POOL_COLD
 
-    case PathTypes.PATH_GOVERNANCE_VOTING_KEY:
-      return PathLabel.GOVERNANCE_VOTING
+    case PathTypes.PATH_CVOTE_KEY:
+      return PathLabel.CIP36_VOTING
 
     default:
       throw Error('not implemented')
@@ -87,8 +87,8 @@ const verificationKeyType = (path: BIP32Path): string => {
     case PathTypes.PATH_POOL_COLD_KEY:
       return `${label}VerificationKey_ed25519`
 
-    case PathTypes.PATH_GOVERNANCE_VOTING_KEY:
-    case PathTypes.PATH_GOVERNANCE_VOTING_ACCOUNT:
+    case PathTypes.PATH_CVOTE_KEY:
+    case PathTypes.PATH_CVOTE_ACCOUNT:
       return `${label}VerificationKey_ed25519`
 
     case PathTypes.PATH_WALLET_SPENDING_KEY_BYRON:
@@ -122,12 +122,13 @@ const verificationKeyDescription = (path: BIP32Path): string => {
     case PathTypes.PATH_POOL_COLD_KEY:
       return 'Hardware Stake Pool Operator Verification Key'
 
-    case PathTypes.PATH_GOVERNANCE_VOTING_KEY:
-      return 'Hardware Governance Voting Verification Key'
+    case PathTypes.PATH_CVOTE_KEY:
+      // TODO take into account non-catalyst voting purpose
+      return 'Hardware Catalyst Vote Verification Key'
 
     case PathTypes.PATH_WALLET_ACCOUNT:
     case PathTypes.PATH_WALLET_ACCOUNT_MULTISIG:
-    case PathTypes.PATH_GOVERNANCE_VOTING_ACCOUNT:
+    case PathTypes.PATH_CVOTE_ACCOUNT:
     case PathTypes.PATH_INVALID:
     default:
       throw Error('not implemented')
@@ -151,8 +152,8 @@ const getHwSigningFileType = (label: PathLabel, pathType: PathTypes): string => 
     case PathTypes.PATH_WALLET_SPENDING_KEY_BYRON:
       return `${label}HWSigningFileByron_ed25519_bip32`
 
-    case PathTypes.PATH_GOVERNANCE_VOTING_ACCOUNT:
-    case PathTypes.PATH_GOVERNANCE_VOTING_KEY:
+    case PathTypes.PATH_CVOTE_ACCOUNT:
+    case PathTypes.PATH_CVOTE_KEY:
       return `${label}HWSigningFile_ed25519`
 
     default:

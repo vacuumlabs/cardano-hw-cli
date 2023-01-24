@@ -29,7 +29,7 @@ import {
   NativeScriptType,
   ParsedShowAddressArguments,
   DerivationType,
-  GovernanceVotingDelegation,
+  CVoteDelegation,
 } from '../types'
 import {
   encodeAddress,
@@ -639,11 +639,11 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
   }
 
   const prepareVoteDelegations = (
-    delegations: GovernanceVotingDelegation[],
+    delegations: CVoteDelegation[],
   ): TrezorTypes.CardanoGovernanceRegistrationDelegation[] => (
     delegations.map(({ votePublicKey, voteWeight }) => {
       if (Number(voteWeight) > Number.MAX_SAFE_INTEGER) {
-        throw Error(Errors.InvalidGovernanceVotingWeight)
+        throw Error(Errors.InvalidCVoteWeight)
       }
       return {
         votingPublicKey: votePublicKey,
@@ -653,7 +653,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
   )
 
   const prepareVoteAuxiliaryData = (
-    delegations: GovernanceVotingDelegation[],
+    delegations: CVoteDelegation[],
     hwStakeSigningFile: HwSigningData,
     addressParameters: _AddressParameters,
     nonce: BigInt,
@@ -719,7 +719,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
   })
 
   const signVotingRegistrationMetaData = async (
-    delegations: GovernanceVotingDelegation[],
+    delegations: CVoteDelegation[],
     hwStakeSigningFile: HwSigningData, // describes stake_credential
     paymentAddressBech32: string,
     nonce: BigInt,
@@ -754,7 +754,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     }
     if (!response.payload.auxiliaryDataSupplement) throw Error(Errors.MissingAuxiliaryDataSupplement)
     if (!response.payload.auxiliaryDataSupplement.governanceSignature) {
-      throw Error(Errors.MissingGovernanceVotingSignature)
+      throw Error(Errors.MissingCVoteSignature)
     }
 
     return encodeVotingRegistrationMetaData(
