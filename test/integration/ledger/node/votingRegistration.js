@@ -16,7 +16,7 @@ const votingRegistrations = {
       },
     ],
     hwStakeSigningFile: signingFiles.stake0,
-    rewardAddressBech32: addresses.testnet.base0,
+    paymentAddressBech32: addresses.testnet.base0,
     nonce: 165564,
     votingPurpose: 0,
     network: 'TESTNET_LEGACY',
@@ -31,14 +31,14 @@ const votingRegistrations = {
       },
     ],
     hwStakeSigningFile: signingFiles.stake0,
-    rewardAddressBech32: addresses.mainnet.base0,
+    paymentAddressBech32: addresses.mainnet.base0,
     nonce: 165564,
     votingPurpose: 1,
     network: 'MAINNET',
     auxiliarySigningFiles: [signingFiles.payment0, signingFiles.stake0],
     signedVotingRegistrationMetaDataHex: 'a219ef64a501818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b70202582066610efd336e1137c525937b76511fbcf2a0e6bcf0d340a67bcb39bc870d85e80358390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c041a000286bc050119ef65a1015840fc76d0ef0e195b8d03a8988f7983c2d881b2fa1098762010d8a61270a779620a4a98361879344f1bc3bda7d33736ae3536d89aec65e4e6adaef15ccc90fa4704',
   },
-  withTestnetRewardAddress0: {
+  withTestnetPaymentAddress0: {
     delegations: [
       {
         votePublicKey: '3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7',
@@ -46,7 +46,7 @@ const votingRegistrations = {
       },
     ],
     hwStakeSigningFile: signingFiles.stake0,
-    rewardAddressBech32: addresses.testnet.reward0,
+    paymentAddressBech32: addresses.testnet.reward0,
     nonce: 165564,
     votingPurpose: 0,
     network: 'TESTNET_LEGACY',
@@ -65,14 +65,14 @@ const votingRegistrations = {
       },
     ],
     hwStakeSigningFile: signingFiles.stake0,
-    rewardAddressBech32: addresses.mainnet.reward0,
+    paymentAddressBech32: addresses.mainnet.reward0,
     nonce: 165564,
     votingPurpose: 0,
     network: 'MAINNET',
     auxiliarySigningFiles: [signingFiles.stake0],
     signedVotingRegistrationMetaDataHex: 'a219ef64a501828258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7018258203eadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef0302582066610efd336e1137c525937b76511fbcf2a0e6bcf0d340a67bcb39bc870d85e803581de11d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c041a000286bc050019ef65a10158401500c4a09b763d5d396933f264d93e51e2aaf85ea41958d3425f1248c72b9d75215857eec227a21a14341efab85ac68882ed246a124398c9f9645b1921cd460c',
   },
-  withThirdPartyRewardAddress: {
+  withThirdPartyPaymentAddress: {
     delegations: [
       {
         votePublicKey: '3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7',
@@ -80,7 +80,7 @@ const votingRegistrations = {
       },
     ],
     hwStakeSigningFile: signingFiles.stake0,
-    rewardAddressBech32: addresses.mainnet.base0,
+    paymentAddressBech32: addresses.mainnet.base0,
     nonce: 165564,
     votingPurpose: 1,
     network: 'MAINNET',
@@ -96,7 +96,7 @@ async function testVotingRegistrationMetaDataSigning(cryptoProvider, votingRegis
     await cryptoProvider.signVotingRegistrationMetaData(
       args.delegations,
       args.hwStakeSigningFile,
-      args.rewardAddressBech32,
+      args.paymentAddressBech32,
       args.nonce,
       args.votingPurpose,
       NETWORKS[args.network],

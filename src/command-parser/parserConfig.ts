@@ -335,9 +335,9 @@ export const parserConfig = {
         type: (path: string) => parseHwSigningFile(path),
         help: 'Input filepath of the hardware wallet stake signing file, which will be used to to sign the voting registration.',
       },
-      '--reward-address': {
+      '--payment-address': {
         required: true,
-        dest: 'rewardAddress',
+        dest: 'paymentAddress',
         help: 'Address to receive voting rewards.',
       },
       '--nonce': {
@@ -352,13 +352,13 @@ export const parserConfig = {
         type: (votingPurpose: string) => BigInt(votingPurpose),
         help: 'Voting purpose.',
       },
-      '--reward-address-signing-key-hwsfile': {
+      '--payment-address-signing-key-hwsfile': {
         required: false,
-        dest: 'rewardAddressSigningKeyData',
+        dest: 'paymentAddressSigningKeyData',
         action: 'append',
         type: (path: string) => parseHwSigningFile(path),
         default: [],
-        help: 'Input filepath of the reward address hardware wallet signing file.',
+        help: 'Input filepath of the payment address hardware wallet signing file.',
       },
       '--metadata-cbor-out-file': {
         required: true,

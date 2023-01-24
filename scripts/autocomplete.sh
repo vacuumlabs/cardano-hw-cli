@@ -53,7 +53,7 @@ _cardano_hw_cli_completions()
                 COMPREPLY=( $(compgen -W "--kes-verification-key-file --kes-period --operational-certificate-issue-counter-file --hw-signing-file --out-file" -- "${COMP_WORDS[-1]}") )
             fi
             if [ "${COMP_WORDS[2]}" = "voting-registration-metadata" ]; then
-                COMPREPLY=( $(compgen -W "--mainnet --testnet-magic --vote-public-key --reward-address --stake-signing-key --nonce --voting-purpose --reward-address-signing-key --metadata-cbor-out-file --derivation-type" -- "${COMP_WORDS[-1]}") )
+                COMPREPLY=( $(compgen -W "--mainnet --testnet-magic --vote-public-key --payment-address --stake-signing-key --nonce --voting-purpose --payment-address-signing-key --metadata-cbor-out-file --derivation-type" -- "${COMP_WORDS[-1]}") )
             fi
             ;;
     esac

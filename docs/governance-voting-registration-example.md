@@ -29,7 +29,7 @@ Get slot number from `cardano-cli`, use slot number as `nonce` in governance vot
 cardano-cli query tip --mainnet
 ```
 
-Get stake address from `cardano-cli`, use it as `reward-address` and `reward-address-signing-key` in governance voting registration command:
+Get stake address from `cardano-cli`, use it as `payment-address` and `payment-address-signing-key` in governance voting registration command:
 ```
 cardano-cli stake-address build \
 --stake-verification-key-file stake.vkey \
@@ -42,10 +42,10 @@ Create governance voting registration metadata with `cardano-hw-cli`:
 cardano-hw-cli governance voting-registration-metadata \
 --mainnet \
 --vote-public-key-file catalyst-vote.pkey \
---reward-address $(cat stake.addr) \
+--payment-address $(cat stake.addr) \
 --stake-signing-key-hwsfile stake.hwsfile \
 --nonce 29747977 \
---reward-address-signing-key-hwsfile stake.hwsfile \
+--payment-address-signing-key-hwsfile stake.hwsfile \
 --metadata-cbor-out-file voting_registration.cbor
 ```
 (You should add `--voting-purpose` to change the voting purpose to something other than Catalyst.)
@@ -58,10 +58,10 @@ cardano-hw-cli governance voting-registration-metadata \
 --vote-weight 1 \
 --vote-public-key-file catalyst-vote2.pkey \
 --vote-weight 10 \
---reward-address $(cat stake.addr) \
+--payment-address $(cat stake.addr) \
 --stake-signing-key-hwsfile stake.hwsfile \
 --nonce 29747977 \
---reward-address-signing-key-hwsfile stake.hwsfile \
+--payment-address-signing-key-hwsfile stake.hwsfile \
 --metadata-cbor-out-file voting_registration.cbor
 ```
 
