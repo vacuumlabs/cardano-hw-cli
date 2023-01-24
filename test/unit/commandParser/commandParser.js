@@ -201,7 +201,7 @@ describe('Command parser', () => {
       '42',
       '--vote-public-key-jcli',
       prefix('vote.pub'),
-      '--reward-address',
+      '--payment-address',
       'adr_test1qq2vzmtlgvjrhkq50rngh8d482zj3l20kyrc6kx4ffl3zfqayfawlf9hwv2fzuygt2km5v92kvf8e3s3mk7ynxw77cwq2glhm4',
       '--stake-signing-key-hwsfile',
       prefix('stake.hwsfile'),
@@ -215,7 +215,7 @@ describe('Command parser', () => {
     const expectedResult = {
       command: CommandType.GOVERNANCE_VOTING_REGISTRATION_METADATA,
       network: NETWORKS.TESTNET_LEGACY,
-      rewardAddressSigningKeyData: [],
+      paymentAddressSigningKeyData: [],
       hwStakeSigningFileData: {
         type: 1,
         path: [2147485500, 2147485463, 2147483648, 2, 0],
@@ -224,7 +224,7 @@ describe('Command parser', () => {
       nonce: 165564n,
       votingPurpose: undefined,
       outFile: 'voting_registration.cbor',
-      rewardAddress: 'adr_test1qq2vzmtlgvjrhkq50rngh8d482zj3l20kyrc6kx4ffl3zfqayfawlf9hwv2fzuygt2km5v92kvf8e3s3mk7ynxw77cwq2glhm4',
+      paymentAddress: 'adr_test1qq2vzmtlgvjrhkq50rngh8d482zj3l20kyrc6kx4ffl3zfqayfawlf9hwv2fzuygt2km5v92kvf8e3s3mk7ynxw77cwq2glhm4',
       votePublicKeys: ['3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7'],
       voteWeights: [],
       derivationType: undefined,
@@ -258,7 +258,7 @@ describe('Command parser', () => {
       prefix('governanceVotingExtended.vkey'),
       '--vote-weight',
       '5',
-      '--reward-address',
+      '--payment-address',
       'adr_test1qq2vzmtlgvjrhkq50rngh8d482zj3l20kyrc6kx4ffl3zfqayfawlf9hwv2fzuygt2km5v92kvf8e3s3mk7ynxw77cwq2glhm4',
       '--stake-signing-key-hwsfile',
       prefix('stake.hwsfile'),
@@ -266,9 +266,9 @@ describe('Command parser', () => {
       '165564',
       '--voting-purpose',
       '164',
-      '--reward-address-signing-key-hwsfile',
+      '--payment-address-signing-key-hwsfile',
       prefix('payment.hwsfile'),
-      '--reward-address-signing-key-hwsfile',
+      '--payment-address-signing-key-hwsfile',
       prefix('stake.hwsfile'),
       '--metadata-cbor-out-file',
       'voting_registration.cbor',
@@ -277,7 +277,7 @@ describe('Command parser', () => {
     const expectedResult = {
       command: CommandType.GOVERNANCE_VOTING_REGISTRATION_METADATA,
       network: NETWORKS.TESTNET_LEGACY,
-      rewardAddressSigningKeyData: [
+      paymentAddressSigningKeyData: [
         {
           type: 0,
           path: [2147485500, 2147485463, 2147483648, 0, 0],
@@ -297,7 +297,7 @@ describe('Command parser', () => {
       nonce: 165564n,
       votingPurpose: 164n,
       outFile: 'voting_registration.cbor',
-      rewardAddress: 'adr_test1qq2vzmtlgvjrhkq50rngh8d482zj3l20kyrc6kx4ffl3zfqayfawlf9hwv2fzuygt2km5v92kvf8e3s3mk7ynxw77cwq2glhm4',
+      paymentAddress: 'adr_test1qq2vzmtlgvjrhkq50rngh8d482zj3l20kyrc6kx4ffl3zfqayfawlf9hwv2fzuygt2km5v92kvf8e3s3mk7ynxw77cwq2glhm4',
       votePublicKeys: [
         '3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7',
         '3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7',

@@ -41,7 +41,7 @@ const enum Errors {
   InvalidGovernanceVotingPublicKey = 'Invalid governance vote public key',
   InvalidGovernanceVotingWeight = 'Invalid governance vote weight',
   InvalidGovernanceVotingDelegations = 'Invalid governance voting delegations (either a single vote public key or several vote public keys with their weights are expected)',
-  AuxSigningFileNotFoundForVotingRewardAddress = 'Voting rewards payment address doesn\'t match with supplied auxiliary signing keys --- Trezor does not support third-party reward addresses yet', // TODO should be removed after the support is added
+  AuxSigningFileNotFoundForVotingPaymentAddress = 'Voting rewards payment address doesn\'t match with supplied auxiliary signing keys --- Trezor does not support third-party reward addresses yet', // TODO should be removed after the support is added
   ByronSigningFilesFoundInVotingRegistration = 'Byron addresses are not allowed for voting registration',
   TrezorVersionError = 'Failed to retrieve trezor version',
   InvalidVotingRegistrationAddressType = 'Voting registration address type must be either BASE or REWARD',
