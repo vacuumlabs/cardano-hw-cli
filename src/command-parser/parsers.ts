@@ -92,7 +92,7 @@ export const parseFileTypeMagic = (fileTypeMagic: string, pathType: PathTypes): 
 
     case PathTypes.PATH_CVOTE_ACCOUNT:
     case PathTypes.PATH_CVOTE_KEY:
-      checkFileTypeStartsWith(PathLabel.CIP36_VOTING)
+      checkFileTypeStartsWith(PathLabel.CIP36_VOTE)
       return HwSigningType.CIP36Voting
 
     default:
@@ -205,7 +205,7 @@ export const parseVotePubFileCli = (path: string): VotePublicKeyHex => {
   const data = JSON.parse(rw.readFileSync(path, 'utf8'))
   const { type, cborHex } = data
 
-  if (type === `${PathLabel.CIP36_VOTING}VerificationKey_ed25519`) {
+  if (type === `${PathLabel.CIP36_VOTE}VerificationKey_ed25519`) {
     if (isPubKeyCborHex(cborHex)) {
       const keyHex = decodeCbor(cborHex).toString('hex')
       if (isVotePublicKeyHex(keyHex)) {
@@ -228,7 +228,7 @@ export const parseVotePubFileHw = (path: string): VotePublicKeyHex => {
   const data = JSON.parse(rw.readFileSync(path, 'utf8'))
   const { type, cborXPubKeyHex } = data
 
-  if (type === getHwSigningFileType(PathLabel.CIP36_VOTING, PathTypes.PATH_CVOTE_KEY)) {
+  if (type === getHwSigningFileType(PathLabel.CIP36_VOTE, PathTypes.PATH_CVOTE_KEY)) {
     if (isXPubKeyCborHex(cborXPubKeyHex)) {
       const keyHex = splitXPubKeyCborHex(cborXPubKeyHex).pubKey.toString('hex')
       if (isVotePublicKeyHex(keyHex)) {
