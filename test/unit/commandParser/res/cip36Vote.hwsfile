@@ -1,6 +1,6 @@
 {
     "type": "CIP36VoteHWSigningFile_ed25519",
-    "description": "Hardware Catalyst Vote Signing File",
+    "description": "CIP36 Vote Hardware Signing File",
     "path": "1694H/1815H/0H/0/0",
     "cborXPubKeyHex": "5840aac861247bd24cae705bca1d1c9763f19c19188fb0faf257c50ed69b8157bcedf23595dd3207b7dde477347fa25d3fd6291c3363df43b54a9cf523d2c7683c10"
 }
