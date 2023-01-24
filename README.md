@@ -84,13 +84,16 @@ cardano-hw-cli node issue-op-cert
 ```
 cardano-hw-cli vote registration-metadata
 --mainnet | --testnet-magic NATURAL    Use the mainnet magic id or specify testnet magic id.
---vote-public-key FILE                 Input filepath to vote public key in ed25519extended format (one or more keys can be provided).
+--vote-public-key-jcli FILE            Input filepath to vote public key in ed25519extended format (one or more keys can be provided).
+--vote-public-key-string BECH32STRING  Bech32-encoded vote public key (one or more keys can be provided).
+--vote-public-key-hwsfile FILE         Input filepath to vote public key in hw-signing-file format (one or more keys can be provided).
+--vote-public-key-file FILE            Input filepath to vote public key in cardano-cli file format (one or more keys can be provided).
 --vote-weight WEIGHT                   Voting power weight assigned to vote public key.
 --stake-signing-key FILE               Input filepath of the hardware wallet stake signing file, which will be used to to sign the voting registration.
 --payment-address PAYMENTADDRESS       Address which will receive voting rewards.
 --nonce NONCE                          Current slot number.
 --voting-purpose VOTINGPURPOSE         Voting purpose (optional)
---payment-address-signing-key FILE      Input filepath of the reward address signing files.
+--payment-address-signing-key FILE     Input filepath of the reward address signing files.
 --metadata-cbor-out-file FILE          Output filepath of metadata cbor.
 --derivation-type TYPE                 Derivation type - currently applies only to Trezor. Options: LEDGER, ICARUS or ICARUS_TREZOR (default).
 ```
