@@ -195,7 +195,7 @@ export type ParsedNodeKeyGenArguments = {
   issueCounterFiles: string[],
 }
 
-export type ParsedGovernanceVotingKeyRegistrationMetadataArguments = {
+export type ParsedGovernanceVoteKeyRegistrationMetadataArguments = {
   command: CommandType.GOVERNANCE_VOTING_REGISTRATION_METADATA,
   votePublicKeys: VotePublicKeyHex[],
   voteWeights: BigInt[],
@@ -226,7 +226,7 @@ export type ParsedArguments =
   | ParsedTransactionTransformArguments
   | ParsedNodeKeyGenArguments
   | ParsedOpCertArguments
-  | ParsedGovernanceVotingKeyRegistrationMetadataArguments
+  | ParsedGovernanceVoteKeyRegistrationMetadataArguments
 
 export type HwSigningOutput = {
   type: string,
