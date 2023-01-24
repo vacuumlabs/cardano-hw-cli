@@ -42,7 +42,7 @@ export type CborHex = string & {
 export type BIP32Path = number[] & { __type: 'bip32path' }
 
 export enum HwSigningType {
-  Payment, Stake, PoolCold, Mint, MultiSig, GovernanceVoting
+  Payment, Stake, PoolCold, Mint, MultiSig, CIP36Voting
 }
 
 export type HwSigningData = {
@@ -195,8 +195,8 @@ export type ParsedNodeKeyGenArguments = {
   issueCounterFiles: string[],
 }
 
-export type ParsedGovernanceVoteKeyRegistrationMetadataArguments = {
-  command: CommandType.GOVERNANCE_VOTING_REGISTRATION_METADATA,
+export type ParsedCVoteRegistrationMetadataArguments = {
+  command: CommandType.CIP36_VOTING_REGISTRATION_METADATA,
   votePublicKeys: VotePublicKeyHex[],
   voteWeights: BigInt[],
   hwStakeSigningFileData: HwSigningData,
@@ -209,7 +209,7 @@ export type ParsedGovernanceVoteKeyRegistrationMetadataArguments = {
   derivationType?: DerivationType,
 }
 
-export type GovernanceVotingDelegation = {
+export type CVoteDelegation = {
   votePublicKey: VotePublicKeyHex,
   voteWeight: BigInt,
 }
@@ -226,7 +226,7 @@ export type ParsedArguments =
   | ParsedTransactionTransformArguments
   | ParsedNodeKeyGenArguments
   | ParsedOpCertArguments
-  | ParsedGovernanceVoteKeyRegistrationMetadataArguments
+  | ParsedCVoteRegistrationMetadataArguments
 
 export type HwSigningOutput = {
   type: string,

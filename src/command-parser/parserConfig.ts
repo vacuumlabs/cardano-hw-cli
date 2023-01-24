@@ -274,8 +274,8 @@ export const parserConfig = {
     'key-gen': nodeKeyGenArgs,
     'issue-op-cert': opCertSigningArgs,
   },
-  'governance': {
-    'voting-registration-metadata': {
+  'vote': {
+    'registration-metadata': {
       '--mainnet': {
         nargs: '?',
         dest: 'network',
@@ -304,7 +304,7 @@ export const parserConfig = {
         dest: 'votePublicKeys',
         action: 'append',
         type: (str: string) => parseVotePubKeyBech32(str),
-        help: 'Bech32-encoded governance vote key (one or more keys can be provided).',
+        help: 'Bech32-encoded vote public key (one or more keys can be provided).',
       },
       '--vote-public-key-hwsfile': {
         required: false,

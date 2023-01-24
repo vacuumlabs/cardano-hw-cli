@@ -90,10 +90,10 @@ export const parseFileTypeMagic = (fileTypeMagic: string, pathType: PathTypes): 
       checkFileTypeStartsWith(PathLabel.POOL_COLD)
       return HwSigningType.PoolCold
 
-    case PathTypes.PATH_GOVERNANCE_VOTING_ACCOUNT:
-    case PathTypes.PATH_GOVERNANCE_VOTING_KEY:
-      checkFileTypeStartsWith(PathLabel.GOVERNANCE_VOTING)
-      return HwSigningType.GovernanceVoting
+    case PathTypes.PATH_CVOTE_ACCOUNT:
+    case PathTypes.PATH_CVOTE_KEY:
+      checkFileTypeStartsWith(PathLabel.CIP36_VOTING)
+      return HwSigningType.CIP36Voting
 
     default:
       throw Error(Errors.InvalidFileTypeError)
@@ -191,9 +191,9 @@ export const parseVotePubKeyBech32 = (keyStr: string): VotePublicKeyHex => {
     const hexString = bech32.decode(keyStr).data.toString('hex')
     if (isVotePublicKeyHex(hexString)) return hexString
   } catch (e) {
-    throw Error(Errors.InvalidGovernanceVotingPublicKey)
+    throw Error(Errors.InvalidCVotePublicKey)
   }
-  throw Error(Errors.InvalidGovernanceVotingPublicKey)
+  throw Error(Errors.InvalidCVotePublicKey)
 }
 
 export const parseVotePubFileJcli = (path: string): VotePublicKeyHex => {
@@ -205,7 +205,7 @@ export const parseVotePubFileCli = (path: string): VotePublicKeyHex => {
   const data = JSON.parse(rw.readFileSync(path, 'utf8'))
   const { type, cborHex } = data
 
-  if (type === `${PathLabel.GOVERNANCE_VOTING}VerificationKey_ed25519`) {
+  if (type === `${PathLabel.CIP36_VOTING}VerificationKey_ed25519`) {
     if (isPubKeyCborHex(cborHex)) {
       const keyHex = decodeCbor(cborHex).toString('hex')
       if (isVotePublicKeyHex(keyHex)) {
@@ -221,14 +221,14 @@ export const parseVotePubFileCli = (path: string): VotePublicKeyHex => {
     }
   }
 
-  throw Error(Errors.InvalidGovernanceVotingPublicKey)
+  throw Error(Errors.InvalidCVotePublicKey)
 }
 
 export const parseVotePubFileHw = (path: string): VotePublicKeyHex => {
   const data = JSON.parse(rw.readFileSync(path, 'utf8'))
   const { type, cborXPubKeyHex } = data
 
-  if (type === getHwSigningFileType(PathLabel.GOVERNANCE_VOTING, PathTypes.PATH_GOVERNANCE_VOTING_KEY)) {
+  if (type === getHwSigningFileType(PathLabel.CIP36_VOTING, PathTypes.PATH_CVOTE_KEY)) {
     if (isXPubKeyCborHex(cborXPubKeyHex)) {
       const keyHex = splitXPubKeyCborHex(cborXPubKeyHex).pubKey.toString('hex')
       if (isVotePublicKeyHex(keyHex)) {
@@ -237,7 +237,7 @@ export const parseVotePubFileHw = (path: string): VotePublicKeyHex => {
     }
   }
 
-  throw Error(Errors.InvalidGovernanceVotingPublicKey)
+  throw Error(Errors.InvalidCVotePublicKey)
 }
 
 const SCRIPT_HASH_LENGTH = 28

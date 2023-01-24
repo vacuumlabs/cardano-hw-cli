@@ -18,10 +18,10 @@ import {
   ParsedVerificationKeyArguments,
   ParsedOpCertArguments,
   ParsedNodeKeyGenArguments,
-  ParsedGovernanceVoteKeyRegistrationMetadataArguments,
+  ParsedCVoteRegistrationMetadataArguments,
   Cbor,
   NativeScriptDisplayFormat,
-  GovernanceVotingDelegation,
+  CVoteDelegation,
 } from './types'
 import { LedgerCryptoProvider } from './crypto-providers/ledgerCryptoProvider'
 import { TrezorCryptoProvider } from './crypto-providers/trezorCryptoProvider'
@@ -36,7 +36,7 @@ import {
 } from './crypto-providers/util'
 import { Errors } from './errors'
 import { parseOpCertIssueCounterFile } from './command-parser/parsers'
-import { GOVERNANCE_VOTING_PURPOSE_CATALYST } from './constants'
+import { CIP36_VOTING_PURPOSE_CATALYST } from './constants'
 import { validateWitnessing } from './crypto-providers/witnessingValidation'
 import { WitnessOutput } from './transaction/types'
 import { validateTxBeforeWitnessing } from './transaction/transactionValidation'
@@ -209,8 +209,8 @@ const CommandExecutor = async () => {
     writeOutputData(args.issueCounterFile, constructOpCertIssueCounterOutput(issueCounter))
   }
 
-  const createGovernanceVotingRegistrationMetadata = async (
-    args: ParsedGovernanceVoteKeyRegistrationMetadataArguments,
+  const createCVoteRegistrationMetadata = async (
+    args: ParsedCVoteRegistrationMetadataArguments,
   ) => {
     // adds stake signing data to reward address data so that it is not necessary to repeat the same
     // staking key file in command line arguments
@@ -228,14 +228,14 @@ const CommandExecutor = async () => {
       // the vote public keys and vote weights are provided correctly
       // nothing to do
     } else {
-      throw Error(Errors.InvalidGovernanceVotingDelegations)
+      throw Error(Errors.InvalidCVoteDelegations)
     }
-    const delegations: GovernanceVotingDelegation[] = args.votePublicKeys.map((votePublicKey, index) => ({
+    const delegations: CVoteDelegation[] = args.votePublicKeys.map((votePublicKey, index) => ({
       votePublicKey,
       voteWeight: args.voteWeights[index],
     }))
 
-    const votingPurpose = args.votingPurpose || GOVERNANCE_VOTING_PURPOSE_CATALYST
+    const votingPurpose = args.votingPurpose || CIP36_VOTING_PURPOSE_CATALYST
 
     const votingRegistrationMetaData = await cryptoProvider.signVotingRegistrationMetaData(
       delegations,
@@ -260,7 +260,7 @@ const CommandExecutor = async () => {
     createTxWitnesses,
     createNodeSigningKeyFiles,
     createSignedOperationalCertificate,
-    createGovernanceVotingRegistrationMetadata,
+    createCVoteRegistrationMetadata,
   }
 }
 

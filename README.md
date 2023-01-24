@@ -80,9 +80,9 @@ cardano-hw-cli node issue-op-cert
 --hw-signing-file FILE                               Input filepath of the hardware wallet signing file.
 ```
 
-## Governance voting registration
+## CIP36 voting registration
 ```
-cardano-hw-cli governance voting-registration-metadata
+cardano-hw-cli vote registration-metadata
 --mainnet | --testnet-magic NATURAL    Use the mainnet magic id or specify testnet magic id.
 --vote-public-key FILE                 Input filepath to vote public key in ed25519extended format (one or more keys can be provided).
 --vote-weight WEIGHT                   Voting power weight assigned to vote public key.
@@ -95,7 +95,7 @@ cardano-hw-cli governance voting-registration-metadata
 --derivation-type TYPE                 Derivation type - currently applies only to Trezor. Options: LEDGER, ICARUS or ICARUS_TREZOR (default).
 ```
 
-see [Governance voting registration example](docs/governance-voting-registration-example.md)
+see [voting registration example](docs/cip36-voting-registration-example.md)
 
 ## Policy id generation
 ```
@@ -120,7 +120,7 @@ cardano-hw-cli device version
 # Examples/Guides
 - [Basic transaction](docs/transaction-example.md)
 - [Stake delegation](docs/delegation-example.md)
-- [Governance voting registration](docs/governance-voting-registration-example.md)
+- [Catalyst/CIP36 voting registration](docs/cip36-voting-registration-example.md)
 - [Stake pool registration](docs/pool-registration.md)
 - [Token minting](docs/token-minting.md)
 - [Multisig transactions](docs/multisig-transactions.md)

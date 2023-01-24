@@ -27,7 +27,7 @@ import {
   Address,
   AddressType,
   BIP32Path,
-  GovernanceVotingDelegation,
+  CVoteDelegation,
   HexString,
   HwSigningData,
   HwSigningType,
@@ -77,9 +77,9 @@ enum PathTypes {
   // pool cold key in pool registrations and retirements
   PATH_POOL_COLD_KEY,
 
-  // governance voting CIP-36
-  PATH_GOVERNANCE_VOTING_ACCOUNT,
-  PATH_GOVERNANCE_VOTING_KEY,
+  // CIP-36 voting
+  PATH_CVOTE_ACCOUNT,
+  PATH_CVOTE_KEY,
 
   // not one of the above
   PATH_INVALID,
@@ -116,8 +116,8 @@ const classifyPath = (path: number[]): PathTypes => {
       if (path.length === 3 && path[2] >= 0 + HD) return PathTypes.PATH_WALLET_MINTING_KEY
       break
     case 1694 + HD:
-      if (path.length === 3 && path[2] >= 0 + HD) return PathTypes.PATH_GOVERNANCE_VOTING_ACCOUNT
-      if (path.length === 5 && path[2] >= 0 + HD && path[3] === 0) return PathTypes.PATH_GOVERNANCE_VOTING_KEY
+      if (path.length === 3 && path[2] >= 0 + HD) return PathTypes.PATH_CVOTE_ACCOUNT
+      if (path.length === 5 && path[2] >= 0 + HD && path[3] === 0) return PathTypes.PATH_CVOTE_KEY
       break
     default:
       break
@@ -529,7 +529,7 @@ const formatVotingRegistrationMetaData = (
 )
 
 const encodeVotingRegistrationMetaData = (
-  delegations: GovernanceVotingDelegation[],
+  delegations: CVoteDelegation[],
   hwStakeSigningFile: HwSigningData,
   address: Buffer,
   nonce: BigInt,
