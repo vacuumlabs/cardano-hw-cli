@@ -1,5 +1,5 @@
 {
-    "type": "GovernanceVotingVerificationKey_ed25519",
-    "description": "Hardware Governance Voting Verification Key",
+    "type": "CIP36VoteVerificationKey_ed25519",
+    "description": "Hardware Catalyst Vote Verification Key",
     "cborHex": "5840423fa841abf9f7fa8dfa10dacdb6737b27fdb0d9bcd9b95d48cabb53047ab76973dd83b34cb41508cebc007b644129573d3076a82fbba7f7a5192a41047a47ee"
 }

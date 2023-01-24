@@ -2,7 +2,7 @@
 
 [TODO add Ledger app and Trezor Firmware versions]
 
-# Create governance vote keys
+# Create CIP36 vote keys
 
 You may want to keep your vote keys stored on a Ledger Nano hardware device (the key derivation schema is described in [CIP-36](https://cips.cardano.org/cips/cip36/)). Consequently, you will have to sign all voting on the HW device storing the keys. For Trezor, this is not supported.
 
@@ -14,7 +14,7 @@ tar -xf jormungandr-0.9.3-x86_64-unknown-linux-gnu-generic.tar.gz
 ./jcli key to-public < catalyst-vote.skey > catalyst-vote.pkey
 ```
 
-# Create governance voting registration metadata
+# Create CIP36 voting registration metadata
 
 Generate stake hardware wallet signing file and verification file with `cardano-hw-cli`:
 ```
@@ -24,12 +24,12 @@ cardano-hw-cli address key-gen \
 --hw-signing-file stake.hwsfile
 ```
 
-Get slot number from `cardano-cli`, use slot number as `nonce` in governance voting registration command:
+Get slot number from `cardano-cli`, use slot number as `nonce` in CIP36 voting registration command:
 ```
 cardano-cli query tip --mainnet
 ```
 
-Get stake address from `cardano-cli`, use it as `payment-address` and `payment-address-signing-key` in governance voting registration command:
+Get stake address from `cardano-cli`, use it as `payment-address` and `payment-address-signing-key` in CIP36 voting registration command:
 ```
 cardano-cli stake-address build \
 --stake-verification-key-file stake.vkey \
@@ -37,9 +37,9 @@ cardano-cli stake-address build \
 --mainnet
 ```
 
-Create governance voting registration metadata with `cardano-hw-cli`:
+Create CIP36 voting registration metadata with `cardano-hw-cli`:
 ```
-cardano-hw-cli governance voting-registration-metadata \
+cardano-hw-cli vote registration-metadata \
 --mainnet \
 --vote-public-key-file catalyst-vote.pkey \
 --payment-address $(cat stake.addr) \
@@ -52,7 +52,7 @@ cardano-hw-cli governance voting-registration-metadata \
 
 Alternatively, in case you want to split your voting power among several vote keys, the keys and their voting power weights can be specified like this:
 ```
-cardano-hw-cli governance voting-registration-metadata \
+cardano-hw-cli vote registration-metadata \
 --mainnet \
 --vote-public-key-file catalyst-vote1.pkey \
 --vote-weight 1 \
@@ -65,7 +65,7 @@ cardano-hw-cli governance voting-registration-metadata \
 --metadata-cbor-out-file voting_registration.cbor
 ```
 
-Note: The governance registration auxiliary data are formatted according to [CIP-36](https://cips.cardano.org/cips/cip36/).
+Note: The voting registration auxiliary data are formatted according to [CIP-36](https://cips.cardano.org/cips/cip36/).
 
 # Create and submit transaction
 Create raw transaction with `cardano-cli`, if you don't know how to create simple transaction, check https://github.com/vacuumlabs/cardano-hw-cli/blob/develop/docs/transaction-example.md

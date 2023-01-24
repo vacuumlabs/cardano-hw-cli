@@ -19,7 +19,7 @@ import {
 } from '../transaction/types'
 import {
   BIP32Path,
-  GovernanceVotingDelegation,
+  CVoteDelegation,
   HexString,
   HwSigningData,
   NativeScript,
@@ -720,11 +720,11 @@ export const LedgerCryptoProvider: (transport: Transport) => Promise<CryptoProvi
   }
 
   const prepareVoteDelegations = (
-    delegations: GovernanceVotingDelegation[],
+    delegations: CVoteDelegation[],
   ): LedgerTypes.GovernanceVotingDelegation[] => (
     delegations.map(({ votePublicKey, voteWeight }) => {
       if (Number(voteWeight) > Number.MAX_SAFE_INTEGER) {
-        throw Error(Errors.InvalidGovernanceVotingWeight)
+        throw Error(Errors.InvalidCVoteWeight)
       }
       return {
         // TODO what about using a path from signing files instead of the key?
@@ -737,7 +737,7 @@ export const LedgerCryptoProvider: (transport: Transport) => Promise<CryptoProvi
   )
 
   const prepareVoteAuxiliaryData = (
-    delegations: GovernanceVotingDelegation[],
+    delegations: CVoteDelegation[],
     hwStakeSigningFile: HwSigningData,
     rewardsDestination: TxOutputDestination,
     nonce: BigInt,
@@ -794,7 +794,7 @@ export const LedgerCryptoProvider: (transport: Transport) => Promise<CryptoProvi
   })
 
   const signVotingRegistrationMetaData = async (
-    delegations: GovernanceVotingDelegation[],
+    delegations: CVoteDelegation[],
     hwStakeSigningFile: HwSigningData, // describes stake_credential
     paymentAddressBech32: string,
     nonce: BigInt,
