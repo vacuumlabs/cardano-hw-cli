@@ -2,9 +2,9 @@
 
 [TODO add Ledger app and Trezor Firmware versions]
 
-# Create governance voting keys
+# Create governance vote keys
 
-You may want to keep your voting keys stored on a Ledger Nano hardware device (the key derivation schema is described in [CIP-36](https://cips.cardano.org/cips/cip36/)). Consequently, you will have to sign all voting on the HW device storing the keys. For Trezor, this is not supported.
+You may want to keep your vote keys stored on a Ledger Nano hardware device (the key derivation schema is described in [CIP-36](https://cips.cardano.org/cips/cip36/)). Consequently, you will have to sign all voting on the HW device storing the keys. For Trezor, this is not supported.
 
 It is possible to register and use keys generated in other ways, e.g. as follows:
 ```
@@ -50,7 +50,7 @@ cardano-hw-cli governance voting-registration-metadata \
 ```
 (You should add `--voting-purpose` to change the voting purpose to something other than Catalyst.)
 
-Alternatively, in case you want to split your voting power among several voting keys, the keys and their voting power weights can be specified like this:
+Alternatively, in case you want to split your voting power among several vote keys, the keys and their voting power weights can be specified like this:
 ```
 cardano-hw-cli governance voting-registration-metadata \
 --mainnet \
