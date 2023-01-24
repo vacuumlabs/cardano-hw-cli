@@ -796,16 +796,16 @@ export const LedgerCryptoProvider: (transport: Transport) => Promise<CryptoProvi
   const signVotingRegistrationMetaData = async (
     delegations: GovernanceVotingDelegation[],
     hwStakeSigningFile: HwSigningData, // describes stake_credential
-    rewardAddressBech32: string,
+    paymentAddressBech32: string,
     nonce: BigInt,
     votingPurpose: BigInt,
     network: Network,
-    rewardAddressSigningFiles: HwSigningData[],
+    paymentAddressSigningFiles: HwSigningData[],
   ): Promise<VotingRegistrationMetaDataCborHex> => {
-    const { data: address } : { data: Buffer } = bech32.decode(rewardAddressBech32)
+    const { data: address } : { data: Buffer } = bech32.decode(paymentAddressBech32)
 
     let destination: TxOutputDestination
-    const addressParams = getAddressParameters(rewardAddressSigningFiles, address, network)
+    const addressParams = getAddressParameters(paymentAddressSigningFiles, address, network)
     if (addressParams) {
       validateVotingRegistrationAddressType(addressParams.addressType)
       destination = {

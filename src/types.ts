@@ -200,11 +200,11 @@ export type ParsedGovernanceVotingKeyRegistrationMetadataArguments = {
   votePublicKeys: VotePublicKeyHex[],
   voteWeights: BigInt[],
   hwStakeSigningFileData: HwSigningData,
-  rewardAddress: string,
+  paymentAddress: string,
   nonce: BigInt,
   votingPurpose: BigInt,
   network: Network,
-  rewardAddressSigningKeyData: HwSigningData[],
+  paymentAddressSigningKeyData: HwSigningData[],
   outFile: string,
   derivationType?: DerivationType,
 }

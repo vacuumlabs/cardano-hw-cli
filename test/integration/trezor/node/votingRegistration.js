@@ -15,7 +15,7 @@ const votingRegistrations = {
       },
     ],
     hwStakeSigningFile: signingFiles.stake0,
-    rewardAddressBech32: addresses.testnet.base0,
+    paymentAddressBech32: addresses.testnet.base0,
     nonce: 165564,
     votingPurpose: 0,
     network: 'TESTNET_LEGACY',
@@ -30,14 +30,14 @@ const votingRegistrations = {
       },
     ],
     hwStakeSigningFile: signingFiles.stake0,
-    rewardAddressBech32: addresses.mainnet.base0,
+    paymentAddressBech32: addresses.mainnet.base0,
     nonce: 165564,
     votingPurpose: 0,
     network: 'MAINNET',
     auxiliarySigningFiles: [signingFiles.payment0, signingFiles.stake0],
     signedVotingRegistrationMetaDataHex: 'a219ef64a501818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b701025820bc65be1b0b9d7531778a1317c2aa6de936963c3f9ac7d5ee9e9eda25e0c97c5e0358390180f9e2c88e6c817008f3a812ed889b4a4da8e0bd103f86e7335422aa122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277041a000286bc050019ef65a10158400e08dba5d4336c1c7b52cfd95ff2b016ca37cd476756f4217e8d7ecb1c95d09d372d87b8d8da88f701736e6ec15f46d6e55999afa54ecce6adc04da8cf927600',
   },
-  withTestnetRewardAddress0: {
+  withTestnetPaymentAddress0: {
     delegations: [
       {
         votePublicKey: '3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7',
@@ -45,7 +45,7 @@ const votingRegistrations = {
       },
     ],
     hwStakeSigningFile: signingFiles.stake0,
-    rewardAddressBech32: addresses.testnet.reward0,
+    paymentAddressBech32: addresses.testnet.reward0,
     nonce: 165564,
     votingPurpose: 0,
     network: 'TESTNET_LEGACY',
@@ -64,7 +64,7 @@ const votingRegistrations = {
       },
     ],
     hwStakeSigningFile: signingFiles.stake0,
-    rewardAddressBech32: addresses.mainnet.reward0,
+    paymentAddressBech32: addresses.mainnet.reward0,
     nonce: 165564,
     votingPurpose: 0,
     network: 'MAINNET',
@@ -80,7 +80,7 @@ async function testVotingRegistrationMetaDataSigning(cryptoProvider, votingRegis
     await cryptoProvider.signVotingRegistrationMetaData(
       args.delegations,
       args.hwStakeSigningFile,
-      args.rewardAddressBech32,
+      args.paymentAddressBech32,
       args.nonce,
       args.votingPurpose,
       NETWORKS[args.network],
