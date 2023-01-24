@@ -74,7 +74,7 @@ const bip32PathLabel = (path: BIP32Path): PathLabel => {
       return PathLabel.POOL_COLD
 
     case PathTypes.PATH_CVOTE_KEY:
-      return PathLabel.CIP36_VOTING
+      return PathLabel.CIP36_VOTE
 
     default:
       throw Error('not implemented')
@@ -123,8 +123,7 @@ const verificationKeyDescription = (path: BIP32Path): string => {
       return 'Hardware Stake Pool Operator Verification Key'
 
     case PathTypes.PATH_CVOTE_KEY:
-      // TODO take into account non-catalyst voting purpose
-      return 'Hardware Catalyst Vote Verification Key'
+      return 'Hardware CIP36 Vote Verification Key'
 
     case PathTypes.PATH_WALLET_ACCOUNT:
     case PathTypes.PATH_WALLET_ACCOUNT_MULTISIG:
@@ -161,12 +160,45 @@ const getHwSigningFileType = (label: PathLabel, pathType: PathTypes): string => 
   }
 }
 
+const hwsfileDescription = (path: BIP32Path): string => {
+  switch (classifyPath(path)) {
+    case PathTypes.PATH_WALLET_SPENDING_KEY_BYRON:
+    case PathTypes.PATH_WALLET_SPENDING_KEY_SHELLEY:
+      return 'Payment Hardware Signing File'
+
+    case PathTypes.PATH_WALLET_STAKING_KEY:
+      return 'Stake Hardware Signing File'
+
+    case PathTypes.PATH_WALLET_SPENDING_KEY_MULTISIG:
+      return 'Script Payment Hardware Signing File'
+
+    case PathTypes.PATH_WALLET_STAKING_KEY_MULTISIG:
+      return 'Script Stake Hardware Signing File'
+
+    case PathTypes.PATH_WALLET_MINTING_KEY:
+      return 'Mint Hardware Signing File'
+
+    case PathTypes.PATH_POOL_COLD_KEY:
+      return 'Stake Pool Hardware Signing File'
+
+    case PathTypes.PATH_CVOTE_KEY:
+      return 'CIP36 Vote Hardware Signing File'
+
+    case PathTypes.PATH_WALLET_ACCOUNT:
+    case PathTypes.PATH_WALLET_ACCOUNT_MULTISIG:
+    case PathTypes.PATH_CVOTE_ACCOUNT:
+    case PathTypes.PATH_INVALID:
+    default:
+      throw Error('not implemented')
+  }
+}
+
 const constructHwSigningKeyOutput = (xPubKey: XPubKeyHex, path: BIP32Path): HwSigningOutput => {
   const label = bip32PathLabel(path)
 
   return {
     type: getHwSigningFileType(label, classifyPath(path)),
-    description: `${label} Hardware Signing File`,
+    description: hwsfileDescription(path),
     path: constructBIP32PathOutput(path),
     cborXPubKeyHex: encodeCbor(Buffer.from(xPubKey, 'hex')).toString('hex'),
   }
