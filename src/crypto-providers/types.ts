@@ -15,7 +15,7 @@ import {
   ParsedShowAddressArguments,
   CardanoEra,
   DerivationType,
-  GovernanceVotingDelegation,
+  CVoteDelegation,
 } from '../types'
 
 export enum SigningMode {
@@ -56,7 +56,7 @@ export type CryptoProvider = {
     signingFile: HwSigningData[],
   ) => Promise<SignedOpCertCborHex>
   signVotingRegistrationMetaData: (
-    delegations: GovernanceVotingDelegation[],
+    delegations: CVoteDelegation[],
     hwStakeSigningFile: HwSigningData, // describes stake_credential
     paymentAddressBech32: string,
     nonce: BigInt,

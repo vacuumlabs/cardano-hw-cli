@@ -193,10 +193,10 @@ describe('Command parser', () => {
     assert.deepStrictEqual(parsedArgs, expectedResult)
   })
 
-  it('Should parse governance voting registration', () => {
+  it('Should parse CIP36 voting registration', () => {
     const args = pad([
-      'governance',
-      'voting-registration-metadata',
+      'vote',
+      'registration-metadata',
       '--testnet-magic',
       '42',
       '--vote-public-key-jcli',
@@ -213,7 +213,7 @@ describe('Command parser', () => {
     const { parsedArgs } = parse(args)
 
     const expectedResult = {
-      command: CommandType.GOVERNANCE_VOTING_REGISTRATION_METADATA,
+      command: CommandType.CIP36_VOTING_REGISTRATION_METADATA,
       network: NETWORKS.TESTNET_LEGACY,
       paymentAddressSigningKeyData: [],
       hwStakeSigningFileData: {
@@ -232,10 +232,10 @@ describe('Command parser', () => {
     assert.deepStrictEqual(parsedArgs, expectedResult)
   })
 
-  it('Should parse governance voting registration with several delegations and reward address hw signing files', () => {
+  it('Should parse CIP36 voting registration with several delegations and reward address hw signing files', () => {
     const args = pad([
-      'governance',
-      'voting-registration-metadata',
+      'vote',
+      'registration-metadata',
       '--testnet-magic',
       '42',
       '--vote-public-key-jcli',
@@ -247,15 +247,15 @@ describe('Command parser', () => {
       '--vote-weight',
       '2',
       '--vote-public-key-file',
-      prefix('governanceVoting.vkey'),
+      prefix('cip36Vote.vkey'),
       '--vote-weight',
       '3',
       '--vote-public-key-hwsfile',
-      prefix('governanceVoting.hwsfile'),
+      prefix('cip36Vote.hwsfile'),
       '--vote-weight',
       '4',
       '--vote-public-key-file',
-      prefix('governanceVotingExtended.vkey'),
+      prefix('cip36VoteExtended.vkey'),
       '--vote-weight',
       '5',
       '--payment-address',
@@ -275,7 +275,7 @@ describe('Command parser', () => {
     ])
     const { parsedArgs } = parse(args)
     const expectedResult = {
-      command: CommandType.GOVERNANCE_VOTING_REGISTRATION_METADATA,
+      command: CommandType.CIP36_VOTING_REGISTRATION_METADATA,
       network: NETWORKS.TESTNET_LEGACY,
       paymentAddressSigningKeyData: [
         {
