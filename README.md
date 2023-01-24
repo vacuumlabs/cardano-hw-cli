@@ -87,10 +87,10 @@ cardano-hw-cli governance voting-registration-metadata
 --vote-public-key FILE                 Input filepath to vote public key in ed25519extended format (one or more keys can be provided).
 --vote-weight WEIGHT                   Voting power weight assigned to vote public key.
 --stake-signing-key FILE               Input filepath of the hardware wallet stake signing file, which will be used to to sign the voting registration.
---reward-address REWARDADDRESS         Staking address which will receive voting rewards.
+--payment-address PAYMENTADDRESS       Address which will receive voting rewards.
 --nonce NONCE                          Current slot number.
 --voting-purpose VOTINGPURPOSE         Voting purpose (optional)
---reward-address-signing-key FILE      Input filepath of the reward address signing files.
+--payment-address-signing-key FILE      Input filepath of the reward address signing files.
 --metadata-cbor-out-file FILE          Output filepath of metadata cbor.
 --derivation-type TYPE                 Derivation type - currently applies only to Trezor. Options: LEDGER, ICARUS or ICARUS_TREZOR (default).
 ```

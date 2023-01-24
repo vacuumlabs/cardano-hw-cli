@@ -214,7 +214,7 @@ const CommandExecutor = async () => {
   ) => {
     // adds stake signing data to reward address data so that it is not necessary to repeat the same
     // staking key file in command line arguments
-    const hwSigningData = [...args.rewardAddressSigningKeyData, args.hwStakeSigningFileData]
+    const hwSigningData = [...args.paymentAddressSigningKeyData, args.hwStakeSigningFileData]
     if (!areHwSigningDataNonByron(hwSigningData)) {
       throw Error(Errors.ByronSigningFilesFoundInVotingRegistration)
     }
@@ -240,7 +240,7 @@ const CommandExecutor = async () => {
     const votingRegistrationMetaData = await cryptoProvider.signVotingRegistrationMetaData(
       delegations,
       args.hwStakeSigningFileData,
-      args.rewardAddress,
+      args.paymentAddress,
       args.nonce,
       votingPurpose,
       args.network,

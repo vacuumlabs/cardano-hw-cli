@@ -58,11 +58,11 @@ export type CryptoProvider = {
   signVotingRegistrationMetaData: (
     delegations: GovernanceVotingDelegation[],
     hwStakeSigningFile: HwSigningData, // describes stake_credential
-    rewardAddressBech32: string,
+    paymentAddressBech32: string,
     nonce: BigInt,
     votingPurpose: BigInt,
     network: Network,
-    rewardAddressSigningFiles: HwSigningData[],
+    paymentAddressSigningFiles: HwSigningData[],
     derivationType?: DerivationType,
   ) => Promise<VotingRegistrationMetaDataCborHex>
   deriveNativeScriptHash: (
