@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
 const enum Errors {
-  HwTransportNotFoundError = 'Error occured while trying to find hw transport, make sure Ledger or Trezor is connected to your computer',
+  HwTransportNotFoundError = 'Error occurred while trying to find hw transport, make sure Ledger or Trezor is connected to your computer',
   InvalidPathError = 'Can not parse path',
   InvalidFileTypeError = 'Invalid file type of hw-signing-file',
   InvalidHwSigningFileError = 'Invalid file contents of hw-signing-file',
