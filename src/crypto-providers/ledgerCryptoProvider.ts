@@ -2,7 +2,7 @@ import * as TxTypes from 'cardano-hw-interop-lib'
 import Ledger, * as LedgerTypes from '@cardano-foundation/ledgerjs-hw-app-cardano'
 import type Transport from '@ledgerhq/hw-transport'
 import {
-  GovernanceVotingDelegationType,
+  CIP36VoteDelegationType,
   TxOutputDestination,
 } from '@cardano-foundation/ledgerjs-hw-app-cardano'
 import { parseBIP32Path } from '../command-parser/parsers'
@@ -721,16 +721,16 @@ export const LedgerCryptoProvider: (transport: Transport) => Promise<CryptoProvi
 
   const prepareVoteDelegations = (
     delegations: CVoteDelegation[],
-  ): LedgerTypes.GovernanceVotingDelegation[] => (
+  ): LedgerTypes.CIP36VoteDelegation[] => (
     delegations.map(({ votePublicKey, voteWeight }) => {
       if (Number(voteWeight) > Number.MAX_SAFE_INTEGER) {
         throw Error(Errors.InvalidCVoteWeight)
       }
       return {
         // TODO what about using a path from signing files instead of the key?
-        type: GovernanceVotingDelegationType.KEY,
+        type: CIP36VoteDelegationType.KEY,
         // TODO vote vs. voting in names
-        votingPublicKeyHex: votePublicKey,
+        voteKeyHex: votePublicKey,
         weight: Number(voteWeight),
       }
     })
@@ -739,16 +739,16 @@ export const LedgerCryptoProvider: (transport: Transport) => Promise<CryptoProvi
   const prepareVoteAuxiliaryData = (
     delegations: CVoteDelegation[],
     hwStakeSigningFile: HwSigningData,
-    rewardsDestination: TxOutputDestination,
+    paymentDestination: TxOutputDestination,
     nonce: BigInt,
     votingPurpose: BigInt,
   ): LedgerTypes.TxAuxiliaryData => ({
-    type: LedgerTypes.TxAuxiliaryDataType.GOVERNANCE_VOTING_REGISTRATION,
+    type: LedgerTypes.TxAuxiliaryDataType.CIP36_REGISTRATION,
     params: {
-      format: LedgerTypes.GovernanceVotingRegistrationFormat.CIP_36,
+      format: LedgerTypes.CIP36VoteRegistrationFormat.CIP_36,
       delegations: prepareVoteDelegations(delegations),
       stakingPath: hwStakeSigningFile.path,
-      rewardsDestination,
+      paymentDestination,
       nonce: `${nonce}`,
       votingPurpose: `${votingPurpose}`,
     },
@@ -846,7 +846,7 @@ export const LedgerCryptoProvider: (transport: Transport) => Promise<CryptoProvi
       nonce,
       votingPurpose,
       response.auxiliaryDataSupplement.auxiliaryDataHashHex as HexString,
-      response.auxiliaryDataSupplement.governanceVotingRegistrationSignatureHex as HexString,
+      response.auxiliaryDataSupplement.cip36VoteRegistrationSignatureHex as HexString,
     )
   }
 
