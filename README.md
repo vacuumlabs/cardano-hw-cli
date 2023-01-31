@@ -80,7 +80,7 @@ cardano-hw-cli node issue-op-cert
 --hw-signing-file FILE                               Input filepath of the hardware wallet signing file.
 ```
 
-## CIP36 voting registration
+## CIP36 registration
 ```
 cardano-hw-cli vote registration-metadata
 --mainnet | --testnet-magic NATURAL    Use the mainnet magic id or specify testnet magic id.
@@ -89,16 +89,16 @@ cardano-hw-cli vote registration-metadata
 --vote-public-key-hwsfile FILE         Input filepath to vote public key in hw-signing-file format (one or more keys can be provided).
 --vote-public-key-file FILE            Input filepath to vote public key in cardano-cli file format (one or more keys can be provided).
 --vote-weight WEIGHT                   Voting power weight assigned to vote public key.
---stake-signing-key FILE               Input filepath of the hardware wallet stake signing file, which will be used to to sign the voting registration.
+--stake-signing-key FILE               Input filepath of the hardware wallet stake signing file, which will be used to to sign the registration.
 --payment-address PAYMENTADDRESS       Address which will receive voting rewards.
 --nonce NONCE                          Current slot number.
 --voting-purpose VOTINGPURPOSE         Voting purpose (optional)
---payment-address-signing-key FILE     Input filepath of the reward address signing files.
+--payment-address-signing-key FILE     Input filepath of the payment address signing files.
 --metadata-cbor-out-file FILE          Output filepath of metadata cbor.
 --derivation-type TYPE                 Derivation type - currently applies only to Trezor. Options: LEDGER, ICARUS or ICARUS_TREZOR (default).
 ```
 
-see [voting registration example](docs/cip36-voting-registration-example.md)
+see [registration example](docs/cip36-voting-registration-example.md)
 
 ## Policy id generation
 ```
@@ -123,7 +123,7 @@ cardano-hw-cli device version
 # Examples/Guides
 - [Basic transaction](docs/transaction-example.md)
 - [Stake delegation](docs/delegation-example.md)
-- [Catalyst/CIP36 voting registration](docs/cip36-voting-registration-example.md)
+- [Catalyst/CIP36 registration](docs/cip36-registration-example.md)
 - [Stake pool registration](docs/pool-registration.md)
 - [Token minting](docs/token-minting.md)
 - [Multisig transactions](docs/multisig-transactions.md)

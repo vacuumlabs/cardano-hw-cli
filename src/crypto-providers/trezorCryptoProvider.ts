@@ -2,7 +2,7 @@ import * as TxTypes from 'cardano-hw-interop-lib'
 import TrezorConnect, * as TrezorTypes from '@trezor/connect'
 import { PROTO as TrezorEnums } from '@trezor/connect'
 import {
-  VotingRegistrationMetaDataCborHex,
+  CIP36RegistrationMetaDataCborHex,
   TxWitnesses,
   TxWitnessKeys,
 } from '../transaction/types'
@@ -39,9 +39,9 @@ import {
   ipv4ToString,
   ipv6ToString,
   getAddressParameters,
-  validateVotingRegistrationAddressType,
+  validateCIP36RegistrationAddressType,
   splitXPubKeyCborHex,
-  encodeVotingRegistrationMetaData,
+  encodeCIP36RegistrationMetaData,
   rewardAccountToStakeCredential,
   areAddressParamsAllowed,
 } from './util'
@@ -673,7 +673,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
           stakingPath: addressParameters.stakePath as BIP32Path,
         }
       }
-      throw Error(Errors.InvalidVotingRegistrationAddressType)
+      throw Error(Errors.InvalidCIP36RegistrationAddressType)
     }
 
     return {
@@ -718,7 +718,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     auxiliaryData,
   })
 
-  const signVotingRegistrationMetaData = async (
+  const signCIP36RegistrationMetaData = async (
     delegations: CVoteDelegation[],
     hwStakeSigningFile: HwSigningData, // describes stake_credential
     paymentAddressBech32: string,
@@ -727,14 +727,14 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     network: Network,
     paymentAddressSigningFiles: HwSigningData[],
     derivationType?: DerivationType,
-  ): Promise<VotingRegistrationMetaDataCborHex> => {
+  ): Promise<CIP36RegistrationMetaDataCborHex> => {
     const { data: address } : { data: Buffer } = bech32.decode(paymentAddressBech32)
     const addressParams = getAddressParameters(paymentAddressSigningFiles, address, network)
     if (!addressParams) {
-      throw Error(Errors.AuxSigningFileNotFoundForVotingPaymentAddress)
+      throw Error(Errors.AuxSigningFileNotFoundForCIP36PaymentAddress)
     }
 
-    validateVotingRegistrationAddressType(addressParams.addressType)
+    validateCIP36RegistrationAddressType(addressParams.addressType)
 
     const trezorAuxData = prepareVoteAuxiliaryData(
       delegations,
@@ -754,10 +754,10 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     }
     if (!response.payload.auxiliaryDataSupplement) throw Error(Errors.MissingAuxiliaryDataSupplement)
     if (!response.payload.auxiliaryDataSupplement.governanceSignature) {
-      throw Error(Errors.MissingCVoteSignature)
+      throw Error(Errors.MissingCIP36RegistrationSignature)
     }
 
-    return encodeVotingRegistrationMetaData(
+    return encodeCIP36RegistrationMetaData(
       delegations,
       hwStakeSigningFile,
       address,
@@ -863,7 +863,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     witnessTx,
     getXPubKeys,
     signOperationalCertificate,
-    signVotingRegistrationMetaData,
+    signCIP36RegistrationMetaData,
     deriveNativeScriptHash,
   }
 }

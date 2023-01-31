@@ -14,7 +14,7 @@ export enum CommandType {
   DERIVE_NATIVE_SCRIPT_HASH = 'transaction.policyid',
   SIGN_OPERATIONAL_CERTIFICATE = 'node.issue-op-cert',
   NODE_KEY_GEN = 'node.key-gen',
-  CIP36_VOTING_REGISTRATION_METADATA = 'vote.registration-metadata',
+  CIP36_REGISTRATION_METADATA = 'vote.registration-metadata',
 }
 
 const initParser = (parser: ArgumentParser | ArgumentGroup, config: any): void => {
