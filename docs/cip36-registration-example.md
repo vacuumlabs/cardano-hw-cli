@@ -14,7 +14,7 @@ tar -xf jormungandr-0.9.3-x86_64-unknown-linux-gnu-generic.tar.gz
 ./jcli key to-public < catalyst-vote.skey > catalyst-vote.pkey
 ```
 
-# Create CIP36 voting registration metadata
+# Create CIP36 registration metadata
 
 Generate stake hardware wallet signing file and verification file with `cardano-hw-cli`:
 ```
@@ -24,12 +24,12 @@ cardano-hw-cli address key-gen \
 --hw-signing-file stake.hwsfile
 ```
 
-Get slot number from `cardano-cli`, use slot number as `nonce` in CIP36 voting registration command:
+Get slot number from `cardano-cli`, use slot number as `nonce` in CIP36 registration command:
 ```
 cardano-cli query tip --mainnet
 ```
 
-Get stake address from `cardano-cli`, use it as `payment-address` and `payment-address-signing-key` in CIP36 voting registration command:
+Get stake address from `cardano-cli`, use it as `payment-address` and `payment-address-signing-key` in CIP36 registration command:
 ```
 cardano-cli stake-address build \
 --stake-verification-key-file stake.vkey \
@@ -37,7 +37,7 @@ cardano-cli stake-address build \
 --mainnet
 ```
 
-Create CIP36 voting registration metadata with `cardano-hw-cli`:
+Create CIP36 registration metadata with `cardano-hw-cli`:
 ```
 cardano-hw-cli vote registration-metadata \
 --mainnet \
@@ -46,7 +46,7 @@ cardano-hw-cli vote registration-metadata \
 --stake-signing-key-hwsfile stake.hwsfile \
 --nonce 29747977 \
 --payment-address-signing-key-hwsfile stake.hwsfile \
---metadata-cbor-out-file voting_registration.cbor
+--metadata-cbor-out-file cip36_registration.cbor
 ```
 (You should add `--voting-purpose` to change the voting purpose to something other than Catalyst.)
 
@@ -62,10 +62,10 @@ cardano-hw-cli vote registration-metadata \
 --stake-signing-key-hwsfile stake.hwsfile \
 --nonce 29747977 \
 --payment-address-signing-key-hwsfile stake.hwsfile \
---metadata-cbor-out-file voting_registration.cbor
+--metadata-cbor-out-file cip36_registration.cbor
 ```
 
-Note: The voting registration auxiliary data are formatted according to [CIP-36](https://cips.cardano.org/cips/cip36/).
+Note: The registration auxiliary data are formatted according to [CIP-36](https://cips.cardano.org/cips/cip36/).
 
 # Create and submit transaction
 Create raw transaction with `cardano-cli`, if you don't know how to create simple transaction, check https://github.com/vacuumlabs/cardano-hw-cli/blob/develop/docs/transaction-example.md
@@ -75,7 +75,7 @@ cardano-cli transaction build-raw \
 --tx-in "270eb90adfb4634fb7e7356dab9a36d1d6c6763e03629ead2e64b59f70217c75#0" \
 --tx-out addr1q9nz9shd0wh6uevtnr5j4epyqxtwx6953wegv7pfdttr9hzfn5kc55752ehrcspld7ucc0zt8502efdaac4nlajgagasayc3u9+1810000 \
 --fee 190000 \
---metadata-cbor-file voting_registration.cbor \
+--metadata-cbor-file cip36_registration.cbor \
 --out-file tx.raw \
 --cddl-format
 ```

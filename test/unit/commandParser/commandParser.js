@@ -193,7 +193,7 @@ describe('Command parser', () => {
     assert.deepStrictEqual(parsedArgs, expectedResult)
   })
 
-  it('Should parse CIP36 voting registration', () => {
+  it('Should parse CIP36 registration', () => {
     const args = pad([
       'vote',
       'registration-metadata',
@@ -208,12 +208,12 @@ describe('Command parser', () => {
       '--nonce',
       '165564',
       '--metadata-cbor-out-file',
-      'voting_registration.cbor',
+      'cip36_registration.cbor',
     ])
     const { parsedArgs } = parse(args)
 
     const expectedResult = {
-      command: CommandType.CIP36_VOTING_REGISTRATION_METADATA,
+      command: CommandType.CIP36_REGISTRATION_METADATA,
       network: NETWORKS.TESTNET_LEGACY,
       paymentAddressSigningKeyData: [],
       hwStakeSigningFileData: {
@@ -223,7 +223,7 @@ describe('Command parser', () => {
       },
       nonce: 165564n,
       votingPurpose: undefined,
-      outFile: 'voting_registration.cbor',
+      outFile: 'cip36_registration.cbor',
       paymentAddress: 'adr_test1qq2vzmtlgvjrhkq50rngh8d482zj3l20kyrc6kx4ffl3zfqayfawlf9hwv2fzuygt2km5v92kvf8e3s3mk7ynxw77cwq2glhm4',
       votePublicKeys: ['3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7'],
       voteWeights: [],
@@ -232,7 +232,7 @@ describe('Command parser', () => {
     assert.deepStrictEqual(parsedArgs, expectedResult)
   })
 
-  it('Should parse CIP36 voting registration with several delegations and reward address hw signing files', () => {
+  it('Should parse CIP36 registration with several delegations and payment address hw signing files', () => {
     const args = pad([
       'vote',
       'registration-metadata',
@@ -271,11 +271,11 @@ describe('Command parser', () => {
       '--payment-address-signing-key-hwsfile',
       prefix('stake.hwsfile'),
       '--metadata-cbor-out-file',
-      'voting_registration.cbor',
+      'cip36_registration.cbor',
     ])
     const { parsedArgs } = parse(args)
     const expectedResult = {
-      command: CommandType.CIP36_VOTING_REGISTRATION_METADATA,
+      command: CommandType.CIP36_REGISTRATION_METADATA,
       network: NETWORKS.TESTNET_LEGACY,
       paymentAddressSigningKeyData: [
         {
@@ -296,7 +296,7 @@ describe('Command parser', () => {
       },
       nonce: 165564n,
       votingPurpose: 164n,
-      outFile: 'voting_registration.cbor',
+      outFile: 'cip36_registration.cbor',
       paymentAddress: 'adr_test1qq2vzmtlgvjrhkq50rngh8d482zj3l20kyrc6kx4ffl3zfqayfawlf9hwv2fzuygt2km5v92kvf8e3s3mk7ynxw77cwq2glhm4',
       votePublicKeys: [
         '3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7',

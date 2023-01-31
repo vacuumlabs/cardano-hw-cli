@@ -18,7 +18,7 @@ import {
   ParsedVerificationKeyArguments,
   ParsedOpCertArguments,
   ParsedNodeKeyGenArguments,
-  ParsedCVoteRegistrationMetadataArguments,
+  ParsedCIP36RegistrationMetadataArguments,
   Cbor,
   NativeScriptDisplayFormat,
   CVoteDelegation,
@@ -209,14 +209,14 @@ const CommandExecutor = async () => {
     writeOutputData(args.issueCounterFile, constructOpCertIssueCounterOutput(issueCounter))
   }
 
-  const createCVoteRegistrationMetadata = async (
-    args: ParsedCVoteRegistrationMetadataArguments,
+  const createCIP36RegistrationMetadata = async (
+    args: ParsedCIP36RegistrationMetadataArguments,
   ) => {
-    // adds stake signing data to reward address data so that it is not necessary to repeat the same
+    // adds stake signing data to payment address data so that it is not necessary to repeat the same
     // staking key file in command line arguments
     const hwSigningData = [...args.paymentAddressSigningKeyData, args.hwStakeSigningFileData]
     if (!areHwSigningDataNonByron(hwSigningData)) {
-      throw Error(Errors.ByronSigningFilesFoundInVotingRegistration)
+      throw Error(Errors.ByronSigningFilesFoundInCIP36Registration)
     }
 
     const votePublicKeyCount = args.votePublicKeys.length
@@ -237,7 +237,7 @@ const CommandExecutor = async () => {
 
     const votingPurpose = args.votingPurpose || CIP36_VOTING_PURPOSE_CATALYST
 
-    const votingRegistrationMetaData = await cryptoProvider.signVotingRegistrationMetaData(
+    const votingRegistrationMetaData = await cryptoProvider.signCIP36RegistrationMetaData(
       delegations,
       args.hwStakeSigningFileData,
       args.paymentAddress,
@@ -260,7 +260,7 @@ const CommandExecutor = async () => {
     createTxWitnesses,
     createNodeSigningKeyFiles,
     createSignedOperationalCertificate,
-    createCVoteRegistrationMetadata,
+    createCIP36RegistrationMetadata,
   }
 }
 

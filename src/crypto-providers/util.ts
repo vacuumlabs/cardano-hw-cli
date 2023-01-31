@@ -18,9 +18,9 @@ import { HARDENED_THRESHOLD } from '../constants'
 import { Errors } from '../errors'
 import { isBIP32Path, isPubKeyHex } from '../guards'
 import {
-  VotingRegistrationAuxiliaryData,
-  VotingRegistrationMetaData,
-  VotingRegistrationMetaDataPayloadItem,
+  CIP36RegistrationAuxiliaryData,
+  CIP36RegistrationMetaData,
+  CIP36RegistrationMetaDataPayloadItem,
   _XPubKey,
 } from '../transaction/types'
 import {
@@ -500,18 +500,18 @@ const rewardAccountToStakeCredential = (address: RewardAccount): StakeCredential
   }
 }
 
-const formatVotingRegistrationMetaData = (
+const formatCIP36RegistrationMetaData = (
   delegations: [Buffer, BigInt][],
   stakePub: Buffer,
   address: Buffer,
   nonce: BigInt,
   votingPurpose: BigInt,
   signature: Buffer,
-): VotingRegistrationMetaData => (
-  new Map<number, Map<number, VotingRegistrationMetaDataPayloadItem>>([
+): CIP36RegistrationMetaData => (
+  new Map<number, Map<number, CIP36RegistrationMetaDataPayloadItem>>([
     [
       61284,
-      new Map<number, VotingRegistrationMetaDataPayloadItem>([
+      new Map<number, CIP36RegistrationMetaDataPayloadItem>([
         [1, delegations],
         [2, stakePub],
         [3, address],
@@ -528,14 +528,14 @@ const formatVotingRegistrationMetaData = (
   ])
 )
 
-const encodeVotingRegistrationMetaData = (
+const encodeCIP36RegistrationMetaData = (
   delegations: CVoteDelegation[],
   hwStakeSigningFile: HwSigningData,
   address: Buffer,
   nonce: BigInt,
   votingPurpose: BigInt,
   auxiliaryDataHashHex: HexString,
-  votingRegistrationSignatureHex: HexString,
+  registrationSignatureHex: HexString,
 ) => {
   const serializedDelegations: [Buffer, BigInt][] = delegations.map(
     ({ votePublicKey, voteWeight }) => [
@@ -545,25 +545,25 @@ const encodeVotingRegistrationMetaData = (
   )
   const stakePubHex = extractStakePubKeyFromHwSigningData(hwStakeSigningFile)
 
-  const votingRegistrationMetaData = formatVotingRegistrationMetaData(
+  const metadata = formatCIP36RegistrationMetaData(
     serializedDelegations,
     Buffer.from(stakePubHex, 'hex'),
     address,
     nonce,
     votingPurpose,
-    Buffer.from(votingRegistrationSignatureHex, 'hex'),
+    Buffer.from(registrationSignatureHex, 'hex'),
   )
 
   // we serialize the entire (Mary-era formatted) auxiliary data only to check that its hash
   // matches the hash computed by the HW wallet
-  const auxiliaryData: VotingRegistrationAuxiliaryData = [votingRegistrationMetaData, []]
+  const auxiliaryData: CIP36RegistrationAuxiliaryData = [metadata, []]
   const auxiliaryDataCbor = encodeCbor(auxiliaryData)
 
   if (blake2b(auxiliaryDataCbor, 32).toString('hex') !== auxiliaryDataHashHex) {
     throw Error(Errors.MetadataSerializationMismatchError)
   }
 
-  return encodeCbor(votingRegistrationMetaData).toString('hex')
+  return encodeCbor(metadata).toString('hex')
 }
 
 const areHwSigningDataNonByron = (hwSigningData: HwSigningData[]): boolean => (
@@ -572,9 +572,9 @@ const areHwSigningDataNonByron = (hwSigningData: HwSigningData[]): boolean => (
     .every((pathType) => pathType !== PathTypes.PATH_WALLET_SPENDING_KEY_BYRON)
 )
 
-const validateVotingRegistrationAddressType = (addressType: number): void => {
+const validateCIP36RegistrationAddressType = (addressType: number): void => {
   if (addressType !== AddressTypes.BASE && addressType !== AddressTypes.REWARD) {
-    throw Error(Errors.InvalidVotingRegistrationAddressType)
+    throw Error(Errors.InvalidCIP36RegistrationAddressType)
   }
 }
 
@@ -600,10 +600,10 @@ export {
   ipv4ToString,
   ipv6ToString,
   rewardAccountToStakeCredential,
-  formatVotingRegistrationMetaData,
-  encodeVotingRegistrationMetaData,
+  formatCIP36RegistrationMetaData,
+  encodeCIP36RegistrationMetaData,
   areHwSigningDataNonByron,
-  validateVotingRegistrationAddressType,
+  validateCIP36RegistrationAddressType,
   certificatesWithStakeCredentials,
   hasMultisigSigningFile,
   determineSigningMode,
