@@ -1,6 +1,8 @@
 # Requirements
 
-[TODO add Ledger app and Trezor Firmware versions]
+CIP-36 support:
+* on Ledger, Cardano app version 6.0.2 and above
+* on Trezor, firmware 2.5.3 and above
 
 # Create CIP36 vote keys
 
@@ -16,12 +18,17 @@ tar -xf jormungandr-0.9.3-x86_64-unknown-linux-gnu-generic.tar.gz
 
 # Create CIP36 registration metadata
 
-Generate stake hardware wallet signing file and verification file with `cardano-hw-cli`:
+Generate hardware wallet signing files and verification key files with `cardano-hw-cli`:
 ```
 cardano-hw-cli address key-gen \
 --path 1852H/1815H/0H/2/0 \
 --verification-key-file stake.vkey \
 --hw-signing-file stake.hwsfile
+
+cardano-hw-cli address key-gen \
+--path 1852H/1815H/0H/0/0 \
+--verification-key-file payment.vkey \
+--hw-signing-file payment.hwsfile
 ```
 
 Get slot number from `cardano-cli`, use slot number as `nonce` in CIP36 registration command:
@@ -29,11 +36,12 @@ Get slot number from `cardano-cli`, use slot number as `nonce` in CIP36 registra
 cardano-cli query tip --mainnet
 ```
 
-Get stake address from `cardano-cli`, use it as `payment-address` and `payment-address-signing-key` in CIP36 registration command:
+Get payment address from `cardano-cli`, use it as `payment-address` and `payment-address-signing-key-hwsfile` in CIP36 registration command:
 ```
-cardano-cli stake-address build \
+cardano-cli address build \
+--payment-verification-key-file payment.vkey \
 --stake-verification-key-file stake.vkey \
---out-file stake.addr \
+--out-file payment.addr \
 --mainnet
 ```
 
@@ -42,10 +50,10 @@ Create CIP36 registration metadata with `cardano-hw-cli`:
 cardano-hw-cli vote registration-metadata \
 --mainnet \
 --vote-public-key-file catalyst-vote.pkey \
---payment-address $(cat stake.addr) \
+--payment-address $(cat payment.addr) \
 --stake-signing-key-hwsfile stake.hwsfile \
 --nonce 29747977 \
---payment-address-signing-key-hwsfile stake.hwsfile \
+--payment-address-signing-key-hwsfile payment.hwsfile \
 --metadata-cbor-out-file cip36_registration.cbor
 ```
 (You should add `--voting-purpose` to change the voting purpose to something other than Catalyst.)
