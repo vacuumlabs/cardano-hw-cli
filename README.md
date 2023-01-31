@@ -98,7 +98,7 @@ cardano-hw-cli vote registration-metadata
 --derivation-type TYPE                 Derivation type - currently applies only to Trezor. Options: LEDGER, ICARUS or ICARUS_TREZOR (default).
 ```
 
-see [registration example](docs/cip36-voting-registration-example.md)
+see [registration example](docs/cip36-registration-example.md)
 
 ## Policy id generation
 ```
