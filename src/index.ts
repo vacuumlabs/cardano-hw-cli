@@ -59,8 +59,8 @@ const executeCommand = async (): Promise<ExitCode> => {
     case (CommandType.SIGN_OPERATIONAL_CERTIFICATE):
       await commandExecutor.createSignedOperationalCertificate(parsedArgs)
       break
-    case (CommandType.CIP36_VOTING_REGISTRATION_METADATA):
-      await commandExecutor.createCVoteRegistrationMetadata(parsedArgs)
+    case (CommandType.CIP36_REGISTRATION_METADATA):
+      await commandExecutor.createCIP36RegistrationMetadata(parsedArgs)
       break
     default:
       throw Error(Errors.UndefinedCommandError)

@@ -327,13 +327,13 @@ export const parserConfig = {
         action: 'append',
         type: (weight: string) => BigInt(weight),
         default: [],
-        help: 'Voting power weight assigned to vote public key.',
+        help: 'Weight assigned to the respective vote public key.',
       },
       '--stake-signing-key-hwsfile': {
         required: true,
         dest: 'hwStakeSigningFileData',
         type: (path: string) => parseHwSigningFile(path),
-        help: 'Input filepath of the hardware wallet stake signing file, which will be used to to sign the voting registration.',
+        help: 'Input filepath of the hardware wallet stake signing file, which will be used to to sign the registration.',
       },
       '--payment-address': {
         required: true,
