@@ -195,8 +195,8 @@ export type ParsedNodeKeyGenArguments = {
   issueCounterFiles: string[],
 }
 
-export type ParsedCVoteRegistrationMetadataArguments = {
-  command: CommandType.CIP36_VOTING_REGISTRATION_METADATA,
+export type ParsedCIP36RegistrationMetadataArguments = {
+  command: CommandType.CIP36_REGISTRATION_METADATA,
   votePublicKeys: VotePublicKeyHex[],
   voteWeights: BigInt[],
   hwStakeSigningFileData: HwSigningData,
@@ -226,7 +226,7 @@ export type ParsedArguments =
   | ParsedTransactionTransformArguments
   | ParsedNodeKeyGenArguments
   | ParsedOpCertArguments
-  | ParsedCVoteRegistrationMetadataArguments
+  | ParsedCIP36RegistrationMetadataArguments
 
 export type HwSigningOutput = {
   type: string,

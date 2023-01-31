@@ -14,7 +14,7 @@ import {
 import { TxByronWitnessData, TxShelleyWitnessData } from '../transaction/transaction'
 import {
   TxWitnessKeys,
-  VotingRegistrationMetaDataCborHex,
+  CIP36RegistrationMetaDataCborHex,
   TxWitnesses,
 } from '../transaction/types'
 import {
@@ -42,9 +42,9 @@ import {
   filterSigningFiles,
   getAddressParameters,
   splitXPubKeyCborHex,
-  validateVotingRegistrationAddressType,
+  validateCIP36RegistrationAddressType,
   findSigningPathForKey,
-  encodeVotingRegistrationMetaData,
+  encodeCIP36RegistrationMetaData,
   rewardAccountToStakeCredential,
   areAddressParamsAllowed,
   pathEquals,
@@ -729,7 +729,6 @@ export const LedgerCryptoProvider: (transport: Transport) => Promise<CryptoProvi
       return {
         // TODO what about using a path from signing files instead of the key?
         type: CIP36VoteDelegationType.KEY,
-        // TODO vote vs. voting in names
         voteKeyHex: votePublicKey,
         weight: Number(voteWeight),
       }
@@ -793,7 +792,7 @@ export const LedgerCryptoProvider: (transport: Transport) => Promise<CryptoProvi
     additionalWitnessPaths: [],
   })
 
-  const signVotingRegistrationMetaData = async (
+  const signCIP36RegistrationMetaData = async (
     delegations: CVoteDelegation[],
     hwStakeSigningFile: HwSigningData, // describes stake_credential
     paymentAddressBech32: string,
@@ -801,13 +800,13 @@ export const LedgerCryptoProvider: (transport: Transport) => Promise<CryptoProvi
     votingPurpose: BigInt,
     network: Network,
     paymentAddressSigningFiles: HwSigningData[],
-  ): Promise<VotingRegistrationMetaDataCborHex> => {
+  ): Promise<CIP36RegistrationMetaDataCborHex> => {
     const { data: address } : { data: Buffer } = bech32.decode(paymentAddressBech32)
 
     let destination: TxOutputDestination
     const addressParams = getAddressParameters(paymentAddressSigningFiles, address, network)
     if (addressParams) {
-      validateVotingRegistrationAddressType(addressParams.addressType)
+      validateCIP36RegistrationAddressType(addressParams.addressType)
       destination = {
         type: LedgerTypes.TxOutputDestinationType.DEVICE_OWNED,
         params: {
@@ -839,7 +838,7 @@ export const LedgerCryptoProvider: (transport: Transport) => Promise<CryptoProvi
     const response = await ledger.signTransaction(dummyTx)
     if (!response.auxiliaryDataSupplement) throw Error(Errors.MissingAuxiliaryDataSupplement)
 
-    return encodeVotingRegistrationMetaData(
+    return encodeCIP36RegistrationMetaData(
       delegations,
       hwStakeSigningFile,
       address,
@@ -968,7 +967,7 @@ export const LedgerCryptoProvider: (transport: Transport) => Promise<CryptoProvi
     witnessTx,
     getXPubKeys,
     signOperationalCertificate,
-    signVotingRegistrationMetaData,
+    signCIP36RegistrationMetaData,
     deriveNativeScriptHash,
   }
 }

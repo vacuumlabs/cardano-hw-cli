@@ -2,7 +2,7 @@ import { Transaction } from 'cardano-hw-interop-lib'
 import { KesVKey, OpCertIssueCounter, SignedOpCertCborHex } from '../opCert/opCert'
 import {
   TxWitnesses,
-  VotingRegistrationMetaDataCborHex,
+  CIP36RegistrationMetaDataCborHex,
 } from '../transaction/types'
 import {
   HwSigningData,
@@ -55,7 +55,7 @@ export type CryptoProvider = {
     issueCounter: OpCertIssueCounter,
     signingFile: HwSigningData[],
   ) => Promise<SignedOpCertCborHex>
-  signVotingRegistrationMetaData: (
+  signCIP36RegistrationMetaData: (
     delegations: CVoteDelegation[],
     hwStakeSigningFile: HwSigningData, // describes stake_credential
     paymentAddressBech32: string,
@@ -64,7 +64,7 @@ export type CryptoProvider = {
     network: Network,
     paymentAddressSigningFiles: HwSigningData[],
     derivationType?: DerivationType,
-  ) => Promise<VotingRegistrationMetaDataCborHex>
+  ) => Promise<CIP36RegistrationMetaDataCborHex>
   deriveNativeScriptHash: (
     nativeScript: NativeScript,
     signingFiles: HwSigningData[],
