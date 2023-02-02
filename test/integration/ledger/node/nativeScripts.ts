@@ -1,10 +1,17 @@
-const assert = require('assert')
-const { LedgerCryptoProvider } = require('../../../../src/crypto-providers/ledgerCryptoProvider')
-const { NativeScriptType, NativeScriptDisplayFormat } = require('../../../../src/types')
-const { signingFiles } = require('./signingFiles')
-const { getTransport } = require('./speculos')
+import assert from 'assert'
+import { LedgerCryptoProvider } from '../../../../src/crypto-providers/ledgerCryptoProvider'
+import { CryptoProvider } from '../../../../src/crypto-providers/types'
+import { NativeScriptType, NativeScriptDisplayFormat, NativeScript } from '../../../../src/types'
+import { signingFiles } from './signingFiles'
+import { getTransport } from './speculos'
 
-const nativeScripts = {
+interface TestItem {
+  nativeScript: NativeScript,
+  hwSigningFiles: any[],
+  expectedNativeScriptHashHex: string,
+}
+
+const nativeScripts: {[key: string]: TestItem} = {
   pubkey: {
     nativeScript: {
       type: NativeScriptType.PUBKEY,
@@ -56,7 +63,7 @@ const nativeScripts = {
   invalidBefore: {
     nativeScript: {
       type: NativeScriptType.INVALID_BEFORE,
-      slot: 100,
+      slot: 100n,
     },
     hwSigningFiles: [],
     expectedNativeScriptHashHex: '15fa0f97f3fe447a10dfbbd71edae89fb15d2b1b80f805ffaace9a5b',
@@ -64,7 +71,7 @@ const nativeScripts = {
   invalidHereafter: {
     nativeScript: {
       type: NativeScriptType.INVALID_HEREAFTER,
-      slot: 200,
+      slot: 200n,
     },
     hwSigningFiles: [],
     expectedNativeScriptHashHex: '81a8f494e6cfe6b2407c9f68beda19ac74193548ab7c9aa94fe935f6',
@@ -122,7 +129,7 @@ const nativeScripts = {
             },
             {
               type: NativeScriptType.INVALID_HEREAFTER,
-              slot: 200,
+              slot: 200n,
             },
           ],
         },
@@ -137,9 +144,9 @@ const nativeScripts = {
 }
 
 async function testNativeScriptHashDerivation(
-  cryptoProvider,
-  { nativeScript, hwSigningFiles, expectedNativeScriptHashHex },
-) {
+  cryptoProvider: CryptoProvider,
+  { nativeScript, hwSigningFiles, expectedNativeScriptHashHex }: TestItem,
+): Promise<void> {
   const nativeScriptHashHex = await cryptoProvider.deriveNativeScriptHash(
     nativeScript,
     hwSigningFiles,
@@ -149,7 +156,7 @@ async function testNativeScriptHashDerivation(
 }
 
 describe('Ledger native script hash derivation', () => {
-  let cryptoProvider
+  let cryptoProvider: CryptoProvider
   // eslint-disable-next-line func-names
   before(async function () {
     this.timeout(10000)

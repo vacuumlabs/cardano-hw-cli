@@ -138,7 +138,7 @@ export type NativeScript = {
   scripts: NativeScript[],
 } | {
   type: NativeScriptType.N_OF_K,
-  required: bigint,
+  required: number,
   scripts: NativeScript[],
 } | {
   type: NativeScriptType.INVALID_BEFORE | NativeScriptType.INVALID_HEREAFTER,

@@ -1,13 +1,14 @@
 /* eslint-disable max-len */
-const assert = require('assert')
-const { parseBIP32Path } = require('../../../src/command-parser/parsers')
+import assert from 'assert'
+import { parseBIP32Path } from '../../../src/command-parser/parsers'
 
-const { constructVerificationKeyOutput, constructHwSigningKeyOutput } = require('../../../src/fileWriter')
+import { constructVerificationKeyOutput, constructHwSigningKeyOutput } from '../../../src/fileWriter'
+import { XPubKeyHex } from '../../../src/types'
 
 describe('Key-gen output', () => {
   it('Should generate correct output for CIP36 vote keys', () => {
     const pathStr = '1694H/1815H/0H/0/1'
-    const keyHex = 'deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef'
+    const keyHex = 'deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef' as XPubKeyHex
     const path = parseBIP32Path(pathStr)
     const vkey = constructVerificationKeyOutput(keyHex, path)
     const expectedVkey = {

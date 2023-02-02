@@ -1,9 +1,23 @@
 /* eslint-disable max-len */
-const assert = require('assert')
-const InteropLib = require('cardano-hw-interop-lib')
-const { checkValidationErrors } = require('../../../src/transaction/transactionValidation')
+import assert from 'assert'
+import * as InteropLib from 'cardano-hw-interop-lib'
+import { checkValidationErrors } from '../../../src/transaction/transactionValidation'
+import { CborHex } from '../../../src/types'
 
-const transactions = {
+interface Tx {
+  txCborHex: string,
+  validationResult: {
+    containsFixable: boolean,
+    containsUnfixable: boolean,
+  },
+  transformedTxCborHex: string,
+}
+
+interface TxTests {
+  [key: string]: Tx,
+}
+
+const transactions: TxTests = {
   validSimple: {
     txCborHex: '83a40081825820bc8bf52ea894fb8e442fe3eea628be87d0c9a37baef185b70eb00a5c8a849d3b0001818258390180f9e2c88e6c817008f3a812ed889b4a4da8e0bd103f86e7335422aa122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b42771a0023583c021a00029b75031a01a3bd8fa0f6',
     validationResult: {
@@ -62,13 +76,12 @@ const transactions = {
   },
 }
 
-function testValidate(tx) {
-  const txCbor = Buffer.from(tx.txCborHex, 'hex')
-  const validationResult = checkValidationErrors(txCbor, InteropLib.validateTx, false, false)
+function testValidate(tx: Tx) {
+  const validationResult = checkValidationErrors(tx.txCborHex as CborHex, InteropLib.validateTx, false, false)
   assert.deepStrictEqual(validationResult, tx.validationResult)
 }
 
-function testTransform(tx) {
+function testTransform(tx: Tx) {
   const txCbor = Buffer.from(tx.txCborHex, 'hex')
   const transformedTxCbor = InteropLib.encodeTx(InteropLib.transformTx(InteropLib.decodeTx(txCbor)))
   assert.deepStrictEqual(transformedTxCbor.toString('hex'), tx.transformedTxCborHex)

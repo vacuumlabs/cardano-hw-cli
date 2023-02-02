@@ -1,7 +1,7 @@
 /* eslint-disable max-len */
 
-const { HARDENED_THRESHOLD } = require('../../../../src/constants')
-const { HwSigningType } = require('../../../../src/types')
+import { HARDENED_THRESHOLD } from '../../../../src/constants'
+import { HwSigningType } from '../../../../src/types'
 
 // mnemonic "all all all all all all all all all all all all"
 
@@ -103,6 +103,6 @@ const signingFiles = {
   },
 }
 
-module.exports = {
+export {
   signingFiles,
 }

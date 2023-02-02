@@ -11,7 +11,7 @@ async function getTransport() {
     : TransportNodeHid.create()
 }
 
-module.exports = {
+export {
   shouldUseSpeculos,
   getTransport,
 }

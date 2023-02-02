@@ -1,17 +1,14 @@
 /* eslint-disable max-len */
-const assert = require('assert')
-const { CommandType, parse } = require('../../../src/command-parser/commandParser')
-const {
-  CardanoEra,
-  HwSigningType,
-  NativeScriptType,
-  DerivationType,
-} = require('../../../src/types')
-const { cardanoEraToSignedType, NETWORKS } = require('../../../src/constants')
+import assert from 'assert'
+import { CommandType, parse } from '../../../src/command-parser/commandParser'
+import {
+  CardanoEra, HwSigningType, NativeScriptType, DerivationType,
+} from '../../../src/types'
+import { cardanoEraToSignedType, NETWORKS } from '../../../src/constants'
 
 const resFolder = 'test/unit/commandParser/res/'
-const prefix = (filename) => `${resFolder}${filename}`
-const pad = (args) => [undefined, undefined, ...args]
+const prefix = (filename: string) => `${resFolder}${filename}`
+const pad = (args: string[]) => ['', '', ...args]
 
 describe('Command parser', () => {
   it('Should parse address show command', () => {
@@ -122,7 +119,7 @@ describe('Command parser', () => {
       '--hw-signing-file',
       prefix('payment.hwsfile'),
       '--testnet-magic',
-      42,
+      '42',
       '--out-file',
       prefix('witness.out'),
     ])

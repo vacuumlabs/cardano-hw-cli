@@ -1,9 +1,10 @@
 /* eslint-disable max-len */
-const assert = require('assert')
-const { LedgerCryptoProvider } = require('../../../../src/crypto-providers/ledgerCryptoProvider')
+import assert from 'assert'
+import { LedgerCryptoProvider } from '../../../../src/crypto-providers/ledgerCryptoProvider'
+import { CryptoProvider } from '../../../../src/crypto-providers/types'
 
-const { signingFiles } = require('./signingFiles')
-const { getTransport } = require('./speculos')
+import { signingFiles } from './signingFiles'
+import { getTransport } from './speculos'
 
 const opCerts = {
   opcert1: {
@@ -18,7 +19,7 @@ const opCerts = {
   },
 }
 
-async function testOpCertSigning(cryptoProvider, opCert) {
+async function testOpCertSigning(cryptoProvider: CryptoProvider, opCert: any) {
   const signedOpCertCborHex = await cryptoProvider.signOperationalCertificate(
     opCert.kesVKey,
     opCert.kesPeriod,
@@ -29,7 +30,7 @@ async function testOpCertSigning(cryptoProvider, opCert) {
 }
 
 describe('Ledger operational certificate', () => {
-  let cryptoProvider
+  let cryptoProvider: CryptoProvider
   // eslint-disable-next-line func-names
   before(async function () {
     this.timeout(10000)
