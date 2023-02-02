@@ -1,7 +1,7 @@
-const assert = require('assert')
-const { encodeCbor } = require('../../src/util')
+import assert from 'assert'
+import { encodeCbor } from '../../src/util'
 
-function testCbor(value, expected) {
+function testCbor(value: any, expected: any) {
   const encoded = encodeCbor(value)
   assert.deepStrictEqual(encoded.toString('hex'), expected)
 }

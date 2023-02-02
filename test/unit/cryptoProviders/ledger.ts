@@ -1,7 +1,7 @@
-const assert = require('assert')
-const { HARDENED_THRESHOLD } = require('../../../src/constants')
-const { AddressType, NetworkIds, ProtocolMagics } = require('../../../src/types')
-const { classifyPath, getAddressAttributes, PathTypes } = require('../../../src/crypto-providers/util')
+import assert from 'assert'
+import { HARDENED_THRESHOLD } from '../../../src/constants'
+import { AddressType, NetworkIds, ProtocolMagics } from '../../../src/types'
+import { classifyPath, getAddressAttributes, PathTypes } from '../../../src/crypto-providers/util'
 
 describe('Test util', () => {
   describe('Classify path', () => {

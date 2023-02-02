@@ -11,6 +11,6 @@ const addresses = {
   },
 }
 
-module.exports = {
+export {
   addresses,
 }

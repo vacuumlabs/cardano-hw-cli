@@ -1,14 +1,16 @@
 /* eslint-disable max-len */
-const assert = require('assert')
-const { decodeTx } = require('cardano-hw-interop-lib')
-const { LedgerCryptoProvider } = require('../../../../src/crypto-providers/ledgerCryptoProvider')
-const { NETWORKS } = require('../../../../src/constants')
-const { determineSigningMode, getTxBodyHash } = require('../../../../src/crypto-providers/util')
-const { validateWitnessing } = require('../../../../src/crypto-providers/witnessingValidation')
-const { validateTxBeforeWitnessing } = require('../../../../src/transaction/transactionValidation')
+import assert from 'assert'
+import { decodeTx } from 'cardano-hw-interop-lib'
+import { LedgerCryptoProvider } from '../../../../src/crypto-providers/ledgerCryptoProvider'
+import { NETWORKS } from '../../../../src/constants'
+import { determineSigningMode, getTxBodyHash } from '../../../../src/crypto-providers/util'
+import { validateWitnessing } from '../../../../src/crypto-providers/witnessingValidation'
+import { validateTxBeforeWitnessing } from '../../../../src/transaction/transactionValidation'
 
-const { signingFiles } = require('./signingFiles')
-const { getTransport } = require('./speculos')
+import { signingFiles } from './signingFiles'
+import { getTransport } from './speculos'
+import { CardanoEra } from '../../../../src/types'
+import { CryptoProvider } from '../../../../src/crypto-providers/types'
 
 // Note for future readers (Dec 2022): The tests in this file were created in the cardano-cli's
 // internal raw tx format. When we removed support for this format in favor of the CDDL-compliant
@@ -897,7 +899,7 @@ const transactions = {
   },
 }
 
-async function testTxWitnessing(cryptoProvider, transaction) {
+async function testTxWitnessing(cryptoProvider: CryptoProvider, transaction: any) {
   validateTxBeforeWitnessing(transaction.cborHex)
   const txCbor = Buffer.from(transaction.cborHex, 'hex')
   const tx = decodeTx(txCbor)
@@ -908,6 +910,7 @@ async function testTxWitnessing(cryptoProvider, transaction) {
     txBodyHashHex: getTxBodyHash(tx.body),
     hwSigningFileData: transaction.hwSigningFiles,
     network: NETWORKS[transaction.network],
+    era: CardanoEra.BABBAGE,
   }
   const changeOutputFiles = transaction.changeOutputFiles || []
   validateWitnessing(signingParameters)
@@ -916,7 +919,7 @@ async function testTxWitnessing(cryptoProvider, transaction) {
 }
 
 describe('Ledger tx witnessing', () => {
-  let cryptoProvider
+  let cryptoProvider: CryptoProvider
   // eslint-disable-next-line func-names
   before(async function () {
     this.timeout(10000)

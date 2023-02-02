@@ -1,10 +1,11 @@
 /* eslint-disable max-len */
-const assert = require('assert')
-const { TrezorCryptoProvider } = require('../../../../src/crypto-providers/trezorCryptoProvider')
+import assert from 'assert'
+import { TrezorCryptoProvider } from '../../../../src/crypto-providers/trezorCryptoProvider'
 
-const { NETWORKS } = require('../../../../src/constants')
-const { signingFiles } = require('./signingFiles')
-const { addresses } = require('./addresses')
+import { NETWORKS } from '../../../../src/constants'
+import { signingFiles } from './signingFiles'
+import { addresses } from './addresses'
+import { CryptoProvider } from '../../../../src/crypto-providers/types'
 
 const cip36Registrations = {
   withTestnetBaseAddress0: {
@@ -73,7 +74,7 @@ const cip36Registrations = {
   },
 }
 
-async function testCIP36RegistrationMetaDataSigning(cryptoProvider, cip36Registration) {
+async function testCIP36RegistrationMetaDataSigning(cryptoProvider: CryptoProvider, cip36Registration: any) {
   const { signedCIP36RegistrationMetaDataHex, ...args } = cip36Registration
 
   assert.deepStrictEqual(
@@ -91,7 +92,7 @@ async function testCIP36RegistrationMetaDataSigning(cryptoProvider, cip36Registr
 }
 
 describe('Trezor sign CIP36 registration metadata', () => {
-  let cryptoProvider
+  let cryptoProvider: CryptoProvider
   // eslint-disable-next-line func-names
   before(async function () {
     this.timeout(10000)
