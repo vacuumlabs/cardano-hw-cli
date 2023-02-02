@@ -1,7 +1,7 @@
 # Linux
 
 ## Option 1: install from `.deb` package:
-To install from `.deb` package, open file from file explorer of your choice or run in command line:
+To install from a `.deb` package, open file from file explorer of your choice or run in command line:
 ```
 sudo dpkg --install ./cardano-hw-cli_<VERSION>.deb
 ```
@@ -13,7 +13,7 @@ sudo dpkg --remove cardano-hw-cli
 ```
 
 ## Option 2: uncompress `.tar.gz` archive:
-if `.deb` package is not working for some reason you can uncompress the `.tar.gz` archive and create soft link to `cardano-hw-cli` manually:
+if `.deb` package is not working for some reason, you can uncompress the `.tar.gz` archive and create a soft link to `cardano-hw-cli` manually:
 
 Uncompress:
 ```

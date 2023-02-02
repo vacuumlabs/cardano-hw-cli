@@ -5,7 +5,8 @@ cd ..
 
 ./scripts/build-common.sh
 ./scripts/build-linux-deb-package.sh
-./scripts/build-linux-tar-gz.sh
+./scripts/build-linux-x64-tar-gz.sh
+./scripts/build-linux-arm64-tar-gz.sh
 ./scripts/build-windows.sh
 ./scripts/build-macos.sh
 
