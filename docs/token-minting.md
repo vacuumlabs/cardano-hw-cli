@@ -65,7 +65,7 @@ TOKEN_NAME=$(echo -n "C0in" | xxd -b -ps -c 80 | tr -d '\n')
 ```
 
 ### Querying the UTxO
-First as with every transaction you need to query for the UTxO (substitute `--mainnet` for `--testnet-magic 1097911063` if you are using testnet):
+First as with every transaction you need to query for the UTxO (substitute `--mainnet` for `--testnet-magic PROTOCOL_MAGIC` if you are using testnet; see https://book.world.dev.cardano.org/environments.html for current values of PROTOCOL_MAGIC):
 ```sh
 cardano-cli query utxo \
 --address $(cat payment.addr) \
@@ -101,7 +101,7 @@ cardano-cli query protocol-parameters \
 --mainnet
 ```
 
-Then we can calculate the fee (substitute `--mainnet` for `--testnet-magic 1097911063` if you are using testnet):
+Then we can calculate the fee (substitute `--mainnet` for `--testnet-magic PROTOCOL_MAGIC` if you are using testnet; see https://book.world.dev.cardano.org/environments.html for current values of PROTOCOL_MAGIC):
 ```sh
 cardano-cli transaction calculate-min-fee \
 --tx-body-file tx.draft  \

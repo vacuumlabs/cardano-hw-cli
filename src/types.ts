@@ -110,10 +110,14 @@ export enum NetworkIds {
   TESTNET = 0,
 }
 
+// taken from https://book.world.dev.cardano.org/environments.html
 export enum ProtocolMagics {
   MAINNET = 764824073,
-  TESTNET = 1097911063,
-  TESTNET_LEGACY = 42, // we keep this because some test CBORs contain this magic
+  TESTNET_PREPROD = 1,
+  TESTNET_PREVIEW = 2,
+  // we keep these because some test CBORs contain this magic
+  TESTNET_LEGACY1 = 42,
+  TESTNET_LEGACY2 = 1097911063,
 }
 
 export type Network = {

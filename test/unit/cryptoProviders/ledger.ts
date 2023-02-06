@@ -67,7 +67,7 @@ describe('Test util', () => {
         {
           addressType: AddressType.BASE_PAYMENT_KEY_STAKE_KEY,
           networkId: NetworkIds.TESTNET,
-          protocolMagic: ProtocolMagics.TESTNET,
+          protocolMagic: ProtocolMagics.TESTNET_PREVIEW,
         },
       )
     })

@@ -57,6 +57,7 @@ const enum Errors {
   CannotTransformSignedTx = 'Transaction contains vkey witnesses, transformation would invalidate them',
   NetworkIdMismatchError = 'Provided network id differs from network id included in transaction body',
   NotEnoughOutFilesError = 'Not enough output files specified',
+  TestnetProtocolMagicMissing = 'Testnet protocol magic is missing',
 }
 
 export {

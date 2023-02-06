@@ -174,7 +174,7 @@ const transactions = {
     // ebdace28e630ee2d2048460bf2ebca31c2b0ad775206b78255ecf6f4e955b86e
     cborHex: '83a40081825820c8f0d737ca5c647c434fea02759755a404d9915c3bd292bd7443ae9e46f5b7b1000181825839003b04dabe6e473ebffa196a2cee191cba32a25a8dc71f2fa35e74785b5e3b888f476e3634020b43079cf27437aee4432648a7580bc24a7f121b00005af31077b2cf021a00028d31031a0081b320a0f6',
     hwSigningFiles: [signingFiles.payment0],
-    network: 'TESTNET_LEGACY',
+    network: 'TESTNET_LEGACY1',
     witnesses: {
       byronWitnesses: [],
       shelleyWitnesses: [
@@ -230,7 +230,7 @@ const transactions = {
     // 62c36ab26608bdd827c5494126063eea704a51ea68803c59834b34f9f85bf8d4
     cborHex: '83a50081825820897c3429f794c44aecbe6f2e4f292836f3153f85ce2026b86a13ecbdbadaa05700018182581d60daad04ed2b7f69e2a9be582e37091739fa036a14c1c22f88061d43c71b0055a275925d560f021a000249f00319138804818a03581c61891bbdc08431a1d4d4911903dad04705f82e29a87e54cc77db217f582092c4a889cca979e804327595768d107295ad7cb6e9a787ef6b23b757ba3433381b0000b5e620f480001a1dcd6500d81e82030a581de05e3b888f476e3634020b43079cf27437aee4432648a7580bc24a7f1281581c122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b427780f6a0f6',
     hwSigningFiles: [signingFiles.stake0],
-    network: 'TESTNET_LEGACY',
+    network: 'TESTNET_LEGACY1',
     witnesses: {
       byronWitnesses: [],
       shelleyWitnesses: [{
@@ -279,7 +279,7 @@ const transactions = {
     cborHex: '83a30081825820ac9f9da514965a72270f3dea9f401e509a8e8f8af2716e88a182b399adc233c60101818258390080f9e2c88e6c817008f3a812ed889b4a4da8e0bd103f86e7335422aa122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277821a00958940a2581c0b1bda00e69de8d554eeafe22b04541fbb2ff89a61d12049f55ba688a14a6669727374617373657401581c95a292ffee938be03e9bae5657982a74e9014eb4960108c9e23a5b39a24a66697273746173736574014b7365636f6e64617373657401021a00030d40a0f6',
     hwSigningFiles: [signingFiles.payment0],
     changeOutputFiles: [signingFiles.payment0, signingFiles.stake0],
-    network: 'TESTNET_LEGACY',
+    network: 'TESTNET_LEGACY1',
     witnesses: {
       byronWitnesses: [],
       shelleyWitnesses: [
@@ -298,7 +298,7 @@ const transactions = {
   withValidityIntervalStart: {
     cborHex: '83a40081825820371b2d1aa350f3e3ffff8c7dddaa3a218022132d24541cba463292acd51cbbf60101818258390080f9e2c88e6c817008f3a812ed889b4a4da8e0bd103f86e7335422aa122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b42771a00493e00021a00030d40081a00868378a0f6',
     hwSigningFiles: [signingFiles.payment0],
-    network: 'TESTNET_LEGACY',
+    network: 'TESTNET_LEGACY1',
     witnesses: {
       byronWitnesses: [],
       shelleyWitnesses: [
@@ -318,7 +318,7 @@ const transactions = {
     // 575d62a441695183211651ef616683e2d0e8db4b4fcc4e0099136fc34fd9d427
     cborHex: '83a5008182582008f7b94f631b931ee48bb9c9447f9cc7c366a76ad04b66033cfd3f4ba95740500001818258390080f9e2c88e6c817008f3a812ed889b4a4da8e0bd103f86e7335422aa122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b42771a3b97e3d0021a0002e630031a014369d7075820c0523b09bef39412ffd6e9eeb4c4171673821bbe5c06c7e522ecffca8b856eeda0a1016763617264616e6f',
     hwSigningFiles: [signingFiles.payment0],
-    network: 'TESTNET_LEGACY',
+    network: 'TESTNET_LEGACY1',
     witnesses: {
       byronWitnesses: [],
       shelleyWitnesses: [
@@ -338,7 +338,7 @@ const transactions = {
     // ba638246bd9be05aa46e865320c354efea75cf5796e88b763faaa30c9fbb78de
     cborHex: '83a4008282582005d590fa6fed4ed07c5649f3debab04e6263c34d42d1843e41e8e86cf5ceaf9d01825820d27832fed6902ebe1c1ce31b900be6275b230930e2d3c2076f4367ebd921c95c0101818258390080f9e2c88e6c817008f3a812ed889b4a4da8e0bd103f86e7335422aa122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277821a39396951a1581c21c3e7f6f954e606fe90017628b048a0067b561a4f6e2aa0e1aa6131a14756616375756d731a000f4240021a0002d7f509a1581c21c3e7f6f954e606fe90017628b048a0067b561a4f6e2aa0e1aa6131a14756616375756d731a000f4240a0f6',
     hwSigningFiles: [signingFiles.payment0, signingFiles.mint0],
-    network: 'TESTNET_LEGACY',
+    network: 'TESTNET_LEGACY1',
     witnesses: {
       byronWitnesses: [],
       shelleyWitnesses: [
@@ -368,7 +368,7 @@ const transactions = {
     // defined below, we need both for correct signature
     cborHex: '83a30081825820a122b7044d6f7da26a0f4bad87ad43fc967b471cfb231c96681c421b40868c5e010181825839301ed8427f8dba7f0edf1d3c942a82a8addf4ef838e24d76b5b77a5abbf8ecfa2654cfe1dd931439db45e43f5d1a73129dcb7e4acc736c766a1a05f31fe7021a0002c119a0f6',
     hwSigningFiles: [signingFiles.multisigPayment0, signingFiles.multisigPayment1],
-    network: 'TESTNET_LEGACY',
+    network: 'TESTNET_LEGACY1',
     witnesses: {
       byronWitnesses: [],
       shelleyWitnesses: [
@@ -398,7 +398,7 @@ const transactions = {
     // two pubkey hashes of the stake signing files defined below
     cborHex: '83a4008182582044d511ec0a24eda60aed8f66d83da4587e52a64ae3cdbfe23e19a397097179e60101818258393029fb5fd4aa8cadd6705acc8263cee0fc62edca5ac38db593fec2f9fda603435bcedf975543901383daaa264fe7ce513910472a113837c9a51a0077214b021a0002f0b5048282008201581ca603435bcedf975543901383daaa264fe7ce513910472a113837c9a583028201581ca603435bcedf975543901383daaa264fe7ce513910472a113837c9a5581c001337292eec9b3eefc6802f71cb34c21a7963eb12466d52836aa390a0f6',
     hwSigningFiles: [signingFiles.multisigPayment0, signingFiles.multisigStake0, signingFiles.multisigStake1],
-    network: 'TESTNET_LEGACY',
+    network: 'TESTNET_LEGACY1',
     witnesses: {
       byronWitnesses: [],
       shelleyWitnesses: [
@@ -436,7 +436,7 @@ const transactions = {
     // registered in the tx above
     cborHex: '83a50081825820c8dfe434e1a682a2cfe537b90af8f44c66cdbb849b89c11dd4d74e3913f08f690001818258393029fb5fd4aa8cadd6705acc8263cee0fc62edca5ac38db593fec2f9fda603435bcedf975543901383daaa264fe7ce513910472a113837c9a51a0092ba3e021a0002eb8d048182018201581ca603435bcedf975543901383daaa264fe7ce513910472a113837c9a505a1581df0a603435bcedf975543901383daaa264fe7ce513910472a113837c9a500a0f6',
     hwSigningFiles: [signingFiles.multisigPayment0, signingFiles.multisigStake0, signingFiles.multisigStake1],
-    network: 'TESTNET_LEGACY',
+    network: 'TESTNET_LEGACY1',
     witnesses: {
       byronWitnesses: [],
       shelleyWitnesses: [
@@ -478,7 +478,7 @@ const transactions = {
     // Minting: 1000000 defined by policy script all [mint0 hash, mint1 hash]
     cborHex: '83a5008182582094461e17271b4a108f679eb7b6947aea29573296a5edca635d583fb40785e05d000182825839301ed8427f8dba7f0edf1d3c942a82a8addf4ef838e24d76b5b77a5abba603435bcedf975543901383daaa264fe7ce513910472a113837c9a5821a00769ed7a1581c0a35d58554c970a2782ad2e8821035bd6d84254504ca795861171bd8a14756616375756d731a000f4240825839000743d16cfe3c4fcc0c11c2403bbc10dbc7ecdd4477e053481a368e7a06e2ae44dff6770dc0f4ada3cf4cf2605008e27aecdb332ad349fda71a3b023380021a00037329048282008201581ca603435bcedf975543901383daaa264fe7ce513910472a113837c9a583028201581ca603435bcedf975543901383daaa264fe7ce513910472a113837c9a5581c001337292eec9b3eefc6802f71cb34c21a7963eb12466d52836aa39009a1581c0a35d58554c970a2782ad2e8821035bd6d84254504ca795861171bd8a14756616375756d731a000f4240a0f6',
     hwSigningFiles: [signingFiles.multisigPayment0, signingFiles.multisigPayment1, signingFiles.multisigStake0, signingFiles.multisigStake1, signingFiles.mint0, signingFiles.mint1],
-    network: 'TESTNET_LEGACY',
+    network: 'TESTNET_LEGACY1',
     witnesses: {
       byronWitnesses: [],
       shelleyWitnesses: [
@@ -547,7 +547,7 @@ const transactions = {
     // cardano-hw-cli transaction transform --tx-file tx.raw --out-file tx.transformed
     cborHex: '84a30081825820dbc2334398601986d7479e813a30acaebb544a4dd8ccbedc63e8911ae32a7e3600018283581d70945886f2df73d41d1387d421acfa5399de9788bd491aa715b36798671a3b0233805820bb292f5270d8b30482d91ee44de4ffcb50c1efeb1c219d9cd08eda0f9242a7b582583900ed9c04b17347c86bfa474bed975a01241f2ce091fb82255e16bfa884f9c4b2e3208664aa773a6b64f92bf8ec0f64b1365029632efd2ef9391a00895440021a000f4240a0f5f6',
     hwSigningFiles: [signingFiles.payment0],
-    network: 'TESTNET',
+    network: 'TESTNET_LEGACY2',
     witnesses: {
       byronWitnesses: [],
       shelleyWitnesses: [{
@@ -579,7 +579,7 @@ const transactions = {
     // cardano-hw-cli transaction transform --tx-file tx.raw --out-file tx.transformed
     cborHex: '84a600818258201789f11f03143338cfcc0dbf3a93ad8f177e8698fc37ab3ab17c954cf2b28ee800018182583900ed9c04b17347c86bfa474bed975a01241f2ce091fb82255e16bfa884f9c4b2e3208664aa773a6b64f92bf8ec0f64b1365029632efd2ef9391a3aff6c0b021a0002c7750b582013a83818f68bb170dff0ab8a8c0098c5a14db0e43e04c9661dd3f64deb8241c20d818258201789f11f03143338cfcc0dbf3a93ad8f177e8698fc37ab3ab17c954cf2b28ee8010e81581c122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277a3038158425840010000332233322222253353004333573466ebc00c00801801440204c98d4c01ccd5ce2481094e6f7420457175616c000084984880084880048004480048004104814963686f636f6c61746505818400004963686f636f6c617465821917701a001e8480f5f6',
     hwSigningFiles: [signingFiles.payment0, signingFiles.stake0],
-    network: 'TESTNET',
+    network: 'TESTNET_LEGACY2',
     witnesses: {
       byronWitnesses: [],
       shelleyWitnesses: [
@@ -618,7 +618,7 @@ const transactions = {
     cborHex: '84a30081825820d44c3a039c9f4c4a117f91f7475974f64e51a3bfbc7729132f2ef0b025f76e06010183a300581d70dfcad2d5ae0c192e2dbcc1fab7783d13f862a06fbc59bfc73244576b011a00989680028201d818565579657420616e6f746865722063686f636f6c617465a30058390080f9e2c88e6c817008f3a812ed889b4a4da8e0bd103f86e7335422aa122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277011a004c4b4003d8185846820258425840010000332233322222253353004333573466ebc00c00801801440204c98d4c01ccd5ce2481094e6f7420457175616c0000849848800848800480044800480041a20058390080f9e2c88e6c817008f3a812ed889b4a4da8e0bd103f86e7335422aa122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277011a01d905c0021a003d0900a0f5f6',
     hwSigningFiles: [signingFiles.payment0],
     changeOutputFiles: [signingFiles.payment0, signingFiles.stake0],
-    network: 'TESTNET',
+    network: 'TESTNET_LEGACY2',
     witnesses: {
       byronWitnesses: [],
       shelleyWitnesses: [
@@ -654,7 +654,7 @@ const transactions = {
     // cardano-hw-cli transaction transform --tx-file tx.raw --out-file tx.transformed
     cborHex: '84a80081825820c16cd7176f1814396bb5437da4f97e92e8a166f374c3aa92124625b31b92d2c9000181a20058390080f9e2c88e6c817008f3a812ed889b4a4da8e0bd103f86e7335422aa122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277011a005b8d80021a003d09000b582083664b0bce93f500e9eee751375bbc58dfd8c7ed87ce577193082f2965e96d480d81825820c16cd7176f1814396bb5437da4f97e92e8a166f374c3aa92124625b31b92d2c90210a20058390080f9e2c88e6c817008f3a812ed889b4a4da8e0bd103f86e7335422aa122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277011a015ef3c0111a007a12001281825820c16cd7176f1814396bb5437da4f97e92e8a166f374c3aa92124625b31b92d2c901a105818400005579657420616e6f746865722063686f636f6c6174658219138a1a0023f39df5f6',
     hwSigningFiles: [signingFiles.payment0],
-    network: 'TESTNET',
+    network: 'TESTNET_LEGACY2',
     witnesses: {
       byronWitnesses: [],
       shelleyWitnesses: [
