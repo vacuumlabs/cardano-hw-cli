@@ -739,8 +739,8 @@ export const LedgerCryptoProvider: (transport: Transport) => Promise<CryptoProvi
     delegations: CVoteDelegation[],
     hwStakeSigningFile: HwSigningData,
     paymentDestination: TxOutputDestination,
-    nonce: BigInt,
-    votingPurpose: BigInt,
+    nonce: bigint,
+    votingPurpose: bigint,
   ): LedgerTypes.TxAuxiliaryData => ({
     type: LedgerTypes.TxAuxiliaryDataType.CIP36_REGISTRATION,
     params: {
@@ -796,8 +796,8 @@ export const LedgerCryptoProvider: (transport: Transport) => Promise<CryptoProvi
     delegations: CVoteDelegation[],
     hwStakeSigningFile: HwSigningData, // describes stake_credential
     paymentAddressBech32: string,
-    nonce: BigInt,
-    votingPurpose: BigInt,
+    nonce: bigint,
+    votingPurpose: bigint,
     network: Network,
     paymentAddressSigningFiles: HwSigningData[],
   ): Promise<CIP36RegistrationMetaDataCborHex> => {
@@ -851,7 +851,7 @@ export const LedgerCryptoProvider: (transport: Transport) => Promise<CryptoProvi
 
   const signOperationalCertificate = async (
     kesVKey: KesVKey,
-    kesPeriod: BigInt,
+    kesPeriod: bigint,
     issueCounter: OpCertIssueCounter,
     signingFiles: HwSigningData[],
   ): Promise<SignedOpCertCborHex> => {

@@ -9,7 +9,7 @@ import { getTransport } from './speculos'
 const opCerts = {
   opcert1: {
     kesVKey: Buffer.from('f70601c4de155e67797e057c07fb768b5590b2241b05ec30235a85b71e2ae858', 'hex'),
-    kesPeriod: 251, // fails when I use BigInt(251)   ???
+    kesPeriod: 251n,
     issueCounter: {
       counter: 1,
       poolColdKey: Buffer.from('3d7e84dca8b4bc322401a2cc814af7c84d2992a22f99554fe340d7df7910768d', 'hex'),

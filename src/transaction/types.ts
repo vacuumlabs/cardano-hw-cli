@@ -59,7 +59,7 @@ export type WitnessOutput = {
   cborHex: TxWitnessCborHex,
 }
 
-export type CIP36RegistrationMetaDataPayloadItem = [Buffer, BigInt][] | Buffer | BigInt
+export type CIP36RegistrationMetaDataPayloadItem = [Buffer, bigint][] | Buffer | bigint
 export type CIP36RegistrationMetaData = Map<number, Map<number, CIP36RegistrationMetaDataPayloadItem>>
 export type CIP36RegistrationMetaDataCborHex = CborHex
 

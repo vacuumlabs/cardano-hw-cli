@@ -51,7 +51,7 @@ export type CryptoProvider = {
   ) => Promise<XPubKeyHex[]>,
   signOperationalCertificate: (
     kesVKey: KesVKey,
-    kesPeriod: BigInt,
+    kesPeriod: bigint,
     issueCounter: OpCertIssueCounter,
     signingFile: HwSigningData[],
   ) => Promise<SignedOpCertCborHex>
@@ -59,8 +59,8 @@ export type CryptoProvider = {
     delegations: CVoteDelegation[],
     hwStakeSigningFile: HwSigningData, // describes stake_credential
     paymentAddressBech32: string,
-    nonce: BigInt,
-    votingPurpose: BigInt,
+    nonce: bigint,
+    votingPurpose: bigint,
     network: Network,
     paymentAddressSigningFiles: HwSigningData[],
     derivationType?: DerivationType,

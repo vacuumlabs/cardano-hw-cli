@@ -4,7 +4,7 @@ import { encodeCbor } from '../util'
 export type KesVKey = Buffer
 
 export type OpCertIssueCounter = {
-  counter: BigInt,
+  counter: bigint,
   poolColdKey: Buffer,
 }
 
@@ -12,7 +12,7 @@ export type SignedOpCertCborHex = CborHex
 
 export const OpCertSigned = (
   kesVKey: KesVKey,
-  kesPeriod: BigInt,
+  kesPeriod: bigint,
   issueCounter: OpCertIssueCounter,
   signature: Buffer,
 ): SignedOpCertCborHex => encodeCbor(
