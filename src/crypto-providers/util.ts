@@ -501,11 +501,11 @@ const rewardAccountToStakeCredential = (address: RewardAccount): StakeCredential
 }
 
 const formatCIP36RegistrationMetaData = (
-  delegations: [Buffer, BigInt][],
+  delegations: [Buffer, bigint][],
   stakePub: Buffer,
   address: Buffer,
-  nonce: BigInt,
-  votingPurpose: BigInt,
+  nonce: bigint,
+  votingPurpose: bigint,
   signature: Buffer,
 ): CIP36RegistrationMetaData => (
   new Map<number, Map<number, CIP36RegistrationMetaDataPayloadItem>>([
@@ -532,12 +532,12 @@ const encodeCIP36RegistrationMetaData = (
   delegations: CVoteDelegation[],
   hwStakeSigningFile: HwSigningData,
   address: Buffer,
-  nonce: BigInt,
-  votingPurpose: BigInt,
+  nonce: bigint,
+  votingPurpose: bigint,
   auxiliaryDataHashHex: HexString,
   registrationSignatureHex: HexString,
 ) => {
-  const serializedDelegations: [Buffer, BigInt][] = delegations.map(
+  const serializedDelegations: [Buffer, bigint][] = delegations.map(
     ({ votePublicKey, voteWeight }) => [
       Buffer.from(votePublicKey, 'hex'),
       voteWeight,

@@ -181,7 +181,7 @@ export type ParsedTransactionTransformArguments = {
 export type ParsedOpCertArguments = {
   command: CommandType.SIGN_OPERATIONAL_CERTIFICATE,
   kesVKey: KesVKey,
-  kesPeriod: BigInt,
+  kesPeriod: bigint,
   issueCounterFile: string,
   hwSigningFileData: HwSigningData[],
   outFile: string,
@@ -198,11 +198,11 @@ export type ParsedNodeKeyGenArguments = {
 export type ParsedCIP36RegistrationMetadataArguments = {
   command: CommandType.CIP36_REGISTRATION_METADATA,
   votePublicKeys: VotePublicKeyHex[],
-  voteWeights: BigInt[],
+  voteWeights: bigint[],
   hwStakeSigningFileData: HwSigningData,
   paymentAddress: string,
-  nonce: BigInt,
-  votingPurpose: BigInt,
+  nonce: bigint,
+  votingPurpose: bigint,
   network: Network,
   paymentAddressSigningKeyData: HwSigningData[],
   outFile: string,
@@ -211,7 +211,7 @@ export type ParsedCIP36RegistrationMetadataArguments = {
 
 export type CVoteDelegation = {
   votePublicKey: VotePublicKeyHex,
-  voteWeight: BigInt,
+  voteWeight: bigint,
 }
 
 export type ParsedArguments =

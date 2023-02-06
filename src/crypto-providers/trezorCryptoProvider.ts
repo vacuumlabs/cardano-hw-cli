@@ -656,8 +656,8 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     delegations: CVoteDelegation[],
     hwStakeSigningFile: HwSigningData,
     addressParameters: _AddressParameters,
-    nonce: BigInt,
-    votingPurpose: BigInt,
+    nonce: bigint,
+    votingPurpose: bigint,
   ): TrezorTypes.CardanoAuxiliaryData => {
     const prepareAddressParameters = () => {
       if (addressParameters.addressType === TrezorEnums.CardanoAddressType.BASE) {
@@ -722,8 +722,8 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     delegations: CVoteDelegation[],
     hwStakeSigningFile: HwSigningData, // describes stake_credential
     paymentAddressBech32: string,
-    nonce: BigInt,
-    votingPurpose: BigInt,
+    nonce: bigint,
+    votingPurpose: bigint,
     network: Network,
     paymentAddressSigningFiles: HwSigningData[],
     derivationType?: DerivationType,
@@ -770,7 +770,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
 
   const signOperationalCertificate = async (
     _kesVKey: KesVKey,
-    _kesPeriod: BigInt,
+    _kesPeriod: bigint,
     _issueCounter: OpCertIssueCounter,
     _signingFile: HwSigningData[],
   ): Promise<SignedOpCertCborHex> => {

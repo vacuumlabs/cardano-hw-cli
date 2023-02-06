@@ -185,7 +185,7 @@ const CommandExecutor = async () => {
       writeOutputData(verificationKeyFiles[i], constructVerificationKeyOutput(xPubKey, path))
 
       const issueCounter = {
-        counter: BigInt(0),
+        counter: 0n,
         poolColdKey: Buffer.from(xPubKey, 'hex').slice(-64).slice(0, 32),
       }
       writeOutputData(issueCounterFiles[i], constructOpCertIssueCounterOutput(issueCounter))
@@ -204,8 +204,7 @@ const CommandExecutor = async () => {
 
     writeOutputData(args.outFile, constructSignedOpCertOutput(signedCertCborHex))
 
-    // TODO how to increment BigInt?
-    issueCounter.counter = BigInt(issueCounter.counter as bigint) + BigInt(1)
+    issueCounter.counter += 1n
     writeOutputData(args.issueCounterFile, constructOpCertIssueCounterOutput(issueCounter))
   }
 
@@ -223,7 +222,7 @@ const CommandExecutor = async () => {
     const voteWeightCount = args.voteWeights.length
     if (votePublicKeyCount === 1 && voteWeightCount === 0) {
       // delegate the whole voting power to the single vote public key
-      args.voteWeights.push(BigInt(1))
+      args.voteWeights.push(1n)
     } else if (votePublicKeyCount > 0 && votePublicKeyCount === voteWeightCount) {
       // the vote public keys and vote weights are provided correctly
       // nothing to do
