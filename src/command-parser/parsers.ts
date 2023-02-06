@@ -24,6 +24,8 @@ import {
   HwSigningType,
   NativeScript,
   NativeScriptType,
+  Network,
+  NetworkIds,
   TxFileData,
   VotePublicKeyHex,
 } from '../types'
@@ -35,11 +37,22 @@ import { getHwSigningFileType } from '../fileWriter'
 const { bech32 } = require('cardano-crypto.js')
 const rw = require('rw')
 
-export const parseNetwork = (name: string, protocolMagic?: string) => {
-  if (!protocolMagic) return NETWORKS[name]
-  return {
-    networkId: NETWORKS[name].networkId,
-    protocolMagic: parseInt(protocolMagic, 10),
+export const parseNetwork = (networkId: NetworkIds, protocolMagic?: string): Network => {
+  switch (networkId) {
+    case NetworkIds.MAINNET:
+      return NETWORKS.MAINNET
+
+    case NetworkIds.TESTNET:
+      if (protocolMagic == null) {
+        throw Error(Errors.TestnetProtocolMagicMissing)
+      }
+      return {
+        networkId,
+        protocolMagic: parseInt(protocolMagic, 10),
+      }
+
+    default:
+      throw Error(Errors.Unreachable)
   }
 }
 

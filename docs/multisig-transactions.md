@@ -74,7 +74,7 @@ cardano-cli address build \
 --out-file payment.addr \
 --mainnet
 ```
-Or you can swap `--mainnet` for `--testnet-magic 1097911063` if you want to create a testnet address.
+Or you can swap `--mainnet` for `--testnet-magic PROTOCOL_MAGIC` if you want to create a testnet address (see https://book.world.dev.cardano.org/environments.html for current values of PROTOCOL_MAGIC).
 
 ## Creating the transaction
 Now we have created a multisig address and we are able to continue with creating a simple transaction. We will assume you have already sent some funds to your newly created address (for testnet addresses you can use the [Faucet](https://testnets.cardano.org/en/testnets/cardano/tools/faucet/)).

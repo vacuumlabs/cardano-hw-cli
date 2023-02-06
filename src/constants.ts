@@ -3,18 +3,28 @@ import {
 } from './types'
 import { invertObject } from './util'
 
+// taken from https://book.world.dev.cardano.org/environments.html
 export const NETWORKS: {[key: string]: Network} = {
   MAINNET: {
     networkId: NetworkIds.MAINNET,
     protocolMagic: ProtocolMagics.MAINNET,
   },
-  TESTNET: {
+  TESTNET_PREVIEW: {
     networkId: NetworkIds.TESTNET,
-    protocolMagic: ProtocolMagics.TESTNET,
+    protocolMagic: ProtocolMagics.TESTNET_PREVIEW,
   },
-  TESTNET_LEGACY: { // we keep this because some test CBORs contain this network
+  TESTNET_PREPROD: {
     networkId: NetworkIds.TESTNET,
-    protocolMagic: ProtocolMagics.TESTNET_LEGACY,
+    protocolMagic: ProtocolMagics.TESTNET_PREPROD,
+  },
+  // we keep these because some test CBORs contain them
+  TESTNET_LEGACY1: {
+    networkId: NetworkIds.TESTNET,
+    protocolMagic: ProtocolMagics.TESTNET_LEGACY1,
+  },
+  TESTNET_LEGACY2: {
+    networkId: NetworkIds.TESTNET,
+    protocolMagic: ProtocolMagics.TESTNET_LEGACY2,
   },
 }
 

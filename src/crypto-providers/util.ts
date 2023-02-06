@@ -457,9 +457,11 @@ const getAddressAttributes = (addressStr: Address): {
       protocolMagic: address.byron_protocol_magic(),
     }
   } if (address instanceof cardanoSerialization.Address) {
+    // HW wallets require us to supply protocol magic, but it is only
+    // relevant for Byron addresses, so we can return anything here
     const protocolMagic = address.network_id() === NetworkIds.MAINNET
       ? ProtocolMagics.MAINNET
-      : ProtocolMagics.TESTNET
+      : ProtocolMagics.TESTNET_PREVIEW
     return {
       addressType: getAddressType(address.to_bytes()),
       networkId: address.network_id(),

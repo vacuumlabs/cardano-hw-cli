@@ -126,7 +126,7 @@ describe('Command parser', () => {
     const { parsedArgs } = parse(args)
     const expectedResult = {
       command: CommandType.WITNESS_TRANSACTION,
-      network: NETWORKS.TESTNET_LEGACY,
+      network: NETWORKS.TESTNET_LEGACY1,
       txFileData: {
         era: CardanoEra.SHELLEY,
         description: 'Ledger Cddl Format',
@@ -211,7 +211,7 @@ describe('Command parser', () => {
 
     const expectedResult = {
       command: CommandType.CIP36_REGISTRATION_METADATA,
-      network: NETWORKS.TESTNET_LEGACY,
+      network: NETWORKS.TESTNET_LEGACY1,
       paymentAddressSigningKeyData: [],
       hwStakeSigningFileData: {
         type: 1,
@@ -273,7 +273,7 @@ describe('Command parser', () => {
     const { parsedArgs } = parse(args)
     const expectedResult = {
       command: CommandType.CIP36_REGISTRATION_METADATA,
-      network: NETWORKS.TESTNET_LEGACY,
+      network: NETWORKS.TESTNET_LEGACY1,
       paymentAddressSigningKeyData: [
         {
           type: 0,

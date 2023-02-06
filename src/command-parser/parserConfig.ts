@@ -1,5 +1,6 @@
 /* eslint-disable max-len */
 /* eslint quote-props: ["error", "consistent"] */
+import { NetworkIds } from '../types'
 import {
   parseAddressFile,
   parseHwSigningFile,
@@ -80,14 +81,14 @@ const txSigningArgs = {
   '--mainnet': {
     nargs: '?',
     dest: 'network',
-    const: parseNetwork('MAINNET'),
-    default: parseNetwork('MAINNET'),
+    const: parseNetwork(NetworkIds.MAINNET),
+    default: parseNetwork(NetworkIds.MAINNET),
     help: 'NETWORK.',
   },
   '--testnet-magic': {
     nargs: '?',
     dest: 'network',
-    type: (magic: string) => parseNetwork('TESTNET', magic),
+    type: (magic: string) => parseNetwork(NetworkIds.TESTNET, magic),
     help: 'Protocol magic number.',
   },
   '--tx-file': {
@@ -279,14 +280,14 @@ export const parserConfig = {
       '--mainnet': {
         nargs: '?',
         dest: 'network',
-        const: parseNetwork('MAINNET'),
-        default: parseNetwork('MAINNET'),
+        const: parseNetwork(NetworkIds.MAINNET),
+        default: parseNetwork(NetworkIds.MAINNET),
         help: 'NETWORK.',
       },
       '--testnet-magic': {
         nargs: '?',
         dest: 'network',
-        type: (magic: string) => parseNetwork('TESTNET', magic),
+        type: (magic: string) => parseNetwork(NetworkIds.TESTNET, magic),
         help: 'Protocol magic number.',
       },
 
