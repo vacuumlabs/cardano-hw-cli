@@ -54,12 +54,20 @@ import {
 
 const { bech32 } = require('cardano-crypto.js')
 
+const failedMsg = (e: any): string => `The requested operation failed. \
+Check that your Ledger device is connected, unlocked and with Cardano app running.
+Details: ${e}`
+
 export const LedgerCryptoProvider: (transport: Transport) => Promise<CryptoProvider> = async (transport) => {
   const ledger = new Ledger(transport)
 
   const getVersion = async (): Promise<string> => {
-    const { major, minor, patch } = (await ledger.getVersion()).version
-    return `Ledger app version ${major}.${minor}.${patch}`
+    try {
+      const { major, minor, patch } = (await ledger.getVersion()).version
+      return `Ledger app version ${major}.${minor}.${patch}`
+    } catch (err) {
+      throw Error(failedMsg(err))
+    }
   }
 
   const showAddress = async (
@@ -67,9 +75,8 @@ export const LedgerCryptoProvider: (transport: Transport) => Promise<CryptoProvi
       paymentPath, paymentScriptHash, stakingPath, stakingScriptHash, address,
     }: ParsedShowAddressArguments,
   ): Promise<void> => {
+    const { addressType, networkId, protocolMagic } = getAddressAttributes(address)
     try {
-      const { addressType, networkId, protocolMagic } = getAddressAttributes(address)
-
       await ledger.showAddress({
         network: {
           protocolMagic,
@@ -86,23 +93,27 @@ export const LedgerCryptoProvider: (transport: Transport) => Promise<CryptoProvi
         },
       })
     } catch (err) {
-      throw Error(Errors.LedgerOperationError)
+      throw Error(failedMsg(err))
     }
   }
 
   const getXPubKeys = async (paths: BIP32Path[]): Promise<XPubKeyHex[]> => {
-    const xPubKeys = await ledger.getExtendedPublicKeys({ paths })
-    return xPubKeys.map((xPubKey) => {
-      const { publicKeyHex, chainCodeHex } = xPubKey
-      if (!isPubKeyHex(xPubKey.publicKeyHex) || !isChainCodeHex(xPubKey.chainCodeHex)) {
-        throw Error(Errors.InternalInvalidTypeError)
-      }
-      const xPubKeyHex = publicKeyHex + chainCodeHex
-      if (!isXPubKeyHex(xPubKeyHex)) {
-        throw Error(Errors.InternalInvalidTypeError)
-      }
-      return xPubKeyHex
-    })
+    try {
+      const xPubKeys = await ledger.getExtendedPublicKeys({ paths })
+      return xPubKeys.map((xPubKey) => {
+        const { publicKeyHex, chainCodeHex } = xPubKey
+        if (!isPubKeyHex(xPubKey.publicKeyHex) || !isChainCodeHex(xPubKey.chainCodeHex)) {
+          throw Error(Errors.InternalInvalidTypeError)
+        }
+        const xPubKeyHex = publicKeyHex + chainCodeHex
+        if (!isXPubKeyHex(xPubKeyHex)) {
+          throw Error(Errors.InternalInvalidTypeError)
+        }
+        return xPubKeyHex
+      })
+    } catch (err) {
+      throw Error(failedMsg(err))
+    }
   }
 
   const prepareInput = (
@@ -680,43 +691,49 @@ export const LedgerCryptoProvider: (transport: Transport) => Promise<CryptoProvi
       multisigSigningFiles,
     )
 
-    const response = await ledger.signTransaction({
-      signingMode: signingModeToLedgerType(signingMode),
-      tx: {
-        network,
-        inputs,
-        outputs,
-        fee,
-        ttl,
-        certificates,
-        withdrawals,
-        auxiliaryData,
-        validityIntervalStart,
-        mint,
-        scriptDataHashHex,
-        collateralInputs,
-        requiredSigners,
-        includeNetworkId,
-        collateralOutput,
-        totalCollateral,
-        referenceInputs,
-      },
-      additionalWitnessPaths: additionalWitnessRequests,
-    })
-
-    if (response.txHashHex !== txBodyHashHex) {
-      throw Error(Errors.TxSerializationMismatchError)
+    try {
+      const response = await ledger.signTransaction({
+        signingMode: signingModeToLedgerType(signingMode),
+        tx: {
+          network,
+          inputs,
+          outputs,
+          fee,
+          ttl,
+          certificates,
+          withdrawals,
+          auxiliaryData,
+          validityIntervalStart,
+          mint,
+          scriptDataHashHex,
+          collateralInputs,
+          requiredSigners,
+          includeNetworkId,
+          collateralOutput,
+          totalCollateral,
+          referenceInputs,
+        },
+        additionalWitnessPaths: additionalWitnessRequests,
+      })
+      if (response.txHashHex !== txBodyHashHex) {
+        throw Error(Errors.TxSerializationMismatchError)
+      }
+      return response.witnesses
+    } catch (err) {
+      throw Error(failedMsg(err))
     }
-
-    return response.witnesses
   }
 
   const witnessTx = async (
     params: SigningParameters,
     changeOutputFiles: HwSigningData[],
   ): Promise<TxWitnesses> => {
-    const ledgerWitnesses = await ledgerSignTx(params, changeOutputFiles)
-    return createWitnesses(ledgerWitnesses, params.hwSigningFileData)
+    try {
+      const ledgerWitnesses = await ledgerSignTx(params, changeOutputFiles)
+      return createWitnesses(ledgerWitnesses, params.hwSigningFileData)
+    } catch (err) {
+      throw Error(failedMsg(err))
+    }
   }
 
   const prepareVoteDelegations = (
@@ -835,18 +852,22 @@ export const LedgerCryptoProvider: (transport: Transport) => Promise<CryptoProvi
     )
     const dummyTx = prepareDummyTx(network, ledgerAuxData)
 
-    const response = await ledger.signTransaction(dummyTx)
-    if (!response.auxiliaryDataSupplement) throw Error(Errors.MissingAuxiliaryDataSupplement)
+    try {
+      const response = await ledger.signTransaction(dummyTx)
+      if (!response.auxiliaryDataSupplement) throw Error(Errors.MissingAuxiliaryDataSupplement)
 
-    return encodeCIP36RegistrationMetaData(
-      delegations,
-      hwStakeSigningFile,
-      address,
-      nonce,
-      votingPurpose,
-      response.auxiliaryDataSupplement.auxiliaryDataHashHex as HexString,
-      response.auxiliaryDataSupplement.cip36VoteRegistrationSignatureHex as HexString,
-    )
+      return encodeCIP36RegistrationMetaData(
+        delegations,
+        hwStakeSigningFile,
+        address,
+        nonce,
+        votingPurpose,
+        response.auxiliaryDataSupplement.auxiliaryDataHashHex as HexString,
+        response.auxiliaryDataSupplement.cip36VoteRegistrationSignatureHex as HexString,
+      )
+    } catch (err) {
+      throw Error(failedMsg(err))
+    }
   }
 
   const signOperationalCertificate = async (
@@ -856,20 +877,23 @@ export const LedgerCryptoProvider: (transport: Transport) => Promise<CryptoProvi
     signingFiles: HwSigningData[],
   ): Promise<SignedOpCertCborHex> => {
     const poolColdKeyPath = findSigningPathForKey(issueCounter.poolColdKey, signingFiles)
+    try {
+      const { signatureHex } = await ledger.signOperationalCertificate({
+        kesPublicKeyHex: kesVKey.toString('hex'),
+        kesPeriod: kesPeriod.toString(),
+        issueCounter: issueCounter.counter.toString(),
+        coldKeyPath: poolColdKeyPath as BIP32Path,
+      })
 
-    const { signatureHex } = await ledger.signOperationalCertificate({
-      kesPublicKeyHex: kesVKey.toString('hex'),
-      kesPeriod: kesPeriod.toString(),
-      issueCounter: issueCounter.counter.toString(),
-      coldKeyPath: poolColdKeyPath as BIP32Path,
-    })
-
-    return OpCertSigned(
-      kesVKey,
-      kesPeriod,
-      issueCounter,
-      Buffer.from(signatureHex, 'hex'),
-    )
+      return OpCertSigned(
+        kesVKey,
+        kesPeriod,
+        issueCounter,
+        Buffer.from(signatureHex, 'hex'),
+      )
+    } catch (err) {
+      throw Error(failedMsg(err))
+    }
   }
 
   const nativeScriptToLedgerTypes = (
@@ -953,12 +977,15 @@ export const LedgerCryptoProvider: (transport: Transport) => Promise<CryptoProvi
     signingFiles: HwSigningData[],
     displayFormat: NativeScriptDisplayFormat,
   ): Promise<NativeScriptHashKeyHex> => {
-    const { scriptHashHex } = await ledger.deriveNativeScriptHash({
-      script: nativeScriptToLedgerTypes(nativeScript, signingFiles),
-      displayFormat: nativeScriptDisplayFormatToLedgerType(displayFormat),
-    })
-
-    return scriptHashHex as NativeScriptHashKeyHex
+    try {
+      const { scriptHashHex } = await ledger.deriveNativeScriptHash({
+        script: nativeScriptToLedgerTypes(nativeScript, signingFiles),
+        displayFormat: nativeScriptDisplayFormatToLedgerType(displayFormat),
+      })
+      return scriptHashHex as NativeScriptHashKeyHex
+    } catch (err) {
+      throw Error(failedMsg(err))
+    }
   }
 
   return {

@@ -27,13 +27,17 @@ import { encodeCbor } from './util'
 
 const rw = require('rw')
 
-const writeOutputData = (path: string, data: OutputData) => (
+const writeOutputData = (path: string, data: OutputData) => {
+  // eslint-disable-next-line no-console
+  console.log(`Writing to file '${path}'.`)
   rw.writeFileSync(path, JSON.stringify(data, null, 4), 'utf8')
-)
+}
 
-const writeCbor = (path: string, data: Cbor) => (
+const writeCbor = (path: string, data: Cbor) => {
+  // eslint-disable-next-line no-console
+  console.log(`Writing to file '${path}'.`)
   rw.writeFileSync(path, data)
-)
+}
 
 const constructTxFileOutput = (
   envelopeType: string,
