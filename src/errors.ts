@@ -29,7 +29,6 @@ const enum Errors {
   UnsupportedRelayTypeError = 'Unsupported relay type',
   UnknownCertificateError = 'Unknown certificate',
   InvalidAddressError = 'Invalid address',
-  LedgerOperationError = 'Ledger operation error',
   InvalidAddressParametersProvidedError = 'Invalid address parameters provided',
   InvalidKeyGenInputsError = 'Invalid key gen inputs error',
   TrezorPassphraseNotInsertableOnDevice = 'Trezor passphrase not insertable on the device',
