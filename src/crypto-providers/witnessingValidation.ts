@@ -8,7 +8,7 @@ import { HwSigningData } from '../basicTypes'
 import {
   SigningMode,
   SigningParameters,
-} from './types'
+} from './cryptoProvider'
 import {
   filterSigningFiles,
 } from './util'

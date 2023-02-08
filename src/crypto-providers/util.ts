@@ -35,9 +35,8 @@ import {
 } from '../basicTypes'
 import { decodeCbor, encodeCbor } from '../util'
 import {
-  _AddressParameters,
   SigningMode,
-} from './types'
+} from './cryptoProvider'
 
 const cardanoCrypto = require('cardano-crypto.js')
 const {
@@ -46,6 +45,13 @@ const {
   bech32,
   blake2b,
 } = require('cardano-crypto.js')
+
+export type _AddressParameters = {
+  address: Buffer,
+  addressType: number,
+  paymentPath?: BIP32Path,
+  stakePath?: BIP32Path,
+}
 
 enum PathTypes {
   // hd wallet account

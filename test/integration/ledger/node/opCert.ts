@@ -1,7 +1,7 @@
 /* eslint-disable max-len */
 import assert from 'assert'
 import { LedgerCryptoProvider } from '../../../../src/crypto-providers/ledgerCryptoProvider'
-import { CryptoProvider } from '../../../../src/crypto-providers/types'
+import { CryptoProvider } from '../../../../src/crypto-providers/cryptoProvider'
 
 import { signingFiles } from './signingFiles'
 import { getTransport } from './speculos'

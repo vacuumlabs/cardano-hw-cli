@@ -8,11 +8,10 @@ import {
 } from '../transaction/types'
 import {
   CryptoProvider,
-  _AddressParameters,
   SigningMode,
   SigningParameters,
   NativeScriptDisplayFormat,
-} from './types'
+} from './cryptoProvider'
 import {
   TxByronWitnessData,
   TxShelleyWitnessData,
@@ -43,6 +42,7 @@ import {
   encodeCIP36RegistrationMetaData,
   rewardAccountToStakeCredential,
   areAddressParamsAllowed,
+  _AddressParameters,
 } from './util'
 import { Errors } from '../errors'
 import { partition } from '../util'

@@ -6,7 +6,7 @@ import { NETWORKS } from '../../../../src/constants'
 import { signingFiles } from './signingFiles'
 import { addresses } from './addresses'
 import { getTransport } from './speculos'
-import { CryptoProvider } from '../../../../src/crypto-providers/types'
+import { CryptoProvider } from '../../../../src/crypto-providers/cryptoProvider'
 
 const cip36Registrations = {
   withTestnetBaseAddress0: {
