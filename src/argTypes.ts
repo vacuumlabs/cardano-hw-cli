@@ -1,6 +1,20 @@
-import { CommandType } from './command-parser/commandParser'
 import { KesVKey } from './opCert/opCert'
 import { Address, BIP32Path, DerivationType, HwSigningData, NativeScript, Network, TxFileData, VotePublicKeyHex } from './basicTypes'
+
+export enum CommandType {
+  APP_VERSION = 'version',
+  DEVICE_VERSION = 'device.version',
+  SHOW_ADDRESS = 'address.show',
+  ADDRESS_KEY_GEN = 'address.key-gen',
+  VERIFICATION_KEY = 'key.verification-key',
+  WITNESS_TRANSACTION = 'transaction.witness',
+  VALIDATE_TRANSACTION = 'transaction.validate',
+  TRANSFORM_TRANSACTION = 'transaction.transform',
+  DERIVE_NATIVE_SCRIPT_HASH = 'transaction.policyid',
+  SIGN_OPERATIONAL_CERTIFICATE = 'node.issue-op-cert',
+  NODE_KEY_GEN = 'node.key-gen',
+  CIP36_REGISTRATION_METADATA = 'vote.registration-metadata',
+}
 
 export type ParsedAppVersionArguments = {
   command: CommandType.APP_VERSION,

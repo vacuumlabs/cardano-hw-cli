@@ -20,7 +20,7 @@ import {
   ParsedOpCertArguments,
   ParsedNodeKeyGenArguments,
   ParsedCIP36RegistrationMetadataArguments,
-} from './types'
+} from './argTypes'
 import { LedgerCryptoProvider } from './crypto-providers/ledgerCryptoProvider'
 import { TrezorCryptoProvider } from './crypto-providers/trezorCryptoProvider'
 import {
