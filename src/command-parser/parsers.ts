@@ -15,7 +15,7 @@ import {
   isVotePublicKeyHex,
   isXPubKeyCborHex,
 } from '../guards'
-import { Errors } from '../errors'
+import {Errors} from '../errors'
 import {
   HumanAddress,
   BIP32Path,
@@ -26,16 +26,23 @@ import {
   Network,
   NetworkIds,
 } from '../basicTypes'
-import { KesVKey, OpCertIssueCounter } from '../opCert/opCert'
-import { decodeCbor } from '../util'
-import { classifyPath, PathTypes, splitXPubKeyCborHex } from '../crypto-providers/util'
-import { getHwSigningFileType } from '../fileWriter'
-import { HwSigningData, HwSigningType, TxFileData } from '../argTypes'
+import {KesVKey, OpCertIssueCounter} from '../opCert/opCert'
+import {decodeCbor} from '../util'
+import {
+  classifyPath,
+  PathTypes,
+  splitXPubKeyCborHex,
+} from '../crypto-providers/util'
+import {getHwSigningFileType} from '../fileWriter'
+import {HwSigningData, HwSigningType, TxFileData} from '../argTypes'
 
-const { bech32 } = require('cardano-crypto.js')
+const {bech32} = require('cardano-crypto.js')
 const rw = require('rw')
 
-export const parseNetwork = (networkId: NetworkIds, protocolMagic?: string): Network => {
+export const parseNetwork = (
+  networkId: NetworkIds,
+  protocolMagic?: string,
+): Network => {
   switch (networkId) {
     case NetworkIds.MAINNET:
       return NETWORKS.MAINNET
@@ -54,19 +61,22 @@ export const parseNetwork = (networkId: NetworkIds, protocolMagic?: string): Net
   }
 }
 
-export const parseBIP32Path = (
-  path: string,
-): BIP32Path => {
+export const parseBIP32Path = (path: string): BIP32Path => {
   const parsedPath = path
     .split('/')
-    .map((arg) => (arg.endsWith('H')
-      ? parseInt(arg.slice(0, -1), 10) + HARDENED_THRESHOLD
-      : parseInt(arg, 10)))
+    .map((arg) =>
+      arg.endsWith('H')
+        ? parseInt(arg.slice(0, -1), 10) + HARDENED_THRESHOLD
+        : parseInt(arg, 10),
+    )
   if (isBIP32Path(parsedPath)) return parsedPath
   throw Error(Errors.InvalidPathError)
 }
 
-export const parseFileTypeMagic = (fileTypeMagic: string, pathType: PathTypes): HwSigningType => {
+export const parseFileTypeMagic = (
+  fileTypeMagic: string,
+  pathType: PathTypes,
+): HwSigningType => {
   // cardano-cli only distinguish 3 categories, payment, pool cold and stake keys
   // to keep things simple, any other key is bundled into the "payment" category
   // to keep things more generic
@@ -115,9 +125,12 @@ export const parseHwSigningFile = (path: string): HwSigningData => {
   const data = JSON.parse(rw.readFileSync(path, 'utf8'))
   data.path = parseBIP32Path(data.path)
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { type: fileTypeMagic, description, ...parsedData } = data
+  const {type: fileTypeMagic, description, ...parsedData} = data
 
-  const result = { type: parseFileTypeMagic(fileTypeMagic, classifyPath(data.path)), ...parsedData }
+  const result = {
+    type: parseFileTypeMagic(fileTypeMagic, classifyPath(data.path)),
+    ...parsedData,
+  }
   if (isHwSigningData(result)) {
     return result
   }
@@ -127,7 +140,7 @@ export const parseHwSigningFile = (path: string): HwSigningData => {
 export const parseTxFile = (path: string): TxFileData => {
   const json = JSON.parse(rw.readFileSync(path, 'utf8'))
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { type, description, cborHex } = json
+  const {type, description, cborHex} = json
   const era = txTypeToCardanoEra[type]
   const data = {
     era,
@@ -147,16 +160,16 @@ export const parseAddressFile = (path: string): HumanAddress => {
 }
 
 export const parseAppVersion = () => {
-  const { version, commit } = JSON.parse(
+  const {version, commit} = JSON.parse(
     rw.readFileSync(fsPath.resolve(__dirname, '../../package.json'), 'utf8'),
   )
-  return { version, commit }
+  return {version, commit}
 }
 
 export const parseKesVKeyFile = (path: string): KesVKey => {
   const data = JSON.parse(rw.readFileSync(path, 'utf8'))
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { type, description, cborHex } = data
+  const {type, description, cborHex} = data
   // TODO ? validate that "type": "KesVerificationKey_ed25519_kes_2^6",
   // TODO ? validate that "description": "KES Verification Key",
 
@@ -170,10 +183,12 @@ export const parseKesVKeyFile = (path: string): KesVKey => {
   throw Error(Errors.InvalidKesVKeyFileError)
 }
 
-export const parseOpCertIssueCounterFile = (path: string): OpCertIssueCounter => {
+export const parseOpCertIssueCounterFile = (
+  path: string,
+): OpCertIssueCounter => {
   const data = JSON.parse(rw.readFileSync(path, 'utf8'))
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { type, description, cborHex } = data
+  const {type, description, cborHex} = data
 
   if (type !== 'NodeOperationalCertificateIssueCounter') {
     throw Error(Errors.InvalidOpCertIssueCounterFileError)
@@ -181,10 +196,12 @@ export const parseOpCertIssueCounterFile = (path: string): OpCertIssueCounter =>
 
   try {
     const decoded = decodeCbor(cborHex)
-    if (decoded instanceof Array
-      && decoded.length === 2
-      && decoded[1] instanceof Buffer
-      && decoded[1].length === 32) {
+    if (
+      decoded instanceof Array &&
+      decoded.length === 2 &&
+      decoded[1] instanceof Buffer &&
+      decoded[1].length === 32
+    ) {
       return {
         counter: BigInt(decoded[0]),
         poolColdKey: decoded[1],
@@ -225,7 +242,7 @@ const tryToExtractVoteXPubKey = (cborXPubKeyHex: unknown): VotePublicKeyHex => {
 
 export const parseVotePubFileCli = (path: string): VotePublicKeyHex => {
   const data = JSON.parse(rw.readFileSync(path, 'utf8'))
-  const { type, cborHex } = data
+  const {type, cborHex} = data
 
   if (type === `${PathLabel.CIP36_VOTE}VerificationKey_ed25519`) {
     if (isPubKeyCborHex(cborHex)) {
@@ -244,9 +261,12 @@ export const parseVotePubFileCli = (path: string): VotePublicKeyHex => {
 
 export const parseVotePubFileHw = (path: string): VotePublicKeyHex => {
   const data = JSON.parse(rw.readFileSync(path, 'utf8'))
-  const { type, cborXPubKeyHex } = data
+  const {type, cborXPubKeyHex} = data
 
-  if (type === getHwSigningFileType(PathLabel.CIP36_VOTE, PathTypes.PATH_CVOTE_KEY)) {
+  if (
+    type ===
+    getHwSigningFileType(PathLabel.CIP36_VOTE, PathTypes.PATH_CVOTE_KEY)
+  ) {
     return tryToExtractVoteXPubKey(cborXPubKeyHex)
   }
 
@@ -256,7 +276,10 @@ export const parseVotePubFileHw = (path: string): VotePublicKeyHex => {
 const SCRIPT_HASH_LENGTH = 28
 
 export const parseScriptHashHex = (hashHex: string): string => {
-  if (!/^[0-9a-fA-F]*$/.test(hashHex) || hashHex.length !== SCRIPT_HASH_LENGTH * 2) {
+  if (
+    !/^[0-9a-fA-F]*$/.test(hashHex) ||
+    hashHex.length !== SCRIPT_HASH_LENGTH * 2
+  ) {
     throw Error(Errors.InvalidScriptHashHex)
   }
   return hashHex
@@ -272,11 +295,14 @@ const nativeScriptTypeMap: {[key: string]: NativeScriptType} = {
 }
 
 const parseNativeScriptData = (data: unknown): NativeScript => {
-  const isCorrectNumber = (n: unknown): n is number => typeof n === 'number' && n >= 0 && n <= Number.MAX_SAFE_INTEGER
+  const isCorrectNumber = (n: unknown): n is number =>
+    typeof n === 'number' && n >= 0 && n <= Number.MAX_SAFE_INTEGER
 
   const isNativeScriptData =
-    typeof data === 'object' && data !== null &&
-    'type' in data && typeof data.type === 'string' &&
+    typeof data === 'object' &&
+    data !== null &&
+    'type' in data &&
+    typeof data.type === 'string' &&
     data.type in nativeScriptTypeMap
   if (!isNativeScriptData) {
     throw Error(Errors.InvalidNativeScriptFile)
@@ -286,7 +312,11 @@ const parseNativeScriptData = (data: unknown): NativeScript => {
 
   switch (type) {
     case NativeScriptType.PUBKEY:
-      if (!('keyHash' in data) || !data.keyHash || typeof data.keyHash !== 'string') {
+      if (
+        !('keyHash' in data) ||
+        !data.keyHash ||
+        typeof data.keyHash !== 'string'
+      ) {
         throw Error(Errors.InvalidNativeScriptFile)
       }
       return {
@@ -295,7 +325,11 @@ const parseNativeScriptData = (data: unknown): NativeScript => {
       }
     case NativeScriptType.ALL:
     case NativeScriptType.ANY:
-      if (!('scripts' in data) || !data.scripts || !Array.isArray(data.scripts)) {
+      if (
+        !('scripts' in data) ||
+        !data.scripts ||
+        !Array.isArray(data.scripts)
+      ) {
         throw Error(Errors.InvalidNativeScriptFile)
       }
       return {
@@ -306,7 +340,11 @@ const parseNativeScriptData = (data: unknown): NativeScript => {
       if (!('required' in data) || !isCorrectNumber(data.required)) {
         throw Error(Errors.InvalidNativeScriptFile)
       }
-      if (!('scripts' in data) || !data.scripts || !Array.isArray(data.scripts)) {
+      if (
+        !('scripts' in data) ||
+        !data.scripts ||
+        !Array.isArray(data.scripts)
+      ) {
         throw Error(Errors.InvalidNativeScriptFile)
       }
       return {

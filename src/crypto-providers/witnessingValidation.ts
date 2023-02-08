@@ -1,17 +1,8 @@
-import {
-  CertificateType,
-  TransactionBody,
-  Uint,
-} from 'cardano-hw-interop-lib'
-import { Errors } from '../errors'
-import { HwSigningData } from '../argTypes'
-import {
-  SigningMode,
-  SigningParameters,
-} from './cryptoProvider'
-import {
-  filterSigningFiles,
-} from './util'
+import {CertificateType, TransactionBody, Uint} from 'cardano-hw-interop-lib'
+import {Errors} from '../errors'
+import {HwSigningData} from '../argTypes'
+import {SigningMode, SigningParameters} from './cryptoProvider'
+import {filterSigningFiles} from './util'
 
 const _countWitnessableItems = (body: TransactionBody) => {
   // we count stake registrations separately because they don't necessarily require a staking witness
@@ -37,15 +28,17 @@ const _countWitnessableItems = (body: TransactionBody) => {
         break
     }
   })
-  return { numStakeRegistrationItems, numStakeOtherItems, numPoolColdItems }
+  return {numStakeRegistrationItems, numStakeOtherItems, numPoolColdItems}
 }
 
-const validateOrdinaryWitnesses = (body: TransactionBody, hwSigningFileData: HwSigningData[]) => {
-  const {
-    poolColdSigningFiles, mintSigningFiles, multisigSigningFiles,
-  } = filterSigningFiles(hwSigningFileData)
+const validateOrdinaryWitnesses = (
+  body: TransactionBody,
+  hwSigningFileData: HwSigningData[],
+) => {
+  const {poolColdSigningFiles, mintSigningFiles, multisigSigningFiles} =
+    filterSigningFiles(hwSigningFileData)
 
-  const { numPoolColdItems } = _countWitnessableItems(body)
+  const {numPoolColdItems} = _countWitnessableItems(body)
 
   if (numPoolColdItems === 0 && poolColdSigningFiles.length > 0) {
     throw Error(Errors.TooManyPoolColdSigningFilesError)
@@ -58,9 +51,16 @@ const validateOrdinaryWitnesses = (body: TransactionBody, hwSigningFileData: HwS
   }
 }
 
-const validatePoolOwnerWitnesses = (body: TransactionBody, hwSigningFileData: HwSigningData[]) => {
+const validatePoolOwnerWitnesses = (
+  body: TransactionBody,
+  hwSigningFileData: HwSigningData[],
+) => {
   const {
-    paymentSigningFiles, stakeSigningFiles, poolColdSigningFiles, mintSigningFiles, multisigSigningFiles,
+    paymentSigningFiles,
+    stakeSigningFiles,
+    poolColdSigningFiles,
+    mintSigningFiles,
+    multisigSigningFiles,
   } = filterSigningFiles(hwSigningFileData)
 
   if (paymentSigningFiles.length > 0) {
@@ -86,9 +86,15 @@ const validatePoolOwnerWitnesses = (body: TransactionBody, hwSigningFileData: Hw
   }
 }
 
-const validatePoolOperatorWitnesses = (body: TransactionBody, hwSigningFileData: HwSigningData[]) => {
+const validatePoolOperatorWitnesses = (
+  body: TransactionBody,
+  hwSigningFileData: HwSigningData[],
+) => {
   const {
-    stakeSigningFiles, poolColdSigningFiles, mintSigningFiles, multisigSigningFiles,
+    stakeSigningFiles,
+    poolColdSigningFiles,
+    mintSigningFiles,
+    multisigSigningFiles,
   } = filterSigningFiles(hwSigningFileData)
 
   if (stakeSigningFiles.length > 0) {
@@ -108,9 +114,15 @@ const validatePoolOperatorWitnesses = (body: TransactionBody, hwSigningFileData:
   }
 }
 
-const validateMultisigWitnesses = (body: TransactionBody, hwSigningFileData: HwSigningData[]) => {
+const validateMultisigWitnesses = (
+  body: TransactionBody,
+  hwSigningFileData: HwSigningData[],
+) => {
   const {
-    paymentSigningFiles, stakeSigningFiles, poolColdSigningFiles, mintSigningFiles,
+    paymentSigningFiles,
+    stakeSigningFiles,
+    poolColdSigningFiles,
+    mintSigningFiles,
   } = filterSigningFiles(hwSigningFileData)
 
   if (paymentSigningFiles.length > 0) {
@@ -127,15 +139,21 @@ const validateMultisigWitnesses = (body: TransactionBody, hwSigningFileData: HwS
   }
 }
 
-const validatePlutusWitnesses = (body: TransactionBody, hwSigningFileData: HwSigningData[]) => {
-  const { poolColdSigningFiles } = filterSigningFiles(hwSigningFileData)
+const validatePlutusWitnesses = (
+  body: TransactionBody,
+  hwSigningFileData: HwSigningData[],
+) => {
+  const {poolColdSigningFiles} = filterSigningFiles(hwSigningFileData)
 
   if (poolColdSigningFiles.length > 0) {
     throw Error(Errors.TooManyPoolColdSigningFilesError)
   }
 }
 
-const validateNetworkId = (cliNetworkId: number, bodyNetworkId: Uint | undefined): void => {
+const validateNetworkId = (
+  cliNetworkId: number,
+  bodyNetworkId: Uint | undefined,
+): void => {
   if (bodyNetworkId !== undefined && bodyNetworkId !== cliNetworkId) {
     throw Error(Errors.NetworkIdMismatchError)
   }
@@ -143,8 +161,8 @@ const validateNetworkId = (cliNetworkId: number, bodyNetworkId: Uint | undefined
 
 const validateWitnessing = (params: SigningParameters): void => {
   // verifies whether signing parameters correspond to each other
-  const { body } = params.tx
-  const { hwSigningFileData } = params
+  const {body} = params.tx
+  const {hwSigningFileData} = params
 
   validateNetworkId(params.network.networkId, body.networkId)
 
@@ -174,6 +192,4 @@ const validateWitnessing = (params: SigningParameters): void => {
   }
 }
 
-export {
-  validateWitnessing,
-}
+export {validateWitnessing}

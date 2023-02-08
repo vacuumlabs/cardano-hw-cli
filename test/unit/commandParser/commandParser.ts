@@ -1,12 +1,13 @@
 /* eslint-disable max-len */
 import assert from 'assert'
-import { parse } from '../../../src/command-parser/commandParser'
+import {parse} from '../../../src/command-parser/commandParser'
 import {
-  CardanoEra, DerivationType,
+  CardanoEra,
+  DerivationType,
   NativeScriptType,
 } from '../../../src/basicTypes'
-import { cardanoEraToSignedType, NETWORKS } from '../../../src/constants'
-import { CommandType, HwSigningType } from '../../../src/argTypes'
+import {cardanoEraToSignedType, NETWORKS} from '../../../src/constants'
+import {CommandType, HwSigningType} from '../../../src/argTypes'
 
 const resFolder = 'test/unit/commandParser/res/'
 const prefix = (filename: string) => `${resFolder}${filename}`
@@ -25,14 +26,16 @@ describe('Command parser', () => {
       '--address-file',
       prefix('payment.addr'),
     ])
-    const { parsedArgs } = parse(args)
+    const {parsedArgs} = parse(args)
     const expectedResult = {
       command: CommandType.SHOW_ADDRESS,
       paymentPath: [2147485500, 2147485463, 2147483648, 0, 0],
       paymentScriptHash: undefined,
       stakingPath: undefined,
-      stakingScriptHash: '14c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f1124',
-      address: 'addr1qxq0nckg3ekgzuqg7w5p9mvgnd9ym28qh5grlph8xd2z92sj922xhxkn6twlq2wn4q50q352annk3903tj00h45mgfmsl3s9zt',
+      stakingScriptHash:
+        '14c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f1124',
+      address:
+        'addr1qxq0nckg3ekgzuqg7w5p9mvgnd9ym28qh5grlph8xd2z92sj922xhxkn6twlq2wn4q50q352annk3903tj00h45mgfmsl3s9zt',
       derivationType: undefined,
     }
     assert.deepStrictEqual(parsedArgs, expectedResult)
@@ -52,14 +55,16 @@ describe('Command parser', () => {
       '--derivation-type',
       'ICARUS',
     ])
-    const { parsedArgs } = parse(args)
+    const {parsedArgs} = parse(args)
     const expectedResult = {
       command: CommandType.SHOW_ADDRESS,
       paymentPath: [2147485500, 2147485463, 2147483648, 0, 0],
       paymentScriptHash: undefined,
       stakingPath: undefined,
-      stakingScriptHash: '14c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f1124',
-      address: 'addr1qxq0nckg3ekgzuqg7w5p9mvgnd9ym28qh5grlph8xd2z92sj922xhxkn6twlq2wn4q50q352annk3903tj00h45mgfmsl3s9zt',
+      stakingScriptHash:
+        '14c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f1124',
+      address:
+        'addr1qxq0nckg3ekgzuqg7w5p9mvgnd9ym28qh5grlph8xd2z92sj922xhxkn6twlq2wn4q50q352annk3903tj00h45mgfmsl3s9zt',
       derivationType: DerivationType.ICARUS,
     }
     assert.deepStrictEqual(parsedArgs, expectedResult)
@@ -77,7 +82,7 @@ describe('Command parser', () => {
       '--hw-signing-file',
       prefix('payment.hwsfile'),
     ])
-    const { parsedArgs } = parse(args)
+    const {parsedArgs} = parse(args)
     const expectedResult = {
       command: CommandType.ADDRESS_KEY_GEN,
       paths: [[2147485500, 2147485463, 2147483648, 0, 0]],
@@ -98,7 +103,7 @@ describe('Command parser', () => {
       '--verification-key-file',
       prefix('payment.vkey'),
     ])
-    const { parsedArgs } = parse(args)
+    const {parsedArgs} = parse(args)
     const expectedResult = {
       command: CommandType.VERIFICATION_KEY,
       hwSigningFileData: {
@@ -125,7 +130,7 @@ describe('Command parser', () => {
       '--out-file',
       prefix('witness.out'),
     ])
-    const { parsedArgs } = parse(args)
+    const {parsedArgs} = parse(args)
     const expectedResult = {
       command: CommandType.WITNESS_TRANSACTION,
       network: NETWORKS.TESTNET_LEGACY1,
@@ -134,13 +139,16 @@ describe('Command parser', () => {
         description: 'Ledger Cddl Format',
         envelopeType: 'Unwitnessed Tx ShelleyEra',
         // eslint-disable-next-line max-len
-        cborHex: '83a40081825820941a33cf9d39bba4102c4eff8bd54efd72cf93e65a023a4475ba48a58fc0de000001818258390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c1a002b2b4b021a00029b75031a00a8474ca0f6',
+        cborHex:
+          '83a40081825820941a33cf9d39bba4102c4eff8bd54efd72cf93e65a023a4475ba48a58fc0de000001818258390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c1a002b2b4b021a00029b75031a00a8474ca0f6',
       },
-      hwSigningFileData: [{
-        type: 0,
-        path: [2147485500, 2147485463, 2147483648, 0, 0],
-        cborXPubKeyHex: '5880e0d9c2e5b...7277e7db',
-      }],
+      hwSigningFileData: [
+        {
+          type: 0,
+          path: [2147485500, 2147485463, 2147483648, 0, 0],
+          cborXPubKeyHex: '5880e0d9c2e5b...7277e7db',
+        },
+      ],
       outFiles: ['test/unit/commandParser/res/witness.out'],
       changeOutputKeyFileData: [],
       derivationType: undefined,
@@ -163,7 +171,7 @@ describe('Command parser', () => {
       '--out-file',
       prefix('tx.signed'),
     ])
-    const { parsedArgs } = parse(args)
+    const {parsedArgs} = parse(args)
     const expectedResult = {
       command: CommandType.WITNESS_TRANSACTION,
       network: NETWORKS.MAINNET,
@@ -172,21 +180,24 @@ describe('Command parser', () => {
         description: 'Ledger Cddl Format',
         envelopeType: 'Unwitnessed Tx ShelleyEra',
         // eslint-disable-next-line max-len
-        cborHex: '83a40081825820941a33cf9d39bba4102c4eff8bd54efd72cf93e65a023a4475ba48a58fc0de000001818258390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c1a002b2b4b021a00029b75031a00a8474ca0f6',
+        cborHex:
+          '83a40081825820941a33cf9d39bba4102c4eff8bd54efd72cf93e65a023a4475ba48a58fc0de000001818258390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c1a002b2b4b021a00029b75031a00a8474ca0f6',
       },
-      hwSigningFileData: [{
-        type: 0,
-        path: [2147485500, 2147485463, 2147483648, 0, 0],
-        cborXPubKeyHex: '5880e0d9c2e5b...7277e7db',
-      }],
-      outFiles: [
-        'test/unit/commandParser/res/tx.signed',
+      hwSigningFileData: [
+        {
+          type: 0,
+          path: [2147485500, 2147485463, 2147483648, 0, 0],
+          cborXPubKeyHex: '5880e0d9c2e5b...7277e7db',
+        },
       ],
-      changeOutputKeyFileData: [{
-        type: 0,
-        path: [2147485500, 2147485463, 2147483648, 0, 0],
-        cborXPubKeyHex: '5880e0d9c2e5b...7277e7db',
-      }],
+      outFiles: ['test/unit/commandParser/res/tx.signed'],
+      changeOutputKeyFileData: [
+        {
+          type: 0,
+          path: [2147485500, 2147485463, 2147483648, 0, 0],
+          cborXPubKeyHex: '5880e0d9c2e5b...7277e7db',
+        },
+      ],
       derivationType: undefined,
     }
     assert.deepStrictEqual(parsedArgs, expectedResult)
@@ -209,7 +220,7 @@ describe('Command parser', () => {
       '--metadata-cbor-out-file',
       'cip36_registration.cbor',
     ])
-    const { parsedArgs } = parse(args)
+    const {parsedArgs} = parse(args)
 
     const expectedResult = {
       command: CommandType.CIP36_REGISTRATION_METADATA,
@@ -218,13 +229,17 @@ describe('Command parser', () => {
       hwStakeSigningFileData: {
         type: 1,
         path: [2147485500, 2147485463, 2147483648, 2, 0],
-        cborXPubKeyHex: '584066610efd336e1137c525937b76511fbcf2a0e6bcf0d340a67bcb39bc870d85e8e977e956d29810dbfbda9c8ea667585982454e401c68578623d4b86bc7eb7b58',
+        cborXPubKeyHex:
+          '584066610efd336e1137c525937b76511fbcf2a0e6bcf0d340a67bcb39bc870d85e8e977e956d29810dbfbda9c8ea667585982454e401c68578623d4b86bc7eb7b58',
       },
       nonce: 165564n,
       votingPurpose: undefined,
       outFile: 'cip36_registration.cbor',
-      paymentAddress: 'adr_test1qq2vzmtlgvjrhkq50rngh8d482zj3l20kyrc6kx4ffl3zfqayfawlf9hwv2fzuygt2km5v92kvf8e3s3mk7ynxw77cwq2glhm4',
-      votePublicKeys: ['3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7'],
+      paymentAddress:
+        'adr_test1qq2vzmtlgvjrhkq50rngh8d482zj3l20kyrc6kx4ffl3zfqayfawlf9hwv2fzuygt2km5v92kvf8e3s3mk7ynxw77cwq2glhm4',
+      votePublicKeys: [
+        '3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7',
+      ],
       voteWeights: [],
       derivationType: undefined,
     }
@@ -272,7 +287,7 @@ describe('Command parser', () => {
       '--metadata-cbor-out-file',
       'cip36_registration.cbor',
     ])
-    const { parsedArgs } = parse(args)
+    const {parsedArgs} = parse(args)
     const expectedResult = {
       command: CommandType.CIP36_REGISTRATION_METADATA,
       network: NETWORKS.TESTNET_LEGACY1,
@@ -285,18 +300,21 @@ describe('Command parser', () => {
         {
           type: 1,
           path: [2147485500, 2147485463, 2147483648, 2, 0],
-          cborXPubKeyHex: '584066610efd336e1137c525937b76511fbcf2a0e6bcf0d340a67bcb39bc870d85e8e977e956d29810dbfbda9c8ea667585982454e401c68578623d4b86bc7eb7b58',
+          cborXPubKeyHex:
+            '584066610efd336e1137c525937b76511fbcf2a0e6bcf0d340a67bcb39bc870d85e8e977e956d29810dbfbda9c8ea667585982454e401c68578623d4b86bc7eb7b58',
         },
       ],
       hwStakeSigningFileData: {
         type: 1,
         path: [2147485500, 2147485463, 2147483648, 2, 0],
-        cborXPubKeyHex: '584066610efd336e1137c525937b76511fbcf2a0e6bcf0d340a67bcb39bc870d85e8e977e956d29810dbfbda9c8ea667585982454e401c68578623d4b86bc7eb7b58',
+        cborXPubKeyHex:
+          '584066610efd336e1137c525937b76511fbcf2a0e6bcf0d340a67bcb39bc870d85e8e977e956d29810dbfbda9c8ea667585982454e401c68578623d4b86bc7eb7b58',
       },
       nonce: 165564n,
       votingPurpose: 164n,
       outFile: 'cip36_registration.cbor',
-      paymentAddress: 'adr_test1qq2vzmtlgvjrhkq50rngh8d482zj3l20kyrc6kx4ffl3zfqayfawlf9hwv2fzuygt2km5v92kvf8e3s3mk7ynxw77cwq2glhm4',
+      paymentAddress:
+        'adr_test1qq2vzmtlgvjrhkq50rngh8d482zj3l20kyrc6kx4ffl3zfqayfawlf9hwv2fzuygt2km5v92kvf8e3s3mk7ynxw77cwq2glhm4',
       votePublicKeys: [
         '3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7',
         '3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7',
@@ -317,7 +335,7 @@ describe('Command parser', () => {
       '--script-file',
       prefix('nested.script'),
     ])
-    const { parsedArgs } = parse(args)
+    const {parsedArgs} = parse(args)
     const expectedResult = {
       command: CommandType.DERIVE_NATIVE_SCRIPT_HASH,
       nativeScript: {
@@ -333,34 +351,37 @@ describe('Command parser', () => {
           },
           {
             type: NativeScriptType.ANY,
-            scripts:
-            [
+            scripts: [
               {
                 type: NativeScriptType.PUBKEY,
-                keyHash: 'c4b9265645fde9536c0795adbcc5291767a0c61fd62448341d7e0386',
+                keyHash:
+                  'c4b9265645fde9536c0795adbcc5291767a0c61fd62448341d7e0386',
               },
               {
                 type: NativeScriptType.PUBKEY,
-                keyHash: '0241f2d196f52a92fbd2183d03b370c30b6960cfdeae364ffabac889',
+                keyHash:
+                  '0241f2d196f52a92fbd2183d03b370c30b6960cfdeae364ffabac889',
               },
             ],
           },
           {
             type: NativeScriptType.N_OF_K,
             required: 2,
-            scripts:
-            [
+            scripts: [
               {
                 type: NativeScriptType.PUBKEY,
-                keyHash: 'c4b9265645fde9536c0795adbcc5291767a0c61fd62448341d7e0386',
+                keyHash:
+                  'c4b9265645fde9536c0795adbcc5291767a0c61fd62448341d7e0386',
               },
               {
                 type: NativeScriptType.PUBKEY,
-                keyHash: '0241f2d196f52a92fbd2183d03b370c30b6960cfdeae364ffabac889',
+                keyHash:
+                  '0241f2d196f52a92fbd2183d03b370c30b6960cfdeae364ffabac889',
               },
               {
                 type: NativeScriptType.PUBKEY,
-                keyHash: 'cecb1d427c4ae436d28cc0f8ae9bb37501a5b77bcc64cd1693e9ae20',
+                keyHash:
+                  'cecb1d427c4ae436d28cc0f8ae9bb37501a5b77bcc64cd1693e9ae20',
               },
             ],
           },
@@ -387,7 +408,7 @@ describe('Command parser', () => {
       '--tx-file',
       prefix('tx.signed'),
     ])
-    const { parsedArgs } = parse(args)
+    const {parsedArgs} = parse(args)
     const expectedResult = {
       command: CommandType.VALIDATE_TRANSACTION,
       txFileData: {
@@ -395,7 +416,8 @@ describe('Command parser', () => {
         era: CardanoEra.SHELLEY,
         description: '',
         // eslint-disable-next-line max-len
-        cborHex: '83a40081825820941a33cf9d39bba4102c4eff8bd54efd72cf93e65a023a4475ba48a58fc0de000001818258390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c1a002b2b4b021a00029b75031a00a8474ca10081825820cd2b047d1a803eee059769cffb3dfd0a4b9327e55bc78aa962d9bd4f720db0b2584093cbb49246dffb2cb2ca2c18e75039bdb4f80730bb9478045c4b8ef5494145a71bd59a478df4ec0dd22e78c9fc919918f4404115fafb10fa4f218b269d3e220af6',
+        cborHex:
+          '83a40081825820941a33cf9d39bba4102c4eff8bd54efd72cf93e65a023a4475ba48a58fc0de000001818258390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c1a002b2b4b021a00029b75031a00a8474ca10081825820cd2b047d1a803eee059769cffb3dfd0a4b9327e55bc78aa962d9bd4f720db0b2584093cbb49246dffb2cb2ca2c18e75039bdb4f80730bb9478045c4b8ef5494145a71bd59a478df4ec0dd22e78c9fc919918f4404115fafb10fa4f218b269d3e220af6',
       },
     }
     assert.deepStrictEqual(parsedArgs, expectedResult)
@@ -410,7 +432,7 @@ describe('Command parser', () => {
       '--out-file',
       prefix('fixed.signed'),
     ])
-    const { parsedArgs } = parse(args)
+    const {parsedArgs} = parse(args)
     const expectedResult = {
       command: CommandType.TRANSFORM_TRANSACTION,
       txFileData: {
@@ -418,7 +440,8 @@ describe('Command parser', () => {
         era: CardanoEra.SHELLEY,
         description: '',
         // eslint-disable-next-line max-len
-        cborHex: '83a40081825820941a33cf9d39bba4102c4eff8bd54efd72cf93e65a023a4475ba48a58fc0de000001818258390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c1a002b2b4b021a00029b75031a00a8474ca10081825820cd2b047d1a803eee059769cffb3dfd0a4b9327e55bc78aa962d9bd4f720db0b2584093cbb49246dffb2cb2ca2c18e75039bdb4f80730bb9478045c4b8ef5494145a71bd59a478df4ec0dd22e78c9fc919918f4404115fafb10fa4f218b269d3e220af6',
+        cborHex:
+          '83a40081825820941a33cf9d39bba4102c4eff8bd54efd72cf93e65a023a4475ba48a58fc0de000001818258390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c1a002b2b4b021a00029b75031a00a8474ca10081825820cd2b047d1a803eee059769cffb3dfd0a4b9327e55bc78aa962d9bd4f720db0b2584093cbb49246dffb2cb2ca2c18e75039bdb4f80730bb9478045c4b8ef5494145a71bd59a478df4ec0dd22e78c9fc919918f4404115fafb10fa4f218b269d3e220af6',
       },
       outFile: 'test/unit/commandParser/res/fixed.signed',
     }

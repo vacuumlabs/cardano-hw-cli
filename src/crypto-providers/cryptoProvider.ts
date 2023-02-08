@@ -1,5 +1,9 @@
-import { Transaction } from 'cardano-hw-interop-lib'
-import { KesVKey, OpCertIssueCounter, SignedOpCertCborHex } from '../opCert/opCert'
+import {Transaction} from 'cardano-hw-interop-lib'
+import {
+  KesVKey,
+  OpCertIssueCounter,
+  SignedOpCertCborHex,
+} from '../opCert/opCert'
 import {
   TxWitnesses,
   CIP36RegistrationMetaDataCborHex,
@@ -9,9 +13,12 @@ import {
   XPubKeyHex,
   NativeScriptHashKeyHex,
   CardanoEra,
-  DerivationType, NativeScript, Network, CVoteDelegation,
+  DerivationType,
+  NativeScript,
+  Network,
+  CVoteDelegation,
 } from '../basicTypes'
-import { ParsedShowAddressArguments,   HwSigningData} from '../argTypes'
+import {ParsedShowAddressArguments, HwSigningData} from '../argTypes'
 
 export enum SigningMode {
   ORDINARY_TRANSACTION,
@@ -22,13 +29,13 @@ export enum SigningMode {
 }
 
 export type SigningParameters = {
-  signingMode: SigningMode,
-  tx: Transaction,
-  txBodyHashHex: string,
-  hwSigningFileData: HwSigningData[],
-  network: Network,
-  era: CardanoEra,
-  derivationType?: DerivationType,
+  signingMode: SigningMode
+  tx: Transaction
+  txBodyHashHex: string
+  hwSigningFileData: HwSigningData[]
+  network: Network
+  era: CardanoEra
+  derivationType?: DerivationType
 }
 
 export enum NativeScriptDisplayFormat {
@@ -37,18 +44,16 @@ export enum NativeScriptDisplayFormat {
 }
 
 export type CryptoProvider = {
-  getVersion: () => Promise<string>,
-  showAddress: (
-    args: ParsedShowAddressArguments,
-  ) => Promise<void>,
+  getVersion: () => Promise<string>
+  showAddress: (args: ParsedShowAddressArguments) => Promise<void>
   witnessTx: (
     params: SigningParameters,
     changeOutputFiles: HwSigningData[],
-  ) => Promise<TxWitnesses>,
+  ) => Promise<TxWitnesses>
   getXPubKeys: (
     paths: BIP32Path[],
     derivationType?: DerivationType,
-  ) => Promise<XPubKeyHex[]>,
+  ) => Promise<XPubKeyHex[]>
   signOperationalCertificate: (
     kesVKey: KesVKey,
     kesPeriod: bigint,
@@ -70,5 +75,5 @@ export type CryptoProvider = {
     signingFiles: HwSigningData[],
     displayFormat: NativeScriptDisplayFormat,
     derivationType?: DerivationType,
-  ) => Promise<NativeScriptHashKeyHex>,
+  ) => Promise<NativeScriptHashKeyHex>
 }

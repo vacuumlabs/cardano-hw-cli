@@ -1,11 +1,11 @@
 import * as InteropLib from 'cardano-hw-interop-lib'
-import { cloneDeep } from 'lodash'
+import {cloneDeep} from 'lodash'
 import {
   TxWitnessByronData,
   TxWitnessShelleyData,
   TxWitnessKeys,
 } from './txTypes'
-import { encodeCbor } from '../util'
+import {encodeCbor} from '../util'
 
 type WitnessSet = Map<number, unknown[]>
 
@@ -13,9 +13,11 @@ type WitnessSet = Map<number, unknown[]>
 // Let's convert it to Map in any case, just to make sure.
 const _parseWitnessSet = (witnessSet: unknown): WitnessSet => {
   const clonedWitnessSet = cloneDeep(witnessSet)
-  return (clonedWitnessSet instanceof Map)
+  return clonedWitnessSet instanceof Map
     ? clonedWitnessSet
-    : new Map(Object.entries(clonedWitnessSet as object)) as unknown as WitnessSet
+    : (new Map(
+        Object.entries(clonedWitnessSet as object),
+      ) as unknown as WitnessSet)
 }
 
 const TxByronWitnessData = (
@@ -23,7 +25,12 @@ const TxByronWitnessData = (
   signature: Buffer,
   chaincode: Buffer,
   addressAttributes: object,
-): TxWitnessByronData => [publicKey, signature, chaincode, encodeCbor(addressAttributes)]
+): TxWitnessByronData => [
+  publicKey,
+  signature,
+  chaincode,
+  encodeCbor(addressAttributes),
+]
 
 const TxShelleyWitnessData = (
   publicKey: Buffer,
@@ -37,7 +44,4 @@ export const containsVKeyWitnesses = (tx: InteropLib.Transaction): boolean => {
   return [...shelleyWitnesses, ...byronWitnesses].length > 0
 }
 
-export {
-  TxByronWitnessData,
-  TxShelleyWitnessData,
-}
+export {TxByronWitnessData, TxShelleyWitnessData}

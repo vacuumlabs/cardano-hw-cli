@@ -1,4 +1,4 @@
-import { BIP32Path, CborHex } from '../basicTypes'
+import {BIP32Path, CborHex} from '../basicTypes'
 
 export const enum TxWitnessKeys {
   SHELLEY = 0,
@@ -22,15 +22,15 @@ export type TxWitnessShelleyData = [
 ]
 
 export type TxWitnessByron = {
-  key: TxWitnessKeys.BYRON,
-  data: TxWitnessByronData,
-  path: BIP32Path,
+  key: TxWitnessKeys.BYRON
+  data: TxWitnessByronData
+  path: BIP32Path
 }
 
 export type TxWitnessShelley = {
-  key: TxWitnessKeys.SHELLEY,
-  data: TxWitnessShelleyData,
-  path: BIP32Path,
+  key: TxWitnessKeys.SHELLEY
+  data: TxWitnessShelleyData
+  path: BIP32Path
 }
 
 export type TxWitnesses = {
@@ -43,12 +43,18 @@ export type TxCborHex = CborHex
 export type TxWitnessCborHex = CborHex
 
 export type _XPubKey = {
-  pubKey: Buffer,
-  chainCode: Buffer,
+  pubKey: Buffer
+  chainCode: Buffer
 }
 
-export type CIP36RegistrationMetaDataPayloadItem = [Buffer, bigint][] | Buffer | bigint
-export type CIP36RegistrationMetaData = Map<number, Map<number, CIP36RegistrationMetaDataPayloadItem>>
+export type CIP36RegistrationMetaDataPayloadItem =
+  | [Buffer, bigint][]
+  | Buffer
+  | bigint
+export type CIP36RegistrationMetaData = Map<
+  number,
+  Map<number, CIP36RegistrationMetaDataPayloadItem>
+>
 export type CIP36RegistrationMetaDataCborHex = CborHex
 
 export type CIP36RegistrationAuxiliaryData = [CIP36RegistrationMetaData, []]

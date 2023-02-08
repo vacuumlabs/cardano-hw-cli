@@ -1,15 +1,18 @@
 import assert from 'assert'
-import { NativeScript, NativeScriptType } from '../../../../src/basicTypes'
-import { LedgerCryptoProvider } from '../../../../src/crypto-providers/ledgerCryptoProvider'
-import { CryptoProvider, NativeScriptDisplayFormat } from '../../../../src/crypto-providers/cryptoProvider'
-import { signingFiles } from './signingFiles'
-import { getTransport } from './speculos'
+import {NativeScript, NativeScriptType} from '../../../../src/basicTypes'
+import {LedgerCryptoProvider} from '../../../../src/crypto-providers/ledgerCryptoProvider'
+import {
+  CryptoProvider,
+  NativeScriptDisplayFormat,
+} from '../../../../src/crypto-providers/cryptoProvider'
+import {signingFiles} from './signingFiles'
+import {getTransport} from './speculos'
 
 interface TestItem {
-  nativeScript: NativeScript,
+  nativeScript: NativeScript
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  hwSigningFiles: any[],
-  expectedNativeScriptHashHex: string,
+  hwSigningFiles: any[]
+  expectedNativeScriptHashHex: string
 }
 
 const nativeScripts: {[key: string]: TestItem} = {
@@ -19,7 +22,8 @@ const nativeScripts: {[key: string]: TestItem} = {
       keyHash: '3a55d9f68255dfbefa1efd711f82d005fae1be2e145d616c90cf0fa9',
     },
     hwSigningFiles: [],
-    expectedNativeScriptHashHex: '855228f5ecececf9c85618007cc3c2e5bdf5e6d41ef8d6fa793fe0eb',
+    expectedNativeScriptHashHex:
+      '855228f5ecececf9c85618007cc3c2e5bdf5e6d41ef8d6fa793fe0eb',
   },
   all: {
     nativeScript: {
@@ -32,7 +36,8 @@ const nativeScripts: {[key: string]: TestItem} = {
       ],
     },
     hwSigningFiles: [],
-    expectedNativeScriptHashHex: 'b442025ae01ccb227ecbfc013d1c17eae7f8d04d366ffff5a091d03f',
+    expectedNativeScriptHashHex:
+      'b442025ae01ccb227ecbfc013d1c17eae7f8d04d366ffff5a091d03f',
   },
   any: {
     nativeScript: {
@@ -45,7 +50,8 @@ const nativeScripts: {[key: string]: TestItem} = {
       ],
     },
     hwSigningFiles: [],
-    expectedNativeScriptHashHex: '74c6eec4851daab6cc93283b06d73c7ce1eccc20f6f9bfdb715a05f3',
+    expectedNativeScriptHashHex:
+      '74c6eec4851daab6cc93283b06d73c7ce1eccc20f6f9bfdb715a05f3',
   },
   nOfK: {
     nativeScript: {
@@ -59,7 +65,8 @@ const nativeScripts: {[key: string]: TestItem} = {
       ],
     },
     hwSigningFiles: [],
-    expectedNativeScriptHashHex: 'cea740b672a5a359030b0355098407368fb3d4fa1a7f46b4adb8e8f3',
+    expectedNativeScriptHashHex:
+      'cea740b672a5a359030b0355098407368fb3d4fa1a7f46b4adb8e8f3',
   },
   invalidBefore: {
     nativeScript: {
@@ -67,7 +74,8 @@ const nativeScripts: {[key: string]: TestItem} = {
       slot: 100n,
     },
     hwSigningFiles: [],
-    expectedNativeScriptHashHex: '15fa0f97f3fe447a10dfbbd71edae89fb15d2b1b80f805ffaace9a5b',
+    expectedNativeScriptHashHex:
+      '15fa0f97f3fe447a10dfbbd71edae89fb15d2b1b80f805ffaace9a5b',
   },
   invalidHereafter: {
     nativeScript: {
@@ -75,7 +83,8 @@ const nativeScripts: {[key: string]: TestItem} = {
       slot: 200n,
     },
     hwSigningFiles: [],
-    expectedNativeScriptHashHex: '81a8f494e6cfe6b2407c9f68beda19ac74193548ab7c9aa94fe935f6',
+    expectedNativeScriptHashHex:
+      '81a8f494e6cfe6b2407c9f68beda19ac74193548ab7c9aa94fe935f6',
   },
   paymentScriptWithSigningFiles: {
     nativeScript: {
@@ -90,11 +99,13 @@ const nativeScripts: {[key: string]: TestItem} = {
           scripts: [
             {
               type: NativeScriptType.PUBKEY,
-              keyHash: '9a70dd7c77e9db9442b560a11446962e9d7c595274c587a62f8a0b61',
+              keyHash:
+                '9a70dd7c77e9db9442b560a11446962e9d7c595274c587a62f8a0b61',
             },
             {
               type: NativeScriptType.PUBKEY,
-              keyHash: '3d926054e17d9ed8374d0e1d18c765209dd0c249f954214c45417fea',
+              keyHash:
+                '3d926054e17d9ed8374d0e1d18c765209dd0c249f954214c45417fea',
             },
           ],
         },
@@ -105,7 +116,8 @@ const nativeScripts: {[key: string]: TestItem} = {
       signingFiles.multisigPayment1,
       signingFiles.multisigPayment2,
     ],
-    expectedNativeScriptHashHex: '9064dc1a8ce9d07aabd3399b67520ec9f6eb11c82220b9462938c479',
+    expectedNativeScriptHashHex:
+      '9064dc1a8ce9d07aabd3399b67520ec9f6eb11c82220b9462938c479',
   },
   stakingScriptWithSigningFiles: {
     nativeScript: {
@@ -117,7 +129,8 @@ const nativeScripts: {[key: string]: TestItem} = {
           scripts: [
             {
               type: NativeScriptType.PUBKEY,
-              keyHash: '4c139dd7e3a600fd1a4855b38cf8f731f39d3051791a5ede1f553d6c',
+              keyHash:
+                '4c139dd7e3a600fd1a4855b38cf8f731f39d3051791a5ede1f553d6c',
             },
           ],
         },
@@ -126,7 +139,8 @@ const nativeScripts: {[key: string]: TestItem} = {
           scripts: [
             {
               type: NativeScriptType.PUBKEY,
-              keyHash: 'f699c6400f85bdca54e44d0cad1f6141ce049a411c0d695fc30c3f73',
+              keyHash:
+                'f699c6400f85bdca54e44d0cad1f6141ce049a411c0d695fc30c3f73',
             },
             {
               type: NativeScriptType.INVALID_HEREAFTER,
@@ -136,17 +150,15 @@ const nativeScripts: {[key: string]: TestItem} = {
         },
       ],
     },
-    hwSigningFiles: [
-      signingFiles.multisigStake0,
-      signingFiles.multisigStake1,
-    ],
-    expectedNativeScriptHashHex: '54d8e96bb32a441432393d7690ac0132e5669a9ecd95cfc4b8674219',
+    hwSigningFiles: [signingFiles.multisigStake0, signingFiles.multisigStake1],
+    expectedNativeScriptHashHex:
+      '54d8e96bb32a441432393d7690ac0132e5669a9ecd95cfc4b8674219',
   },
 }
 
 async function testNativeScriptHashDerivation(
   cryptoProvider: CryptoProvider,
-  { nativeScript, hwSigningFiles, expectedNativeScriptHashHex }: TestItem,
+  {nativeScript, hwSigningFiles, expectedNativeScriptHashHex}: TestItem,
 ): Promise<void> {
   const nativeScriptHashHex = await cryptoProvider.deriveNativeScriptHash(
     nativeScript,
@@ -164,8 +176,10 @@ describe('Ledger native script hash derivation', () => {
     cryptoProvider = await LedgerCryptoProvider(await getTransport())
   })
   const nativeScriptsToDerive = Object.entries(nativeScripts)
-  nativeScriptsToDerive.forEach(([nativeScriptName, nativeScript]) => it(
-    `Should derive native script hash, script type "${nativeScriptName}"`,
-    async () => testNativeScriptHashDerivation(cryptoProvider, nativeScript),
-  ).timeout(100000))
+  nativeScriptsToDerive.forEach(([nativeScriptName, nativeScript]) =>
+    it(`Should derive native script hash, script type "${nativeScriptName}"`, async () =>
+      testNativeScriptHashDerivation(cryptoProvider, nativeScript)).timeout(
+      100000,
+    ),
+  )
 })
