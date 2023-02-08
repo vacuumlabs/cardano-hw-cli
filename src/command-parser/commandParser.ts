@@ -1,6 +1,6 @@
 import { ArgumentGroup, ArgumentParser, SubParser } from 'argparse'
 import { ParsedArguments } from '../types'
-import { parserConfig } from './parserConfig'
+import { ParserConfig, parserConfig } from './parserConfig'
 
 export enum CommandType {
   APP_VERSION = 'version',
@@ -17,7 +17,7 @@ export enum CommandType {
   CIP36_REGISTRATION_METADATA = 'vote.registration-metadata',
 }
 
-const initParser = (parser: ArgumentParser | ArgumentGroup, config: any): void => {
+const initParser = (parser: ArgumentParser | ArgumentGroup, config: ParserConfig): void => {
   const MUTUALLY_EXCLUSIVE_GROUP_KEY = '_mutually-exclusive-group'
   const isMutuallyExclusiveGroup = (str: string) => str.startsWith(MUTUALLY_EXCLUSIVE_GROUP_KEY)
   const isOneOfGroupRequired = (str: string) => str.startsWith(`${MUTUALLY_EXCLUSIVE_GROUP_KEY}-required`)
@@ -29,10 +29,10 @@ const initParser = (parser: ArgumentParser | ArgumentGroup, config: any): void =
     if (isCommand(key)) {
       const subparser = (subparsers as SubParser).add_parser(key)
       subparser.set_defaults({ command: commandType(parser.get_default('command'), key) })
-      initParser(subparser, config[key])
+      initParser(subparser, config[key] as ParserConfig)
     } else if (isMutuallyExclusiveGroup(key)) {
       const group = parser.add_mutually_exclusive_group({ required: isOneOfGroupRequired(key) })
-      initParser(group, config[key])
+      initParser(group, config[key] as ParserConfig)
     } else {
       parser.add_argument(key, config[key])
     }
