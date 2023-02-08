@@ -4,7 +4,7 @@ import {
   TxWitnessByronData,
   TxWitnessShelleyData,
   TxWitnessKeys,
-} from './types'
+} from './txTypes'
 import { encodeCbor } from '../util'
 
 type WitnessSet = Map<number, unknown[]>

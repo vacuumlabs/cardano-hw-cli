@@ -3,7 +3,7 @@ import { KesVKey, OpCertIssueCounter, SignedOpCertCborHex } from '../opCert/opCe
 import {
   TxWitnesses,
   CIP36RegistrationMetaDataCborHex,
-} from '../transaction/types'
+} from '../transaction/txTypes'
 import {
   HwSigningData,
   BIP32Path,

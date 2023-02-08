@@ -16,7 +16,7 @@ import {
   TxWitnessKeys,
   CIP36RegistrationMetaDataCborHex,
   TxWitnesses,
-} from '../transaction/types'
+} from '../transaction/txTypes'
 import {
   BIP32Path,
   HexString,
