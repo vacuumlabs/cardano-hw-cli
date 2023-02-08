@@ -73,10 +73,3 @@ export type CryptoProvider = {
     derivationType?: DerivationType,
   ) => Promise<NativeScriptHashKeyHex>,
 }
-
-export type _AddressParameters = {
-  address: Buffer,
-  addressType: number,
-  paymentPath?: BIP32Path,
-  stakePath?: BIP32Path,
-}

@@ -1,6 +1,6 @@
 import * as InteropLib from 'cardano-hw-interop-lib'
 import TransportNodeHid from '@ledgerhq/hw-transport-node-hid-noevents'
-import { CryptoProvider, NativeScriptDisplayFormat, SigningParameters } from './crypto-providers/types'
+import { CryptoProvider, NativeScriptDisplayFormat, SigningParameters } from './crypto-providers/cryptoProvider'
 import {
   constructHwSigningKeyOutput,
   constructVerificationKeyOutput,

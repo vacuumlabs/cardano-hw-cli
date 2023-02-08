@@ -5,7 +5,7 @@ import { TrezorCryptoProvider } from '../../../../src/crypto-providers/trezorCry
 import { NETWORKS } from '../../../../src/constants'
 import { signingFiles } from './signingFiles'
 import { addresses } from './addresses'
-import { CryptoProvider } from '../../../../src/crypto-providers/types'
+import { CryptoProvider } from '../../../../src/crypto-providers/cryptoProvider'
 
 const cip36Registrations = {
   withTestnetBaseAddress0: {

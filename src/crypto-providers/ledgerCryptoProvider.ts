@@ -33,8 +33,8 @@ import {
 } from '../argTypes'
 import { partition } from '../util'
 import {
-  CryptoProvider, _AddressParameters, SigningMode, SigningParameters, NativeScriptDisplayFormat,
-} from './types'
+  CryptoProvider, SigningMode, SigningParameters, NativeScriptDisplayFormat,
+} from './cryptoProvider'
 import {
   findSigningPathForKeyHash,
   getAddressAttributes,
@@ -51,6 +51,7 @@ import {
   pathEquals,
   classifyPath,
   PathTypes,
+  _AddressParameters,
 } from './util'
 
 const { bech32 } = require('cardano-crypto.js')

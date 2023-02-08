@@ -9,7 +9,7 @@ import { validateTxBeforeWitnessing } from '../../../../src/transaction/transact
 
 import { signingFiles } from './signingFiles'
 import { CardanoEra } from '../../../../src/basicTypes'
-import { CryptoProvider } from '../../../../src/crypto-providers/types'
+import { CryptoProvider } from '../../../../src/crypto-providers/cryptoProvider'
 
 // Note for future readers (Dec 2022): The tests in this file were created in the cardano-cli's
 // internal raw tx format. When we removed support for this format in favor of the CDDL-compliant
