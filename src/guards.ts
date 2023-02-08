@@ -18,7 +18,7 @@ import {
   X_PUB_KEY_CBOR_HEX_LENGTH,
   VOTE_PUBLIC_KEY_HEX_LENGTH,
   DerivationType,
-} from './types'
+} from './basicTypes'
 import { decodeCbor } from './util'
 
 export const isEra = (value: unknown): value is CardanoEra => Object.values(CardanoEra).includes(value as CardanoEra)

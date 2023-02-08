@@ -25,18 +25,14 @@ import {
 } from '../transaction/types'
 import {
   Address,
-  AddressType,
   BIP32Path,
-  CVoteDelegation,
   HexString,
   HwSigningData,
   HwSigningType,
-  Network,
-  NetworkIds,
-  ProtocolMagics,
   PubKeyHex,
   XPubKeyCborHex,
-} from '../types'
+  Network, NetworkIds, ProtocolMagics, AddressType, CVoteDelegation
+} from '../basicTypes'
 import { decodeCbor, encodeCbor } from '../util'
 import {
   _AddressParameters,

@@ -1,3 +1,4 @@
+import { BIP32Path, CardanoEra, Cbor, XPubKeyCborHex, XPubKeyHex } from './basicTypes'
 import {
   cardanoEraToWitnessType,
   HARDENED_THRESHOLD,
@@ -13,15 +14,10 @@ import {
   WitnessOutput,
 } from './transaction/types'
 import {
-  BIP32Path,
-  CardanoEra,
-  Cbor,
   HwSigningOutput,
   OpCertIssueCounterOutput,
   OutputData,
   VerificationKeyOutput,
-  XPubKeyCborHex,
-  XPubKeyHex,
 } from './types'
 import { encodeCbor } from './util'
 

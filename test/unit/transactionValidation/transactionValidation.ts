@@ -2,7 +2,7 @@
 import assert from 'assert'
 import * as InteropLib from 'cardano-hw-interop-lib'
 import { checkValidationErrors } from '../../../src/transaction/transactionValidation'
-import { CborHex } from '../../../src/types'
+import { CborHex } from '../../../src/basicTypes'
 
 interface Tx {
   txCborHex: string,

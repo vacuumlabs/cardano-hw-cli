@@ -22,13 +22,13 @@ import {
   DerivationType,
   HwSigningData,
   HwSigningType,
+  TxFileData,
+  VotePublicKeyHex,
   NativeScript,
   NativeScriptType,
   Network,
   NetworkIds,
-  TxFileData,
-  VotePublicKeyHex,
-} from '../types'
+} from '../basicTypes'
 import { KesVKey, OpCertIssueCounter } from '../opCert/opCert'
 import { decodeCbor } from '../util'
 import { classifyPath, PathTypes, splitXPubKeyCborHex } from '../crypto-providers/util'

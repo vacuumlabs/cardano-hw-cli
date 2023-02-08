@@ -4,11 +4,11 @@ import { partition } from '../util'
 import {
   ParsedTransactionValidateArguments,
   ParsedTransactionTransformArguments,
-  CborHex,
   ExitCode,
 } from '../types'
 import { constructTxFileOutput, writeOutputData } from '../fileWriter'
 import { containsVKeyWitnesses } from './transaction'
+import { CborHex } from '../basicTypes'
 
 const checkValidationErrors = (
   cborHex: CborHex,

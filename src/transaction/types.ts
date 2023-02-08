@@ -1,4 +1,4 @@
-import { BIP32Path, CborHex } from '../types'
+import { BIP32Path, CborHex } from '../basicTypes'
 
 export const enum TxWitnessKeys {
   SHELLEY = 0,

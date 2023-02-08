@@ -1,4 +1,4 @@
-import { CborHex } from '../types'
+import { CborHex } from '../basicTypes'
 import { encodeCbor } from '../util'
 
 export type KesVKey = Buffer

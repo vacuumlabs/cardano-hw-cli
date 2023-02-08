@@ -1,6 +1,6 @@
 import * as InteropLib from 'cardano-hw-interop-lib'
 import TransportNodeHid from '@ledgerhq/hw-transport-node-hid-noevents'
-import { CryptoProvider, SigningParameters } from './crypto-providers/types'
+import { CryptoProvider, NativeScriptDisplayFormat, SigningParameters } from './crypto-providers/types'
 import {
   constructHwSigningKeyOutput,
   constructVerificationKeyOutput,
@@ -19,9 +19,6 @@ import {
   ParsedOpCertArguments,
   ParsedNodeKeyGenArguments,
   ParsedCIP36RegistrationMetadataArguments,
-  Cbor,
-  NativeScriptDisplayFormat,
-  CVoteDelegation,
 } from './types'
 import { LedgerCryptoProvider } from './crypto-providers/ledgerCryptoProvider'
 import { TrezorCryptoProvider } from './crypto-providers/trezorCryptoProvider'
@@ -40,6 +37,7 @@ import { CIP36_VOTING_PURPOSE_CATALYST } from './constants'
 import { validateWitnessing } from './crypto-providers/witnessingValidation'
 import { WitnessOutput } from './transaction/types'
 import { validateTxBeforeWitnessing } from './transaction/transactionValidation'
+import { Cbor, CVoteDelegation } from './basicTypes'
 
 const promiseTimeout = <T> (promise: Promise<T>, ms: number): Promise<T> => {
   const timeout: Promise<T> = new Promise((resolve, reject) => {
