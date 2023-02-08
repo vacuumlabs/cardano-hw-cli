@@ -19,7 +19,6 @@ import {
 import {
   BIP32Path,
   HexString,
-  HwSigningData,
   PubKeyHex,
   XPubKeyHex,
   DerivationType,
@@ -48,7 +47,7 @@ import { Errors } from '../errors'
 import { partition } from '../util'
 import { KesVKey, OpCertIssueCounter, SignedOpCertCborHex } from '../opCert/opCert'
 import { parseBIP32Path } from '../command-parser/parsers'
-import { ParsedShowAddressArguments } from '../argTypes'
+import { ParsedShowAddressArguments,   HwSigningData} from '../argTypes'
 
 const { bech32 } = require('cardano-crypto.js')
 

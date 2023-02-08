@@ -17,12 +17,9 @@ import {
 } from '../guards'
 import { Errors } from '../errors'
 import {
-  Address,
+  HumanAddress,
   BIP32Path,
   DerivationType,
-  HwSigningData,
-  HwSigningType,
-  TxFileData,
   VotePublicKeyHex,
   NativeScript,
   NativeScriptType,
@@ -33,6 +30,7 @@ import { KesVKey, OpCertIssueCounter } from '../opCert/opCert'
 import { decodeCbor } from '../util'
 import { classifyPath, PathTypes, splitXPubKeyCborHex } from '../crypto-providers/util'
 import { getHwSigningFileType } from '../fileWriter'
+import { HwSigningData, HwSigningType, TxFileData } from '../argTypes'
 
 const { bech32 } = require('cardano-crypto.js')
 const rw = require('rw')
@@ -143,9 +141,9 @@ export const parseTxFile = (path: string): TxFileData => {
   throw Error(Errors.InvalidTxFileError)
 }
 
-export const parseAddressFile = (path: string): Address => {
+export const parseAddressFile = (path: string): HumanAddress => {
   const data = rw.readFileSync(path, 'utf8')
-  return data.trim()
+  return data.trim() as HumanAddress
 }
 
 export const parseAppVersion = () => {

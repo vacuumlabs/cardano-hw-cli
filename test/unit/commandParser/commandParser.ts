@@ -2,11 +2,11 @@
 import assert from 'assert'
 import { parse } from '../../../src/command-parser/commandParser'
 import {
-  CardanoEra, HwSigningType, DerivationType,
+  CardanoEra, DerivationType,
   NativeScriptType,
 } from '../../../src/basicTypes'
 import { cardanoEraToSignedType, NETWORKS } from '../../../src/constants'
-import { CommandType } from '../../../src/argTypes'
+import { CommandType, HwSigningType } from '../../../src/argTypes'
 
 const resFolder = 'test/unit/commandParser/res/'
 const prefix = (filename: string) => `${resFolder}${filename}`

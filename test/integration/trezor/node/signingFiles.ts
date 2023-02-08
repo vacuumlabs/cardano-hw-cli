@@ -1,7 +1,7 @@
 /* eslint-disable max-len */
 
 import { HARDENED_THRESHOLD } from '../../../../src/constants'
-import { HwSigningType } from '../../../../src/basicTypes'
+import { HwSigningType } from '../../../../src/argTypes'
 
 // mnemonic "all all all all all all all all all all all all"
 

@@ -1,5 +1,5 @@
 import { KesVKey } from './opCert/opCert'
-import { Address, BIP32Path, DerivationType, HwSigningData, NativeScript, Network, TxFileData, VotePublicKeyHex } from './basicTypes'
+import { HumanAddress, BIP32Path, DerivationType, NativeScript, Network, VotePublicKeyHex, CardanoEra, CborHex, XPubKeyCborHex } from './basicTypes'
 
 export enum CommandType {
   APP_VERSION = 'version',
@@ -14,6 +14,23 @@ export enum CommandType {
   SIGN_OPERATIONAL_CERTIFICATE = 'node.issue-op-cert',
   NODE_KEY_GEN = 'node.key-gen',
   CIP36_REGISTRATION_METADATA = 'vote.registration-metadata',
+}
+
+export enum HwSigningType {
+  Payment, Stake, PoolCold, Mint, MultiSig, CIP36Voting
+}
+
+export type HwSigningData = {
+  type: HwSigningType
+  path: BIP32Path,
+  cborXPubKeyHex: XPubKeyCborHex
+}
+
+export type TxFileData = {
+  envelopeType: string,
+  era: CardanoEra,
+  description: string,
+  cborHex: CborHex,
 }
 
 export type ParsedAppVersionArguments = {
@@ -32,7 +49,7 @@ export type ParsedShowAddressArguments = {
   paymentScriptHash: string,
   stakingPath: BIP32Path,
   stakingScriptHash: string,
-  address: Address,
+  address: HumanAddress,
   derivationType?: DerivationType,
 }
 

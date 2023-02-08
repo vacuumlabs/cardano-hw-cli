@@ -3,8 +3,6 @@ import {
   BIP32Path,
   CborHex,
   CardanoEra,
-  HwSigningData,
-  TxFileData,
   PubKeyHex,
   PubKeyCborHex,
   ChainCodeHex,
@@ -20,6 +18,7 @@ import {
   DerivationType,
 } from './basicTypes'
 import { decodeCbor } from './util'
+import { TxFileData, HwSigningData } from './argTypes'
 
 export const isEra = (value: unknown): value is CardanoEra => Object.values(CardanoEra).includes(value as CardanoEra)
 

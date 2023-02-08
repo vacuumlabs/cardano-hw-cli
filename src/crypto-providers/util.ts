@@ -24,11 +24,9 @@ import {
   _XPubKey,
 } from '../transaction/txTypes'
 import {
-  Address,
+  HumanAddress,
   BIP32Path,
   HexString,
-  HwSigningData,
-  HwSigningType,
   PubKeyHex,
   XPubKeyCborHex,
   Network, NetworkIds, ProtocolMagics, AddressType, CVoteDelegation
@@ -37,6 +35,7 @@ import { decodeCbor, encodeCbor } from '../util'
 import {
   SigningMode,
 } from './cryptoProvider'
+import { HwSigningData, HwSigningType } from '../argTypes'
 
 const cardanoCrypto = require('cardano-crypto.js')
 const {
@@ -438,7 +437,7 @@ const areAddressParamsAllowed = (signingMode: SigningMode) : boolean => (
   [SigningMode.ORDINARY_TRANSACTION, SigningMode.PLUTUS_TRANSACTION].includes(signingMode)
 )
 
-const getAddressAttributes = (addressStr: Address): {
+const getAddressAttributes = (addressStr: HumanAddress): {
   addressType: number,
   networkId: number,
   protocolMagic: number,

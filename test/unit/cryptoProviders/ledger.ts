@@ -1,6 +1,6 @@
 import assert from 'assert'
 import { HARDENED_THRESHOLD } from '../../../src/constants'
-import { AddressType, NetworkIds, ProtocolMagics } from '../../../src/basicTypes'
+import { AddressType, HumanAddress, NetworkIds, ProtocolMagics } from '../../../src/basicTypes'
 import { classifyPath, getAddressAttributes, PathTypes } from '../../../src/crypto-providers/util'
 
 describe('Test util', () => {
@@ -51,7 +51,7 @@ describe('Test util', () => {
   describe('Gets correct address attributes', () => {
     it('Byron address', () => {
       assert.deepStrictEqual(
-        getAddressAttributes('Ae2tdPwUPEZELF6oijm8VFmhWpujnNzyG2zCf4RxfhmWqQKHo2drRD5Uhah'),
+        getAddressAttributes('Ae2tdPwUPEZELF6oijm8VFmhWpujnNzyG2zCf4RxfhmWqQKHo2drRD5Uhah' as HumanAddress),
         {
           addressType: AddressType.BYRON,
           networkId: NetworkIds.MAINNET,
@@ -63,7 +63,7 @@ describe('Test util', () => {
     it('Shelley address (testnet, payment key, staking key)', () => {
       assert.deepStrictEqual(
         // eslint-disable-next-line max-len
-        getAddressAttributes('addr_test1qpd9xypc9xnnstp2kas3r7mf7ylxn4sksfxxypvwgnc63vcayfawlf9hwv2fzuygt2km5v92kvf8e3s3mk7ynxw77cwq9nnhk4'),
+        getAddressAttributes('addr_test1qpd9xypc9xnnstp2kas3r7mf7ylxn4sksfxxypvwgnc63vcayfawlf9hwv2fzuygt2km5v92kvf8e3s3mk7ynxw77cwq9nnhk4' as HumanAddress),
         {
           addressType: AddressType.BASE_PAYMENT_KEY_STAKE_KEY,
           networkId: NetworkIds.TESTNET,
@@ -75,7 +75,7 @@ describe('Test util', () => {
     it('Shelley address (mainnet, payment script, staking script)', () => {
       assert.deepStrictEqual(
         // eslint-disable-next-line max-len
-        getAddressAttributes('addr1x96vdmkys5w64dkvjv5rkpkh837wrmxvyrm0n07mw9dqtu6jms758dkjge0fvyyuuadtvx47t6wpmz3unnn0lz36755qp6mwvr'),
+        getAddressAttributes('addr1x96vdmkys5w64dkvjv5rkpkh837wrmxvyrm0n07mw9dqtu6jms758dkjge0fvyyuuadtvx47t6wpmz3unnn0lz36755qp6mwvr' as HumanAddress),
         {
           addressType: AddressType.BASE_PAYMENT_SCRIPT_STAKE_SCRIPT,
           networkId: NetworkIds.MAINNET,
