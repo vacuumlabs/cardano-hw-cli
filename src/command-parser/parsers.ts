@@ -214,7 +214,7 @@ export const parseVotePubFileJcli = (path: string): VotePublicKeyHex => {
   return parseVotePubKeyBech32(data)
 }
 
-const tryToExtractVoteXPubKey = (cborXPubKeyHex: any): VotePublicKeyHex => {
+const tryToExtractVoteXPubKey = (cborXPubKeyHex: unknown): VotePublicKeyHex => {
   if (isXPubKeyCborHex(cborXPubKeyHex)) {
     const keyHex = splitXPubKeyCborHex(cborXPubKeyHex).pubKey.toString('hex')
     if (isVotePublicKeyHex(keyHex)) {
@@ -273,18 +273,22 @@ const nativeScriptTypeMap: {[key: string]: NativeScriptType} = {
   sig: NativeScriptType.PUBKEY,
 }
 
-const parseNativeScriptData = (data: any): NativeScript => {
-  const isCorrectNumber = (n: any): boolean => typeof n === 'number' && n >= 0 && n <= Number.MAX_SAFE_INTEGER
+const parseNativeScriptData = (data: unknown): NativeScript => {
+  const isCorrectNumber = (n: unknown): n is number => typeof n === 'number' && n >= 0 && n <= Number.MAX_SAFE_INTEGER
 
-  if (!data.type || !(data.type in nativeScriptTypeMap)) {
+  const isNativeScriptData =
+    typeof data === 'object' && data !== null &&
+    'type' in data && typeof data.type === 'string' &&
+    data.type in nativeScriptTypeMap
+  if (!isNativeScriptData) {
     throw Error(Errors.InvalidNativeScriptFile)
   }
 
-  const type = nativeScriptTypeMap[data.type]
+  const type = nativeScriptTypeMap[data.type as NativeScriptType]
 
   switch (type) {
     case NativeScriptType.PUBKEY:
-      if (!data.keyHash || typeof data.keyHash !== 'string') {
+      if (!('keyHash' in data) || !data.keyHash || typeof data.keyHash !== 'string') {
         throw Error(Errors.InvalidNativeScriptFile)
       }
       return {
@@ -293,7 +297,7 @@ const parseNativeScriptData = (data: any): NativeScript => {
       }
     case NativeScriptType.ALL:
     case NativeScriptType.ANY:
-      if (!data.scripts || !Array.isArray(data.scripts)) {
+      if (!('scripts' in data) || !data.scripts || !Array.isArray(data.scripts)) {
         throw Error(Errors.InvalidNativeScriptFile)
       }
       return {
@@ -301,7 +305,10 @@ const parseNativeScriptData = (data: any): NativeScript => {
         scripts: data.scripts.map(parseNativeScriptData),
       }
     case NativeScriptType.N_OF_K:
-      if (!isCorrectNumber(data.required) || !data.scripts || !Array.isArray(data.scripts)) {
+      if (!('required' in data) || !isCorrectNumber(data.required)) {
+        throw Error(Errors.InvalidNativeScriptFile)
+      }
+      if (!('scripts' in data) || !data.scripts || !Array.isArray(data.scripts)) {
         throw Error(Errors.InvalidNativeScriptFile)
       }
       return {
@@ -311,12 +318,12 @@ const parseNativeScriptData = (data: any): NativeScript => {
       }
     case NativeScriptType.INVALID_BEFORE:
     case NativeScriptType.INVALID_HEREAFTER:
-      if (!isCorrectNumber(data.slot)) {
+      if (!('slot' in data) || !isCorrectNumber(data.slot)) {
         throw Error(Errors.InvalidNativeScriptFile)
       }
       return {
         type,
-        slot: data.slot,
+        slot: BigInt(data.slot),
       }
     default:
       throw Error(Errors.Unreachable)

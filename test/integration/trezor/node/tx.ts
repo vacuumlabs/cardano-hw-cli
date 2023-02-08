@@ -671,6 +671,7 @@ const transactions = {
   },
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function testTxWitnessing(cryptoProvider: CryptoProvider, transaction: any) {
   validateTxBeforeWitnessing(transaction.cborHex)
   const txCbor = Buffer.from(transaction.cborHex, 'hex')

@@ -19,6 +19,7 @@ const opCerts = {
   },
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function testOpCertSigning(cryptoProvider: CryptoProvider, opCert: any) {
   const signedOpCertCborHex = await cryptoProvider.signOperationalCertificate(
     opCert.kesVKey,
