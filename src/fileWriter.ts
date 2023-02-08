@@ -1,4 +1,4 @@
-import { BIP32Path, CardanoEra, Cbor, XPubKeyCborHex, XPubKeyHex } from './basicTypes'
+import { BIP32Path, CardanoEra, Cbor, CborHex, XPubKeyCborHex, XPubKeyHex } from './basicTypes'
 import {
   cardanoEraToWitnessType,
   HARDENED_THRESHOLD,
@@ -8,18 +8,51 @@ import { classifyPath, PathTypes } from './crypto-providers/util'
 import { OpCertIssueCounter, SignedOpCertCborHex } from './opCert/opCert'
 import {
   TxCborHex,
-  TxFileOutput,
   TxWitnessByron,
+  TxWitnessCborHex,
   TxWitnessShelley,
-  WitnessOutput,
 } from './transaction/types'
-import {
-  HwSigningOutput,
-  OpCertIssueCounterOutput,
-  OutputData,
-  VerificationKeyOutput,
-} from './types'
 import { encodeCbor } from './util'
+
+export type TxFileOutput = {
+  type: string,
+  description: string,
+  cborHex: TxCborHex,
+}
+
+export type WitnessOutput = {
+  type: string
+  description: '',
+  cborHex: TxWitnessCborHex,
+}
+
+export type HwSigningOutput = {
+  type: string,
+  description: string,
+  path: string,
+  cborXPubKeyHex: XPubKeyCborHex,
+}
+
+export type VerificationKeyOutput = {
+  type: string,
+  description: string,
+  cborHex: CborHex,
+}
+
+// TODO maybe generalize? see also VerificationKeyOutput
+export type OpCertIssueCounterOutput = {
+  type: string,
+  description: string,
+  cborHex: CborHex
+}
+
+export type OutputData =
+  | TxFileOutput
+  | WitnessOutput
+  | HwSigningOutput
+  | VerificationKeyOutput
+  | OpCertIssueCounterOutput
+
 
 const rw = require('rw')
 

@@ -47,18 +47,6 @@ export type _XPubKey = {
   chainCode: Buffer,
 }
 
-export type TxFileOutput = {
-  type: string,
-  description: string,
-  cborHex: TxCborHex,
-}
-
-export type WitnessOutput = {
-  type: string
-  description: '',
-  cborHex: TxWitnessCborHex,
-}
-
 export type CIP36RegistrationMetaDataPayloadItem = [Buffer, bigint][] | Buffer | bigint
 export type CIP36RegistrationMetaData = Map<number, Map<number, CIP36RegistrationMetaDataPayloadItem>>
 export type CIP36RegistrationMetaDataCborHex = CborHex
