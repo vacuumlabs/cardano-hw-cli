@@ -9,6 +9,7 @@ import {
   constructOpCertIssueCounterOutput,
   writeCbor,
   writeOutputData,
+  WitnessOutput,
 } from './fileWriter'
 import {
   ParsedShowAddressArguments,
@@ -35,7 +36,6 @@ import { Errors } from './errors'
 import { parseOpCertIssueCounterFile } from './command-parser/parsers'
 import { CIP36_VOTING_PURPOSE_CATALYST } from './constants'
 import { validateWitnessing } from './crypto-providers/witnessingValidation'
-import { WitnessOutput } from './transaction/types'
 import { validateTxBeforeWitnessing } from './transaction/transactionValidation'
 import { Cbor, CVoteDelegation } from './basicTypes'
 

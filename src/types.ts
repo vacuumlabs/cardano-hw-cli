@@ -1,7 +1,6 @@
-import { TxFileOutput, WitnessOutput } from './transaction/types'
 import { CommandType } from './command-parser/commandParser'
 import { KesVKey } from './opCert/opCert'
-import { Address, BIP32Path, CborHex, DerivationType, HwSigningData, NativeScript, Network, TxFileData, VotePublicKeyHex, XPubKeyCborHex } from './basicTypes'
+import { Address, BIP32Path, DerivationType, HwSigningData, NativeScript, Network, TxFileData, VotePublicKeyHex } from './basicTypes'
 
 export type ParsedAppVersionArguments = {
   command: CommandType.APP_VERSION,
@@ -109,33 +108,6 @@ export type ParsedArguments =
   | ParsedNodeKeyGenArguments
   | ParsedOpCertArguments
   | ParsedCIP36RegistrationMetadataArguments
-
-export type HwSigningOutput = {
-  type: string,
-  description: string,
-  path: string,
-  cborXPubKeyHex: XPubKeyCborHex,
-}
-
-export type VerificationKeyOutput = {
-  type: string,
-  description: string,
-  cborHex: CborHex,
-}
-
-// TODO maybe generalize? see also VerificationKeyOutput
-export type OpCertIssueCounterOutput = {
-  type: string,
-  description: string,
-  cborHex: CborHex
-}
-
-export type OutputData =
-  | TxFileOutput
-  | WitnessOutput
-  | HwSigningOutput
-  | VerificationKeyOutput
-  | OpCertIssueCounterOutput
 
 export enum ExitCode {
   Success = 0,
