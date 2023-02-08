@@ -364,11 +364,11 @@ describe('Command parser', () => {
           },
           {
             type: NativeScriptType.INVALID_BEFORE,
-            slot: 100,
+            slot: 100n,
           },
           {
             type: NativeScriptType.INVALID_HEREAFTER,
-            slot: 200,
+            slot: 200n,
           },
         ],
       },

@@ -56,8 +56,10 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
   const getVersion = async (): Promise<string> => {
     const { payload: features } = await TrezorConnect.getFeatures()
     const isSuccessful = (
-      value: any,
-    ): value is TrezorTypes.Features => !value.error
+      value: unknown,
+    ): value is TrezorTypes.Features =>
+      typeof value === 'object' && value !== null &&
+      !('error' in value)
 
     if (!isSuccessful(features)) throw Error(Errors.TrezorVersionError)
 
@@ -135,7 +137,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
       showOnTrezor: true,
     })
 
-    if ((response as any).error || !response.success) {
+    if (('error' in response && response.error != null) || !response.success) {
       throw Error(Errors.InvalidAddressParametersProvidedError)
     }
   }
@@ -153,8 +155,10 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     })
 
     const isSuccessful = (
-      value: any,
-    ): value is TrezorTypes.CardanoPublicKey[] => !value.error
+      value: unknown,
+    ): value is TrezorTypes.CardanoPublicKey[] =>
+      typeof value === 'object' && value !== null &&
+      !('error' in value)
 
     if (!isSuccessful(payload)) {
       throw Error(Errors.TrezorXPubKeyCancelled)
@@ -396,6 +400,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
 
     return {
       type: TrezorEnums.CardanoCertificateType.STAKE_POOL_REGISTRATION,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       path: null as any, // path can be null here, library type definition is wrong
       poolParameters,
     }

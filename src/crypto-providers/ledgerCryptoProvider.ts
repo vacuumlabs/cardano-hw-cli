@@ -54,7 +54,7 @@ import {
 
 const { bech32 } = require('cardano-crypto.js')
 
-const failedMsg = (e: any): string => `The requested operation failed. \
+const failedMsg = (e: unknown): string => `The requested operation failed. \
 Check that your Ledger device is connected, unlocked and with Cardano app running.
 Details: ${e}`
 

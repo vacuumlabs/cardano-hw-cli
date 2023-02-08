@@ -74,6 +74,7 @@ const cip36Registrations = {
   },
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function testCIP36RegistrationMetaDataSigning(cryptoProvider: CryptoProvider, cip36Registration: any) {
   const { signedCIP36RegistrationMetaDataHex, ...args } = cip36Registration
 

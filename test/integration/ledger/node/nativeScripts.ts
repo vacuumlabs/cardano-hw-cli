@@ -7,6 +7,7 @@ import { getTransport } from './speculos'
 
 interface TestItem {
   nativeScript: NativeScript,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   hwSigningFiles: any[],
   expectedNativeScriptHashHex: string,
 }

@@ -1,7 +1,7 @@
 import assert from 'assert'
 import { encodeCbor } from '../../src/util'
 
-function testCbor(value: any, expected: any) {
+function testCbor(value: unknown, expected: unknown) {
   const encoded = encodeCbor(value)
   assert.deepStrictEqual(encoded.toString('hex'), expected)
 }

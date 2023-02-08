@@ -6,7 +6,7 @@ const cbor = require('cbor')
 // these functions should be used only for the other simple stuff (eg. keys, ...)
 export const decodeCbor = cbor.decode
 
-export const encodeCbor = (value: any) => {
+export const encodeCbor = (value: unknown) => {
   const enc = new Encoder({ collapseBigIntegers: true })
   enc.pushAny(value)
   return enc.read()
