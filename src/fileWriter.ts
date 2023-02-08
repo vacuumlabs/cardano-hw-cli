@@ -11,7 +11,7 @@ import {
   TxWitnessByron,
   TxWitnessCborHex,
   TxWitnessShelley,
-} from './transaction/types'
+} from './transaction/txTypes'
 import { encodeCbor } from './util'
 
 export type TxFileOutput = {

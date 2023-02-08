@@ -22,7 +22,7 @@ import {
   CIP36RegistrationMetaData,
   CIP36RegistrationMetaDataPayloadItem,
   _XPubKey,
-} from '../transaction/types'
+} from '../transaction/txTypes'
 import {
   Address,
   BIP32Path,

@@ -5,7 +5,7 @@ import {
   CIP36RegistrationMetaDataCborHex,
   TxWitnesses,
   TxWitnessKeys,
-} from '../transaction/types'
+} from '../transaction/txTypes'
 import {
   CryptoProvider,
   SigningMode,
