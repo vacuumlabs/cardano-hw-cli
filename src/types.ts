@@ -109,9 +109,3 @@ export type ParsedArguments =
   | ParsedOpCertArguments
   | ParsedCIP36RegistrationMetadataArguments
 
-export enum ExitCode {
-  Success = 0,
-  Error = 1,
-  UnfixableValidationErrorsFound = 2,
-  FixableValidationErrorsFound = 3,
-}

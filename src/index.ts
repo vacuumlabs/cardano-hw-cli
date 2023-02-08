@@ -2,12 +2,11 @@
 import { CommandType, parse } from './command-parser/commandParser'
 import { parseAppVersion } from './command-parser/parsers'
 import { CommandExecutor } from './commandExecutor'
-import { Errors } from './errors'
+import { Errors, ExitCode } from './errors'
 import {
   transformTx,
   validateTx,
 } from './transaction/transactionValidation'
-import { ExitCode } from './types'
 
 const executeCommand = async (): Promise<ExitCode> => {
   const { parser, parsedArgs } = parse(process.argv)

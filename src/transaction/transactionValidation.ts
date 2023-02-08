@@ -1,10 +1,9 @@
 import * as InteropLib from 'cardano-hw-interop-lib'
-import { Errors } from '../errors'
+import { Errors, ExitCode } from '../errors'
 import { partition } from '../util'
 import {
   ParsedTransactionValidateArguments,
   ParsedTransactionTransformArguments,
-  ExitCode,
 } from '../types'
 import { constructTxFileOutput, writeOutputData } from '../fileWriter'
 import { containsVKeyWitnesses } from './transaction'
