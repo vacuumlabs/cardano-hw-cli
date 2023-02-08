@@ -11,6 +11,7 @@ import {
   _AddressParameters,
   SigningMode,
   SigningParameters,
+  NativeScriptDisplayFormat,
 } from './types'
 import {
   TxByronWitnessData,
@@ -20,17 +21,15 @@ import {
   BIP32Path,
   HexString,
   HwSigningData,
-  NativeScript,
-  NativeScriptDisplayFormat,
-  NativeScriptHashKeyHex,
-  Network,
   PubKeyHex,
   XPubKeyHex,
-  NativeScriptType,
-  ParsedShowAddressArguments,
   DerivationType,
+  NativeScriptHashKeyHex,
+  Network,
+  NativeScriptType,
+  NativeScript,
   CVoteDelegation,
-} from '../types'
+} from '../basicTypes'
 import {
   encodeAddress,
   filterSigningFiles,
@@ -49,6 +48,7 @@ import { Errors } from '../errors'
 import { partition } from '../util'
 import { KesVKey, OpCertIssueCounter, SignedOpCertCborHex } from '../opCert/opCert'
 import { parseBIP32Path } from '../command-parser/parsers'
+import { ParsedShowAddressArguments } from '../types'
 
 const { bech32 } = require('cardano-crypto.js')
 

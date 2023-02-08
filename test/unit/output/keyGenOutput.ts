@@ -3,7 +3,7 @@ import assert from 'assert'
 import { parseBIP32Path } from '../../../src/command-parser/parsers'
 
 import { constructVerificationKeyOutput, constructHwSigningKeyOutput } from '../../../src/fileWriter'
-import { XPubKeyHex } from '../../../src/types'
+import { XPubKeyHex } from '../../../src/basicTypes'
 
 describe('Key-gen output', () => {
   it('Should generate correct output for CIP36 vote keys', () => {

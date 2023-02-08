@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
 /* eslint quote-props: ["error", "consistent"] */
-import { NetworkIds } from '../types'
+import { NetworkIds } from '../basicTypes'
 import {
   parseAddressFile,
   parseHwSigningFile,

@@ -1,6 +1,6 @@
 import assert from 'assert'
 import { HARDENED_THRESHOLD } from '../../../src/constants'
-import { AddressType, NetworkIds, ProtocolMagics } from '../../../src/types'
+import { AddressType, NetworkIds, ProtocolMagics } from '../../../src/basicTypes'
 import { classifyPath, getAddressAttributes, PathTypes } from '../../../src/crypto-providers/util'
 
 describe('Test util', () => {

@@ -7,16 +7,12 @@ import {
 import {
   HwSigningData,
   BIP32Path,
-  Network,
   XPubKeyHex,
-  NativeScript,
   NativeScriptHashKeyHex,
-  NativeScriptDisplayFormat,
-  ParsedShowAddressArguments,
   CardanoEra,
-  DerivationType,
-  CVoteDelegation,
-} from '../types'
+  DerivationType, NativeScript, Network, CVoteDelegation,
+} from '../basicTypes'
+import { ParsedShowAddressArguments } from '../types'
 
 export enum SigningMode {
   ORDINARY_TRANSACTION,
@@ -34,6 +30,11 @@ export type SigningParameters = {
   network: Network,
   era: CardanoEra,
   derivationType?: DerivationType,
+}
+
+export enum NativeScriptDisplayFormat {
+  BECH32,
+  POLICY_ID,
 }
 
 export type CryptoProvider = {

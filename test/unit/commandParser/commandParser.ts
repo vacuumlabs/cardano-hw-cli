@@ -2,8 +2,9 @@
 import assert from 'assert'
 import { CommandType, parse } from '../../../src/command-parser/commandParser'
 import {
-  CardanoEra, HwSigningType, NativeScriptType, DerivationType,
-} from '../../../src/types'
+  CardanoEra, HwSigningType, DerivationType,
+  NativeScriptType,
+} from '../../../src/basicTypes'
 import { cardanoEraToSignedType, NETWORKS } from '../../../src/constants'
 
 const resFolder = 'test/unit/commandParser/res/'

@@ -9,7 +9,7 @@ import { validateTxBeforeWitnessing } from '../../../../src/transaction/transact
 
 import { signingFiles } from './signingFiles'
 import { getTransport } from './speculos'
-import { CardanoEra } from '../../../../src/types'
+import { CardanoEra } from '../../../../src/basicTypes'
 import { CryptoProvider } from '../../../../src/crypto-providers/types'
 
 // Note for future readers (Dec 2022): The tests in this file were created in the cardano-cli's

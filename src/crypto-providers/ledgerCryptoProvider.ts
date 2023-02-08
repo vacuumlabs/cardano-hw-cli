@@ -19,20 +19,21 @@ import {
 } from '../transaction/types'
 import {
   BIP32Path,
-  CVoteDelegation,
   HexString,
   HwSigningData,
-  NativeScript,
-  NativeScriptDisplayFormat,
   NativeScriptHashKeyHex,
+  XPubKeyHex,
+  NativeScript,
   NativeScriptType,
   Network,
+  CVoteDelegation,
+} from '../basicTypes'
+import {
   ParsedShowAddressArguments,
-  XPubKeyHex,
 } from '../types'
 import { partition } from '../util'
 import {
-  CryptoProvider, _AddressParameters, SigningMode, SigningParameters,
+  CryptoProvider, _AddressParameters, SigningMode, SigningParameters, NativeScriptDisplayFormat,
 } from './types'
 import {
   findSigningPathForKeyHash,

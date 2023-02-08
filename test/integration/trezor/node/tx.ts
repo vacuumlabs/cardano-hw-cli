@@ -8,7 +8,7 @@ import { validateWitnessing } from '../../../../src/crypto-providers/witnessingV
 import { validateTxBeforeWitnessing } from '../../../../src/transaction/transactionValidation'
 
 import { signingFiles } from './signingFiles'
-import { CardanoEra } from '../../../../src/types'
+import { CardanoEra } from '../../../../src/basicTypes'
 import { CryptoProvider } from '../../../../src/crypto-providers/types'
 
 // Note for future readers (Dec 2022): The tests in this file were created in the cardano-cli's

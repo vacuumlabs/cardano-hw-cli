@@ -4,7 +4,7 @@ import {
   Uint,
 } from 'cardano-hw-interop-lib'
 import { Errors } from '../errors'
-import { HwSigningData } from '../types'
+import { HwSigningData } from '../basicTypes'
 import {
   SigningMode,
   SigningParameters,

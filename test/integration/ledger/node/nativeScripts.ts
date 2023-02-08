@@ -1,7 +1,7 @@
 import assert from 'assert'
+import { NativeScript, NativeScriptType } from '../../../../src/basicTypes'
 import { LedgerCryptoProvider } from '../../../../src/crypto-providers/ledgerCryptoProvider'
-import { CryptoProvider } from '../../../../src/crypto-providers/types'
-import { NativeScriptType, NativeScriptDisplayFormat, NativeScript } from '../../../../src/types'
+import { CryptoProvider, NativeScriptDisplayFormat } from '../../../../src/crypto-providers/types'
 import { signingFiles } from './signingFiles'
 import { getTransport } from './speculos'
 
