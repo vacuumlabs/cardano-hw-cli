@@ -30,7 +30,7 @@ import {
 } from '../basicTypes'
 import {
   ParsedShowAddressArguments,
-} from '../types'
+} from '../argTypes'
 import { partition } from '../util'
 import {
   CryptoProvider, _AddressParameters, SigningMode, SigningParameters, NativeScriptDisplayFormat,

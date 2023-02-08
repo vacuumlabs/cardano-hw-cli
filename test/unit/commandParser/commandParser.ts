@@ -1,11 +1,12 @@
 /* eslint-disable max-len */
 import assert from 'assert'
-import { CommandType, parse } from '../../../src/command-parser/commandParser'
+import { parse } from '../../../src/command-parser/commandParser'
 import {
   CardanoEra, HwSigningType, DerivationType,
   NativeScriptType,
 } from '../../../src/basicTypes'
 import { cardanoEraToSignedType, NETWORKS } from '../../../src/constants'
+import { CommandType } from '../../../src/argTypes'
 
 const resFolder = 'test/unit/commandParser/res/'
 const prefix = (filename: string) => `${resFolder}${filename}`

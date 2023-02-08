@@ -1,21 +1,6 @@
 import { ArgumentGroup, ArgumentParser, SubParser } from 'argparse'
-import { ParsedArguments } from '../types'
+import { ParsedArguments } from '../argTypes'
 import { ParserConfig, parserConfig } from './parserConfig'
-
-export enum CommandType {
-  APP_VERSION = 'version',
-  DEVICE_VERSION = 'device.version',
-  SHOW_ADDRESS = 'address.show',
-  ADDRESS_KEY_GEN = 'address.key-gen',
-  VERIFICATION_KEY = 'key.verification-key',
-  WITNESS_TRANSACTION = 'transaction.witness',
-  VALIDATE_TRANSACTION = 'transaction.validate',
-  TRANSFORM_TRANSACTION = 'transaction.transform',
-  DERIVE_NATIVE_SCRIPT_HASH = 'transaction.policyid',
-  SIGN_OPERATIONAL_CERTIFICATE = 'node.issue-op-cert',
-  NODE_KEY_GEN = 'node.key-gen',
-  CIP36_REGISTRATION_METADATA = 'vote.registration-metadata',
-}
 
 const initParser = (parser: ArgumentParser | ArgumentGroup, config: ParserConfig): void => {
   const MUTUALLY_EXCLUSIVE_GROUP_KEY = '_mutually-exclusive-group'

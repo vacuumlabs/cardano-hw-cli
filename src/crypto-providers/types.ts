@@ -12,7 +12,7 @@ import {
   CardanoEra,
   DerivationType, NativeScript, Network, CVoteDelegation,
 } from '../basicTypes'
-import { ParsedShowAddressArguments } from '../types'
+import { ParsedShowAddressArguments } from '../argTypes'
 
 export enum SigningMode {
   ORDINARY_TRANSACTION,
