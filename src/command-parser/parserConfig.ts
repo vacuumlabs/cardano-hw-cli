@@ -17,6 +17,8 @@ import {
   parseVotePubFileCli,
 } from './parsers'
 
+export type ParserConfig = { [key: string]: ParserConfig | object }
+
 const derivationTypeArg = {
   '--derivation-type': {
     required: false,
@@ -160,7 +162,7 @@ const opCertSigningArgs = {
 
 // based on cardano-cli interface
 // https://docs.cardano.org/projects/cardano-node/en/latest/reference/cardano-node-cli-reference.html
-export const parserConfig = {
+export const parserConfig: ParserConfig = {
   // ===============  commands specific for hw interactions  ===============
   'version': {},
   'device': {
