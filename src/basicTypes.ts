@@ -31,39 +31,10 @@ export type VotePublicKeyHex = FixlenHexString<typeof VOTE_PUBLIC_KEY_HEX_LENGTH
 export const NATIVE_SCRIPT_HASH_HEX_LENGTH = 28
 export type NativeScriptHashKeyHex = FixlenHexString<typeof NATIVE_SCRIPT_HASH_HEX_LENGTH>
 
+export type Cbor = Buffer & { __type: 'cbor' }
 export type CborHex = string & { __type: 'cborHex' }
 
 export type BIP32Path = number[] & { __type: 'bip32path' }
-
-export enum HwSigningType {
-  Payment, Stake, PoolCold, Mint, MultiSig, CIP36Voting
-}
-
-export type HwSigningData = {
-  type: HwSigningType
-  path: BIP32Path,
-  cborXPubKeyHex: XPubKeyCborHex
-}
-
-export type TxFileData = {
-  envelopeType: string,
-  era: CardanoEra,
-  description: string,
-  cborHex: CborHex,
-}
-
-export type Address = string
-
-/* eslint-disable max-len */
-// Currently, this is used only by Trezor. Relevant docs:
-// https://github.com/trezor/trezor-suite/blob/1a0125c9e1d738f5750f935f1aed4d17a37e69ba/docs/packages/connect/methods/cardanoSignTransaction.md#params
-// https://github.com/trezor/trezor-firmware/blob/4bed278e80d23077676128eba8cb2478fcd31120/core/src/apps/cardano/README.md#seed-derivation-schemes
-/* eslint-enable max-len */
-export enum DerivationType {
-  LEDGER = 'LEDGER',
-  ICARUS = 'ICARUS',
-  ICARUS_TREZOR = 'ICARUS_TREZOR',
-}
 
 export enum NetworkIds {
   MAINNET = 1,
@@ -84,6 +55,23 @@ export type Network = {
   networkId: number,
   protocolMagic: number,
 }
+
+// Address type as defined in the Cardano CDDL
+export enum AddressType {
+    BASE_PAYMENT_KEY_STAKE_KEY = 0b0000,
+    BASE_PAYMENT_SCRIPT_STAKE_KEY = 0b0001,
+    BASE_PAYMENT_KEY_STAKE_SCRIPT = 0b0010,
+    BASE_PAYMENT_SCRIPT_STAKE_SCRIPT = 0b0011,
+    POINTER_KEY = 0b0100,
+    POINTER_SCRIPT = 0b0101,
+    ENTERPRISE_KEY = 0b0110,
+    ENTERPRISE_SCRIPT = 0b0111,
+    BYRON = 0b1000,
+    REWARD_KEY = 0b1110,
+    REWARD_SCRIPT = 0b1111,
+}
+
+export type HumanAddress = string & { __type: 'humanAddress' }
 
 export enum NativeScriptType {
   PUBKEY,
@@ -109,24 +97,18 @@ export type NativeScript = {
   slot: bigint,
 }
 
-export type Cbor = Buffer & { __type: 'cbor' }
-
-// Address type as defined in the Cardano CDDL
-export enum AddressType {
-    BASE_PAYMENT_KEY_STAKE_KEY = 0b0000,
-    BASE_PAYMENT_SCRIPT_STAKE_KEY = 0b0001,
-    BASE_PAYMENT_KEY_STAKE_SCRIPT = 0b0010,
-    BASE_PAYMENT_SCRIPT_STAKE_SCRIPT = 0b0011,
-    POINTER_KEY = 0b0100,
-    POINTER_SCRIPT = 0b0101,
-    ENTERPRISE_KEY = 0b0110,
-    ENTERPRISE_SCRIPT = 0b0111,
-    BYRON = 0b1000,
-    REWARD_KEY = 0b1110,
-    REWARD_SCRIPT = 0b1111,
-}
-
 export type CVoteDelegation = {
   votePublicKey: VotePublicKeyHex,
   voteWeight: bigint,
+}
+
+/* eslint-disable max-len */
+// Currently, this is used only by Trezor. Relevant docs:
+// https://github.com/trezor/trezor-suite/blob/1a0125c9e1d738f5750f935f1aed4d17a37e69ba/docs/packages/connect/methods/cardanoSignTransaction.md#params
+// https://github.com/trezor/trezor-firmware/blob/4bed278e80d23077676128eba8cb2478fcd31120/core/src/apps/cardano/README.md#seed-derivation-schemes
+/* eslint-enable max-len */
+export enum DerivationType {
+  LEDGER = 'LEDGER',
+  ICARUS = 'ICARUS',
+  ICARUS_TREZOR = 'ICARUS_TREZOR',
 }

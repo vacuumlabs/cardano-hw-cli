@@ -5,14 +5,13 @@ import {
   CIP36RegistrationMetaDataCborHex,
 } from '../transaction/txTypes'
 import {
-  HwSigningData,
   BIP32Path,
   XPubKeyHex,
   NativeScriptHashKeyHex,
   CardanoEra,
   DerivationType, NativeScript, Network, CVoteDelegation,
 } from '../basicTypes'
-import { ParsedShowAddressArguments } from '../argTypes'
+import { ParsedShowAddressArguments,   HwSigningData} from '../argTypes'
 
 export enum SigningMode {
   ORDINARY_TRANSACTION,

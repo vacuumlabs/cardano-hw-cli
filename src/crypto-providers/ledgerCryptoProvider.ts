@@ -20,7 +20,6 @@ import {
 import {
   BIP32Path,
   HexString,
-  HwSigningData,
   NativeScriptHashKeyHex,
   XPubKeyHex,
   NativeScript,
@@ -29,6 +28,7 @@ import {
   CVoteDelegation,
 } from '../basicTypes'
 import {
+  HwSigningData,
   ParsedShowAddressArguments,
 } from '../argTypes'
 import { partition } from '../util'
