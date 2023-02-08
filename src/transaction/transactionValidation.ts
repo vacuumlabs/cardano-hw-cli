@@ -1,28 +1,31 @@
 import * as InteropLib from 'cardano-hw-interop-lib'
-import { Errors, ExitCode } from '../errors'
-import { partition } from '../util'
+import {Errors, ExitCode} from '../errors'
+import {partition} from '../util'
 import {
   ParsedTransactionValidateArguments,
   ParsedTransactionTransformArguments,
 } from '../argTypes'
-import { constructTxFileOutput, writeOutputData } from '../fileWriter'
-import { containsVKeyWitnesses } from './transaction'
-import { CborHex } from '../basicTypes'
+import {constructTxFileOutput, writeOutputData} from '../fileWriter'
+import {containsVKeyWitnesses} from './transaction'
+import {CborHex} from '../basicTypes'
 
 const checkValidationErrors = (
   cborHex: CborHex,
   validator: (txCbor: Buffer) => InteropLib.ValidationError[],
   printErrors: boolean,
   printSuccessMessage: boolean,
-): { containsUnfixable: boolean, containsFixable: boolean } => {
+): {containsUnfixable: boolean; containsFixable: boolean} => {
   const cbor = Buffer.from(cborHex, 'hex')
   const validationErrors = validator(cbor)
-  const [fixableErrors, unfixableErrors] = partition(validationErrors, (e) => e.fixable)
+  const [fixableErrors, unfixableErrors] = partition(
+    validationErrors,
+    (e) => e.fixable,
+  )
   const errorGroups = [
-    { title: 'unfixable', errors: unfixableErrors },
-    { title: 'fixable', errors: fixableErrors },
+    {title: 'unfixable', errors: unfixableErrors},
+    {title: 'fixable', errors: fixableErrors},
   ]
-  errorGroups.forEach(({ title, errors }) => {
+  errorGroups.forEach(({title, errors}) => {
     if (errors.length > 0 && printErrors) {
       // eslint-disable-next-line no-console
       console.log(`The transaction contains following ${title} errors:`)
@@ -35,13 +38,19 @@ const checkValidationErrors = (
     // eslint-disable-next-line no-console
     console.log('The transaction CBOR is valid and canonical.')
   }
-  return { containsUnfixable: unfixableErrors.length > 0, containsFixable: fixableErrors.length > 0 }
+  return {
+    containsUnfixable: unfixableErrors.length > 0,
+    containsFixable: fixableErrors.length > 0,
+  }
 }
 
 const validateTxBeforeWitnessing = (txCborHex: CborHex): void => {
-  const {
-    containsUnfixable, containsFixable,
-  } = checkValidationErrors(txCborHex, InteropLib.validateTx, true, false)
+  const {containsUnfixable, containsFixable} = checkValidationErrors(
+    txCborHex,
+    InteropLib.validateTx,
+    true,
+    false,
+  )
 
   if (containsUnfixable) {
     throw Error(Errors.TxContainsUnfixableErrors)
@@ -52,18 +61,24 @@ const validateTxBeforeWitnessing = (txCborHex: CborHex): void => {
 }
 
 const validateTx = (args: ParsedTransactionValidateArguments): ExitCode => {
-  const {
-    containsUnfixable, containsFixable,
-  } = checkValidationErrors(args.txFileData.cborHex, InteropLib.validateTx, true, true)
+  const {containsUnfixable, containsFixable} = checkValidationErrors(
+    args.txFileData.cborHex,
+    InteropLib.validateTx,
+    true,
+    true,
+  )
   if (containsUnfixable) return ExitCode.UnfixableValidationErrorsFound
   if (containsFixable) return ExitCode.FixableValidationErrorsFound
   return ExitCode.Success
 }
 
 const transformTx = (args: ParsedTransactionTransformArguments): void => {
-  const {
-    containsUnfixable, containsFixable,
-  } = checkValidationErrors(args.txFileData.cborHex, InteropLib.validateTx, true, true)
+  const {containsUnfixable, containsFixable} = checkValidationErrors(
+    args.txFileData.cborHex,
+    InteropLib.validateTx,
+    true,
+    true,
+  )
   if (containsUnfixable) {
     throw Error(Errors.TxContainsUnfixableErrors)
   }
@@ -76,7 +91,9 @@ const transformTx = (args: ParsedTransactionTransformArguments): void => {
     // eslint-disable-next-line no-console
     console.log('Transformed transaction will be written to the output file.')
   }
-  const encodedTx = InteropLib.encodeTx(transformedTx).toString('hex') as CborHex
+  const encodedTx = InteropLib.encodeTx(transformedTx).toString(
+    'hex',
+  ) as CborHex
   const txFileOutput = constructTxFileOutput(
     args.txFileData.envelopeType,
     args.txFileData.description,

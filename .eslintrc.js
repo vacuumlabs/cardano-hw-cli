@@ -51,6 +51,7 @@ module.exports = {
     // helps.
     'require-await': 'off',
     'spaced-comment': ['error', 'always', {block: {balanced: true}}],
+    'quote-props': ['error', 'consistent'],
   },
   parser: '@typescript-eslint/parser',
   parserOptions: {

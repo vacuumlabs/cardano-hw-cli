@@ -1,4 +1,4 @@
-import { Encoder } from 'cbor'
+import {Encoder} from 'cbor'
 
 const cbor = require('cbor')
 
@@ -7,15 +7,17 @@ const cbor = require('cbor')
 export const decodeCbor = cbor.decode
 
 export const encodeCbor = (value: unknown) => {
-  const enc = new Encoder({ collapseBigIntegers: true })
+  const enc = new Encoder({collapseBigIntegers: true})
   enc.pushAny(value)
   return enc.read()
 }
 
-export const partition = <T>(array: T[], predicate: (t: T) => boolean): [T[], T[]] => (
-  [array.filter(predicate), array.filter((t) => !predicate(t))]
-)
+export const partition = <T>(
+  array: T[],
+  predicate: (t: T) => boolean,
+): [T[], T[]] => [array.filter(predicate), array.filter((t) => !predicate(t))]
 
-export const invertObject = (obj: {[key: string]: string}): {[key: string]: string} => (
+export const invertObject = (obj: {
+  [key: string]: string
+}): {[key: string]: string} =>
   Object.fromEntries(Object.entries(obj).map(([k, v]) => [v, k]))
-)

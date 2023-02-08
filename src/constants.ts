@@ -1,7 +1,5 @@
-import {
-  Network, NetworkIds, ProtocolMagics, CardanoEra,
-} from './basicTypes'
-import { invertObject } from './util'
+import {Network, NetworkIds, ProtocolMagics, CardanoEra} from './basicTypes'
+import {invertObject} from './util'
 
 // taken from https://book.world.dev.cardano.org/environments.html
 export const NETWORKS: {[key: string]: Network} = {

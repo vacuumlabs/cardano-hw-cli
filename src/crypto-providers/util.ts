@@ -14,9 +14,9 @@ import {
   KeyHash,
   ScriptHash,
 } from 'cardano-hw-interop-lib'
-import { HARDENED_THRESHOLD } from '../constants'
-import { Errors } from '../errors'
-import { isBIP32Path, isPubKeyHex } from '../guards'
+import {HARDENED_THRESHOLD} from '../constants'
+import {Errors} from '../errors'
+import {isBIP32Path, isPubKeyHex} from '../guards'
 import {
   CIP36RegistrationAuxiliaryData,
   CIP36RegistrationMetaData,
@@ -29,27 +29,24 @@ import {
   HexString,
   PubKeyHex,
   XPubKeyCborHex,
-  Network, NetworkIds, ProtocolMagics, AddressType, CVoteDelegation
+  Network,
+  NetworkIds,
+  ProtocolMagics,
+  AddressType,
+  CVoteDelegation,
 } from '../basicTypes'
-import { decodeCbor, encodeCbor } from '../util'
-import {
-  SigningMode,
-} from './cryptoProvider'
-import { HwSigningData, HwSigningType } from '../argTypes'
+import {decodeCbor, encodeCbor} from '../util'
+import {SigningMode} from './cryptoProvider'
+import {HwSigningData, HwSigningType} from '../argTypes'
 
 const cardanoCrypto = require('cardano-crypto.js')
-const {
-  AddressTypes,
-  base58,
-  bech32,
-  blake2b,
-} = require('cardano-crypto.js')
+const {AddressTypes, base58, bech32, blake2b} = require('cardano-crypto.js')
 
 export type _AddressParameters = {
-  address: Buffer,
-  addressType: number,
-  paymentPath?: BIP32Path,
-  stakePath?: BIP32Path,
+  address: Buffer
+  addressType: number
+  paymentPath?: BIP32Path
+  stakePath?: BIP32Path
 }
 
 enum PathTypes {
@@ -96,16 +93,20 @@ const classifyPath = (path: number[]): PathTypes => {
     case 44 + HD:
       if (path.length === 3) return PathTypes.PATH_WALLET_ACCOUNT
       if (path.length !== 5) return PathTypes.PATH_INVALID
-      if (path[3] === 0 || path[3] === 1) return PathTypes.PATH_WALLET_SPENDING_KEY_BYRON
+      if (path[3] === 0 || path[3] === 1)
+        return PathTypes.PATH_WALLET_SPENDING_KEY_BYRON
       break
     case 1852 + HD:
       if (path.length === 3) return PathTypes.PATH_WALLET_ACCOUNT
       if (path.length !== 5) return PathTypes.PATH_INVALID
-      if (path[3] === 0 || path[3] === 1) return PathTypes.PATH_WALLET_SPENDING_KEY_SHELLEY
-      if (path[3] === 2 && path[4] === 0) return PathTypes.PATH_WALLET_STAKING_KEY
+      if (path[3] === 0 || path[3] === 1)
+        return PathTypes.PATH_WALLET_SPENDING_KEY_SHELLEY
+      if (path[3] === 2 && path[4] === 0)
+        return PathTypes.PATH_WALLET_STAKING_KEY
       break
     case 1853 + HD:
-      if (path.length === 4 && path[2] === 0 + HD && path[3] >= HD) return PathTypes.PATH_POOL_COLD_KEY
+      if (path.length === 4 && path[2] === 0 + HD && path[3] >= HD)
+        return PathTypes.PATH_POOL_COLD_KEY
       break
     case 1854 + HD:
       if (path.length === 3) return PathTypes.PATH_WALLET_ACCOUNT_MULTISIG
@@ -114,11 +115,14 @@ const classifyPath = (path: number[]): PathTypes => {
       if (path[3] === 2) return PathTypes.PATH_WALLET_STAKING_KEY_MULTISIG
       break
     case 1855 + HD:
-      if (path.length === 3 && path[2] >= 0 + HD) return PathTypes.PATH_WALLET_MINTING_KEY
+      if (path.length === 3 && path[2] >= 0 + HD)
+        return PathTypes.PATH_WALLET_MINTING_KEY
       break
     case 1694 + HD:
-      if (path.length === 3 && path[2] >= 0 + HD) return PathTypes.PATH_CVOTE_ACCOUNT
-      if (path.length === 5 && path[2] >= 0 + HD && path[3] === 0) return PathTypes.PATH_CVOTE_KEY
+      if (path.length === 3 && path[2] >= 0 + HD)
+        return PathTypes.PATH_CVOTE_ACCOUNT
+      if (path.length === 5 && path[2] >= 0 + HD && path[3] === 0)
+        return PathTypes.PATH_CVOTE_KEY
       break
     default:
       break
@@ -127,15 +131,15 @@ const classifyPath = (path: number[]): PathTypes => {
   return PathTypes.PATH_INVALID
 }
 
-const pathEquals = (path1: BIP32Path, path2: BIP32Path) => (
-  path1.length === path2.length && path1.every((element, i) => element === path2[i])
-)
+const pathEquals = (path1: BIP32Path, path2: BIP32Path) =>
+  path1.length === path2.length &&
+  path1.every((element, i) => element === path2[i])
 
 const splitXPubKeyCborHex = (xPubKeyCborHex: XPubKeyCborHex): _XPubKey => {
   const xPubKeyDecoded = decodeCbor(xPubKeyCborHex)
   const pubKey = xPubKeyDecoded.slice(0, 32)
   const chainCode = xPubKeyDecoded.slice(32, 64)
-  return { pubKey, chainCode }
+  return {pubKey, chainCode}
 }
 
 const getAddressType = (address: Uint8Array): AddressType => {
@@ -152,7 +156,10 @@ const encodeAddress = (address: Buffer): string => {
   if (addressType === AddressType.BYRON) {
     return base58.encode(address)
   }
-  const addressPrefixes: Omit<Record<AddressType, string>, AddressType.BYRON> = {
+  const addressPrefixes: Omit<
+    Record<AddressType, string>,
+    AddressType.BYRON
+  > = {
     [AddressType.BASE_PAYMENT_KEY_STAKE_KEY]: 'addr',
     [AddressType.BASE_PAYMENT_SCRIPT_STAKE_KEY]: 'addr',
     [AddressType.BASE_PAYMENT_KEY_STAKE_SCRIPT]: 'addr',
@@ -164,19 +171,22 @@ const encodeAddress = (address: Buffer): string => {
     [AddressType.REWARD_KEY]: 'stake',
     [AddressType.REWARD_SCRIPT]: 'stake',
   }
-  const isTestnet = cardanoCrypto.getShelleyAddressNetworkId(address) === NetworkIds.TESTNET
-  const addressPrefix = `${addressPrefixes[addressType]}${isTestnet ? '_test' : ''}`
+  const isTestnet =
+    cardanoCrypto.getShelleyAddressNetworkId(address) === NetworkIds.TESTNET
+  const addressPrefix = `${addressPrefixes[addressType]}${
+    isTestnet ? '_test' : ''
+  }`
   return bech32.encode(addressPrefix, address)
 }
 
 const filterSigningFiles = (
   signingFiles: HwSigningData[],
 ): {
-    paymentSigningFiles: HwSigningData[],
-    stakeSigningFiles: HwSigningData[],
-    poolColdSigningFiles: HwSigningData[],
-    mintSigningFiles: HwSigningData[],
-    multisigSigningFiles: HwSigningData[],
+  paymentSigningFiles: HwSigningData[]
+  stakeSigningFiles: HwSigningData[]
+  poolColdSigningFiles: HwSigningData[]
+  mintSigningFiles: HwSigningData[]
+  multisigSigningFiles: HwSigningData[]
 } => {
   const paymentSigningFiles = signingFiles.filter(
     (signingFile) => signingFile.type === HwSigningType.Payment,
@@ -202,20 +212,23 @@ const filterSigningFiles = (
   }
 }
 
-const hwSigningFileToPubKey = (signingFile: HwSigningData): Buffer => (
+const hwSigningFileToPubKey = (signingFile: HwSigningData): Buffer =>
   splitXPubKeyCborHex(signingFile.cborXPubKeyHex).pubKey
-)
 
 const hwSigningFileToPubKeyHash = (signingFile: HwSigningData): Buffer => {
   const pubKey = hwSigningFileToPubKey(signingFile)
-  return Buffer.from(cardanoSerialization.PublicKey.from_bytes(pubKey).hash().to_bytes())
+  return Buffer.from(
+    cardanoSerialization.PublicKey.from_bytes(pubKey).hash().to_bytes(),
+  )
 }
 
 const findSigningPathForKey = (
   keyHash: Buffer,
   signingFiles: HwSigningData[],
 ): BIP32Path | undefined => {
-  const signingFile = signingFiles.find((file) => keyHash.equals(hwSigningFileToPubKey(file)))
+  const signingFile = signingFiles.find((file) =>
+    keyHash.equals(hwSigningFileToPubKey(file)),
+  )
   return signingFile?.path
 }
 
@@ -223,33 +236,50 @@ const findSigningPathForKeyHash = (
   keyHash: Buffer,
   signingFiles: HwSigningData[],
 ): BIP32Path | undefined => {
-  const signingFile = signingFiles.find((file) => keyHash.equals(hwSigningFileToPubKeyHash(file)))
+  const signingFile = signingFiles.find((file) =>
+    keyHash.equals(hwSigningFileToPubKeyHash(file)),
+  )
   return signingFile?.path
 }
 
-const extractStakePubKeyFromHwSigningData = (signingFile: HwSigningData): PubKeyHex => {
+const extractStakePubKeyFromHwSigningData = (
+  signingFile: HwSigningData,
+): PubKeyHex => {
   const cborStakeXPubKeyHex = signingFile.cborXPubKeyHex
-  const stakePubHex = splitXPubKeyCborHex(cborStakeXPubKeyHex).pubKey.toString('hex')
+  const stakePubHex =
+    splitXPubKeyCborHex(cborStakeXPubKeyHex).pubKey.toString('hex')
   if (isPubKeyHex(stakePubHex)) return stakePubHex
   throw Error(Errors.InternalInvalidTypeError)
 }
 
-const hasPaymentSigningFile = (signingFiles: HwSigningData[]): boolean => (
+const hasPaymentSigningFile = (signingFiles: HwSigningData[]): boolean =>
   signingFiles.some((signingFile) => signingFile.type === HwSigningType.Payment)
-)
 
-const hasMultisigSigningFile = (signingFiles: HwSigningData[]): boolean => (
-  signingFiles.some((signingFile) => signingFile.type === HwSigningType.MultiSig)
-)
+const hasMultisigSigningFile = (signingFiles: HwSigningData[]): boolean =>
+  signingFiles.some(
+    (signingFile) => signingFile.type === HwSigningType.MultiSig,
+  )
 
-const certificatesWithStakeCredentials = (certificates: Certificate[]): (
-    StakeRegistrationCertificate | StakeDeregistrationCertificate | StakeDelegationCertificate)[] => (
-  certificates.filter((cert) => cert.type in [
-    CertificateType.STAKE_REGISTRATION,
-    CertificateType.STAKE_DEREGISTRATION,
-    CertificateType.STAKE_DELEGATION,
-  ]) as (StakeRegistrationCertificate | StakeDeregistrationCertificate | StakeDelegationCertificate)[]
-)
+const certificatesWithStakeCredentials = (
+  certificates: Certificate[],
+): (
+  | StakeRegistrationCertificate
+  | StakeDeregistrationCertificate
+  | StakeDelegationCertificate
+)[] =>
+  certificates.filter(
+    (cert) =>
+      cert.type in
+      [
+        CertificateType.STAKE_REGISTRATION,
+        CertificateType.STAKE_DEREGISTRATION,
+        CertificateType.STAKE_DELEGATION,
+      ],
+  ) as (
+    | StakeRegistrationCertificate
+    | StakeDeregistrationCertificate
+    | StakeDelegationCertificate
+  )[]
 
 const determineSigningMode = (
   txBody: TransactionBody,
@@ -264,9 +294,12 @@ const determineSigningMode = (
   // indicates that a mistake happened at some point), this attempt is refused by
   // witnessingValidation.ts.
   if (poolRegistrationCert) {
-    const poolKeyPath = findSigningPathForKeyHash(poolRegistrationCert.poolParams.operator, signingFiles)
+    const poolKeyPath = findSigningPathForKeyHash(
+      poolRegistrationCert.poolParams.operator,
+      signingFiles,
+    )
     const isPaying = hasPaymentSigningFile(signingFiles)
-    return (poolKeyPath || isPaying)
+    return poolKeyPath || isPaying
       ? SigningMode.POOL_REGISTRATION_AS_OPERATOR
       : SigningMode.POOL_REGISTRATION_AS_OWNER
   }
@@ -291,21 +324,24 @@ const validateKeyGenInputs = (
   verificationKeyFiles: string[],
 ): void => {
   if (
-    !Array.isArray(paths)
-    || !paths.every(isBIP32Path)
-    || !Array.isArray(hwSigningFiles)
-    || !Array.isArray(verificationKeyFiles)
-    || paths.length < 1
-    || paths.length !== hwSigningFiles.length
-    || paths.length !== verificationKeyFiles.length
-  ) throw Error(Errors.InvalidKeyGenInputsError)
+    !Array.isArray(paths) ||
+    !paths.every(isBIP32Path) ||
+    !Array.isArray(hwSigningFiles) ||
+    !Array.isArray(verificationKeyFiles) ||
+    paths.length < 1 ||
+    paths.length !== hwSigningFiles.length ||
+    paths.length !== verificationKeyFiles.length
+  )
+    throw Error(Errors.InvalidKeyGenInputsError)
 }
 
 const _packByronAddress = (
   paymentSigningFile: HwSigningData,
   network: Network,
 ): _AddressParameters => {
-  const { pubKey, chainCode } = splitXPubKeyCborHex(paymentSigningFile.cborXPubKeyHex)
+  const {pubKey, chainCode} = splitXPubKeyCborHex(
+    paymentSigningFile.cborXPubKeyHex,
+  )
   const xPubKey = Buffer.concat([pubKey, chainCode])
   const address: Buffer = cardanoCrypto.packBootstrapAddress(
     paymentSigningFile.path,
@@ -326,8 +362,12 @@ const _packBaseAddress = (
   stakeSigningFile: HwSigningData,
   network: Network,
 ): _AddressParameters => {
-  const { pubKey: paymentPubKey } = splitXPubKeyCborHex(paymentSigningFile.cborXPubKeyHex)
-  const { pubKey: stakePubKey } = splitXPubKeyCborHex(stakeSigningFile.cborXPubKeyHex)
+  const {pubKey: paymentPubKey} = splitXPubKeyCborHex(
+    paymentSigningFile.cborXPubKeyHex,
+  )
+  const {pubKey: stakePubKey} = splitXPubKeyCborHex(
+    stakeSigningFile.cborXPubKeyHex,
+  )
   const address: Buffer = cardanoCrypto.packBaseAddress(
     cardanoCrypto.getPubKeyBlake2b224Hash(paymentPubKey),
     cardanoCrypto.getPubKeyBlake2b224Hash(stakePubKey),
@@ -345,7 +385,9 @@ const _packEnterpriseAddress = (
   paymentSigningFile: HwSigningData,
   network: Network,
 ): _AddressParameters => {
-  const { pubKey: paymentPubKey } = splitXPubKeyCborHex(paymentSigningFile.cborXPubKeyHex)
+  const {pubKey: paymentPubKey} = splitXPubKeyCborHex(
+    paymentSigningFile.cborXPubKeyHex,
+  )
   const address: Buffer = cardanoCrypto.packEnterpriseAddress(
     cardanoCrypto.getPubKeyBlake2b224Hash(paymentPubKey),
     network.networkId,
@@ -361,7 +403,9 @@ const _packRewardAddress = (
   stakeSigningFile: HwSigningData,
   network: Network,
 ): _AddressParameters => {
-  const { pubKey: stakePubKey } = splitXPubKeyCborHex(stakeSigningFile.cborXPubKeyHex)
+  const {pubKey: stakePubKey} = splitXPubKeyCborHex(
+    stakeSigningFile.cborXPubKeyHex,
+  )
   const address: Buffer = cardanoCrypto.packRewardAddress(
     cardanoCrypto.getPubKeyBlake2b224Hash(stakePubKey),
     network.networkId,
@@ -386,61 +430,73 @@ const getAddressParameters = (
   network: Network,
 ): _AddressParameters | null => {
   if (hwSigningData.length === 0) return null
-  const { paymentSigningFiles, stakeSigningFiles } = filterSigningFiles(hwSigningData)
+  const {paymentSigningFiles, stakeSigningFiles} =
+    filterSigningFiles(hwSigningData)
   const addressType = getAddressType(address)
-  const findMatchingAddress = (packedAddresses: (_AddressParameters | null)[]) => (
-    (packedAddresses.filter((packedAddress) => packedAddress) as _AddressParameters[]).find(
-      (packedAddress) => address.equals(packedAddress.address),
-    ) || null
-  )
+  const findMatchingAddress = (
+    packedAddresses: (_AddressParameters | null)[],
+  ) =>
+    (
+      packedAddresses.filter(
+        (packedAddress) => packedAddress,
+      ) as _AddressParameters[]
+    ).find((packedAddress) => address.equals(packedAddress.address)) || null
 
   try {
     switch (addressType) {
       case AddressType.BYRON:
         return findMatchingAddress(
-          paymentSigningFiles.map((paymentSigningFile) => _packByronAddress(paymentSigningFile, network)),
+          paymentSigningFiles.map((paymentSigningFile) =>
+            _packByronAddress(paymentSigningFile, network),
+          ),
         )
 
       case AddressType.BASE_PAYMENT_KEY_STAKE_KEY:
         return findMatchingAddress(
-          paymentSigningFiles.flatMap((paymentSigningFile) => (
-            stakeSigningFiles.map((stakeSigningFile) => (
-              _packBaseAddress(paymentSigningFile, stakeSigningFile, network)
-            ))
-          )),
+          paymentSigningFiles.flatMap((paymentSigningFile) =>
+            stakeSigningFiles.map((stakeSigningFile) =>
+              _packBaseAddress(paymentSigningFile, stakeSigningFile, network),
+            ),
+          ),
         )
-        // Note: BASE addresses containing a script hash cannot be constructed from hwSigningData this way.
-        // However, hw wallets will show them anyway, so let's just send them as address bytes.
+      // Note: BASE addresses containing a script hash cannot be constructed from hwSigningData this way.
+      // However, hw wallets will show them anyway, so let's just send them as address bytes.
 
       case AddressType.ENTERPRISE_KEY:
         return findMatchingAddress(
-          paymentSigningFiles.map((paymentSigningFile) => (
-            _packEnterpriseAddress(paymentSigningFile, network)
-          )),
+          paymentSigningFiles.map((paymentSigningFile) =>
+            _packEnterpriseAddress(paymentSigningFile, network),
+          ),
         )
 
       case AddressType.REWARD_KEY:
         return findMatchingAddress(
-          stakeSigningFiles.map((stakeSigningFile) => _packRewardAddress(stakeSigningFile, network)),
+          stakeSigningFiles.map((stakeSigningFile) =>
+            _packRewardAddress(stakeSigningFile, network),
+          ),
         )
 
-        // TODO: Pointer address
+      // TODO: Pointer address
 
-      default: return null
+      default:
+        return null
     }
   } catch (e) {
     return null
   }
 }
 
-const areAddressParamsAllowed = (signingMode: SigningMode) : boolean => (
-  [SigningMode.ORDINARY_TRANSACTION, SigningMode.PLUTUS_TRANSACTION].includes(signingMode)
-)
+const areAddressParamsAllowed = (signingMode: SigningMode): boolean =>
+  [SigningMode.ORDINARY_TRANSACTION, SigningMode.PLUTUS_TRANSACTION].includes(
+    signingMode,
+  )
 
-const getAddressAttributes = (addressStr: HumanAddress): {
-  addressType: number,
-  networkId: number,
-  protocolMagic: number,
+const getAddressAttributes = (
+  addressStr: HumanAddress,
+): {
+  addressType: number
+  networkId: number
+  protocolMagic: number
 } => {
   let address: cardanoSerialization.ByronAddress | cardanoSerialization.Address
   try {
@@ -457,12 +513,14 @@ const getAddressAttributes = (addressStr: HumanAddress): {
       networkId: address.network_id(),
       protocolMagic: address.byron_protocol_magic(),
     }
-  } if (address instanceof cardanoSerialization.Address) {
+  }
+  if (address instanceof cardanoSerialization.Address) {
     // HW wallets require us to supply protocol magic, but it is only
     // relevant for Byron addresses, so we can return anything here
-    const protocolMagic = address.network_id() === NetworkIds.MAINNET
-      ? ProtocolMagics.MAINNET
-      : ProtocolMagics.TESTNET_PREVIEW
+    const protocolMagic =
+      address.network_id() === NetworkIds.MAINNET
+        ? ProtocolMagics.MAINNET
+        : ProtocolMagics.TESTNET_PREVIEW
     return {
       addressType: getAddressType(address.to_bytes()),
       networkId: address.network_id(),
@@ -479,20 +537,25 @@ const ipv4ToString = (ipv4: Buffer | null | undefined): string | undefined => {
 const ipv6ToString = (ipv6: Buffer | null | undefined): string | undefined => {
   if (!ipv6) return undefined
   // concats the little endians to Buffer and divides the hex string to foursomes
-  const ipv6LE = Buffer.from(ipv6).swap32().toString('hex').match(/.{1,4}/g)
+  const ipv6LE = Buffer.from(ipv6)
+    .swap32()
+    .toString('hex')
+    .match(/.{1,4}/g)
   return ipv6LE ? ipv6LE.join(':') : undefined
 }
 
-const rewardAccountToStakeCredential = (address: RewardAccount): StakeCredential => {
+const rewardAccountToStakeCredential = (
+  address: RewardAccount,
+): StakeCredential => {
   const type = getAddressType(address)
   switch (type) {
-    case (AddressType.REWARD_KEY): {
+    case AddressType.REWARD_KEY: {
       return {
         type: StakeCredentialType.KEY_HASH,
         hash: address.slice(1) as KeyHash,
       }
     }
-    case (AddressType.REWARD_SCRIPT): {
+    case AddressType.REWARD_SCRIPT: {
       return {
         type: StakeCredentialType.SCRIPT_HASH,
         hash: address.slice(1) as ScriptHash,
@@ -510,7 +573,7 @@ const formatCIP36RegistrationMetaData = (
   nonce: bigint,
   votingPurpose: bigint,
   signature: Buffer,
-): CIP36RegistrationMetaData => (
+): CIP36RegistrationMetaData =>
   new Map<number, Map<number, CIP36RegistrationMetaDataPayloadItem>>([
     [
       61284,
@@ -522,14 +585,8 @@ const formatCIP36RegistrationMetaData = (
         [5, votingPurpose],
       ]),
     ],
-    [
-      61285,
-      new Map<number, Buffer>([
-        [1, signature],
-      ]),
-    ],
+    [61285, new Map<number, Buffer>([[1, signature]])],
   ])
-)
 
 const encodeCIP36RegistrationMetaData = (
   delegations: CVoteDelegation[],
@@ -541,7 +598,7 @@ const encodeCIP36RegistrationMetaData = (
   registrationSignatureHex: HexString,
 ) => {
   const serializedDelegations: [Buffer, bigint][] = delegations.map(
-    ({ votePublicKey, voteWeight }) => [
+    ({votePublicKey, voteWeight}) => [
       Buffer.from(votePublicKey, 'hex'),
       voteWeight,
     ],
@@ -569,21 +626,22 @@ const encodeCIP36RegistrationMetaData = (
   return encodeCbor(metadata).toString('hex')
 }
 
-const areHwSigningDataNonByron = (hwSigningData: HwSigningData[]): boolean => (
+const areHwSigningDataNonByron = (hwSigningData: HwSigningData[]): boolean =>
   hwSigningData
     .map((signingFile) => classifyPath(signingFile.path))
     .every((pathType) => pathType !== PathTypes.PATH_WALLET_SPENDING_KEY_BYRON)
-)
 
 const validateCIP36RegistrationAddressType = (addressType: number): void => {
-  if (addressType !== AddressTypes.BASE && addressType !== AddressTypes.REWARD) {
+  if (
+    addressType !== AddressTypes.BASE &&
+    addressType !== AddressTypes.REWARD
+  ) {
     throw Error(Errors.InvalidCIP36RegistrationAddressType)
   }
 }
 
-const getTxBodyHash = (txBody: TransactionBody): string => (
+const getTxBodyHash = (txBody: TransactionBody): string =>
   blake2b(encodeTxBody(txBody), 32).toString('hex')
-)
 
 export {
   PathTypes,

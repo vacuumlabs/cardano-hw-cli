@@ -1,5 +1,5 @@
 import assert from 'assert'
-import { encodeCbor } from '../../src/util'
+import {encodeCbor} from '../../src/util'
 
 function testCbor(value: unknown, expected: unknown) {
   const encoded = encodeCbor(value)

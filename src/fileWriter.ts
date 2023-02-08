@@ -1,48 +1,55 @@
-import { BIP32Path, CardanoEra, Cbor, CborHex, XPubKeyCborHex, XPubKeyHex } from './basicTypes'
+import {
+  BIP32Path,
+  CardanoEra,
+  Cbor,
+  CborHex,
+  XPubKeyCborHex,
+  XPubKeyHex,
+} from './basicTypes'
 import {
   cardanoEraToWitnessType,
   HARDENED_THRESHOLD,
   PathLabel,
 } from './constants'
-import { classifyPath, PathTypes } from './crypto-providers/util'
-import { OpCertIssueCounter, SignedOpCertCborHex } from './opCert/opCert'
+import {classifyPath, PathTypes} from './crypto-providers/util'
+import {OpCertIssueCounter, SignedOpCertCborHex} from './opCert/opCert'
 import {
   TxCborHex,
   TxWitnessByron,
   TxWitnessCborHex,
   TxWitnessShelley,
 } from './transaction/txTypes'
-import { encodeCbor } from './util'
+import {encodeCbor} from './util'
 
 export type TxFileOutput = {
-  type: string,
-  description: string,
-  cborHex: TxCborHex,
+  type: string
+  description: string
+  cborHex: TxCborHex
 }
 
 export type WitnessOutput = {
   type: string
-  description: '',
-  cborHex: TxWitnessCborHex,
+  description: ''
+  cborHex: TxWitnessCborHex
 }
 
 export type HwSigningOutput = {
-  type: string,
-  description: string,
-  path: string,
-  cborXPubKeyHex: XPubKeyCborHex,
+  type: string
+  description: string
+  path: string
+  cborXPubKeyHex: XPubKeyCborHex
 }
 
 export type VerificationKeyOutput = {
-  type: string,
-  description: string,
-  cborHex: CborHex,
+  type: string
+  description: string
+  cborHex: CborHex
 }
 
 // TODO maybe generalize? see also VerificationKeyOutput
 export type OpCertIssueCounterOutput = {
-  type: string,
-  description: string,
+  type: string
+  description: string
   cborHex: CborHex
 }
 
@@ -52,7 +59,6 @@ export type OutputData =
   | HwSigningOutput
   | VerificationKeyOutput
   | OpCertIssueCounterOutput
-
 
 const rw = require('rw')
 
@@ -80,16 +86,21 @@ const constructTxFileOutput = (
 
 const constructTxWitnessOutput = (
   era: CardanoEra,
-  { key, data }: TxWitnessByron | TxWitnessShelley,
+  {key, data}: TxWitnessByron | TxWitnessShelley,
 ): WitnessOutput => ({
   type: cardanoEraToWitnessType[era],
   description: '',
   cborHex: encodeCbor([key, data]).toString('hex'),
 })
 
-const constructBIP32PathOutput = (path: BIP32Path): string => path
-  .map((value) => (value >= HARDENED_THRESHOLD ? `${value - HARDENED_THRESHOLD}H` : `${value}`))
-  .join('/')
+const constructBIP32PathOutput = (path: BIP32Path): string =>
+  path
+    .map((value) =>
+      value >= HARDENED_THRESHOLD
+        ? `${value - HARDENED_THRESHOLD}H`
+        : `${value}`,
+    )
+    .join('/')
 
 const bip32PathLabel = (path: BIP32Path): PathLabel => {
   switch (classifyPath(path)) {
@@ -179,7 +190,10 @@ const constructVerificationKeyOutput = (
   }
 }
 
-const getHwSigningFileType = (label: PathLabel, pathType: PathTypes): string => {
+const getHwSigningFileType = (
+  label: PathLabel,
+  pathType: PathTypes,
+): string => {
   switch (pathType) {
     case PathTypes.PATH_WALLET_SPENDING_KEY_BYRON:
       return `${label}HWSigningFileByron_ed25519_bip32`
@@ -226,7 +240,10 @@ const hwsfileDescription = (path: BIP32Path): string => {
   }
 }
 
-const constructHwSigningKeyOutput = (xPubKey: XPubKeyHex, path: BIP32Path): HwSigningOutput => {
+const constructHwSigningKeyOutput = (
+  xPubKey: XPubKeyHex,
+  path: BIP32Path,
+): HwSigningOutput => {
   const label = bip32PathLabel(path)
 
   return {
@@ -237,13 +254,17 @@ const constructHwSigningKeyOutput = (xPubKey: XPubKeyHex, path: BIP32Path): HwSi
   }
 }
 
-const constructSignedOpCertOutput = (signedOpCertCborHex: SignedOpCertCborHex): TxFileOutput => ({
+const constructSignedOpCertOutput = (
+  signedOpCertCborHex: SignedOpCertCborHex,
+): TxFileOutput => ({
   type: 'NodeOperationalCertificate',
   description: '',
   cborHex: signedOpCertCborHex,
 })
 
-const constructOpCertIssueCounterOutput = (issueCounter: OpCertIssueCounter): OpCertIssueCounterOutput => ({
+const constructOpCertIssueCounterOutput = (
+  issueCounter: OpCertIssueCounter,
+): OpCertIssueCounterOutput => ({
   type: 'NodeOperationalCertificateIssueCounter',
   description: `Next certificate issue number: ${issueCounter.counter.toString()}`,
   cborHex: encodeCbor([

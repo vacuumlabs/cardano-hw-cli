@@ -1,6 +1,6 @@
 /* eslint-disable max-len */
 /* eslint quote-props: ["error", "consistent"] */
-import { NetworkIds } from '../basicTypes'
+import {NetworkIds} from '../basicTypes'
 import {
   parseAddressFile,
   parseHwSigningFile,
@@ -17,7 +17,7 @@ import {
   parseVotePubFileCli,
 } from './parsers'
 
-export type ParserConfig = { [key: string]: ParserConfig | object }
+export type ParserConfig = {[key: string]: ParserConfig | object}
 
 const derivationTypeArg = {
   '--derivation-type': {
@@ -164,11 +164,11 @@ const opCertSigningArgs = {
 // https://docs.cardano.org/projects/cardano-node/en/latest/reference/cardano-node-cli-reference.html
 export const parserConfig: ParserConfig = {
   // ===============  commands specific for hw interactions  ===============
-  'version': {},
-  'device': {
-    'version': {},
+  version: {},
+  device: {
+    version: {},
   },
-  'key': {
+  key: {
     'verification-key': {
       '--hw-signing-file': {
         required: true,
@@ -185,12 +185,13 @@ export const parserConfig: ParserConfig = {
   },
 
   // ===============  commands taken from cardano-cli interface  ===============
-  'address': {
+  address: {
     // TODO JM: I don't like this endpoint here since it also supports staking keys
     // and bulk export unlike in cardano-cli; let's move it near/under 'key' above
     'key-gen': keyGenArgs,
 
-    'show': { // hw-specific subpath
+    'show': {
+      // hw-specific subpath
       '_mutually-exclusive-group-required-payment': {
         '--payment-path': {
           dest: 'paymentPath',
@@ -224,8 +225,8 @@ export const parserConfig: ParserConfig = {
       ...derivationTypeArg,
     },
   },
-  'transaction': {
-    'policyid': {
+  transaction: {
+    policyid: {
       '--script-file': {
         required: true,
         dest: 'nativeScript',
@@ -242,7 +243,7 @@ export const parserConfig: ParserConfig = {
       },
       ...derivationTypeArg,
     },
-    'witness': {
+    witness: {
       ...txSigningArgs,
       '--out-file': {
         required: true,
@@ -251,7 +252,7 @@ export const parserConfig: ParserConfig = {
         help: 'Output filepath.',
       },
     },
-    'validate': {
+    validate: {
       '--tx-file': {
         required: true,
         dest: 'txFileData',
@@ -259,7 +260,7 @@ export const parserConfig: ParserConfig = {
         help: 'Input filepath of the tx. Use --cddl-format when building transactions with cardano-cli.',
       },
     },
-    'transform': {
+    transform: {
       '--tx-file': {
         required: true,
         dest: 'txFileData',
@@ -273,11 +274,11 @@ export const parserConfig: ParserConfig = {
       },
     },
   },
-  'node': {
+  node: {
     'key-gen': nodeKeyGenArgs,
     'issue-op-cert': opCertSigningArgs,
   },
-  'vote': {
+  vote: {
     'registration-metadata': {
       '--mainnet': {
         nargs: '?',
