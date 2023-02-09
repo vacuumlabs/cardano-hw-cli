@@ -93,7 +93,7 @@ async function testCIP36RegistrationMetaDataSigning(cryptoProvider: CryptoProvid
 
 describe('Trezor sign CIP36 registration metadata', () => {
   let cryptoProvider: CryptoProvider
-  // eslint-disable-next-line func-names
+  // eslint-disable-next-line prefer-arrow-callback
   before(async function () {
     this.timeout(10000)
     cryptoProvider = await TrezorCryptoProvider()

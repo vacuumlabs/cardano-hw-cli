@@ -692,7 +692,7 @@ async function testTxWitnessing(cryptoProvider: CryptoProvider, transaction: any
 
 describe('Trezor tx witnessing', () => {
   let cryptoProvider: CryptoProvider
-  // eslint-disable-next-line func-names
+  // eslint-disable-next-line prefer-arrow-callback
   before(async function () {
     this.timeout(10000)
     cryptoProvider = await TrezorCryptoProvider()
