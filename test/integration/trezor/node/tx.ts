@@ -687,7 +687,7 @@ const transactions = {
     // c0a41c1362340368a9cde76a07953936f0bb0878b2ac3c5acace23e553fab9ce
     // Inputs: payment - all script [multisigPayment0 hash, multisigPayment1 hash]
     // Outputs: The input's payment address
-    //          Facuet address
+    //          Faucet address
     // Contains registration and delegation for stake address (all script [
     // multisigStake0 hash, multisigStake1 hash])
     // Minting: 1000000 defined by policy script all [mint0 hash, mint1 hash]

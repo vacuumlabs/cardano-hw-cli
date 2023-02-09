@@ -23,12 +23,12 @@ const _parseWitnessSet = (witnessSet: unknown): WitnessSet => {
 const TxByronWitnessData = (
   publicKey: Buffer,
   signature: Buffer,
-  chaincode: Buffer,
+  chainCode: Buffer,
   addressAttributes: object,
 ): TxWitnessByronData => [
   publicKey,
   signature,
-  chaincode,
+  chainCode,
   encodeCbor(addressAttributes),
 ]
 

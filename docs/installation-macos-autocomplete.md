@@ -1,5 +1,5 @@
 # Macos autocomplete installation
-On mac you need to udpate your bash first. Check your version with
+On mac you need to update your bash first. Check your version with
 
 ```
 bash --version
@@ -11,7 +11,7 @@ If you have version 3.2 from 2007, update to newer version:
 brew install bash
 ```
 
-Verify instalation, you should see new version installed:
+Verify the installation, you should see new version installed:
 ```
 $ which -a bash
 /usr/local/bin/bash

@@ -48,9 +48,9 @@ cardano-hw-cli transaction validate
 ```
 Exit code meaning:
 - `0` transaction complies with all restrictions
-- `1` an error occured (e.g. the transaction could not be parsed)
-- `2` transaction contains validation errrors that cannot be fixed automatically (e.g. too many tx inputs)
-- `3` transaction contains validation errrors that can be fixed by running `transaction transform` (e.g. non-canonical CBOR)
+- `1` an error occurred (e.g. the transaction could not be parsed)
+- `2` transaction contains validation errors that cannot be fixed automatically (e.g. too many tx inputs)
+- `3` transaction contains validation errors that can be fixed by running `transaction transform` (e.g. non-canonical CBOR)
 
 ## Transform transaction
 Tries to non-destructively transform the tx file, so that it complies with [restrictions](https://github.com/cardano-foundation/CIPs/blob/master/CIP-0021/README.md) imposed by hardware wallets.
