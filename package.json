@@ -1,6 +1,7 @@
 {
   "name": "cardano-hw-cli",
   "version": "1.12.0",
+  "commit": "081c692dc9eaff4708c3b0cfa84a27815bd556df",
   "description": "Cardano CLI tool for hardware wallets",
   "author": "Vacuumlabs",
   "homepage": "https://github.com/vacuumlabs/cardano-hw-cli#readme",
@@ -55,6 +56,7 @@
     "@types/node": "^18.12.0",
     "@typescript-eslint/eslint-plugin": "^5.42.1",
     "@typescript-eslint/parser": "^5.42.1",
+    "cspell": "^6.10.1",
     "eslint": "^8.27.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-config-vacuumlabs": "^8.0.2",
@@ -70,7 +72,6 @@
   "pkg": {
     "assets": "package.json"
   },
-  "commit": "6d28214732e6a526b1f2a0898f91a0af50811764",
   "engines": {
     "node": "18.7.0",
     "npm": ">=6.x",

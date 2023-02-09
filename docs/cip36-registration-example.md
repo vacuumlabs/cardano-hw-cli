@@ -95,7 +95,7 @@ cardano-hw-cli transaction transform \
 --out-file tx.transformed
 ```
 
-Witness the transaction with `cardano-hw-cli` (we assume that `payment.hwsfile` belongs to the address that controlls the transaction inputs):
+Witness the transaction with `cardano-hw-cli` (we assume that `payment.hwsfile` belongs to the address that controls the transaction inputs):
 ```
 cardano-hw-cli transaction witness \
 --tx-file tx.transformed \

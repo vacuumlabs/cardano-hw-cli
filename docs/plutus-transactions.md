@@ -49,7 +49,7 @@ Example return:
 1789f11f03143338cfcc0dbf3a93ad8f177e8698fc37ab3ab17c954cf2b28ee8     0        990000000 lovelace + TxOutDatumHash ScriptDataInAlonzoEra "bb292f5270d8b30482d91ee44de4ffcb50c1efeb1c219d9cd08eda0f9242a7b5"
 ```
 
-The collateral has to be a UTxO owned by a regular payment key, so we expect you to have a suitable UTxO governed by `payment.addr` ready. Beware - if the script evaluation fails, the whole collateral will be consumed, therefore we recommend using only a small Ada amout (let's say 4 Ada) as a collateral. You can split a larger UTxO into two using an ordinary transaction (tutorial [here](./transaction-example.md)).
+The collateral has to be a UTxO owned by a regular payment key, so we expect you to have a suitable UTxO governed by `payment.addr` ready. Beware - if the script evaluation fails, the whole collateral will be consumed, therefore we recommend using only a small Ada amount (let's say 4 Ada) as a collateral. You can split a larger UTxO into two using an ordinary transaction (tutorial [here](./transaction-example.md)).
 ```sh
 cardano-cli query utxo \
 --address $(cat payment.addr) \

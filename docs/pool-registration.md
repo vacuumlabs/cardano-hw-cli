@@ -6,7 +6,7 @@ This guide will walk you through registering a stake pool with a hardware wallet
 
 ### As an owner
 
-HW wallet supports signing of stake pool registration certificates when providing pool owner signatures. In the general case, the transaction may contain external inputs (e.g. belonging to the pool operator) and HW wallet is not able to verify whether they are actually external or not, so if we allowed signing the transaction with a spending key, there is the risk of losing funds from an input that the user did not intend to spend from. Moreover there is the risk of inadvertedly signing a withdrawal in the transaction if there's any. To mitigate those risks, HW wallet has special validation rules for stake pool registration transactions. The validation rules are the following:
+HW wallet supports signing of stake pool registration certificates when providing pool owner signatures. In the general case, the transaction may contain external inputs (e.g. belonging to the pool operator) and HW wallet is not able to verify whether they are actually external or not, so if we allowed signing the transaction with a spending key, there is the risk of losing funds from an input that the user did not intend to spend from. Moreover there is the risk of inadvertently signing a withdrawal in the transaction if there's any. To mitigate those risks, HW wallet has special validation rules for stake pool registration transactions. The validation rules are the following:
 
 1. The transaction must not contain any other certificates, not even another stake pool registration
 2. The transaction must not contain any withdrawals
@@ -171,7 +171,7 @@ cardano-cli stake-pool registration-certificate \
 --pool-relay-port 3000 \
 --single-host-pool-relay aaaa.bbbb.com \
 --pool-relay-port 3000 \
---multi-host-pool-relay aaaa.bbbc.com \
+--multi-host-pool-relay aaaa.bbbb.com \
 --metadata-url https://www.vacuumlabs.com/sampleUrl.json \
 --metadata-hash 790be88f23c12ffa0fde8124814ceb97779fa45b1e0d654e52055e1d8cab53a0 \
 --out-file pool-registration.cert
@@ -220,7 +220,7 @@ cardano-cli transaction calculate-min-fee \
 
 Example output: 194685
 
-Registering a stake pool requires a deposit. This amount is specified in `protocol.json`. On mainnet, it is currently 500 ADA. Substract stake pool registration deposit and fee from the operators balance
+Registering a stake pool requires a deposit. This amount is specified in `protocol.json`. On mainnet, it is currently 500 ADA. Subtract stake pool registration deposit and fee from the operators balance
 
 ```
 expr $operatorBalance - 500000000 - 194685

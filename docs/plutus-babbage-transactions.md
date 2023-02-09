@@ -1,5 +1,5 @@
 # Plutus transactions in Babbage era
-Plutus scripts have been supported since the Alonzo era - see Plutus transactions docs for more details. In Babbage era some changes have been made to the way Plutus transactions can be built. For more information see [this post on IOHK blog](https://iohk.io/en/blog/posts/2022/07/04/cardano-s-approaching-vasil-upgrade-what-to-expect/) or [the Babbage CDDL spec](https://github.com/input-output-hk/cardano-ledger/blob/master/eras/babbage/test-suite/cddl-files/babbage.cddl).
+Plutus scripts have been supported since the Alonzo era - see Plutus transactions docs for more details. In Babbage era some changes have been made to the way Plutus transactions can be built. For more information see [this post on IOG blog](https://iohk.io/en/blog/posts/2022/07/04/cardano-s-approaching-vasil-upgrade-what-to-expect/) or [the Babbage CDDL spec](https://github.com/input-output-hk/cardano-ledger/blob/master/eras/babbage/test-suite/cddl-files/babbage.cddl).
 
 ## Script address
 In Babbage we need a script address as well. However, to use the new Babbage features we need a Plutus V2 script - you can use [the V2 version of the script used in our Plutus docs](./data/datum-equals-redeemer-v2.plutus).

@@ -12,10 +12,10 @@ If you wish to uninstall `cardano-hw-cli`, run:
 sudo dpkg --remove cardano-hw-cli
 ```
 
-## Option 2: uncompress `.tar.gz` archive:
-if `.deb` package is not working for some reason, you can uncompress the `.tar.gz` archive and create a soft link to `cardano-hw-cli` manually:
+## Option 2: decompress `.tar.gz` archive:
+if `.deb` package is not working for some reason, you can decompress the `.tar.gz` archive and create a soft link to `cardano-hw-cli` manually:
 
-Uncompress:
+decompress:
 ```
 tar -zxvf cardano-hw-cli-<VERSION>.tar.gz
 ```
@@ -35,7 +35,7 @@ export PATH=<PATH_TO_DIRECTORY>
 ```
 
 # Mac
-Uncompress the `.tar.gz` archive by double clicking archive in finder or uncompress in command line:
+decompress the `.tar.gz` archive by double clicking archive in finder or decompress in command line:
 ```
 tar -zxvf cardano-hw-cli-<VERSION>.tar.gz
 ```
