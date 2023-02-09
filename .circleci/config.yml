@@ -1,21 +1,45 @@
 version: 2.1
-jobs:
-  build:
-    docker:
-      - image: cimg/node:18.7.0
+
+defaults: &defaults
+  docker:
+    - image: cimg/node:18.7.0
+
+commands:
+  setup:
     steps:
       - checkout
       - run: node --version
       - run: sudo apt-get -y update
       - run: sudo apt-get -y install libudev-dev libusb-1.0-0-dev
       - run: yarn install
-      - run: yarn eslint
+
+jobs:
+  audit:
+    <<: *defaults
+    steps:
+      - setup
+      - run: yarn audit
+
+  lint:
+    <<: *defaults
+    steps:
+      - setup
+      - run: yarn prettier:check
+      - run: yarn spell:check
+      - run: yarn lint
+
+  build_and_test:
+    <<: *defaults
+    steps:
+      - setup
       - run: yarn build-js
       - run: yarn test-unit
-      - run: yarn build
       - run: yarn test-bin
-      - run: yarn audit
+
 workflows:
-  node-tests:
+  version: 2
+  all:
     jobs:
-      - build
+      - audit
+      - lint
+      - build_and_test
