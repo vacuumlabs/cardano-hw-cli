@@ -283,7 +283,7 @@ const CommandExecutor = async () => {
 
     const votingPurpose = args.votingPurpose || CIP36_VOTING_PURPOSE_CATALYST
 
-    const votingRegistrationMetaData =
+    const registrationMetaData =
       await cryptoProvider.signCIP36RegistrationMetaData(
         delegations,
         args.hwStakeSigningFileData,
@@ -297,7 +297,7 @@ const CommandExecutor = async () => {
 
     writeCbor(
       args.outFile,
-      Buffer.from(votingRegistrationMetaData, 'hex') as Cbor,
+      Buffer.from(registrationMetaData, 'hex') as Cbor,
     )
   }
 
