@@ -31,11 +31,6 @@ module.exports = {
     // TLDR - memory crashes, tangled architecture, unreadable code, undefined imports
     'import/no-cycle': [
       'error',
-      {
-        // Without cutoff, this rule takes up >75% overall lint time
-        // Run fully only on circleCI
-        ...(!process.env.CI && {maxDepth: 5}),
-      },
     ],
     'import/no-extraneous-dependencies': ['error'],
     'spaced-comment': ['error', 'always', {block: {balanced: true}}],
