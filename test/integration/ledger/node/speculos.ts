@@ -9,8 +9,8 @@ function shouldUseSpeculos() {
 
 async function getTransport() {
   return shouldUseSpeculos()
-    ? SpeculosTransport.open({apduPort: 9999})
-    : TransportNodeHid.create()
+    ? await SpeculosTransport.open({apduPort: 9999})
+    : await TransportNodeHid.create()
 }
 
 export {shouldUseSpeculos, getTransport}

@@ -133,7 +133,7 @@ describe('Ledger sign CIP36 registration metadata', () => {
 
   cip36RegistrationsToSign.forEach(([testName, cip36Registration]) =>
     it(`Should sign CIP36 registration ${testName}`, async () =>
-      testCIP36RegistrationMetaDataSigning(
+      await testCIP36RegistrationMetaDataSigning(
         cryptoProvider,
         cip36Registration,
       )).timeout(100000),
