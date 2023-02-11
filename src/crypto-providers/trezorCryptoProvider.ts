@@ -879,6 +879,7 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     _kesPeriod: bigint,
     _issueCounter: OpCertIssueCounter,
     _signingFile: HwSigningData[],
+  // eslint-disable-next-line require-await
   ): Promise<SignedOpCertCborHex> => {
     // TODO is this the right way to deal with this?
     throw Error(Errors.UnsupportedCryptoProviderCall)

@@ -38,18 +38,6 @@ module.exports = {
       },
     ],
     'import/no-extraneous-dependencies': ['error'],
-
-    // We often specify async functions in interfaces "just in case" the
-    // implementation does actually need to do some asynchronous processing.
-    // Many implementations of such interfaces on the other hand do not require
-    // any async calls. There are other ways to comply with the interface, such
-    // as wrapping all return values of the function in `Promise.resolve`, but
-    // by far the most convenient solution is to simply mark the function as
-    // `async`, without actually using any `await` keywords inside. Because of
-    // this, `async` functions without `await` are often a legitimate use-case
-    // for us, and this warning gets in the way more often than it actually
-    // helps.
-    'require-await': 'off',
     'spaced-comment': ['error', 'always', {block: {balanced: true}}],
     'quote-props': ['error', 'consistent'],
   },

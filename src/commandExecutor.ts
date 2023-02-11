@@ -57,7 +57,7 @@ const promiseTimeout = <T>(promise: Promise<T>, ms: number): Promise<T> => {
 const getCryptoProvider = async (): Promise<CryptoProvider> => {
   const ledgerPromise = async () =>
     LedgerCryptoProvider(await TransportNodeHid.create())
-  const trezorPromise = async () => TrezorCryptoProvider()
+  const trezorPromise = async () => await TrezorCryptoProvider()
   const cryptoProviderPromise = Promise.any([ledgerPromise(), trezorPromise()])
 
   try {
@@ -77,7 +77,7 @@ const CommandExecutor = async () => {
   const showAddress = async (args: ParsedShowAddressArguments) => {
     // eslint-disable-next-line no-console
     console.log(`address: ${args.address}`)
-    return cryptoProvider.showAddress(args)
+    return await cryptoProvider.showAddress(args)
   }
 
   const createSigningKeyFile = async ({

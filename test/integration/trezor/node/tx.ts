@@ -1003,6 +1003,6 @@ describe('Trezor tx witnessing', () => {
 
   txs.forEach(([txType, tx]) =>
     it(`Should witness tx ${txType}`, async () =>
-      testTxWitnessing(cryptoProvider, tx)).timeout(100000),
+      await testTxWitnessing(cryptoProvider, tx)).timeout(100000),
   )
 })

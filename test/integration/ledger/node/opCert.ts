@@ -47,6 +47,6 @@ describe('Ledger operational certificate', () => {
   const opCertsToSign = Object.entries(opCerts)
   opCertsToSign.forEach(([opCertTestName, opCert]) =>
     it(`Should sign operational certificate ${opCertTestName}`, async () =>
-      testOpCertSigning(cryptoProvider, opCert)).timeout(100000),
+      await testOpCertSigning(cryptoProvider, opCert)).timeout(100000),
   )
 })
