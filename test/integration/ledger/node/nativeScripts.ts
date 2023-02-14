@@ -178,8 +178,9 @@ describe('Ledger native script hash derivation', () => {
   const nativeScriptsToDerive = Object.entries(nativeScripts)
   nativeScriptsToDerive.forEach(([nativeScriptName, nativeScript]) =>
     it(`Should derive native script hash, script type "${nativeScriptName}"`, async () =>
-      await testNativeScriptHashDerivation(cryptoProvider, nativeScript)).timeout(
-      100000,
-    ),
+      await testNativeScriptHashDerivation(
+        cryptoProvider,
+        nativeScript,
+      )).timeout(100000),
   )
 })

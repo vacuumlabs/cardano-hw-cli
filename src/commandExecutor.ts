@@ -295,10 +295,7 @@ const CommandExecutor = async () => {
         args.derivationType,
       )
 
-    writeCbor(
-      args.outFile,
-      Buffer.from(registrationMetaData, 'hex') as Cbor,
-    )
+    writeCbor(args.outFile, Buffer.from(registrationMetaData, 'hex') as Cbor)
   }
 
   return {
