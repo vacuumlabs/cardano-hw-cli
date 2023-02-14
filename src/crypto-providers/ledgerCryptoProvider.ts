@@ -33,7 +33,10 @@ import {
   Network,
   CVoteDelegation,
 } from '../basicTypes'
-import {HwSigningData, ParsedShowAddressArguments} from '../argTypes'
+import {
+  HwSigningData,
+  ParsedShowAddressArguments,
+} from '../command-parser/argTypes'
 import {partition} from '../util'
 import {
   CryptoProvider,

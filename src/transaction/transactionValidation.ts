@@ -4,7 +4,7 @@ import {partition} from '../util'
 import {
   ParsedTransactionValidateArguments,
   ParsedTransactionTransformArguments,
-} from '../argTypes'
+} from '../command-parser/argTypes'
 import {constructTxFileOutput, writeOutputData} from '../fileWriter'
 import {containsVKeyWitnesses} from './transaction'
 import {CborHex} from '../basicTypes'

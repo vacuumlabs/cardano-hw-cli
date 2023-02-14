@@ -51,7 +51,10 @@ import {
   SignedOpCertCborHex,
 } from '../opCert/opCert'
 import {parseBIP32Path} from '../command-parser/parsers'
-import {ParsedShowAddressArguments, HwSigningData} from '../argTypes'
+import {
+  ParsedShowAddressArguments,
+  HwSigningData,
+} from '../command-parser/argTypes'
 
 const {bech32} = require('cardano-crypto.js')
 

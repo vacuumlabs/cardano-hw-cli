@@ -18,7 +18,7 @@ import {
   DerivationType,
 } from './basicTypes'
 import {decodeCbor} from './util'
-import {TxFileData, HwSigningData} from './argTypes'
+import {TxFileData, HwSigningData} from './command-parser/argTypes'
 
 export const isEra = (value: unknown): value is CardanoEra =>
   Object.values(CardanoEra).includes(value as CardanoEra)

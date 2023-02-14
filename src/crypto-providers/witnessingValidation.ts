@@ -1,6 +1,6 @@
 import {CertificateType, TransactionBody, Uint} from 'cardano-hw-interop-lib'
 import {Errors} from '../errors'
-import {HwSigningData} from '../argTypes'
+import {HwSigningData} from '../command-parser/argTypes'
 import {SigningMode, SigningParameters} from './cryptoProvider'
 import {filterSigningFiles} from './util'
 

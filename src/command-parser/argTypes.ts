@@ -1,4 +1,4 @@
-import {KesVKey} from './opCert/opCert'
+import {KesVKey} from '../opCert/opCert'
 import {
   HumanAddress,
   BIP32Path,
@@ -9,7 +9,7 @@ import {
   CardanoEra,
   CborHex,
   XPubKeyCborHex,
-} from './basicTypes'
+} from '../basicTypes'
 
 export enum CommandType {
   APP_VERSION = 'version',

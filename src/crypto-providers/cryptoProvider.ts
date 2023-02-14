@@ -18,7 +18,10 @@ import {
   Network,
   CVoteDelegation,
 } from '../basicTypes'
-import {ParsedShowAddressArguments, HwSigningData} from '../argTypes'
+import {
+  ParsedShowAddressArguments,
+  HwSigningData,
+} from '../command-parser/argTypes'
 
 export enum SigningMode {
   ORDINARY_TRANSACTION,
