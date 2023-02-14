@@ -68,7 +68,7 @@ Details: ${e}`
 
 export const LedgerCryptoProvider: (
   transport: Transport,
-// eslint-disable-next-line require-await
+  // eslint-disable-next-line require-await
 ) => Promise<CryptoProvider> = async (transport) => {
   const ledger = new Ledger(transport)
 
