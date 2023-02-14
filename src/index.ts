@@ -1,5 +1,5 @@
 /* eslint-disable no-console */
-import {CommandType} from './argTypes'
+import {CommandType} from './command-parser/argTypes'
 import {parse} from './command-parser/commandParser'
 import {parseAppVersion} from './command-parser/parsers'
 import {CommandExecutor} from './commandExecutor'

@@ -24,7 +24,7 @@ import {
   ParsedOpCertArguments,
   ParsedNodeKeyGenArguments,
   ParsedCIP36RegistrationMetadataArguments,
-} from './argTypes'
+} from './command-parser/argTypes'
 import {LedgerCryptoProvider} from './crypto-providers/ledgerCryptoProvider'
 import {TrezorCryptoProvider} from './crypto-providers/trezorCryptoProvider'
 import {

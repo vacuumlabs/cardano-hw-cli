@@ -7,7 +7,7 @@ import {
   NativeScriptType,
 } from '../../../src/basicTypes'
 import {cardanoEraToSignedType, NETWORKS} from '../../../src/constants'
-import {CommandType, HwSigningType} from '../../../src/argTypes'
+import {CommandType, HwSigningType} from '../../../src/command-parser/argTypes'
 
 const resFolder = 'test/unit/commandParser/res/'
 const prefix = (filename: string) => `${resFolder}${filename}`

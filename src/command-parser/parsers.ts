@@ -34,7 +34,7 @@ import {
   splitXPubKeyCborHex,
 } from '../crypto-providers/util'
 import {getHwSigningFileType} from '../fileWriter'
-import {HwSigningData, HwSigningType, TxFileData} from '../argTypes'
+import {HwSigningData, HwSigningType, TxFileData} from './argTypes'
 
 const {bech32} = require('cardano-crypto.js')
 const rw = require('rw')

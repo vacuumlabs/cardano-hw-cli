@@ -1,5 +1,5 @@
 import {ArgumentGroup, ArgumentParser, SubParser} from 'argparse'
-import {ParsedArguments} from '../argTypes'
+import {ParsedArguments} from './argTypes'
 import {ParserConfig, parserConfig} from './parserConfig'
 
 const initParser = (

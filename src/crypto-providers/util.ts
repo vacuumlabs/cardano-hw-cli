@@ -37,7 +37,7 @@ import {
 } from '../basicTypes'
 import {decodeCbor, encodeCbor} from '../util'
 import {SigningMode} from './cryptoProvider'
-import {HwSigningData, HwSigningType} from '../argTypes'
+import {HwSigningData, HwSigningType} from '../command-parser/argTypes'
 
 const cardanoCrypto = require('cardano-crypto.js')
 const {AddressTypes, base58, bech32, blake2b} = require('cardano-crypto.js')
