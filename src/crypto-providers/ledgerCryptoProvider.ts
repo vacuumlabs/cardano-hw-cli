@@ -902,9 +902,9 @@ export const LedgerCryptoProvider: (
   })
 
   const prepareDummyInput = (): LedgerTypes.TxInput => ({
+    path: parseBIP32Path('1852H/1815H/0H/0/0'),
     txHashHex: '0'.repeat(64),
     outputIndex: 0,
-    path: parseBIP32Path('1852H/1815H/0H/0/0'),
   })
 
   const prepareDummyOutput = (): LedgerTypes.TxOutput => ({
