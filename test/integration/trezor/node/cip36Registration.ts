@@ -81,6 +81,23 @@ const cip36Registrations = {
     signedCIP36RegistrationMetaDataHex:
       'a219ef64a501828258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7018258201af8fa0b754ff99253d983894e63a2b09cbb56c833ba18c3384210163f63dcfc02025820bc65be1b0b9d7531778a1317c2aa6de936963c3f9ac7d5ee9e9eda25e0c97c5e03581de1122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277041a000286bc050019ef65a10158408dcc41c03e7fe9b281f00c9ac2a8418d4fce9c0673f163088f45a014ad30d8740cb60b065ecdb073d44bb0595e519f9e584c6620258f27e20432706999e7a604',
   },
+  withThirdPartyPaymentAddress: {
+    delegations: [
+      {
+        votePublicKey:
+          '3b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7',
+        voteWeight: 2,
+      },
+    ],
+    hwStakeSigningFile: signingFiles.stake0,
+    paymentAddressBech32: addresses.mainnet.base0,
+    nonce: 165564,
+    votingPurpose: 1,
+    network: 'MAINNET',
+    auxiliarySigningFiles: [],
+    signedCIP36RegistrationMetaDataHex:
+      'a219ef64a501818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b702025820bc65be1b0b9d7531778a1317c2aa6de936963c3f9ac7d5ee9e9eda25e0c97c5e0358390180f9e2c88e6c817008f3a812ed889b4a4da8e0bd103f86e7335422aa122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277041a000286bc050119ef65a10158404893bdbcf02dd0169de641996db41619cdba64f5d36adb4964ba861139ff5306737e9618a558c4ade41e9118cece138df21cebd56175759de18e20349510f607',
+  },
 }
 
 async function testCIP36RegistrationMetaDataSigning(

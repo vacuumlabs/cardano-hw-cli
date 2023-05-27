@@ -40,7 +40,7 @@
     "@emurgo/cardano-serialization-lib-nodejs": "^8.0.0",
     "@ledgerhq/hw-transport": "^6.27.10",
     "@ledgerhq/hw-transport-node-hid-noevents": "^6.24.1",
-    "@trezor/connect": "^9.0.4",
+    "@trezor/connect": "^9.0.11",
     "argparse": "^2.0.1",
     "bignumber": "^1.1.0",
     "cardano-crypto.js": "^5.3.6-rc.6",

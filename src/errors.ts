@@ -46,8 +46,8 @@ export const enum Errors {
   InternalInvalidTypeError = 'Internal invalid type error',
   InvalidCVotePublicKey = 'Invalid CIP36 vote public key',
   InvalidCVoteWeight = 'Invalid CIP36 vote weight',
+  InvalidCVoteVotingPurpose = 'Invalid CIP36 voting purpose',
   InvalidCVoteDelegations = 'Invalid CIP36 delegations (either a single vote public key or several vote public keys with their weights are expected)',
-  AuxSigningFileNotFoundForCIP36PaymentAddress = "CIP36 payment address doesn't match with supplied auxiliary signing keys --- Trezor does not support third-party reward addresses yet", // TODO should be removed after the support is added
   ByronSigningFilesFoundInCIP36Registration = 'Byron addresses are not allowed for CIP36 registration',
   TrezorVersionError = 'Failed to retrieve trezor version',
   InvalidCIP36RegistrationAddressType = 'CIP36 registration address type must be either BASE or REWARD',
