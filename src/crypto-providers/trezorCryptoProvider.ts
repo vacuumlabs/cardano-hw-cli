@@ -58,7 +58,7 @@ import {
 
 const {bech32} = require('cardano-crypto.js')
 
-const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
+export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
   const getVersion = async (): Promise<string> => {
     const {payload: features} = await TrezorConnect.getFeatures()
     const isSuccessful = (value: unknown): value is TrezorTypes.Features =>
@@ -211,6 +211,33 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
       }
     })
 
+  const prepareDestination = (
+    address: Buffer,
+    changeAddressParams: _AddressParameters | null,
+    signingMode: SigningMode,
+  ):
+    | {
+        address: string
+      }
+    | {
+        addressParameters: TrezorTypes.CardanoAddressParameters
+      } => {
+    if (changeAddressParams && areAddressParamsAllowed(signingMode)) {
+      // paymentPath should always be defined if changeAddressParams are defined
+      if (!changeAddressParams.paymentPath) throw Error(Errors.Unreachable)
+
+      return {
+        addressParameters: {
+          addressType: changeAddressParams.addressType,
+          path: changeAddressParams.paymentPath,
+          stakingPath: changeAddressParams.stakePath,
+        },
+      }
+    }
+
+    return {address: encodeAddress(address)}
+  }
+
   const prepareDatumHash = (
     output: TxTypes.TransactionOutput,
   ): string | undefined => {
@@ -239,33 +266,6 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
       default:
         throw Error(Errors.Unreachable)
     }
-  }
-
-  const prepareDestination = (
-    address: Buffer,
-    changeAddressParams: _AddressParameters | null,
-    signingMode: SigningMode,
-  ):
-    | {
-        address: string
-      }
-    | {
-        addressParameters: TrezorTypes.CardanoAddressParameters
-      } => {
-    if (changeAddressParams && areAddressParamsAllowed(signingMode)) {
-      // paymentPath should always be defined if changeAddressParams are defined
-      if (!changeAddressParams.paymentPath) throw Error(Errors.Unreachable)
-
-      return {
-        addressParameters: {
-          addressType: changeAddressParams.addressType,
-          path: changeAddressParams.paymentPath,
-          stakingPath: changeAddressParams.stakePath,
-        },
-      }
-    }
-
-    return {address: encodeAddress(address)}
   }
 
   const prepareOutput = (
@@ -986,5 +986,3 @@ const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     deriveNativeScriptHash,
   }
 }
-
-export {TrezorCryptoProvider}
