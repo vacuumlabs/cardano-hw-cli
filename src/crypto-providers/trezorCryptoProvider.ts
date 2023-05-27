@@ -58,6 +58,14 @@ import {
 
 const {bech32} = require('cardano-crypto.js')
 
+type _TrezorDestination =
+  | {
+      address: string
+    }
+  | {
+      addressParameters: TrezorTypes.CardanoAddressParameters
+    }
+
 export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
   const getVersion = async (): Promise<string> => {
     const {payload: features} = await TrezorConnect.getFeatures()
@@ -215,13 +223,7 @@ export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     address: Buffer,
     changeAddressParams: _AddressParameters | null,
     signingMode: SigningMode,
-  ):
-    | {
-        address: string
-      }
-    | {
-        addressParameters: TrezorTypes.CardanoAddressParameters
-      } => {
+  ): _TrezorDestination => {
     if (changeAddressParams && areAddressParamsAllowed(signingMode)) {
       // paymentPath should always be defined if changeAddressParams are defined
       if (!changeAddressParams.paymentPath) throw Error(Errors.Unreachable)
@@ -741,13 +743,13 @@ export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
 
   const prepareVoteDelegations = (
     delegations: CVoteDelegation[],
-  ): TrezorTypes.CardanoGovernanceRegistrationDelegation[] =>
+  ): TrezorTypes.CardanoCVoteRegistrationDelegation[] =>
     delegations.map(({votePublicKey, voteWeight}) => {
       if (Number(voteWeight) > Number.MAX_SAFE_INTEGER) {
         throw Error(Errors.InvalidCVoteWeight)
       }
       return {
-        votingPublicKey: votePublicKey,
+        votePublicKey,
         weight: Number(voteWeight),
       }
     })
@@ -755,39 +757,25 @@ export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
   const prepareVoteAuxiliaryData = (
     delegations: CVoteDelegation[],
     hwStakeSigningFile: HwSigningData,
-    addressParameters: _AddressParameters,
+    paymentDestination: _TrezorDestination,
     nonce: bigint,
     votingPurpose: bigint,
   ): TrezorTypes.CardanoAuxiliaryData => {
-    const prepareAddressParameters = () => {
-      if (
-        addressParameters.addressType === TrezorEnums.CardanoAddressType.BASE
-      ) {
-        return {
-          addressType: addressParameters.addressType,
-          path: addressParameters.paymentPath as BIP32Path,
-          stakingPath: addressParameters.stakePath,
-        }
-      }
-      if (
-        addressParameters.addressType === TrezorEnums.CardanoAddressType.REWARD
-      ) {
-        return {
-          addressType: addressParameters.addressType,
-          stakingPath: addressParameters.stakePath as BIP32Path,
-        }
-      }
-      throw Error(Errors.InvalidCIP36RegistrationAddressType)
+    const destination: {
+      address?: string
+      addressParameters?: TrezorTypes.CardanoAddressParameters
+    } = paymentDestination
+    if (Number(votingPurpose) > Number.MAX_SAFE_INTEGER) {
+      throw Error(Errors.InvalidCVoteVotingPurpose)
     }
-
     return {
-      governanceRegistrationParameters: {
-        format: TrezorEnums.CardanoGovernanceRegistrationFormat.CIP36,
+      cVoteRegistrationParameters: {
+        format: TrezorEnums.CardanoCVoteRegistrationFormat.CIP36,
         delegations: prepareVoteDelegations(delegations),
         stakingPath: hwStakeSigningFile.path,
-        rewardAddressParameters: prepareAddressParameters(),
+        paymentAddressParameters: destination.addressParameters,
+        paymentAddress: destination.address,
         nonce: `${nonce}`,
-        // TODO change the type in Trezor Connect? or do some validation here
         votingPurpose: Number(votingPurpose),
       },
     }
@@ -833,21 +821,30 @@ export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     derivationType?: DerivationType,
   ): Promise<CIP36RegistrationMetaDataCborHex> => {
     const {data: address}: {data: Buffer} = bech32.decode(paymentAddressBech32)
+
+    let destination: _TrezorDestination
     const addressParams = getAddressParameters(
       paymentAddressSigningFiles,
       address,
       network,
     )
-    if (!addressParams) {
-      throw Error(Errors.AuxSigningFileNotFoundForCIP36PaymentAddress)
+    if (addressParams) {
+      validateCIP36RegistrationAddressType(addressParams.addressType)
+      destination = {
+        addressParameters: {
+          addressType: addressParams.addressType,
+          path: addressParams.paymentPath,
+          stakingPath: addressParams.stakePath,
+        },
+      }
+    } else {
+      destination = {address: paymentAddressBech32}
     }
-
-    validateCIP36RegistrationAddressType(addressParams.addressType)
 
     const trezorAuxData = prepareVoteAuxiliaryData(
       delegations,
       hwStakeSigningFile,
-      addressParams,
+      destination,
       nonce,
       votingPurpose,
     )
@@ -862,7 +859,7 @@ export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     }
     if (!response.payload.auxiliaryDataSupplement)
       throw Error(Errors.MissingAuxiliaryDataSupplement)
-    if (!response.payload.auxiliaryDataSupplement.governanceSignature) {
+    if (!response.payload.auxiliaryDataSupplement.cVoteRegistrationSignature) {
       throw Error(Errors.MissingCIP36RegistrationSignature)
     }
 
@@ -873,7 +870,8 @@ export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
       nonce,
       votingPurpose,
       response.payload.auxiliaryDataSupplement.auxiliaryDataHash as HexString,
-      response.payload.auxiliaryDataSupplement.governanceSignature as HexString,
+      response.payload.auxiliaryDataSupplement
+        .cVoteRegistrationSignature as HexString,
     )
   }
 
