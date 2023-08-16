@@ -57,7 +57,7 @@
     "@typescript-eslint/eslint-plugin": "^5.42.1",
     "@typescript-eslint/parser": "^5.42.1",
     "cspell": "^6.10.1",
-    "eslint": "^8.27.0",
+    "eslint": "^8.47.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-config-vacuumlabs": "^8.0.2",
     "eslint-plugin-import": "^2.25.4",
@@ -80,6 +80,7 @@
   "resolutions": {
     "//": "This is a workaround for pkg (otherwise, it prints an error when building)",
     "node-abi": "^3.24.0",
-    "eslint-plugin-import/**/json5": "^1.0.2"
+    "**/**/semver": "^7.5.2",
+    "**/**/protobufjs": "^6.11.4"
   }
 }
