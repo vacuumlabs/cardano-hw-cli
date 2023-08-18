@@ -158,12 +158,8 @@ const CommandExecutor = async () => {
       if (witness !== undefined) {
         txWitnessOutputs.push(constructTxWitnessOutput(era, witness))
       } else {
-        // eslint-disable-next-line no-console,max-len
-        console.log(
-          `Warning! A superfluous HW signing file specified (${i + 1} of ${
-            args.hwSigningFileData.length
-          }), the witness was not created.`,
-        )
+        // intentionally empty, the signing file might be needed despite not generating a witness,
+        // e.g. staking signing file in pool registration certificates
       }
     }
     if (txWitnessOutputs.length > args.outFiles.length) {
