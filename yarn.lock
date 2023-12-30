@@ -58,10 +58,10 @@
     "@babel/helper-validator-identifier" "^7.18.6"
     to-fast-properties "^2.0.0"
 
-"@cardano-foundation/ledgerjs-hw-app-cardano@^6.0.0":
-  version "6.0.0"
-  resolved "https://registry.yarnpkg.com/@cardano-foundation/ledgerjs-hw-app-cardano/-/ledgerjs-hw-app-cardano-6.0.0.tgz#720f2eb90efd8ca90a055bb09e22d8988bdda7cd"
-  integrity sha512-aiWlERF5sXMzygE62YH9AXrVePu5ZG+QKGv/ZhvYec35vUhDFJK8qPiLzXmTy6MdoDKSqbYVRPd6jY3KKs5pOg==
+"@cardano-foundation/ledgerjs-hw-app-cardano@^7.0.0":
+  version "7.0.0"
+  resolved "https://registry.yarnpkg.com/@cardano-foundation/ledgerjs-hw-app-cardano/-/ledgerjs-hw-app-cardano-7.0.0.tgz#5757b31a4425dcea8c8355509716bc6b63aa0ad6"
+  integrity sha512-tYybWPj/Dgt07g0F+x19dm9ShuRsPAZiLX2DS5xyIObqPh1oLSH5dk7BzZA0JWwo8VcnY/kpVjnh8+l1biAKaA==
   dependencies:
     "@ledgerhq/hw-transport" "^6.27.10"
     base-x "^3.0.5"
@@ -1372,13 +1372,13 @@ cardano-crypto.js@^5.3.6-rc.6:
     borc "^2.1.1"
     pbkdf2 "^3.0.17"
 
-cardano-hw-interop-lib@^2.0.2:
-  version "2.0.2"
-  resolved "https://registry.yarnpkg.com/cardano-hw-interop-lib/-/cardano-hw-interop-lib-2.0.2.tgz#64ee508c6afdad7dae3b3649111cfa53e056b6ee"
-  integrity sha512-7Pv5UnT+2QP/f68GSWA+mYyP+30wohURnzXOw8HYoh0C/jLQXKZFHhnUKMWGsQBBQXTjkvN4zzLC/yeJfVXfwQ==
+cardano-hw-interop-lib@^3.0.1:
+  version "3.0.1"
+  resolved "https://registry.yarnpkg.com/cardano-hw-interop-lib/-/cardano-hw-interop-lib-3.0.1.tgz#cb9c1aafb9a7dd8197a6dd560480c0a471894d1d"
+  integrity sha512-whFS8ZsMIjpcPWp3IiOZfxLZfqcSRlrkrnouEzFbCafxdUqc9rE817t7tdbsCm3GFvAL9sl+MWf/D3A9ehStVA==
   dependencies:
     blake2b "^2.1.4"
-    cbor "^8.1.0"
+    cbor "^9.0.1"
 
 cashaddrjs@0.4.4:
   version "0.4.4"
@@ -1391,6 +1391,13 @@ cbor@^8.1.0:
   version "8.1.0"
   resolved "https://registry.yarnpkg.com/cbor/-/cbor-8.1.0.tgz#cfc56437e770b73417a2ecbfc9caf6b771af60d5"
   integrity sha512-DwGjNW9omn6EwP70aXsn7FQJx5kO12tX0bZkaTjzdVFM6/7nhA4t0EENocKGx6D2Bch9PE2KzCUf5SceBdeijg==
+  dependencies:
+    nofilter "^3.1.0"
+
+cbor@^9.0.1:
+  version "9.0.1"
+  resolved "https://registry.yarnpkg.com/cbor/-/cbor-9.0.1.tgz#b16e393d4948d44758cd54ac6151379d443b37ae"
+  integrity sha512-/TQOWyamDxvVIv+DY9cOLNuABkoyz8K/F3QE56539pGVYohx0+MEA1f4lChFTX79dBTBS7R1PF6ovH7G+VtBfQ==
   dependencies:
     nofilter "^3.1.0"
 

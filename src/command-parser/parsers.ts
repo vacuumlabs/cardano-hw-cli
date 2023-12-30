@@ -104,6 +104,17 @@ export const parseFileTypeMagic = (
       checkFileTypeStartsWith(PathLabel.STAKE)
       return HwSigningType.Stake
 
+    case PathTypes.PATH_DREP_KEY:
+      checkFileTypeStartsWith(PathLabel.DREP)
+      return HwSigningType.DRep
+
+    case PathTypes.PATH_COMMITTEE_COLD_KEY:
+      checkFileTypeStartsWith(PathLabel.COMMITTEE_COLD)
+      return HwSigningType.CommitteeCold
+    case PathTypes.PATH_COMMITTEE_HOT_KEY:
+      checkFileTypeStartsWith(PathLabel.COMMITTEE_HOT)
+      return HwSigningType.CommitteeHot
+
     case PathTypes.PATH_WALLET_MINTING_KEY:
       checkFileTypeStartsWith(PathLabel.PAYMENT)
       return HwSigningType.Mint
