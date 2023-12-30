@@ -114,6 +114,15 @@ const bip32PathLabel = (path: BIP32Path): PathLabel => {
     case PathTypes.PATH_WALLET_STAKING_KEY_MULTISIG:
       return PathLabel.STAKE
 
+    case PathTypes.PATH_DREP_KEY:
+      return PathLabel.DREP
+
+    case PathTypes.PATH_COMMITTEE_COLD_KEY:
+      return PathLabel.COMMITTEE_COLD
+
+    case PathTypes.PATH_COMMITTEE_HOT_KEY:
+      return PathLabel.COMMITTEE_HOT
+
     case PathTypes.PATH_POOL_COLD_KEY:
       return PathLabel.POOL_COLD
 
@@ -128,9 +137,10 @@ const bip32PathLabel = (path: BIP32Path): PathLabel => {
 const verificationKeyType = (path: BIP32Path): string => {
   const label = bip32PathLabel(path)
   switch (classifyPath(path)) {
+    case PathTypes.PATH_DREP_KEY:
+    case PathTypes.PATH_COMMITTEE_COLD_KEY:
+    case PathTypes.PATH_COMMITTEE_HOT_KEY:
     case PathTypes.PATH_POOL_COLD_KEY:
-      return `${label}VerificationKey_ed25519`
-
     case PathTypes.PATH_CVOTE_KEY:
     case PathTypes.PATH_CVOTE_ACCOUNT:
       return `${label}VerificationKey_ed25519`
@@ -153,6 +163,15 @@ const verificationKeyDescription = (path: BIP32Path): string => {
 
     case PathTypes.PATH_WALLET_STAKING_KEY:
       return 'Hardware Stake Verification Key'
+
+    case PathTypes.PATH_DREP_KEY:
+      return 'Hardware Delegate Representative Verification Key'
+
+    case PathTypes.PATH_COMMITTEE_COLD_KEY:
+      return 'Hardware Constitutional Committee Cold Verification Key'
+
+    case PathTypes.PATH_COMMITTEE_HOT_KEY:
+      return 'Hardware Constitutional Committee Hot Verification Key'
 
     case PathTypes.PATH_WALLET_SPENDING_KEY_MULTISIG:
       return 'Hardware Script Payment Verification Key'
@@ -182,7 +201,7 @@ const constructVerificationKeyOutput = (
   xPubKey: XPubKeyHex | XPubKeyCborHex,
   path: BIP32Path,
 ): VerificationKeyOutput => {
-  const pubKey = Buffer.from(xPubKey, 'hex').slice(-64).slice(0, 32)
+  const pubKey = Buffer.from(xPubKey, 'hex').subarray(-64).subarray(0, 32)
   return {
     type: `${verificationKeyType(path)}`,
     description: `${verificationKeyDescription(path)}`,
@@ -198,6 +217,10 @@ const getHwSigningFileType = (
     case PathTypes.PATH_WALLET_SPENDING_KEY_BYRON:
       return `${label}HWSigningFileByron_ed25519_bip32`
 
+    case PathTypes.PATH_DREP_KEY:
+    case PathTypes.PATH_COMMITTEE_COLD_KEY:
+    case PathTypes.PATH_COMMITTEE_HOT_KEY:
+    case PathTypes.PATH_POOL_COLD_KEY:
     case PathTypes.PATH_CVOTE_ACCOUNT:
     case PathTypes.PATH_CVOTE_KEY:
       return `${label}HWSigningFile_ed25519`
@@ -215,6 +238,15 @@ const hwsfileDescription = (path: BIP32Path): string => {
 
     case PathTypes.PATH_WALLET_STAKING_KEY:
       return 'Stake Hardware Signing File'
+
+    case PathTypes.PATH_DREP_KEY:
+      return 'Hardware Delegate Representative Signing File'
+
+    case PathTypes.PATH_COMMITTEE_COLD_KEY:
+      return 'Hardware Constitutional Committee Cold Signing File'
+
+    case PathTypes.PATH_COMMITTEE_HOT_KEY:
+      return 'Hardware Constitutional Committee Hot Signing File'
 
     case PathTypes.PATH_WALLET_SPENDING_KEY_MULTISIG:
       return 'Script Payment Hardware Signing File'

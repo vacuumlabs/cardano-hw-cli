@@ -1,26 +1,53 @@
-import {CertificateType, TransactionBody, Uint} from 'cardano-hw-interop-lib'
+import {
+  CertificateType,
+  TransactionBody,
+  Uint,
+  VoterType,
+} from 'cardano-hw-interop-lib'
 import {Errors} from '../errors'
 import {HwSigningData} from '../command-parser/argTypes'
 import {SigningMode, SigningParameters} from './cryptoProvider'
 import {filterSigningFiles} from './util'
 
-const _countWitnessableItems = (body: TransactionBody) => {
-  // we count stake registrations separately because they don't necessarily require a staking witness
-  let numStakeRegistrationItems = 0
-  let numStakeOtherItems = body.withdrawals?.length || 0
+const _countWitnessableItemsForOrdinaryMode = (body: TransactionBody) => {
+  let numDRepItems = 0
+  let numCommitteeColdItems = 0
+  let numCommitteeHotItems = 0
   let numPoolColdItems = 0
-  body.certificates?.forEach((cert) => {
+
+  body.certificates?.items.forEach((cert) => {
     switch (cert.type) {
-      case CertificateType.STAKE_REGISTRATION:
-        numStakeRegistrationItems += 1
-        break
-
-      case CertificateType.STAKE_DEREGISTRATION:
-      case CertificateType.STAKE_DELEGATION:
-        numStakeOtherItems += 1
-        break
-
       case CertificateType.POOL_RETIREMENT:
+        numPoolColdItems += 1
+        break
+
+      case CertificateType.DREP_REGISTRATION:
+      case CertificateType.DREP_DEREGISTRATION:
+      case CertificateType.DREP_UPDATE:
+        numDRepItems += 1
+        break
+
+      case CertificateType.AUTHORIZE_COMMITTEE_HOT:
+      case CertificateType.RESIGN_COMMITTEE_COLD:
+        numCommitteeColdItems += 1
+        break
+
+      default:
+        break
+    }
+  })
+
+  body.votingProcedures?.forEach((vv) => {
+    switch (vv.voter.type) {
+      case VoterType.DREP_KEY:
+        numDRepItems += 1
+        break
+
+      case VoterType.COMMITTEE_KEY:
+        numCommitteeHotItems += 1
+        break
+
+      case VoterType.STAKE_POOL:
         numPoolColdItems += 1
         break
 
@@ -28,18 +55,43 @@ const _countWitnessableItems = (body: TransactionBody) => {
         break
     }
   })
-  return {numStakeRegistrationItems, numStakeOtherItems, numPoolColdItems}
+  return {
+    numDRepItems,
+    numCommitteeColdItems,
+    numCommitteeHotItems,
+    numPoolColdItems,
+  }
 }
 
 const validateOrdinaryWitnesses = (
   body: TransactionBody,
   hwSigningFileData: HwSigningData[],
 ) => {
-  const {poolColdSigningFiles, mintSigningFiles, multisigSigningFiles} =
-    filterSigningFiles(hwSigningFileData)
+  const {
+    dRepSigningFiles,
+    committeeColdSigningFiles,
+    committeeHotSigningFiles,
+    poolColdSigningFiles,
+    mintSigningFiles,
+    multisigSigningFiles,
+  } = filterSigningFiles(hwSigningFileData)
 
-  const {numPoolColdItems} = _countWitnessableItems(body)
+  const {
+    numDRepItems,
+    numCommitteeColdItems,
+    numCommitteeHotItems,
+    numPoolColdItems,
+  } = _countWitnessableItemsForOrdinaryMode(body)
 
+  if (numDRepItems === 0 && dRepSigningFiles.length > 0) {
+    throw Error(Errors.TooManyDRepSigningFilesError)
+  }
+  if (numCommitteeColdItems === 0 && committeeColdSigningFiles.length > 0) {
+    throw Error(Errors.TooManyCommitteeColdSigningFilesError)
+  }
+  if (numCommitteeHotItems === 0 && committeeHotSigningFiles.length > 0) {
+    throw Error(Errors.TooManyCommitteeHotSigningFilesError)
+  }
   if (numPoolColdItems === 0 && poolColdSigningFiles.length > 0) {
     throw Error(Errors.TooManyPoolColdSigningFilesError)
   }
@@ -58,6 +110,9 @@ const validatePoolOwnerWitnesses = (
   const {
     paymentSigningFiles,
     stakeSigningFiles,
+    dRepSigningFiles,
+    committeeColdSigningFiles,
+    committeeHotSigningFiles,
     poolColdSigningFiles,
     mintSigningFiles,
     multisigSigningFiles,
@@ -75,6 +130,15 @@ const validatePoolOwnerWitnesses = (
     throw Error(Errors.TooManyStakeSigningFilesError)
   }
 
+  if (dRepSigningFiles.length > 0) {
+    throw Error(Errors.TooManyDRepSigningFilesError)
+  }
+  if (committeeColdSigningFiles.length > 0) {
+    throw Error(Errors.TooManyCommitteeColdSigningFilesError)
+  }
+  if (committeeHotSigningFiles.length > 0) {
+    throw Error(Errors.TooManyCommitteeHotSigningFilesError)
+  }
   if (poolColdSigningFiles.length > 0) {
     throw Error(Errors.TooManyPoolColdSigningFilesError)
   }
@@ -92,6 +156,9 @@ const validatePoolOperatorWitnesses = (
 ) => {
   const {
     stakeSigningFiles,
+    dRepSigningFiles,
+    committeeColdSigningFiles,
+    committeeHotSigningFiles,
     poolColdSigningFiles,
     mintSigningFiles,
     multisigSigningFiles,
@@ -99,6 +166,15 @@ const validatePoolOperatorWitnesses = (
 
   if (stakeSigningFiles.length > 0) {
     throw Error(Errors.TooManyStakeSigningFilesError)
+  }
+  if (dRepSigningFiles.length > 0) {
+    throw Error(Errors.TooManyDRepSigningFilesError)
+  }
+  if (committeeColdSigningFiles.length > 0) {
+    throw Error(Errors.TooManyCommitteeColdSigningFilesError)
+  }
+  if (committeeHotSigningFiles.length > 0) {
+    throw Error(Errors.TooManyCommitteeHotSigningFilesError)
   }
   if (poolColdSigningFiles.length === 0) {
     throw Error(Errors.MissingPoolColdSigningFileError)
@@ -121,6 +197,9 @@ const validateMultisigWitnesses = (
   const {
     paymentSigningFiles,
     stakeSigningFiles,
+    dRepSigningFiles,
+    committeeColdSigningFiles,
+    committeeHotSigningFiles,
     poolColdSigningFiles,
     mintSigningFiles,
   } = filterSigningFiles(hwSigningFileData)
@@ -130,6 +209,15 @@ const validateMultisigWitnesses = (
   }
   if (stakeSigningFiles.length > 0) {
     throw Error(Errors.TooManyStakeSigningFilesError)
+  }
+  if (dRepSigningFiles.length > 0) {
+    throw Error(Errors.TooManyDRepSigningFilesError)
+  }
+  if (committeeColdSigningFiles.length > 0) {
+    throw Error(Errors.TooManyCommitteeColdSigningFilesError)
+  }
+  if (committeeHotSigningFiles.length > 0) {
+    throw Error(Errors.TooManyCommitteeHotSigningFilesError)
   }
   if (poolColdSigningFiles.length > 0) {
     throw Error(Errors.TooManyPoolColdSigningFilesError)

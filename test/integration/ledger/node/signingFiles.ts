@@ -66,6 +66,42 @@ const signingFiles = {
     cborXPubKeyHex:
       '584090ca5e64214a03ec975e5097c25b2a49d4ca4988243bc0142b5ada743d80b9d5be68538e05e31dc8fff62a62868c43f229cacbee5c40cbe6493929ad1f0e3cd9',
   },
+  dRep: {
+    type: HwSigningType.DRep,
+    path: [
+      1852 + HARDENED_THRESHOLD,
+      1815 + HARDENED_THRESHOLD,
+      0 + HARDENED_THRESHOLD,
+      3,
+      0,
+    ],
+    cborXPubKeyHex:
+      '58407cc18df2fbd3ee1b16b76843b18446679ab95dbcd07b7833b66a9407c0709e3701d881e1c04fed8defa9a3e8bd3cf85bd975f813ff8eb622d20a4375a07d6bc9',
+  },
+  committeeCold: {
+    type: HwSigningType.CommitteeCold,
+    path: [
+      1852 + HARDENED_THRESHOLD,
+      1815 + HARDENED_THRESHOLD,
+      0 + HARDENED_THRESHOLD,
+      4,
+      0,
+    ],
+    cborXPubKeyHex:
+      '5840bc8c8a37d6ab41339bb073e72ce2e776cefed98d1a6d070ea5fada80dc7d67376f58406a51d33bb35e98884cbadced9bc94f65a752001ad5f4788af07b2ec0fe',
+  },
+  committeeHot: {
+    type: HwSigningType.CommitteeHot,
+    path: [
+      1852 + HARDENED_THRESHOLD,
+      1815 + HARDENED_THRESHOLD,
+      1 + HARDENED_THRESHOLD,
+      5,
+      0,
+    ],
+    cborXPubKeyHex:
+      '5840624142a80217b95ca2fc5b0c1f8d74e26e5683621c430c7bc7eebca6ee541a5892a8c64cfdf1af08e78c2ba59bef496eb34ddf24bdf0f91404a962415a7a0810',
+  },
   poolCold0: {
     type: HwSigningType.PoolCold,
     path: [

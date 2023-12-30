@@ -163,6 +163,11 @@ const CommandExecutor = async () => {
       }
     }
     if (txWitnessOutputs.length > args.outFiles.length) {
+      const witnessPaths = txWitnesses
+        .map((output) => output.path.toString())
+        .join('\n')
+      // eslint-disable-next-line no-console,max-len
+      console.log(`Witness paths:\n${witnessPaths}`)
       throw Error(Errors.NotEnoughOutFilesError)
     }
     for (let i = 0; i < args.outFiles.length; i += 1) {
@@ -210,7 +215,7 @@ const CommandExecutor = async () => {
 
       const issueCounter = {
         counter: 0n,
-        poolColdKey: Buffer.from(xPubKey, 'hex').slice(-64).slice(0, 32),
+        poolColdKey: Buffer.from(xPubKey, 'hex').subarray(-64).subarray(0, 32),
       }
       writeOutputData(
         issueCounterFiles[i],

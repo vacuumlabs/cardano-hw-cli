@@ -311,31 +311,31 @@ export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
   }
 
   const _prepareStakeCredential = (
-    stakeCredential: TxTypes.StakeCredential,
+    stakeCredential: TxTypes.Credential,
     stakeSigningFiles: HwSigningData[],
     signingMode: SigningMode,
   ): {path: BIP32Path} | {keyHash: string} | {scriptHash: string} => {
     switch (stakeCredential.type) {
-      case TxTypes.StakeCredentialType.KEY_HASH: {
+      case TxTypes.CredentialType.KEY_HASH: {
         // A key hash stake credential can be sent to the HW wallet either by the key derivation
         // path or by the key hash (there are certain restrictions depending on signing mode). If we
         // are given the appropriate signing file, we always send a path; if we are not, we send the
         // key hash or throw an error depending on whether the signing mode allows it. This allows
         // the user of hw-cli to stay in control.
         const path = findSigningPathForKeyHash(
-          (stakeCredential as TxTypes.StakeCredentialKey).hash,
+          (stakeCredential as TxTypes.KeyCredential).keyHash,
           stakeSigningFiles,
         )
         if (path) {
           return {path}
         }
         if (signingMode === SigningMode.PLUTUS_TRANSACTION) {
-          return {keyHash: stakeCredential.hash.toString('hex')}
+          return {keyHash: stakeCredential.keyHash.toString('hex')}
         }
         throw Error(Errors.MissingSigningFileForCertificateError)
       }
-      case TxTypes.StakeCredentialType.SCRIPT_HASH: {
-        return {scriptHash: stakeCredential.hash.toString('hex')}
+      case TxTypes.CredentialType.SCRIPT_HASH: {
+        return {scriptHash: stakeCredential.scriptHash.toString('hex')}
       }
       default:
         throw Error(Errors.Unreachable)
@@ -437,7 +437,10 @@ export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
       cost: `${cert.poolParams.cost}`,
       margin,
       rewardAccount: encodeAddress(cert.poolParams.rewardAccount),
-      owners: preparePoolOwners(cert.poolParams.poolOwners, stakeSigningFiles),
+      owners: preparePoolOwners(
+        cert.poolParams.poolOwners.items,
+        stakeSigningFiles,
+      ),
       relays: prepareRelays(cert.poolParams.relays),
       // metadata can be null in case of private pool, library type definition is wrong:
       metadata: metadata as TrezorTypes.CardanoPoolMetadata,
@@ -487,8 +490,9 @@ export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     stakeSigningFiles: HwSigningData[],
     signingMode: SigningMode,
   ): TrezorTypes.CardanoWithdrawal => {
-    const stakeCredential: TxTypes.StakeCredential =
-      rewardAccountToStakeCredential(withdrawal.rewardAccount)
+    const stakeCredential: TxTypes.Credential = rewardAccountToStakeCredential(
+      withdrawal.rewardAccount,
+    )
     return {
       amount: `${withdrawal.amount}`,
       ..._prepareStakeCredential(
@@ -645,11 +649,11 @@ export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
       multisigSigningFiles,
     } = filterSigningFiles(hwSigningFileData)
 
-    const inputs = tx.body.inputs.map(prepareInput)
+    const inputs = tx.body.inputs.items.map(prepareInput)
     const outputs = tx.body.outputs.map((output) =>
       prepareOutput(output, network, changeOutputFiles, signingMode),
     )
-    const certificates = tx.body.certificates?.map((certificate) =>
+    const certificates = tx.body.certificates?.items.map((certificate) =>
       prepareCertificate(certificate, stakeSigningFiles, signingMode),
     )
     const fee = `${tx.body.fee}`
@@ -665,16 +669,17 @@ export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
       ? prepareTokenBundle(tx.body.mint, true)
       : undefined
     const scriptDataHash = prepareScriptDataHash(tx.body.scriptDataHash)
-    const collateralInputs = tx.body.collateralInputs?.map(
+    const collateralInputs = tx.body.collateralInputs?.items.map(
       prepareCollateralInput,
     )
-    const requiredSigners = tx.body.requiredSigners?.map((requiredSigner) =>
-      prepareRequiredSigner(requiredSigner, [
-        ...paymentSigningFiles,
-        ...stakeSigningFiles,
-        ...mintSigningFiles,
-        ...multisigSigningFiles,
-      ]),
+    const requiredSigners = tx.body.requiredSigners?.items.map(
+      (requiredSigner) =>
+        prepareRequiredSigner(requiredSigner, [
+          ...paymentSigningFiles,
+          ...stakeSigningFiles,
+          ...mintSigningFiles,
+          ...multisigSigningFiles,
+        ]),
     )
     const includeNetworkId = tx.body.networkId !== undefined
     const collateralReturn = tx.body.collateralReturnOutput
@@ -689,7 +694,7 @@ export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
       tx.body.totalCollateral !== undefined
         ? `${tx.body.totalCollateral}`
         : undefined
-    const referenceInputs = tx.body.referenceInputs?.map(prepareInput)
+    const referenceInputs = tx.body.referenceInputs?.items.map(prepareInput)
 
     const additionalWitnessRequests = prepareAdditionalWitnessRequests(
       paymentSigningFiles,

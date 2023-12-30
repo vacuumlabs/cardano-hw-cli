@@ -6,6 +6,7 @@ export enum ExitCode {
 }
 
 /* eslint-disable max-len */
+
 export const enum Errors {
   HwTransportNotFoundError = 'Error occurred while trying to find hw transport, make sure Ledger or Trezor is connected to your computer',
   InvalidPathError = 'Can not parse path',
@@ -28,6 +29,9 @@ export const enum Errors {
   MissingPoolColdSigningFileError = 'Missing pool cold key signing file',
   TooManyPaymentSigningFilesError = 'Too many payment signing files',
   TooManyStakeSigningFilesError = 'Too many stake signing files',
+  TooManyDRepSigningFilesError = 'Too many DRep key signing files',
+  TooManyCommitteeColdSigningFilesError = 'Too many committee cold key signing files',
+  TooManyCommitteeHotSigningFilesError = 'Too many committee hot key signing files',
   TooManyPoolColdSigningFilesError = 'Too many pool cold key signing files',
   TooManyMintSigningFilesError = 'Too many mint signing files',
   TooManyMultisigSigningFilesError = 'Too many multisig signing files',
@@ -64,4 +68,6 @@ export const enum Errors {
   NetworkIdMismatchError = 'Provided network id differs from network id included in transaction body',
   NotEnoughOutFilesError = 'Not enough output files specified',
   TestnetProtocolMagicMissing = 'Testnet protocol magic is missing',
+  InvalidVotingProcedures = 'Invalid voting procedures (might be a number out of range)',
+  UnsupportedCertificateType = 'Transaction contains a certificate type that is not supported by HW wallets (see CIP-21)',
 }
