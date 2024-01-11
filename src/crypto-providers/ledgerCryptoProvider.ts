@@ -1029,12 +1029,11 @@ export const LedgerCryptoProvider: (
   const prepareAdditionalWitnessRequests = (
     hwSigningFileData: HwSigningData[],
   ): BIP32Path[] => {
-    // Witnesses for tx body elements have already been added across the tx
-    // (inputs, certificates, required signers etc.)
-    // We must add additional witnesses for script hash elements
-    // (e.g. mint), but for whatever reason, the user might want to get extra witnesses,
-    // so we add it all here and let ledgerjs filter / uniquify them
-    // so that each witness is asked only once.
+    // Witnesses for some tx body elements (certificates, required signers etc.) have already been
+    // added across the tx.
+    // However, we must add witnesses for inputs, script hash elements (e.g. mint).
+    // For whatever reason, the user might want to get extra witnesses, so we add it all here and
+    // let ledgerjs uniquify them so that each witness is asked only once.
     return hwSigningFileData.map((f) => f.path)
   }
 

@@ -30,7 +30,6 @@ import {
 } from '../basicTypes'
 import {
   encodeAddress,
-  filterSigningFiles,
   findSigningPathForKeyHash,
   getAddressAttributes,
   ipv4ToString,
@@ -310,12 +309,12 @@ export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     }
   }
 
-  const _prepareStakeCredential = (
-    stakeCredential: TxTypes.Credential,
-    stakeSigningFiles: HwSigningData[],
+  const prepareCredential = (
+    credential: TxTypes.Credential,
+    signingFiles: HwSigningData[],
     signingMode: SigningMode,
   ): {path: BIP32Path} | {keyHash: string} | {scriptHash: string} => {
-    switch (stakeCredential.type) {
+    switch (credential.type) {
       case TxTypes.CredentialType.KEY_HASH: {
         // A key hash stake credential can be sent to the HW wallet either by the key derivation
         // path or by the key hash (there are certain restrictions depending on signing mode). If we
@@ -323,20 +322,45 @@ export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
         // key hash or throw an error depending on whether the signing mode allows it. This allows
         // the user of hw-cli to stay in control.
         const path = findSigningPathForKeyHash(
-          (stakeCredential as TxTypes.KeyCredential).keyHash,
-          stakeSigningFiles,
+          (credential as TxTypes.KeyCredential).keyHash,
+          signingFiles,
         )
         if (path) {
           return {path}
         }
         if (signingMode === SigningMode.PLUTUS_TRANSACTION) {
-          return {keyHash: stakeCredential.keyHash.toString('hex')}
+          return {keyHash: credential.keyHash.toString('hex')}
         }
         throw Error(Errors.MissingSigningFileForCertificateError)
       }
       case TxTypes.CredentialType.SCRIPT_HASH: {
-        return {scriptHash: stakeCredential.scriptHash.toString('hex')}
+        return {scriptHash: credential.scriptHash.toString('hex')}
       }
+      default:
+        throw Error(Errors.Unreachable)
+    }
+  }
+
+  const prepareDRep = (dRep: TxTypes.DRep): TrezorTypes.CardanoDRep => {
+    switch (dRep.type) {
+      case TxTypes.DRepType.KEY_HASH:
+        return {
+          type: TrezorEnums.CardanoDRepType.KEY_HASH,
+          keyHash: dRep.keyHash.toString('hex'),
+        }
+      case TxTypes.DRepType.SCRIPT_HASH:
+        return {
+          type: TrezorEnums.CardanoDRepType.SCRIPT_HASH,
+          scriptHash: dRep.scriptHash.toString('hex'),
+        }
+      case TxTypes.DRepType.ABSTAIN:
+        return {
+          type: TrezorEnums.CardanoDRepType.ABSTAIN,
+        }
+      case TxTypes.DRepType.NO_CONFIDENCE:
+        return {
+          type: TrezorEnums.CardanoDRepType.NO_CONFIDENCE,
+        }
       default:
         throw Error(Errors.Unreachable)
     }
@@ -348,11 +372,17 @@ export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     signingMode: SigningMode,
   ): TrezorTypes.CardanoCertificate => ({
     type: TrezorEnums.CardanoCertificateType.STAKE_REGISTRATION,
-    ..._prepareStakeCredential(
-      cert.stakeCredential,
-      stakeSigningFiles,
-      signingMode,
-    ),
+    ...prepareCredential(cert.stakeCredential, stakeSigningFiles, signingMode),
+  })
+
+  const prepareStakeKeyRegistrationConwayCert = (
+    cert: TxTypes.StakeRegistrationConwayCertificate,
+    stakeSigningFiles: HwSigningData[],
+    signingMode: SigningMode,
+  ): TrezorTypes.CardanoCertificate => ({
+    type: TrezorEnums.CardanoCertificateType.STAKE_REGISTRATION_CONWAY,
+    ...prepareCredential(cert.stakeCredential, stakeSigningFiles, signingMode),
+    deposit: `${cert.deposit}`,
   })
 
   const prepareStakeKeyDeregistrationCert = (
@@ -361,11 +391,17 @@ export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     signingMode: SigningMode,
   ): TrezorTypes.CardanoCertificate => ({
     type: TrezorEnums.CardanoCertificateType.STAKE_DEREGISTRATION,
-    ..._prepareStakeCredential(
-      cert.stakeCredential,
-      stakeSigningFiles,
-      signingMode,
-    ),
+    ...prepareCredential(cert.stakeCredential, stakeSigningFiles, signingMode),
+  })
+
+  const prepareStakeKeyDeregistrationConwayCert = (
+    cert: TxTypes.StakeDeregistrationConwayCertificate,
+    stakeSigningFiles: HwSigningData[],
+    signingMode: SigningMode,
+  ): TrezorTypes.CardanoCertificate => ({
+    type: TrezorEnums.CardanoCertificateType.STAKE_DEREGISTRATION_CONWAY,
+    ...prepareCredential(cert.stakeCredential, stakeSigningFiles, signingMode),
+    deposit: `${cert.deposit}`,
   })
 
   const prepareDelegationCert = (
@@ -374,12 +410,18 @@ export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     signingMode: SigningMode,
   ): TrezorTypes.CardanoCertificate => ({
     type: TrezorEnums.CardanoCertificateType.STAKE_DELEGATION,
-    ..._prepareStakeCredential(
-      cert.stakeCredential,
-      stakeSigningFiles,
-      signingMode,
-    ),
+    ...prepareCredential(cert.stakeCredential, stakeSigningFiles, signingMode),
     pool: cert.poolKeyHash.toString('hex'),
+  })
+
+  const prepareVoteDelegationCert = (
+    cert: TxTypes.VoteDelegationCertificate,
+    signingFiles: HwSigningData[],
+    signingMode: SigningMode,
+  ): TrezorTypes.CardanoCertificate => ({
+    type: TrezorEnums.CardanoCertificateType.VOTE_DELEGATION,
+    ...prepareCredential(cert.stakeCredential, signingFiles, signingMode),
+    dRep: prepareDRep(cert.dRep),
   })
 
   const preparePoolOwners = (
@@ -466,8 +508,20 @@ export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
           stakeSigningFiles,
           signingMode,
         )
+      case TxTypes.CertificateType.STAKE_REGISTRATION_CONWAY:
+        return prepareStakeKeyRegistrationConwayCert(
+          certificate,
+          stakeSigningFiles,
+          signingMode,
+        )
       case TxTypes.CertificateType.STAKE_DEREGISTRATION:
         return prepareStakeKeyDeregistrationCert(
+          certificate,
+          stakeSigningFiles,
+          signingMode,
+        )
+      case TxTypes.CertificateType.STAKE_DEREGISTRATION_CONWAY:
+        return prepareStakeKeyDeregistrationConwayCert(
           certificate,
           stakeSigningFiles,
           signingMode,
@@ -478,10 +532,30 @@ export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
           stakeSigningFiles,
           signingMode,
         )
+      case TxTypes.CertificateType.VOTE_DELEGATION:
+        return prepareVoteDelegationCert(
+          certificate,
+          stakeSigningFiles,
+          signingMode,
+        )
       case TxTypes.CertificateType.POOL_REGISTRATION:
         return prepareStakePoolRegistrationCert(certificate, stakeSigningFiles)
+
+      case TxTypes.CertificateType.POOL_RETIREMENT:
+      case TxTypes.CertificateType.STAKE_AND_VOTE_DELEGATION:
+      case TxTypes.CertificateType.STAKE_REGISTRATION_AND_DELEGATION:
+      case TxTypes.CertificateType.STAKE_REGISTRATION_WITH_VOTE_DELEGATION:
+      case TxTypes.CertificateType
+        .STAKE_REGISTRATION_WITH_STAKE_AND_VOTE_DELEGATION:
+      case TxTypes.CertificateType.AUTHORIZE_COMMITTEE_HOT:
+      case TxTypes.CertificateType.RESIGN_COMMITTEE_COLD:
+      case TxTypes.CertificateType.DREP_REGISTRATION:
+      case TxTypes.CertificateType.DREP_DEREGISTRATION:
+      case TxTypes.CertificateType.DREP_UPDATE:
+        throw Error(Errors.UnsupportedCertificateType)
+
       default:
-        throw Error(Errors.UnknownCertificateTypeError)
+        throw Error(Errors.UnknownCertificateError)
     }
   }
 
@@ -495,11 +569,7 @@ export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     )
     return {
       amount: `${withdrawal.amount}`,
-      ..._prepareStakeCredential(
-        stakeCredential,
-        stakeSigningFiles,
-        signingMode,
-      ),
+      ...prepareCredential(stakeCredential, stakeSigningFiles, signingMode),
     }
   }
 
@@ -545,17 +615,15 @@ export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
   }
 
   const prepareAdditionalWitnessRequests = (
-    paymentSigningFiles: HwSigningData[],
-    mintSigningFiles: HwSigningData[],
-    multisigSigningFiles: HwSigningData[],
-  ) =>
-    // Payment signing files are always added here, so that the inputs are witnessed.
-    // Even though Plutus txs might require additional stake signatures, Plutus scripts
-    // don't see signatures directly - they can only access requiredSigners, and their witnesses
-    // are gathered above.
-    [...paymentSigningFiles, ...mintSigningFiles, ...multisigSigningFiles].map(
-      (f) => f.path,
-    )
+    hwSigningFileData: HwSigningData[],
+  ): BIP32Path[] => {
+    // Witnesses for some tx body elements (certificates, required signers etc.) have already been
+    // added across the tx.
+    // However, we must add witnesses for inputs and script hash elements (e.g. mint).
+    // For whatever reason, the user might also want to get extra witnesses, so we add it all here
+    // and let ledgerjs uniquify them so that each witness is asked only once.
+    return hwSigningFileData.map((f) => f.path)
+  }
 
   const createWitnesses = (
     trezorWitnesses: TrezorTypes.CardanoSignedTxWitness[],
@@ -642,19 +710,13 @@ export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
       network,
       derivationType,
     } = params
-    const {
-      paymentSigningFiles,
-      stakeSigningFiles,
-      mintSigningFiles,
-      multisigSigningFiles,
-    } = filterSigningFiles(hwSigningFileData)
 
     const inputs = tx.body.inputs.items.map(prepareInput)
     const outputs = tx.body.outputs.map((output) =>
       prepareOutput(output, network, changeOutputFiles, signingMode),
     )
     const certificates = tx.body.certificates?.items.map((certificate) =>
-      prepareCertificate(certificate, stakeSigningFiles, signingMode),
+      prepareCertificate(certificate, hwSigningFileData, signingMode),
     )
     const fee = `${tx.body.fee}`
     const ttl = prepareTtl(tx.body.ttl)
@@ -662,7 +724,7 @@ export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
       tx.body.validityIntervalStart,
     )
     const withdrawals = tx.body.withdrawals?.map((withdrawal) =>
-      prepareWithdrawal(withdrawal, stakeSigningFiles, signingMode),
+      prepareWithdrawal(withdrawal, hwSigningFileData, signingMode),
     )
     const auxiliaryData = prepareAuxiliaryDataHashHex(tx.body.auxiliaryDataHash)
     const mint = tx.body.mint
@@ -674,12 +736,7 @@ export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     )
     const requiredSigners = tx.body.requiredSigners?.items.map(
       (requiredSigner) =>
-        prepareRequiredSigner(requiredSigner, [
-          ...paymentSigningFiles,
-          ...stakeSigningFiles,
-          ...mintSigningFiles,
-          ...multisigSigningFiles,
-        ]),
+        prepareRequiredSigner(requiredSigner, hwSigningFileData),
     )
     const includeNetworkId = tx.body.networkId !== undefined
     const collateralReturn = tx.body.collateralReturnOutput
@@ -696,11 +753,24 @@ export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
         : undefined
     const referenceInputs = tx.body.referenceInputs?.items.map(prepareInput)
 
-    const additionalWitnessRequests = prepareAdditionalWitnessRequests(
-      paymentSigningFiles,
-      mintSigningFiles,
-      multisigSigningFiles,
-    )
+    if (tx.body.votingProcedures !== undefined) {
+      throw Error(Errors.TrezorVotingProceduresUnsupported)
+    }
+
+    if (tx.body.treasury !== undefined) {
+      throw Error(Errors.TrezorTreasuryUnsupported)
+    }
+
+    if (tx.body.donation !== undefined) {
+      throw Error(Errors.TrezorDonationUnsupported)
+    }
+
+    const additionalWitnessRequests =
+      prepareAdditionalWitnessRequests(hwSigningFileData)
+
+    // the tags are either used everywhere or nowhere,
+    // so we can just look at the inputs
+    const tagCborSets = tx.body.inputs.hasTag
 
     const request: TrezorTypes.CardanoSignTransaction = {
       signingMode: signingModeToTrezorType(signingMode),
@@ -724,6 +794,7 @@ export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
       totalCollateral,
       referenceInputs,
       derivationType: derivationTypeToTrezorType(derivationType),
+      tagCborSets,
     }
 
     const response = await TrezorConnect.cardanoSignTransaction(request)
