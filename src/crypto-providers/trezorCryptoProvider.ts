@@ -30,7 +30,6 @@ import {
 } from '../basicTypes'
 import {
   encodeAddress,
-  filterSigningFiles,
   findSigningPathForKeyHash,
   getAddressAttributes,
   ipv4ToString,
@@ -616,17 +615,15 @@ export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
   }
 
   const prepareAdditionalWitnessRequests = (
-    paymentSigningFiles: HwSigningData[],
-    mintSigningFiles: HwSigningData[],
-    multisigSigningFiles: HwSigningData[],
-  ) =>
-    // Payment signing files are always added here, so that the inputs are witnessed.
-    // Even though Plutus txs might require additional stake signatures, Plutus scripts
-    // don't see signatures directly - they can only access requiredSigners, and their witnesses
-    // are gathered above.
-    [...paymentSigningFiles, ...mintSigningFiles, ...multisigSigningFiles].map(
-      (f) => f.path,
-    )
+    hwSigningFileData: HwSigningData[],
+  ): BIP32Path[] => {
+    // Witnesses for some tx body elements (certificates, required signers etc.) have already been
+    // added across the tx.
+    // However, we must add witnesses for inputs and script hash elements (e.g. mint).
+    // For whatever reason, the user might also want to get extra witnesses, so we add it all here
+    // and let ledgerjs uniquify them so that each witness is asked only once.
+    return hwSigningFileData.map((f) => f.path)
+  }
 
   const createWitnesses = (
     trezorWitnesses: TrezorTypes.CardanoSignedTxWitness[],
@@ -713,19 +710,13 @@ export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
       network,
       derivationType,
     } = params
-    const {
-      paymentSigningFiles,
-      stakeSigningFiles,
-      mintSigningFiles,
-      multisigSigningFiles,
-    } = filterSigningFiles(hwSigningFileData)
 
     const inputs = tx.body.inputs.items.map(prepareInput)
     const outputs = tx.body.outputs.map((output) =>
       prepareOutput(output, network, changeOutputFiles, signingMode),
     )
     const certificates = tx.body.certificates?.items.map((certificate) =>
-      prepareCertificate(certificate, stakeSigningFiles, signingMode),
+      prepareCertificate(certificate, hwSigningFileData, signingMode),
     )
     const fee = `${tx.body.fee}`
     const ttl = prepareTtl(tx.body.ttl)
@@ -733,7 +724,7 @@ export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
       tx.body.validityIntervalStart,
     )
     const withdrawals = tx.body.withdrawals?.map((withdrawal) =>
-      prepareWithdrawal(withdrawal, stakeSigningFiles, signingMode),
+      prepareWithdrawal(withdrawal, hwSigningFileData, signingMode),
     )
     const auxiliaryData = prepareAuxiliaryDataHashHex(tx.body.auxiliaryDataHash)
     const mint = tx.body.mint
@@ -745,12 +736,7 @@ export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     )
     const requiredSigners = tx.body.requiredSigners?.items.map(
       (requiredSigner) =>
-        prepareRequiredSigner(requiredSigner, [
-          ...paymentSigningFiles,
-          ...stakeSigningFiles,
-          ...mintSigningFiles,
-          ...multisigSigningFiles,
-        ]),
+        prepareRequiredSigner(requiredSigner, hwSigningFileData),
     )
     const includeNetworkId = tx.body.networkId !== undefined
     const collateralReturn = tx.body.collateralReturnOutput
@@ -779,11 +765,8 @@ export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
       throw Error(Errors.TrezorDonationUnsupported)
     }
 
-    const additionalWitnessRequests = prepareAdditionalWitnessRequests(
-      paymentSigningFiles,
-      mintSigningFiles,
-      multisigSigningFiles,
-    )
+    const additionalWitnessRequests =
+      prepareAdditionalWitnessRequests(hwSigningFileData)
 
     // the tags are either used everywhere or nowhere,
     // so we can just look at the inputs
