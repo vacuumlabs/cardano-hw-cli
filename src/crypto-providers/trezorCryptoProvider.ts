@@ -342,9 +342,7 @@ export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     }
   }
 
-  const prepareDRep = (
-    dRep: TxTypes.DRep,
-  ): TrezorTypes.CardanoDRep => {
+  const prepareDRep = (dRep: TxTypes.DRep): TrezorTypes.CardanoDRep => {
     switch (dRep.type) {
       case TxTypes.DRepType.KEY_HASH:
         return {
@@ -375,11 +373,7 @@ export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     signingMode: SigningMode,
   ): TrezorTypes.CardanoCertificate => ({
     type: TrezorEnums.CardanoCertificateType.STAKE_REGISTRATION,
-    ...prepareCredential(
-      cert.stakeCredential,
-      stakeSigningFiles,
-      signingMode,
-    ),
+    ...prepareCredential(cert.stakeCredential, stakeSigningFiles, signingMode),
   })
 
   const prepareStakeKeyRegistrationConwayCert = (
@@ -388,11 +382,7 @@ export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     signingMode: SigningMode,
   ): TrezorTypes.CardanoCertificate => ({
     type: TrezorEnums.CardanoCertificateType.STAKE_REGISTRATION_CONWAY,
-    ...prepareCredential(
-      cert.stakeCredential,
-      stakeSigningFiles,
-      signingMode,
-    ),
+    ...prepareCredential(cert.stakeCredential, stakeSigningFiles, signingMode),
     deposit: `${cert.deposit}`,
   })
 
@@ -402,11 +392,7 @@ export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     signingMode: SigningMode,
   ): TrezorTypes.CardanoCertificate => ({
     type: TrezorEnums.CardanoCertificateType.STAKE_DEREGISTRATION,
-    ...prepareCredential(
-      cert.stakeCredential,
-      stakeSigningFiles,
-      signingMode,
-    ),
+    ...prepareCredential(cert.stakeCredential, stakeSigningFiles, signingMode),
   })
 
   const prepareStakeKeyDeregistrationConwayCert = (
@@ -415,11 +401,7 @@ export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     signingMode: SigningMode,
   ): TrezorTypes.CardanoCertificate => ({
     type: TrezorEnums.CardanoCertificateType.STAKE_DEREGISTRATION_CONWAY,
-    ...prepareCredential(
-      cert.stakeCredential,
-      stakeSigningFiles,
-      signingMode,
-    ),
+    ...prepareCredential(cert.stakeCredential, stakeSigningFiles, signingMode),
     deposit: `${cert.deposit}`,
   })
 
@@ -429,11 +411,7 @@ export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     signingMode: SigningMode,
   ): TrezorTypes.CardanoCertificate => ({
     type: TrezorEnums.CardanoCertificateType.STAKE_DELEGATION,
-    ...prepareCredential(
-      cert.stakeCredential,
-      stakeSigningFiles,
-      signingMode,
-    ),
+    ...prepareCredential(cert.stakeCredential, stakeSigningFiles, signingMode),
     pool: cert.poolKeyHash.toString('hex'),
   })
 
@@ -443,12 +421,8 @@ export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     signingMode: SigningMode,
   ): TrezorTypes.CardanoCertificate => ({
     type: TrezorEnums.CardanoCertificateType.VOTE_DELEGATION,
-    ...prepareCredential(
-      cert.stakeCredential,
-      signingFiles,
-      signingMode,
-    ),
-    dRep: prepareDRep(cert.dRep),
+    ...prepareCredential(cert.stakeCredential, signingFiles, signingMode),
+    drep: prepareDRep(cert.dRep),
   })
 
   const preparePoolOwners = (
@@ -572,7 +546,8 @@ export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
       case TxTypes.CertificateType.STAKE_AND_VOTE_DELEGATION:
       case TxTypes.CertificateType.STAKE_REGISTRATION_AND_DELEGATION:
       case TxTypes.CertificateType.STAKE_REGISTRATION_WITH_VOTE_DELEGATION:
-      case TxTypes.CertificateType.STAKE_REGISTRATION_WITH_STAKE_AND_VOTE_DELEGATION:
+      case TxTypes.CertificateType
+        .STAKE_REGISTRATION_WITH_STAKE_AND_VOTE_DELEGATION:
       case TxTypes.CertificateType.AUTHORIZE_COMMITTEE_HOT:
       case TxTypes.CertificateType.RESIGN_COMMITTEE_COLD:
       case TxTypes.CertificateType.DREP_REGISTRATION:
@@ -595,11 +570,7 @@ export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     )
     return {
       amount: `${withdrawal.amount}`,
-      ...prepareCredential(
-        stakeCredential,
-        stakeSigningFiles,
-        signingMode,
-      ),
+      ...prepareCredential(stakeCredential, stakeSigningFiles, signingMode),
     }
   }
 

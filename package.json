@@ -36,11 +36,13 @@
     "pkg": "pkg"
   },
   "dependencies": {
+    "//": "TODO temporary, use official release",
     "@cardano-foundation/ledgerjs-hw-app-cardano": "https://github.com/vacuumlabs/ledgerjs-cardano-shelley/releases/download/v7.0.0-rc3/cardano-foundation-ledgerjs-hw-app-cardano-v7.0.0-rc3.tgz",
     "@emurgo/cardano-serialization-lib-nodejs": "^8.0.0",
     "@ledgerhq/hw-transport": "^6.27.10",
     "@ledgerhq/hw-transport-node-hid-noevents": "^6.24.1",
-    "@trezor/connect": "^9.0.11",
+    "//": "TODO temporary, use official release",
+    "@trezor/connect": "file:./trezor-connect-conway-1.tgz",
     "argparse": "^2.0.1",
     "bignumber": "^1.1.0",
     "cardano-crypto.js": "^5.3.6-rc.6",
@@ -81,6 +83,8 @@
     "//": "This is a workaround for pkg (otherwise, it prints an error when building)",
     "node-abi": "^3.24.0",
     "**/**/semver": "^7.5.2",
-    "**/**/protobufjs": "^6.11.4"
+    "**/**/protobufjs": "^6.11.4",
+    "//": "TODO temporary, use official release",
+    "@trezor/protobuf": "file:./trezor-protobuf-conway-1.tgz"
   }
 }
