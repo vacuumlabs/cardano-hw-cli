@@ -149,7 +149,7 @@ const CommandExecutor = async () => {
     )
     const txWitnesses = [...byronWitnesses, ...shelleyWitnesses]
 
-    const txWitnessOutputs: WitnessOutput[] = []
+    const txWitnessOutputs: (WitnessOutput | undefined)[] = []
     for (let i = 0; i < args.hwSigningFileData.length; i += 1) {
       const signingFilePath = args.hwSigningFileData[i].path
       const witness = txWitnesses.find((w) =>
@@ -158,8 +158,9 @@ const CommandExecutor = async () => {
       if (witness !== undefined) {
         txWitnessOutputs.push(constructTxWitnessOutput(era, witness))
       } else {
-        // intentionally empty, the signing file might be needed despite not generating a witness,
-        // e.g. staking signing file in pool registration certificates
+        // all signing files are forwarded to LedgerJS/Connect as additionalWitnessRequests,
+        // so this is not expected to happen - show a warning below
+        txWitnessOutputs.push(undefined)
       }
     }
     if (txWitnessOutputs.length > args.outFiles.length) {
@@ -171,8 +172,8 @@ const CommandExecutor = async () => {
       throw Error(Errors.NotEnoughOutFilesError)
     }
     for (let i = 0; i < args.outFiles.length; i += 1) {
-      if (i < txWitnessOutputs.length) {
-        writeOutputData(args.outFiles[i], txWitnessOutputs[i])
+      if (i < txWitnessOutputs.length && txWitnessOutputs[i] !== undefined) {
+        writeOutputData(args.outFiles[i], txWitnessOutputs[i] as WitnessOutput)
       } else {
         // eslint-disable-next-line no-console,max-len
         console.log(
