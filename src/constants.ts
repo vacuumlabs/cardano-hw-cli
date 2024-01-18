@@ -34,6 +34,9 @@ export const CIP36_VOTING_PURPOSE_CATALYST = 0n
 export enum PathLabel {
   PAYMENT = 'Payment',
   STAKE = 'Stake',
+  DREP = 'DRep',
+  COMMITTEE_COLD = 'ConstitutionalCommitteeCold',
+  COMMITTEE_HOT = 'ConstitutionalCommitteeHot',
   POOL_COLD = 'StakePool',
   CIP36_VOTE = 'CIP36Vote',
 }
@@ -48,6 +51,7 @@ export const cardanoEraToUnwitnessedType: {[key in CardanoEra]: string} = {
   [CardanoEra.MARY]: 'Unwitnessed Tx MaryEra',
   [CardanoEra.ALONZO]: 'Unwitnessed Tx AlonzoEra',
   [CardanoEra.BABBAGE]: 'Unwitnessed Tx BabbageEra',
+  [CardanoEra.CONWAY]: 'Unwitnessed Tx ConwayEra',
 }
 
 export const cardanoEraToWitnessedType: {[key in CardanoEra]: string} = {
@@ -57,6 +61,7 @@ export const cardanoEraToWitnessedType: {[key in CardanoEra]: string} = {
   [CardanoEra.MARY]: 'Witnessed Tx MaryEra',
   [CardanoEra.ALONZO]: 'Witnessed Tx AlonzoEra',
   [CardanoEra.BABBAGE]: 'Witnessed Tx BabbageEra',
+  [CardanoEra.CONWAY]: 'Witnessed Tx ConwayEra',
 }
 
 export const cardanoEraToSignedType: {[key in CardanoEra]: string} = {
@@ -66,6 +71,7 @@ export const cardanoEraToSignedType: {[key in CardanoEra]: string} = {
   [CardanoEra.MARY]: 'Tx MaryEra',
   [CardanoEra.ALONZO]: 'Tx AlonzoEra',
   [CardanoEra.BABBAGE]: 'Tx BabbageEra',
+  [CardanoEra.CONWAY]: 'Tx ConwayEra',
 }
 
 export const txTypeToCardanoEra: {[key: string]: string} = {
@@ -81,6 +87,7 @@ export const cardanoEraToWitnessType: {[key in CardanoEra]: string} = {
   [CardanoEra.MARY]: 'TxWitness MaryEra',
   [CardanoEra.ALONZO]: 'TxWitness AlonzoEra',
   [CardanoEra.BABBAGE]: 'TxWitness BabbageEra',
+  [CardanoEra.CONWAY]: 'TxWitness ConwayEra',
 }
 
 export const txEnvelopeTypes: string[] = Object.keys(txTypeToCardanoEra)

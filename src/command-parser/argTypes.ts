@@ -29,6 +29,9 @@ export enum CommandType {
 export enum HwSigningType {
   Payment,
   Stake,
+  DRep,
+  CommitteeCold,
+  CommitteeHot,
   PoolCold,
   Mint,
   MultiSig,

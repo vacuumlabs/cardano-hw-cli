@@ -37,7 +37,7 @@ describe('Test util', () => {
       )
 
       assert.deepStrictEqual(
-        classifyPath([1852 + HD, 1815 + HD, 0 + HD, 3, 0]),
+        classifyPath([1852 + HD, 1815 + HD, 0 + HD, 6, 0]),
         PathTypes.PATH_INVALID,
       )
     })
@@ -49,10 +49,32 @@ describe('Test util', () => {
         classifyPath([1852 + HD, 1815 + HD, 1 + HD, 2, 0]),
         PathTypes.PATH_WALLET_STAKING_KEY,
       )
+    })
+
+    it('DRep path', () => {
+      const HD = HARDENED_THRESHOLD
 
       assert.deepStrictEqual(
-        classifyPath([1852 + HD, 1815 + HD, 3 + HD, 2, 1]),
-        PathTypes.PATH_INVALID,
+        classifyPath([1852 + HD, 1815 + HD, 0 + HD, 3, 0]),
+        PathTypes.PATH_DREP_KEY,
+      )
+    })
+
+    it('Constitutional committee cold path', () => {
+      const HD = HARDENED_THRESHOLD
+
+      assert.deepStrictEqual(
+        classifyPath([1852 + HD, 1815 + HD, 0 + HD, 4, 0]),
+        PathTypes.PATH_COMMITTEE_COLD_KEY,
+      )
+    })
+
+    it('Constitutional committee hot path', () => {
+      const HD = HARDENED_THRESHOLD
+
+      assert.deepStrictEqual(
+        classifyPath([1852 + HD, 1815 + HD, 0 + HD, 5, 0]),
+        PathTypes.PATH_COMMITTEE_HOT_KEY,
       )
     })
   })

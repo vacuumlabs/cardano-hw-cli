@@ -1,16 +1,12 @@
 import * as cardanoSerialization from '@emurgo/cardano-serialization-lib-nodejs'
 import {
   RewardAccount,
-  StakeCredential,
-  StakeCredentialType,
+  Credential,
+  CredentialType,
   TransactionBody,
   encodeTxBody,
   CertificateType,
   PoolRegistrationCertificate,
-  Certificate,
-  StakeRegistrationCertificate,
-  StakeDeregistrationCertificate,
-  StakeDelegationCertificate,
   KeyHash,
   ScriptHash,
 } from 'cardano-hw-interop-lib'
@@ -60,6 +56,13 @@ enum PathTypes {
   // hd wallet reward address, withdrawal witness, pool owner
   PATH_WALLET_STAKING_KEY,
 
+  // DRep keys
+  PATH_DREP_KEY,
+
+  // constitutional committee keys
+  PATH_COMMITTEE_COLD_KEY,
+  PATH_COMMITTEE_HOT_KEY,
+
   // hd wallet multisig account
   PATH_WALLET_ACCOUNT_MULTISIG,
 
@@ -101,8 +104,10 @@ const classifyPath = (path: number[]): PathTypes => {
       if (path.length !== 5) return PathTypes.PATH_INVALID
       if (path[3] === 0 || path[3] === 1)
         return PathTypes.PATH_WALLET_SPENDING_KEY_SHELLEY
-      if (path[3] === 2 && path[4] === 0)
-        return PathTypes.PATH_WALLET_STAKING_KEY
+      if (path[3] === 2) return PathTypes.PATH_WALLET_STAKING_KEY
+      if (path[3] === 3) return PathTypes.PATH_DREP_KEY
+      if (path[3] === 4) return PathTypes.PATH_COMMITTEE_COLD_KEY
+      if (path[3] === 5) return PathTypes.PATH_COMMITTEE_HOT_KEY
       break
     case 1853 + HD:
       if (path.length === 4 && path[2] === 0 + HD && path[3] >= HD)
@@ -137,6 +142,7 @@ const pathEquals = (path1: BIP32Path, path2: BIP32Path) =>
 
 const splitXPubKeyCborHex = (xPubKeyCborHex: XPubKeyCborHex): _XPubKey => {
   const xPubKeyDecoded = decodeCbor(xPubKeyCborHex)
+  // TODO some check if it can be sliced? and call subarray instead of slice?
   const pubKey = xPubKeyDecoded.slice(0, 32)
   const chainCode = xPubKeyDecoded.slice(32, 64)
   return {pubKey, chainCode}
@@ -184,6 +190,9 @@ const filterSigningFiles = (
 ): {
   paymentSigningFiles: HwSigningData[]
   stakeSigningFiles: HwSigningData[]
+  dRepSigningFiles: HwSigningData[]
+  committeeColdSigningFiles: HwSigningData[]
+  committeeHotSigningFiles: HwSigningData[]
   poolColdSigningFiles: HwSigningData[]
   mintSigningFiles: HwSigningData[]
   multisigSigningFiles: HwSigningData[]
@@ -193,6 +202,15 @@ const filterSigningFiles = (
   )
   const stakeSigningFiles = signingFiles.filter(
     (signingFile) => signingFile.type === HwSigningType.Stake,
+  )
+  const dRepSigningFiles = signingFiles.filter(
+    (signingFile) => signingFile.type === HwSigningType.DRep,
+  )
+  const committeeColdSigningFiles = signingFiles.filter(
+    (signingFile) => signingFile.type === HwSigningType.CommitteeCold,
+  )
+  const committeeHotSigningFiles = signingFiles.filter(
+    (signingFile) => signingFile.type === HwSigningType.CommitteeHot,
   )
   const poolColdSigningFiles = signingFiles.filter(
     (signingFile) => signingFile.type === HwSigningType.PoolCold,
@@ -206,6 +224,9 @@ const filterSigningFiles = (
   return {
     paymentSigningFiles,
     stakeSigningFiles,
+    dRepSigningFiles,
+    committeeColdSigningFiles,
+    committeeHotSigningFiles,
     poolColdSigningFiles,
     mintSigningFiles,
     multisigSigningFiles,
@@ -260,32 +281,11 @@ const hasMultisigSigningFile = (signingFiles: HwSigningData[]): boolean =>
     (signingFile) => signingFile.type === HwSigningType.MultiSig,
   )
 
-const certificatesWithStakeCredentials = (
-  certificates: Certificate[],
-): (
-  | StakeRegistrationCertificate
-  | StakeDeregistrationCertificate
-  | StakeDelegationCertificate
-)[] =>
-  certificates.filter(
-    (cert) =>
-      cert.type in
-      [
-        CertificateType.STAKE_REGISTRATION,
-        CertificateType.STAKE_DEREGISTRATION,
-        CertificateType.STAKE_DELEGATION,
-      ],
-  ) as (
-    | StakeRegistrationCertificate
-    | StakeDeregistrationCertificate
-    | StakeDelegationCertificate
-  )[]
-
 const determineSigningMode = (
   txBody: TransactionBody,
   signingFiles: HwSigningData[],
 ): SigningMode => {
-  const poolRegistrationCert = txBody.certificates?.find(
+  const poolRegistrationCert = txBody.certificates?.items.find(
     (cert) => cert.type === CertificateType.POOL_REGISTRATION,
   ) as PoolRegistrationCertificate | undefined
 
@@ -544,21 +544,19 @@ const ipv6ToString = (ipv6: Buffer | null | undefined): string | undefined => {
   return ipv6LE ? ipv6LE.join(':') : undefined
 }
 
-const rewardAccountToStakeCredential = (
-  address: RewardAccount,
-): StakeCredential => {
+const rewardAccountToStakeCredential = (address: RewardAccount): Credential => {
   const type = getAddressType(address)
   switch (type) {
     case AddressType.REWARD_KEY: {
       return {
-        type: StakeCredentialType.KEY_HASH,
-        hash: address.slice(1) as KeyHash,
+        type: CredentialType.KEY_HASH,
+        keyHash: address.subarray(1) as KeyHash,
       }
     }
     case AddressType.REWARD_SCRIPT: {
       return {
-        type: StakeCredentialType.SCRIPT_HASH,
-        hash: address.slice(1) as ScriptHash,
+        type: CredentialType.SCRIPT_HASH,
+        scriptHash: address.subarray(1) as ScriptHash,
       }
     }
     default:
@@ -665,7 +663,6 @@ export {
   encodeCIP36RegistrationMetaData,
   areHwSigningDataNonByron,
   validateCIP36RegistrationAddressType,
-  certificatesWithStakeCredentials,
   hasMultisigSigningFile,
   determineSigningMode,
   getTxBodyHash,

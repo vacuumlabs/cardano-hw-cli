@@ -49,7 +49,6 @@ import {
   getAddressAttributes,
   ipv4ToString,
   ipv6ToString,
-  filterSigningFiles,
   getAddressParameters,
   splitXPubKeyCborHex,
   validateCIP36RegistrationAddressType,
@@ -276,40 +275,45 @@ export const LedgerCryptoProvider: (
     }
   }
 
-  const _prepareStakeCredential = (
-    stakeCredential: TxTypes.StakeCredential,
-    stakeSigningFiles: HwSigningData[],
+  const prepareCredential = (
+    credential: TxTypes.Credential,
+    signingFiles: HwSigningData[],
     signingMode: SigningMode,
-  ): LedgerTypes.StakeCredentialParams => {
-    switch (stakeCredential.type) {
-      case TxTypes.StakeCredentialType.KEY_HASH: {
-        // A key hash stake credential can be sent to the HW wallet either by the key derivation
+    allowKeyHashInOrdinary: boolean,
+  ): LedgerTypes.CredentialParams => {
+    switch (credential.type) {
+      case TxTypes.CredentialType.KEY_HASH: {
+        // A key hash credential can be sent to the HW wallet either by the key derivation
         // path or by the key hash (there are certain restrictions depending on signing mode). If we
         // are given the appropriate signing file, we always send a path; if we are not, we send the
         // key hash or throw an error depending on whether the signing mode allows it. This allows
         // the user of hw-cli to stay in control.
         const path = findSigningPathForKeyHash(
-          (stakeCredential as TxTypes.StakeCredentialKey).hash,
-          stakeSigningFiles,
+          (credential as TxTypes.KeyCredential).keyHash,
+          signingFiles,
         )
         if (path) {
           return {
-            type: LedgerTypes.StakeCredentialParamsType.KEY_PATH,
+            type: LedgerTypes.CredentialParamsType.KEY_PATH,
             keyPath: path,
           }
         }
-        if (signingMode === SigningMode.PLUTUS_TRANSACTION) {
+        const allowKeyHash =
+          signingMode === SigningMode.PLUTUS_TRANSACTION ||
+          (allowKeyHashInOrdinary &&
+            signingMode === SigningMode.ORDINARY_TRANSACTION)
+        if (allowKeyHash) {
           return {
-            type: LedgerTypes.StakeCredentialParamsType.KEY_HASH,
-            keyHashHex: stakeCredential.hash.toString('hex'),
+            type: LedgerTypes.CredentialParamsType.KEY_HASH,
+            keyHashHex: credential.keyHash.toString('hex'),
           }
         }
         throw Error(Errors.MissingSigningFileForCertificateError)
       }
-      case TxTypes.StakeCredentialType.SCRIPT_HASH: {
+      case TxTypes.CredentialType.SCRIPT_HASH: {
         return {
-          type: LedgerTypes.StakeCredentialParamsType.SCRIPT_HASH,
-          scriptHashHex: stakeCredential.hash.toString('hex'),
+          type: LedgerTypes.CredentialParamsType.SCRIPT_HASH,
+          scriptHashHex: credential.scriptHash.toString('hex'),
         }
       }
       default:
@@ -317,33 +321,124 @@ export const LedgerCryptoProvider: (
     }
   }
 
-  const prepareStakeKeyRegistrationCert = (
+  const prepareDRep = (
+    dRep: TxTypes.DRep,
+    signingFiles: HwSigningData[],
+  ): LedgerTypes.DRepParams => {
+    switch (dRep.type) {
+      case TxTypes.DRepType.KEY_HASH: {
+        const path = findSigningPathForKeyHash(
+          (dRep as TxTypes.KeyHashDRep).keyHash,
+          signingFiles,
+        )
+        if (path) {
+          return {
+            type: LedgerTypes.DRepParamsType.KEY_PATH,
+            keyPath: path,
+          }
+        } else {
+          return {
+            type: LedgerTypes.DRepParamsType.KEY_HASH,
+            keyHashHex: dRep.keyHash.toString('hex'),
+          }
+        }
+      }
+      case TxTypes.DRepType.SCRIPT_HASH: {
+        return {
+          type: LedgerTypes.DRepParamsType.SCRIPT_HASH,
+          scriptHashHex: dRep.scriptHash.toString('hex'),
+        }
+      }
+      case TxTypes.DRepType.ABSTAIN: {
+        return {
+          type: LedgerTypes.DRepParamsType.ABSTAIN,
+        }
+      }
+      case TxTypes.DRepType.NO_CONFIDENCE: {
+        return {
+          type: LedgerTypes.DRepParamsType.NO_CONFIDENCE,
+        }
+      }
+      default:
+        throw Error(Errors.Unreachable)
+    }
+  }
+
+  const prepareAnchor = (
+    anchor: TxTypes.Anchor | null,
+  ): LedgerTypes.AnchorParams | null => {
+    if (anchor === null) {
+      return null
+    }
+    return {
+      url: anchor.url,
+      hashHex: anchor.dataHash.toString('hex'),
+    }
+  }
+
+  const prepareStakeRegistrationCert = (
     cert: TxTypes.StakeRegistrationCertificate,
     stakeSigningFiles: HwSigningData[],
     signingMode: SigningMode,
   ): LedgerTypes.Certificate => ({
     type: LedgerTypes.CertificateType.STAKE_REGISTRATION,
     params: {
-      stakeCredential: _prepareStakeCredential(
+      stakeCredential: prepareCredential(
         cert.stakeCredential,
         stakeSigningFiles,
         signingMode,
+        false,
       ),
     },
   })
 
-  const prepareStakeKeyDeregistrationCert = (
+  const prepareStakeRegistrationConwayCert = (
+    cert: TxTypes.StakeRegistrationConwayCertificate,
+    stakeSigningFiles: HwSigningData[],
+    signingMode: SigningMode,
+  ): LedgerTypes.Certificate => ({
+    type: LedgerTypes.CertificateType.STAKE_REGISTRATION_CONWAY,
+    params: {
+      stakeCredential: prepareCredential(
+        cert.stakeCredential,
+        stakeSigningFiles,
+        signingMode,
+        false,
+      ),
+      deposit: `${cert.deposit}`,
+    },
+  })
+
+  const prepareStakeDeregistrationCert = (
     cert: TxTypes.StakeDeregistrationCertificate,
     stakeSigningFiles: HwSigningData[],
     signingMode: SigningMode,
   ): LedgerTypes.Certificate => ({
     type: LedgerTypes.CertificateType.STAKE_DEREGISTRATION,
     params: {
-      stakeCredential: _prepareStakeCredential(
+      stakeCredential: prepareCredential(
         cert.stakeCredential,
         stakeSigningFiles,
         signingMode,
+        false,
       ),
+    },
+  })
+
+  const prepareStakeDeregistrationConwayCert = (
+    cert: TxTypes.StakeDeregistrationConwayCertificate,
+    stakeSigningFiles: HwSigningData[],
+    signingMode: SigningMode,
+  ): LedgerTypes.Certificate => ({
+    type: LedgerTypes.CertificateType.STAKE_DEREGISTRATION_CONWAY,
+    params: {
+      stakeCredential: prepareCredential(
+        cert.stakeCredential,
+        stakeSigningFiles,
+        signingMode,
+        false,
+      ),
+      deposit: `${cert.deposit}`,
     },
   })
 
@@ -355,11 +450,120 @@ export const LedgerCryptoProvider: (
     type: LedgerTypes.CertificateType.STAKE_DELEGATION,
     params: {
       poolKeyHashHex: cert.poolKeyHash.toString('hex'),
-      stakeCredential: _prepareStakeCredential(
+      stakeCredential: prepareCredential(
         cert.stakeCredential,
         stakeSigningFiles,
         signingMode,
+        false,
       ),
+    },
+  })
+
+  const prepareVoteDelegationCert = (
+    cert: TxTypes.VoteDelegationCertificate,
+    signingFiles: HwSigningData[],
+    signingMode: SigningMode,
+  ): LedgerTypes.Certificate => ({
+    type: LedgerTypes.CertificateType.VOTE_DELEGATION,
+    params: {
+      stakeCredential: prepareCredential(
+        cert.stakeCredential,
+        signingFiles,
+        signingMode,
+        false,
+      ),
+      dRep: prepareDRep(cert.dRep, signingFiles),
+    },
+  })
+
+  const prepareAuthorizeCommitteeHotCert = (
+    cert: TxTypes.AuthorizeCommitteeHotCertificate,
+    signingFiles: HwSigningData[],
+    signingMode: SigningMode,
+  ): LedgerTypes.Certificate => ({
+    type: LedgerTypes.CertificateType.AUTHORIZE_COMMITTEE_HOT,
+    params: {
+      coldCredential: prepareCredential(
+        cert.coldCredential,
+        signingFiles,
+        signingMode,
+        false,
+      ),
+      hotCredential: prepareCredential(
+        cert.hotCredential,
+        signingFiles,
+        signingMode,
+        true,
+      ),
+    },
+  })
+
+  const prepareResignCommitteeColdCert = (
+    cert: TxTypes.ResignCommitteeColdCertificate,
+    signingFiles: HwSigningData[],
+    signingMode: SigningMode,
+  ): LedgerTypes.Certificate => ({
+    type: LedgerTypes.CertificateType.RESIGN_COMMITTEE_COLD,
+    params: {
+      coldCredential: prepareCredential(
+        cert.coldCredential,
+        signingFiles,
+        signingMode,
+        false,
+      ),
+      anchor: prepareAnchor(cert.anchor),
+    },
+  })
+
+  const prepareDRepRegistrationCert = (
+    cert: TxTypes.DRepRegistrationCertificate,
+    signingFiles: HwSigningData[],
+    signingMode: SigningMode,
+  ): LedgerTypes.Certificate => ({
+    type: LedgerTypes.CertificateType.DREP_REGISTRATION,
+    params: {
+      dRepCredential: prepareCredential(
+        cert.dRepCredential,
+        signingFiles,
+        signingMode,
+        false,
+      ),
+      deposit: `${cert.deposit}`,
+      anchor: prepareAnchor(cert.anchor),
+    },
+  })
+
+  const prepareDRepDeregistrationCert = (
+    cert: TxTypes.DRepDeregistrationCertificate,
+    signingFiles: HwSigningData[],
+    signingMode: SigningMode,
+  ): LedgerTypes.Certificate => ({
+    type: LedgerTypes.CertificateType.DREP_DEREGISTRATION,
+    params: {
+      dRepCredential: prepareCredential(
+        cert.dRepCredential,
+        signingFiles,
+        signingMode,
+        false,
+      ),
+      deposit: `${cert.deposit}`,
+    },
+  })
+
+  const prepareDRepUpdateCert = (
+    cert: TxTypes.DRepUpdateCertificate,
+    signingFiles: HwSigningData[],
+    signingMode: SigningMode,
+  ): LedgerTypes.Certificate => ({
+    type: LedgerTypes.CertificateType.DREP_UPDATE,
+    params: {
+      dRepCredential: prepareCredential(
+        cert.dRepCredential,
+        signingFiles,
+        signingMode,
+        false,
+      ),
+      anchor: prepareAnchor(cert.anchor),
     },
   })
 
@@ -537,7 +741,7 @@ export const LedgerCryptoProvider: (
       ),
       poolOwners: preparePoolOwners(
         signingMode,
-        cert.poolParams.poolOwners,
+        cert.poolParams.poolOwners.items,
         signingFiles,
       ),
       relays: prepareRelays(cert.poolParams.relays),
@@ -579,13 +783,25 @@ export const LedgerCryptoProvider: (
   ): LedgerTypes.Certificate => {
     switch (certificate.type) {
       case TxTypes.CertificateType.STAKE_REGISTRATION:
-        return prepareStakeKeyRegistrationCert(
+        return prepareStakeRegistrationCert(
+          certificate,
+          signingFiles,
+          signingMode,
+        )
+      case TxTypes.CertificateType.STAKE_REGISTRATION_CONWAY:
+        return prepareStakeRegistrationConwayCert(
           certificate,
           signingFiles,
           signingMode,
         )
       case TxTypes.CertificateType.STAKE_DEREGISTRATION:
-        return prepareStakeKeyDeregistrationCert(
+        return prepareStakeDeregistrationCert(
+          certificate,
+          signingFiles,
+          signingMode,
+        )
+      case TxTypes.CertificateType.STAKE_DEREGISTRATION_CONWAY:
+        return prepareStakeDeregistrationConwayCert(
           certificate,
           signingFiles,
           signingMode,
@@ -601,6 +817,43 @@ export const LedgerCryptoProvider: (
         )
       case TxTypes.CertificateType.POOL_RETIREMENT:
         return prepareStakePoolRetirementCert(certificate, signingFiles)
+      case TxTypes.CertificateType.VOTE_DELEGATION:
+        return prepareVoteDelegationCert(certificate, signingFiles, signingMode)
+
+      case TxTypes.CertificateType.STAKE_AND_VOTE_DELEGATION:
+      case TxTypes.CertificateType.STAKE_REGISTRATION_AND_DELEGATION:
+      case TxTypes.CertificateType.STAKE_REGISTRATION_WITH_VOTE_DELEGATION:
+      case TxTypes.CertificateType
+        .STAKE_REGISTRATION_WITH_STAKE_AND_VOTE_DELEGATION:
+        throw Error(Errors.UnsupportedCertificateType)
+
+      case TxTypes.CertificateType.AUTHORIZE_COMMITTEE_HOT:
+        return prepareAuthorizeCommitteeHotCert(
+          certificate,
+          signingFiles,
+          signingMode,
+        )
+      case TxTypes.CertificateType.RESIGN_COMMITTEE_COLD:
+        return prepareResignCommitteeColdCert(
+          certificate,
+          signingFiles,
+          signingMode,
+        )
+      case TxTypes.CertificateType.DREP_REGISTRATION:
+        return prepareDRepRegistrationCert(
+          certificate,
+          signingFiles,
+          signingMode,
+        )
+      case TxTypes.CertificateType.DREP_DEREGISTRATION:
+        return prepareDRepDeregistrationCert(
+          certificate,
+          signingFiles,
+          signingMode,
+        )
+      case TxTypes.CertificateType.DREP_UPDATE:
+        return prepareDRepUpdateCert(certificate, signingFiles, signingMode)
+
       default:
         throw Error(Errors.UnknownCertificateError)
     }
@@ -611,13 +864,15 @@ export const LedgerCryptoProvider: (
     stakeSigningFiles: HwSigningData[],
     signingMode: SigningMode,
   ): LedgerTypes.Withdrawal => {
-    const stakeCredential: TxTypes.StakeCredential =
-      rewardAccountToStakeCredential(withdrawal.rewardAccount)
+    const stakeCredential: TxTypes.Credential = rewardAccountToStakeCredential(
+      withdrawal.rewardAccount,
+    )
     return {
-      stakeCredential: _prepareStakeCredential(
+      stakeCredential: prepareCredential(
         stakeCredential,
         stakeSigningFiles,
         signingMode,
+        false,
       ),
       amount: `${withdrawal.amount}`,
     }
@@ -675,18 +930,113 @@ export const LedgerCryptoProvider: (
         }
   }
 
-  const prepareAdditionalWitnessRequests = (
-    paymentSigningFiles: HwSigningData[],
-    mintSigningFiles: HwSigningData[],
-    multisigSigningFiles: HwSigningData[],
-  ) =>
-    // Payment signing files are always added here, so that the inputs are witnessed.
-    // Even though Plutus txs might require additional stake signatures, Plutus scripts
-    // don't see signatures directly - they can only access requiredSigners, and their witnesses
-    // are gathered above.
-    [...paymentSigningFiles, ...mintSigningFiles, ...multisigSigningFiles].map(
-      (f) => f.path,
+  const prepareVoter = (
+    voter: TxTypes.Voter,
+    voterPath: BIP32Path | undefined,
+  ): LedgerTypes.Voter => {
+    switch (voter.type) {
+      case TxTypes.VoterType.DREP_KEY:
+        return voterPath !== undefined
+          ? {
+              type: LedgerTypes.VoterType.DREP_KEY_PATH,
+              keyPath: voterPath,
+            }
+          : {
+              type: LedgerTypes.VoterType.DREP_KEY_HASH,
+              keyHashHex: voter.hash.toString('hex'),
+            }
+
+      case TxTypes.VoterType.DREP_SCRIPT:
+        return {
+          type: LedgerTypes.VoterType.DREP_SCRIPT_HASH,
+          scriptHashHex: voter.hash.toString('hex'),
+        }
+
+      case TxTypes.VoterType.COMMITTEE_KEY:
+        return voterPath !== undefined
+          ? {
+              type: LedgerTypes.VoterType.COMMITTEE_KEY_PATH,
+              keyPath: voterPath,
+            }
+          : {
+              type: LedgerTypes.VoterType.COMMITTEE_KEY_HASH,
+              keyHashHex: voter.hash.toString('hex'),
+            }
+
+      case TxTypes.VoterType.COMMITTEE_SCRIPT:
+        return {
+          type: LedgerTypes.VoterType.COMMITTEE_SCRIPT_HASH,
+          scriptHashHex: voter.hash.toString('hex'),
+        }
+
+      case TxTypes.VoterType.STAKE_POOL:
+        return voterPath !== undefined
+          ? {
+              type: LedgerTypes.VoterType.STAKE_POOL_KEY_PATH,
+              keyPath: voterPath,
+            }
+          : {
+              type: LedgerTypes.VoterType.STAKE_POOL_KEY_HASH,
+              keyHashHex: voter.hash.toString('hex'),
+            }
+
+      default:
+        throw Error(Errors.Unreachable)
+    }
+  }
+
+  const prepareVoteOption = (voteOption: TxTypes.VoteOption) => {
+    switch (voteOption) {
+      case TxTypes.VoteOption.NO:
+        return LedgerTypes.VoteOption.NO
+      case TxTypes.VoteOption.YES:
+        return LedgerTypes.VoteOption.YES
+      case TxTypes.VoteOption.ABSTAIN:
+        return LedgerTypes.VoteOption.ABSTAIN
+      default:
+        throw Error(Errors.Unreachable)
+    }
+  }
+
+  const prepareVoterVotes = (
+    voterVotes: TxTypes.VoterVotes,
+    signingFiles: HwSigningData[],
+  ): LedgerTypes.VoterVotes => {
+    const voterPath = findSigningPathForKeyHash(
+      voterVotes.voter.hash,
+      signingFiles,
     )
+    return {
+      voter: prepareVoter(voterVotes.voter, voterPath),
+      votes: voterVotes.votes.map((vv) => {
+        if (vv.govActionId.index > Number.MAX_SAFE_INTEGER) {
+          throw Error(Errors.InvalidVotingProcedures)
+        }
+        return {
+          govActionId: {
+            txHashHex: vv.govActionId.transactionId.toString('hex'),
+            govActionIndex: Number(vv.govActionId.index),
+          },
+          votingProcedure: {
+            vote: prepareVoteOption(vv.votingProcedure.voteOption),
+            anchor: prepareAnchor(vv.votingProcedure.anchor),
+          },
+        }
+      }),
+    }
+  }
+
+  const prepareAdditionalWitnessRequests = (
+    hwSigningFileData: HwSigningData[],
+  ): BIP32Path[] => {
+    // Witnesses for tx body elements have already been added across the tx
+    // (inputs, certificates, required signers etc.)
+    // We must add additional witnesses for script hash elements
+    // (e.g. mint), but for whatever reason, the user might want to get extra witnesses,
+    // so we add it all here and let ledgerjs filter / uniquify them
+    // so that each witness is asked only once.
+    return hwSigningFileData.map((f) => f.path)
+  }
 
   const createWitnesses = (
     ledgerWitnesses: LedgerTypes.Witness[],
@@ -699,7 +1049,6 @@ export const LedgerCryptoProvider: (
       if (hwSigningData) return hwSigningData
       throw Error(Errors.MissingHwSigningDataAtPathError)
     }
-
     const witnessesWithKeys = ledgerWitnesses.map((witness) => {
       const {pubKey, chainCode} = splitXPubKeyCborHex(
         getSigningFileDataByPath(witness.path as BIP32Path).cborXPubKeyHex,
@@ -760,47 +1109,31 @@ export const LedgerCryptoProvider: (
     changeOutputFiles: HwSigningData[],
   ): Promise<LedgerTypes.Witness[]> => {
     const {signingMode, tx, txBodyHashHex, hwSigningFileData, network} = params
-    const {
-      paymentSigningFiles,
-      stakeSigningFiles,
-      poolColdSigningFiles,
-      mintSigningFiles,
-      multisigSigningFiles,
-    } = filterSigningFiles(hwSigningFileData)
 
-    const inputs = tx.body.inputs.map(prepareInput)
+    const inputs = tx.body.inputs.items.map(prepareInput)
     const outputs = tx.body.outputs.map((output) =>
       prepareOutput(output, network, changeOutputFiles, signingMode),
     )
-    const certificates = tx.body.certificates?.map((certificate) =>
-      prepareCertificate(
-        certificate,
-        [...stakeSigningFiles, ...poolColdSigningFiles],
-        network,
-        signingMode,
-      ),
-    )
     const fee = `${tx.body.fee}`
     const ttl = prepareTtl(tx.body.ttl)
+    const certificates = tx.body.certificates?.items.map((certificate) =>
+      prepareCertificate(certificate, hwSigningFileData, network, signingMode),
+    )
+    const withdrawals = tx.body.withdrawals?.map((withdrawal) =>
+      prepareWithdrawal(withdrawal, hwSigningFileData, signingMode),
+    )
+    const auxiliaryData = prepareAuxiliaryDataHashHex(tx.body.auxiliaryDataHash)
     const validityIntervalStart = prepareValidityIntervalStart(
       tx.body.validityIntervalStart,
     )
-    const withdrawals = tx.body.withdrawals?.map((withdrawal) =>
-      prepareWithdrawal(withdrawal, stakeSigningFiles, signingMode),
-    )
-    const auxiliaryData = prepareAuxiliaryDataHashHex(tx.body.auxiliaryDataHash)
     const mint = tx.body.mint ? prepareTokenBundle(tx.body.mint) : null
     const scriptDataHashHex = prepareScriptDataHash(tx.body.scriptDataHash)
-    const collateralInputs = tx.body.collateralInputs?.map(
+    const collateralInputs = tx.body.collateralInputs?.items.map(
       prepareCollateralInput,
     )
-    const requiredSigners = tx.body.requiredSigners?.map((requiredSigner) =>
-      prepareRequiredSigner(requiredSigner, [
-        ...paymentSigningFiles,
-        ...stakeSigningFiles,
-        ...mintSigningFiles,
-        ...multisigSigningFiles,
-      ]),
+    const requiredSigners = tx.body.requiredSigners?.items.map(
+      (requiredSigner) =>
+        prepareRequiredSigner(requiredSigner, hwSigningFileData),
     )
     const includeNetworkId = tx.body.networkId !== undefined
     const collateralOutput = tx.body.collateralReturnOutput
@@ -815,13 +1148,21 @@ export const LedgerCryptoProvider: (
       tx.body.totalCollateral !== undefined
         ? `${tx.body.totalCollateral}`
         : undefined
-    const referenceInputs = tx.body.referenceInputs?.map(prepareInput)
-
-    const additionalWitnessRequests = prepareAdditionalWitnessRequests(
-      paymentSigningFiles,
-      mintSigningFiles,
-      multisigSigningFiles,
+    const referenceInputs = tx.body.referenceInputs?.items.map(prepareInput)
+    const votingProcedures = tx.body.votingProcedures?.map((vv) =>
+      prepareVoterVotes(vv, hwSigningFileData),
     )
+    const treasury =
+      tx.body.treasury !== undefined ? `${tx.body.treasury}` : undefined
+    const donation =
+      tx.body.donation !== undefined ? `${tx.body.donation}` : undefined
+
+    const additionalWitnessRequests =
+      prepareAdditionalWitnessRequests(hwSigningFileData)
+
+    // the tags are either used everywhere or nowhere,
+    // so we can just look at the inputs
+    const tagCborSets = tx.body.inputs.hasTag
 
     try {
       const response = await ledger.signTransaction({
@@ -844,8 +1185,14 @@ export const LedgerCryptoProvider: (
           collateralOutput,
           totalCollateral,
           referenceInputs,
+          votingProcedures,
+          treasury,
+          donation,
         },
         additionalWitnessPaths: additionalWitnessRequests,
+        options: {
+          tagCborSets,
+        },
       })
       if (response.txHashHex !== txBodyHashHex) {
         throw Error(Errors.TxSerializationMismatchError)
@@ -868,7 +1215,7 @@ export const LedgerCryptoProvider: (
     }
   }
 
-  const prepareVoteDelegations = (
+  const prepareCVoteDelegations = (
     delegations: CVoteDelegation[],
   ): LedgerTypes.CIP36VoteDelegation[] =>
     delegations.map(({votePublicKey, voteWeight}) => {
@@ -883,7 +1230,7 @@ export const LedgerCryptoProvider: (
       }
     })
 
-  const prepareVoteAuxiliaryData = (
+  const prepareCVoteAuxiliaryData = (
     delegations: CVoteDelegation[],
     hwStakeSigningFile: HwSigningData,
     paymentDestination: TxOutputDestination,
@@ -893,7 +1240,7 @@ export const LedgerCryptoProvider: (
     type: LedgerTypes.TxAuxiliaryDataType.CIP36_REGISTRATION,
     params: {
       format: LedgerTypes.CIP36VoteRegistrationFormat.CIP_36,
-      delegations: prepareVoteDelegations(delegations),
+      delegations: prepareCVoteDelegations(delegations),
       stakingPath: hwStakeSigningFile.path,
       paymentDestination,
       nonce: `${nonce}`,
@@ -978,7 +1325,7 @@ export const LedgerCryptoProvider: (
       }
     }
 
-    const ledgerAuxData = prepareVoteAuxiliaryData(
+    const ledgerAuxData = prepareCVoteAuxiliaryData(
       delegations,
       hwStakeSigningFile,
       destination,
