@@ -40,7 +40,7 @@
     "@emurgo/cardano-serialization-lib-nodejs": "^8.0.0",
     "@ledgerhq/hw-transport": "^6.27.10",
     "@ledgerhq/hw-transport-node-hid-noevents": "^6.24.1",
-    "@trezor/connect": "^9.0.11",
+    "@trezor/connect": "^9.1.9",
     "argparse": "^2.0.1",
     "bignumber": "^1.1.0",
     "cardano-crypto.js": "^5.3.6-rc.6",
@@ -70,7 +70,10 @@
     "typescript": "^4.9.4"
   },
   "pkg": {
-    "assets": "package.json"
+    "assets": [
+      "package.json",
+      "node_modules/usb/prebuilds/**/*"
+    ]
   },
   "engines": {
     "node": "18.7.0",
@@ -79,8 +82,6 @@
   },
   "resolutions": {
     "//": "This is a workaround for pkg (otherwise, it prints an error when building)",
-    "node-abi": "^3.24.0",
-    "**/**/semver": "^7.5.2",
-    "**/**/protobufjs": "^6.11.4"
+    "node-abi": "^3.24.0"
   }
 }
