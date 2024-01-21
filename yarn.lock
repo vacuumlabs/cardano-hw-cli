@@ -739,6 +739,11 @@
     "@noble/hashes" "~1.3.0"
     "@scure/base" "~1.1.0"
 
+"@sinclair/typebox@^0.31.28":
+  version "0.31.28"
+  resolved "https://registry.yarnpkg.com/@sinclair/typebox/-/typebox-0.31.28.tgz#b68831e7bc7d09daac26968ea32f42bedc968ede"
+  integrity sha512-/s55Jujywdw/Jpan+vsy6JZs1z2ZTGxTmbZTPiuSL2wz9mfzA2gN1zzaqmvfi4pq+uOt7Du85fkiwv5ymW84aQ==
+
 "@solana/buffer-layout@^4.0.1":
   version "4.0.1"
   resolved "https://registry.yarnpkg.com/@solana/buffer-layout/-/buffer-layout-4.0.1.tgz#b996235eaec15b1e0b5092a8ed6028df77fa6c15"
@@ -823,10 +828,9 @@
     "@trezor/env-utils" "1.0.11"
     "@trezor/utils" "9.0.17"
 
-"@trezor/connect@^9.1.9":
-  version "9.1.9"
-  resolved "https://registry.yarnpkg.com/@trezor/connect/-/connect-9.1.9.tgz#5fc340b5063728d280bbf854b29a8519971eba10"
-  integrity sha512-RblmH/ey4zPglyejzzOaf/pwtQCK0XOvbfjtPh9bScoGC5Iyf+BqudBTvNNg74V2fk6c8Ya3OGwO7B9VfR0e5Q==
+"@trezor/connect@https://github.com/vacuumlabs/trezor-suite/releases/download/cardano-conway-rc1/trezor-connect-conway-rc1.tgz":
+  version "9.1.8"
+  resolved "https://github.com/vacuumlabs/trezor-suite/releases/download/cardano-conway-rc1/trezor-connect-conway-rc1.tgz#3776062946f41dabac5ce78f1b09b962572e9f44"
   dependencies:
     "@ethereumjs/common" "^4.1.0"
     "@ethereumjs/tx" "^5.1.0"
@@ -837,6 +841,7 @@
     "@trezor/connect-common" "0.0.25"
     "@trezor/protobuf" "1.0.5"
     "@trezor/protocol" "1.0.5"
+    "@trezor/schema-utils" "1.0.0"
     "@trezor/transport" "1.1.20"
     "@trezor/utils" "9.0.17"
     "@trezor/utxo-lib" "2.0.3"
@@ -854,11 +859,11 @@
   dependencies:
     ua-parser-js "^1.0.37"
 
-"@trezor/protobuf@1.0.5":
+"@trezor/protobuf@1.0.5", "@trezor/protobuf@https://github.com/vacuumlabs/trezor-suite/releases/download/cardano-conway-rc1/trezor-protobuf-conway-rc1.tgz":
   version "1.0.5"
-  resolved "https://registry.yarnpkg.com/@trezor/protobuf/-/protobuf-1.0.5.tgz#394444acbac7f0257c68c7da70ee4a29a59e3ce2"
-  integrity sha512-ot7TxmSBm2sN/0tDFEvJFSyNx2DHvO2sf7ayZbv+TdLjzzPlT7qidTEt1F5K47f7xKyEryDe8nJN9qo6M9NC5Q==
+  resolved "https://github.com/vacuumlabs/trezor-suite/releases/download/cardano-conway-rc1/trezor-protobuf-conway-rc1.tgz#bf558d8c62f22f0dc5c206779ff239fddd0abecb"
   dependencies:
+    "@trezor/schema-utils" "1.0.0"
     long "^4.0.0"
     protobufjs "7.2.5"
 
@@ -866,6 +871,14 @@
   version "1.0.5"
   resolved "https://registry.yarnpkg.com/@trezor/protocol/-/protocol-1.0.5.tgz#93cf0d97aa92249a355529c8998da5c0aed96536"
   integrity sha512-xRqn6k4Rn9pvDlGu7aBuoDL4fG+BN1dj+nBV2ULt03+evKmrcC0ya6bZ74cWqoaGtWrNSo6opONr1VF7tN2fKg==
+
+"@trezor/schema-utils@1.0.0":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@trezor/schema-utils/-/schema-utils-1.0.0.tgz#d097d154a32fcb6d5b63b37f5b4de1d9de138e6e"
+  integrity sha512-cSIAFxFAjcE+yKBUls4cUFjxN87wqPhClxWHPaXVPhesXH/Wgg+xd7vtu+lE7yz1ZlW9aweriKwXXq8OjMbF+g==
+  dependencies:
+    "@sinclair/typebox" "^0.31.28"
+    ts-mixer "^6.0.3"
 
 "@trezor/transport@1.1.20":
   version "1.1.20"
@@ -4357,6 +4370,11 @@ tr46@~0.0.3:
   version "0.0.3"
   resolved "https://registry.yarnpkg.com/tr46/-/tr46-0.0.3.tgz#8184fd347dac9cdc185992f3a6622e14b9d9ab6a"
   integrity sha512-N3WMsuqV66lT30CrXNbEjx4GEwlow3v6rr4mCcv6prnfwhS01rkgyFdjPNBYd9br7LpXV1+Emh01fHnq2Gdgrw==
+
+ts-mixer@^6.0.3:
+  version "6.0.3"
+  resolved "https://registry.yarnpkg.com/ts-mixer/-/ts-mixer-6.0.3.tgz#69bd50f406ff39daa369885b16c77a6194c7cae6"
+  integrity sha512-k43M7uCG1AkTyxgnmI5MPwKoUvS/bRvLvUb7+Pgpdlmok8AoqmUaZxUUw8zKM5B1lqZrt41GjYgnvAi0fppqgQ==
 
 ts-node@^10.9.1:
   version "10.9.1"
