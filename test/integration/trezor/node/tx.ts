@@ -709,34 +709,6 @@ const transactions = {
           key: 0,
           data: [
             Buffer.from(
-              'b75258e4f61eb7b313d8554c2fe10673cf214ca2d762bfd53ec3b7846e2ee872',
-              'hex',
-            ),
-            Buffer.from(
-              '70c343475e4bdf35b39d37fddd92702c4a8e4ff858cb3b2b27f808dde8707d686b61cb667c60e88b68da272c7aba1c427c1797edd362bcd25d3b6a6fff0c3100',
-              'hex',
-            ),
-          ],
-          path: signingFiles.mint0.path,
-        },
-        {
-          key: 0,
-          data: [
-            Buffer.from(
-              'a54627d6d16724032172541d4261e7aa87c06395724f1d18975a21d56650bda9',
-              'hex',
-            ),
-            Buffer.from(
-              '371adae94e6d3d9f728736a33289f3285ad17eefc8a1af938fae1bf86768ac1c3a2e386feb940e58f17c221b7610c65051d4d131dbe7ab6a9fff4f826916990f',
-              'hex',
-            ),
-          ],
-          path: signingFiles.mint1.path,
-        },
-        {
-          key: 0,
-          data: [
-            Buffer.from(
               'b10be5c0d11ad8292bbe69e220ca0cfbe154610b3041a8e72f9d515c226ab3b1',
               'hex',
             ),
@@ -788,6 +760,34 @@ const transactions = {
             ),
           ],
           path: signingFiles.multisigStake1.path,
+        },
+        {
+          key: 0,
+          data: [
+            Buffer.from(
+              'b75258e4f61eb7b313d8554c2fe10673cf214ca2d762bfd53ec3b7846e2ee872',
+              'hex',
+            ),
+            Buffer.from(
+              '70c343475e4bdf35b39d37fddd92702c4a8e4ff858cb3b2b27f808dde8707d686b61cb667c60e88b68da272c7aba1c427c1797edd362bcd25d3b6a6fff0c3100',
+              'hex',
+            ),
+          ],
+          path: signingFiles.mint0.path,
+        },
+        {
+          key: 0,
+          data: [
+            Buffer.from(
+              'a54627d6d16724032172541d4261e7aa87c06395724f1d18975a21d56650bda9',
+              'hex',
+            ),
+            Buffer.from(
+              '371adae94e6d3d9f728736a33289f3285ad17eefc8a1af938fae1bf86768ac1c3a2e386feb940e58f17c221b7610c65051d4d131dbe7ab6a9fff4f826916990f',
+              'hex',
+            ),
+          ],
+          path: signingFiles.mint1.path,
         },
       ],
     },
@@ -964,6 +964,130 @@ const transactions = {
       ],
     },
   },
+
+  ordinary_ConwayStakeRegistrationCertificate: {
+    // from Martin Lang, modified key hashes
+    cborHex:
+      '84a50082825820c6fc270c3a129830cc06b27a192f85a0bf886565142e23911aa90a77f0d3e5a800825820c6fc270c3a129830cc06b27a192f85a0bf886565142e23911aa90a77f0d3e5a801018182583900682c74c6c82879fc538e8ac283b93fb8b1a119123e1ba970ebd08c77122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b42771a0028918e021a0002a491031a010df1f2048183078200581c122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b42771a001e8480a10082825820543db1d03ac6a72166fc28cd76b95615fb00f21cd4f77aa1f103864437807f6b58409c194078576f5d1dd86f389f378dbfa399e56816c65b974750537a7ac3022800f717671173e087a2d222454a203b160e155c57542061deaf25d4aedb08decf0682582000c331f52f95d25caa3d378411c6699c4d9085090ad9534ee0f63a95d89a49d2584007119c4a1b02a632bd30b5b4ea29124e8e6a1de7cd3684099e582e7a284fac199007e68770d4ba017055e4c5b9149f4c14790ba505021dca91cf610969932f08f5f6',
+    hwSigningFiles: [signingFiles.payment0, signingFiles.stake0],
+    network: 'TESTNET_LEGACY1',
+    witnesses: {
+      byronWitnesses: [],
+      shelleyWitnesses: [
+        {
+          key: 0,
+          data: [
+            Buffer.from(
+              'bc65be1b0b9d7531778a1317c2aa6de936963c3f9ac7d5ee9e9eda25e0c97c5e',
+              'hex',
+            ),
+            Buffer.from(
+              '25098094389592e99f8071fef537842d6de9e4117f5c79469b4be0bdbb3f9a77a205698afd5e44ee43f877f5aa597800f9e203783edc2712f852d401aeb7f609',
+              'hex',
+            ),
+          ],
+          path: signingFiles.stake0.path,
+        },
+        {
+          key: 0,
+          data: [
+            Buffer.from(
+              '5d010cf16fdeff40955633d6c565f3844a288a24967cf6b76acbeb271b4f13c1',
+              'hex',
+            ),
+            Buffer.from(
+              '23cae64efdfd9f23f89a8336d2f8113ba4d8fbc918a2f131c4649713cd5e27332b3c59153aaaf4fb40188bdcce5b8a1853bed3fc493d01761d69fcbc89dfdf09',
+              'hex',
+            ),
+          ],
+          path: signingFiles.payment0.path,
+        },
+      ],
+    },
+  },
+
+  ordinary_ConwayVoteDelegationCertificate: {
+    // from Martin Lang, modified key hashes and added script hash, abstain and no confidence certificates
+    cborHex:
+      '84a500818258209897c9087355250ad02e3b0cc5020d31e2869b1e26ec8df26d460f419e1ca9b70001818258390074976c54afaf444f7cd499bd8519aac6592b13b22b9d5817f0da5c52122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b42771a002349a0021a0002a305031a010f4984048483098200581c122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b42778200581c2c0e9f599655bd3f7f313a3a61fe05fb9caac4cc3d1aa77740fc957983098200581c122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b42778201581c8df36abc34e113c5184bf6a0db0fda235ea766002ed81e9381c9690383098200581c122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277810283098200581c122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b42778103a0f5f6',
+    hwSigningFiles: [signingFiles.payment0, signingFiles.stake0],
+    network: 'TESTNET_LEGACY1',
+    witnesses: {
+      byronWitnesses: [],
+      shelleyWitnesses: [
+        {
+          key: 0,
+          data: [
+            Buffer.from(
+              'bc65be1b0b9d7531778a1317c2aa6de936963c3f9ac7d5ee9e9eda25e0c97c5e',
+              'hex',
+            ),
+            Buffer.from(
+              'c33da7654ea031a552bf36588870a80836010337dd3d86be47948902a7445207b0a16737d56b4e97f7ebb969b61c1249dc34a4f0a7c5505368a3da8dd0799504',
+              'hex',
+            ),
+          ],
+          path: signingFiles.stake0.path,
+        },
+        {
+          key: 0,
+          data: [
+            Buffer.from(
+              '5d010cf16fdeff40955633d6c565f3844a288a24967cf6b76acbeb271b4f13c1',
+              'hex',
+            ),
+            Buffer.from(
+              '52d9805dd59992e30e50112f577911c770527ed74d0ae0ee867a8d1680fb06838eb5cbed484b7277d5fe5193b5e2581704f4e73d84211cc9a62c4601e350e10c',
+              'hex',
+            ),
+          ],
+          path: signingFiles.payment0.path,
+        },
+      ],
+    },
+  },
+
+  ordinary_ConwayTaggedSets: {
+    // constructed manually as a combination of ledger.ordinary_ConwayDRepUpdateCertificate
+    // and trezor.ordinary_ConwayStakeRegistrationCertificate
+    cborHex:
+      '84a500d9010281825820ebd40ab9f949ca492f31f30bd8b17a0f97df4d17fcf499d15aa641521b61a5d50001818258390074976c54afaf444f7cd499bd8519aac6592b13b22b9d5817f0da5c5203d205532089ad2f7816892e2ef42849b7b52788e41b3fd43a6e01cf1a0047c479021a0006bbc2031a011f6b4a04d901028183078200581c122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b42771a001e8480a0f5f6',
+    hwSigningFiles: [signingFiles.payment0, signingFiles.stake0],
+    network: 'TESTNET_LEGACY1',
+    witnesses: {
+      byronWitnesses: [],
+      shelleyWitnesses: [
+        {
+          key: 0,
+          data: [
+            Buffer.from(
+              'bc65be1b0b9d7531778a1317c2aa6de936963c3f9ac7d5ee9e9eda25e0c97c5e',
+              'hex',
+            ),
+            Buffer.from(
+              'a6fd187409ad26d4fd08f00c141b26e0b5df8b9993c150a281c160de91cfff1ecdd8d4ae5800757ab353a4a16c07e455127b892b61562d37dbc1ff7c6e423c03',
+              'hex',
+            ),
+          ],
+          path: signingFiles.stake0.path,
+        },
+        {
+          key: 0,
+          data: [
+            Buffer.from(
+              '5d010cf16fdeff40955633d6c565f3844a288a24967cf6b76acbeb271b4f13c1',
+              'hex',
+            ),
+            Buffer.from(
+              'b7bb56ef639520e353e08080f2367e642dbf03ec6e324906a5fca6f40a0527a742db9bf5d7df814a9df1077978cfff2cf8cd2cb024ed88ab149139df7035fe07',
+              'hex',
+            ),
+          ],
+          path: signingFiles.payment0.path,
+        },
+      ],
+    },
+  },
 }
 
 async function testTxWitnessing(
@@ -989,6 +1113,16 @@ async function testTxWitnessing(
     signingParameters,
     changeOutputFiles,
   )
+
+  // for (let i = 0; i < witnesses.shelleyWitnesses.length; i++) {
+  //   console.log(witnesses.shelleyWitnesses[i].data[0].toString('hex'))
+  //   console.log(transaction.witnesses.shelleyWitnesses[i].data[0].toString('hex'))
+  //   console.log('\n')
+  //   console.log(witnesses.shelleyWitnesses[i].data[1].toString('hex'))
+  //   console.log(transaction.witnesses.shelleyWitnesses[i].data[1].toString('hex'))
+  //   console.log('\n')
+  // }
+
   assert.deepStrictEqual(witnesses, transaction.witnesses)
 }
 
