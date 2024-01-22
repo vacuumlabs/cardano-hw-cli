@@ -87,9 +87,9 @@ export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
       appUrl: 'https://github.com/vacuumlabs/cardano-hw-cli',
     })
 
-    // without this listener, the passphrase, if enabled, would be infinitely awaited
-    // to be inserted in the browser, see https://github.com/trezor/connect/issues/714
     TrezorConnect.on(TrezorTypes.UI_EVENT, (event) => {
+      // without this listener, the passphrase, if enabled, would be infinitely awaited
+      // to be inserted in the browser, see https://github.com/trezor/connect/issues/714
       if (event.type === TrezorTypes.UI.REQUEST_PASSPHRASE) {
         if (
           event.payload.device.features?.capabilities.includes(
@@ -107,6 +107,18 @@ export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
         } else {
           throw Error(Errors.TrezorPassphraseNotInsertableOnDevice)
         }
+      }
+
+      // Connect expects an explicit confirmation that no backup was created
+      // for cardanoGetPublicKey call
+      if (
+        event.type === TrezorTypes.UI.REQUEST_CONFIRMATION &&
+        event.payload.view === 'no-backup'
+      ) {
+        TrezorConnect.uiResponse({
+          type: TrezorTypes.UI.RECEIVE_CONFIRMATION,
+          payload: true,
+        })
       }
     })
 
