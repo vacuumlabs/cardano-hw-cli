@@ -449,4 +449,37 @@ describe('Command parser', () => {
   })
 })
 
-// TODO add something for op certs (node ...)
+it('Should parse operational certificate', () => {
+  const args = pad([
+    'node',
+    'issue-op-cert',
+    '--kes-period',
+    '165564',
+    '--kes-verification-key-file',
+    prefix('kes.vkey'),
+    '--operational-certificate-issue-counter-file',
+    prefix('cold.counter'),
+    '--hw-signing-file',
+    prefix('cold.hwsfile'),
+    '--out-file',
+    prefix('opcert.out'),
+  ])
+  const {parsedArgs} = parse(args)
+
+  const expectedResult = {
+    command: CommandType.SIGN_OPERATIONAL_CERTIFICATE,
+    hwSigningFileData: [
+      {
+        type: 5,
+        path: [2147485501, 2147485463, 2147483648, 2147483648],
+        cborXPubKeyHex:
+          '58403d7e84dca8b4bc322401a2cc814af7c84d2992a22f99554fe340d7df7910768d1e2a47754207da3069f90241fbf3b8742c367e9028e5f3f85ae3660330b4f5b7',
+      },
+    ],
+    kesPeriod: 165564n,
+    kesVKey: Buffer.from('dd90f3ddc4efefeb376dbad809b0f8e35eb5f656a5ceb57afe917f8d99dcd859', 'hex'),
+    issueCounterFile: prefix('cold.counter'),
+    outFile: prefix('opcert.out'),
+  }
+  assert.deepStrictEqual(parsedArgs, expectedResult)
+})

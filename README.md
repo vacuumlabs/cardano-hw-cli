@@ -73,7 +73,6 @@ cardano-hw-cli address show
 ```
 cardano-hw-cli node issue-op-cert
 --kes-verification-key-file FILE                     Input filepath of the file with KES vkey.
---operational-certificate-issue-counter FILE         Input filepath of the issue counter file. This option is DEPRECATED. Please use --operational-certificate-issue-counter-file instead.
 --operational-certificate-issue-counter-file FILE    Input filepath of the file with certificate counter.
 --kes-period UINT64                                  Kes period for the certificate.
 --out-file FILE                                      Output filepath for node certificate.

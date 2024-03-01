@@ -129,15 +129,9 @@ const opCertSigningArgs = {
     type: (kesPeriod: string) => BigInt(kesPeriod),
     help: 'KES period.',
   },
-  '_mutually-exclusive-group-required-operational-certificate-issue-counter': {
-    '--operational-certificate-issue-counter': {
-      dest: 'issueCounterFile',
-      help: 'Input filepath of the issue counter file. This option is DEPRECATED. Please use --operational-certificate-issue-counter-file instead.',
-    },
-    '--operational-certificate-issue-counter-file': {
-      dest: 'issueCounterFile',
-      help: 'Input filepath of the issue counter file.',
-    },
+  '--operational-certificate-issue-counter-file': {
+    dest: 'issueCounterFile',
+    help: 'Input filepath of the issue counter file.',
   },
   '--hw-signing-file': {
     required: true,
