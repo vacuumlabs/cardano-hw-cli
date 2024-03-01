@@ -72,4 +72,8 @@ export const enum Errors {
   TestnetProtocolMagicMissing = 'Testnet protocol magic is missing',
   InvalidVotingProcedures = 'Invalid voting procedures (might be a number out of range)',
   UnsupportedCertificateType = 'Transaction contains a certificate type that is not supported by HW wallets (see CIP-21)',
+  InvalidMessageError = 'Invalid message to sign, should be ASCII',
+  InvalidMessageAddressError = 'Cannot derive address parameters in message signing: likely because address signing files are missing',
+  InvalidMessageAddressTypeError = 'Invalid or unsupported address type in message signing',
+  InvalidMessageAddressSigningFilesError = 'Missing address signing files in message signing',
 }

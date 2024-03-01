@@ -53,7 +53,9 @@ import {parseBIP32Path} from '../command-parser/parsers'
 import {
   ParsedShowAddressArguments,
   HwSigningData,
+  ParsedSignMessageArguments,
 } from '../command-parser/argTypes'
+import {SignedMessageData} from '../signMessage/signMessage'
 
 const {bech32} = require('cardano-crypto.js')
 
@@ -971,6 +973,13 @@ export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     // eslint-disable-next-line require-await
   ): Promise<SignedOpCertCborHex> => {
     // TODO is this the right way to deal with this?
+    throw Error(Errors.UnsupportedCryptoProviderCall)
+  }
+
+  const signMessage = async (
+    args: ParsedSignMessageArguments,
+  ): Promise<SignedMessageData> => {
+    // TODO
     throw Error(Errors.UnsupportedCryptoProviderCall)
   }
 

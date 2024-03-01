@@ -390,3 +390,17 @@ export const parseDerivationType = (
   if (isDerivationType(name)) return name
   throw Error(Errors.InvalidDerivationTypeError)
 }
+
+// eslint-disable-next-line no-control-regex
+const isAscii = (str: string): boolean => /^[\x00-\x7F]+$/.test(str)
+
+export const encodeAsciiToHex = (msg: string): string => {
+  if (!isAscii(msg)) {
+    throw Error(Errors.InvalidMessageError)
+  }
+  let hexString = ''
+  for (let i = 0; i < msg.length; i++) {
+    hexString += msg.charCodeAt(i).toString(16)
+  }
+  return hexString
+}

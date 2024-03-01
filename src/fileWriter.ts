@@ -1,8 +1,11 @@
+import {ParsedSignMessageArguments} from './command-parser/argTypes'
+import {SignedMessageData} from './signMessage/signMessage'
 import {
   BIP32Path,
   CardanoEra,
   Cbor,
   CborHex,
+  HexString,
   XPubKeyCborHex,
   XPubKeyHex,
 } from './basicTypes'
@@ -20,6 +23,8 @@ import {
   TxWitnessShelley,
 } from './transaction/txTypes'
 import {encodeCbor} from './util'
+
+const {blake2b} = require('cardano-crypto.js')
 
 export type TxFileOutput = {
   type: string
@@ -46,11 +51,21 @@ export type VerificationKeyOutput = {
   cborHex: CborHex
 }
 
-// TODO maybe generalize? see also VerificationKeyOutput
 export type OpCertIssueCounterOutput = {
   type: string
   description: string
   cborHex: CborHex
+}
+
+// based on the output format of M. Lang's signer
+export type SignedMessageOutput = {
+  messageHex: HexString
+  isHashed: boolean
+  addressHex: HexString
+  signatureHex: HexString
+  publicKeyHex: HexString
+  COSE_Sign1_hex: HexString
+  COSE_Key_hex: HexString
 }
 
 export type OutputData =
@@ -59,6 +74,7 @@ export type OutputData =
   | HwSigningOutput
   | VerificationKeyOutput
   | OpCertIssueCounterOutput
+  | SignedMessageOutput
 
 const rw = require('rw')
 
@@ -305,6 +321,47 @@ const constructOpCertIssueCounterOutput = (
   ]).toString('hex'),
 })
 
+const constructSignedMessageOutput = (
+  messageHex: HexString,
+  hashPayload: boolean,
+  signedMsgData: SignedMessageData,
+): SignedMessageOutput => {
+  const coseKey = new Map()
+  // Note: for now, the constants are fixed and we don't fully understand them.
+  // If there is more freedom in the future, we can devise some meaningful
+  // naming schema, e.g. using enums where appropriate.
+  coseKey.set(1, 1)
+  coseKey.set(3, -8)
+  coseKey.set(-1, 6)
+  coseKey.set(-2, Buffer.from(signedMsgData.signingPublicKeyHex, 'hex'))
+
+  const protectedHeaders = new Map()
+  protectedHeaders.set(1, -8)
+  protectedHeaders.set(
+    'address',
+    Buffer.from(signedMsgData.addressFieldHex, 'hex'),
+  )
+  const msg = Buffer.from(messageHex, 'hex')
+  const payload = hashPayload ? blake2b(msg, 28) : msg
+  const coseSign1 = [
+    encodeCbor(protectedHeaders),
+    {
+      hashed: hashPayload,
+    },
+    payload,
+    Buffer.from(signedMsgData.signatureHex, 'hex'),
+  ]
+  return {
+    messageHex,
+    isHashed: hashPayload,
+    addressHex: signedMsgData.addressFieldHex,
+    signatureHex: signedMsgData.signatureHex,
+    publicKeyHex: signedMsgData.signingPublicKeyHex,
+    COSE_Sign1_hex: encodeCbor(coseSign1).toString('hex'),
+    COSE_Key_hex: encodeCbor(coseKey).toString('hex'),
+  }
+}
+
 export {
   writeOutputData,
   writeCbor,
@@ -315,4 +372,5 @@ export {
   constructVerificationKeyOutput,
   constructSignedOpCertOutput,
   constructOpCertIssueCounterOutput,
+  constructSignedMessageOutput,
 }

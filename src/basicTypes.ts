@@ -78,6 +78,7 @@ export enum AddressType {
   REWARD_SCRIPT = 0b1111,
 }
 
+// encoded in bech32
 export type HumanAddress = string & {__type: 'humanAddress'}
 
 export enum NativeScriptType {
