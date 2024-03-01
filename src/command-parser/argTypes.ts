@@ -9,6 +9,7 @@ import {
   CardanoEra,
   CborHex,
   XPubKeyCborHex,
+  HexString,
 } from '../basicTypes'
 
 export enum CommandType {
@@ -24,6 +25,7 @@ export enum CommandType {
   SIGN_OPERATIONAL_CERTIFICATE = 'node.issue-op-cert',
   NODE_KEY_GEN = 'node.key-gen',
   CIP36_REGISTRATION_METADATA = 'vote.registration-metadata',
+  SIGN_MESSAGE = 'message.sign',
 }
 
 export enum HwSigningType {
@@ -135,13 +137,23 @@ export type ParsedCIP36RegistrationMetadataArguments = {
   votePublicKeys: VotePublicKeyHex[]
   voteWeights: bigint[]
   hwStakeSigningFileData: HwSigningData
-  paymentAddress: string
+  paymentAddress: HumanAddress
   nonce: bigint
   votingPurpose: bigint
   network: Network
   paymentAddressSigningKeyData: HwSigningData[]
   outFile: string
   derivationType?: DerivationType
+}
+
+export type ParsedSignMessageArguments = {
+  command: CommandType.SIGN_MESSAGE
+  messageHex: HexString
+  hwSigningFileData: HwSigningData
+  hashPayload: boolean
+  address?: HumanAddress
+  addressHwSigningFileData?: HwSigningData[]
+  outFile: string
 }
 
 export type ParsedArguments =

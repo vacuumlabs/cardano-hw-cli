@@ -14,6 +14,7 @@ import {
   writeCbor,
   writeOutputData,
   WitnessOutput,
+  constructSignedMessageOutput,
 } from './fileWriter'
 import {
   ParsedShowAddressArguments,
@@ -24,6 +25,7 @@ import {
   ParsedOpCertArguments,
   ParsedNodeKeyGenArguments,
   ParsedCIP36RegistrationMetadataArguments,
+  ParsedSignMessageArguments,
 } from './command-parser/argTypes'
 import {LedgerCryptoProvider} from './crypto-providers/ledgerCryptoProvider'
 import {TrezorCryptoProvider} from './crypto-providers/trezorCryptoProvider'
@@ -249,6 +251,14 @@ const CommandExecutor = async () => {
     )
   }
 
+  const createSignedMessage = async (args: ParsedSignMessageArguments) => {
+    const signedMessageData = await cryptoProvider.signMessage(args)
+    writeOutputData(
+      args.outFile,
+      constructSignedMessageOutput(args.messageHex, args.hashPayload, signedMessageData),
+    )
+  }
+
   const createCIP36RegistrationMetadata = async (
     args: ParsedCIP36RegistrationMetadataArguments,
   ) => {
@@ -310,6 +320,7 @@ const CommandExecutor = async () => {
     createNodeSigningKeyFiles,
     createSignedOperationalCertificate,
     createCIP36RegistrationMetadata,
+    createSignedMessage,
   }
 }
 

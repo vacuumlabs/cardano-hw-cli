@@ -15,6 +15,7 @@ import {
   parseVotePubKeyBech32,
   parseVotePubFileHw,
   parseVotePubFileCli,
+  encodeAsciiToHex,
 } from './parsers'
 
 export type ParserConfig = {[key: string]: ParserConfig | object}
@@ -139,6 +140,50 @@ const opCertSigningArgs = {
     action: 'append',
     type: (path: string) => parseHwSigningFile(path),
     help: 'Input filepath of the hardware wallet signing file.',
+  },
+  '--out-file': {
+    required: true,
+    dest: 'outFile',
+    help: 'Output filepath.',
+  },
+}
+
+const msgSigningArgs = {
+  '_mutually-exclusive-group-required-message': {
+    '--message': {
+      dest: 'messageHex',
+      type: (msg: string) => encodeAsciiToHex(msg),
+      help: 'Message in ASCII.',
+    },
+    '--message-hex': {
+      dest: 'messageHex',
+      help: 'Message in hex.',
+    },
+  },
+  '--signing-path-hwsfile': {
+    required: true,
+    dest: 'hwSigningFileData',
+    type: (path: string) => parseHwSigningFile(path),
+    help: 'Input filepath of the hardware wallet signing file describing the key to be used to sign the message.',
+  },
+  '--hashed': {
+    required: false,
+    dest: 'hashPayload',
+    action: 'store_true',
+    help: 'If present, the message will be hashed; otherwise it will not be hashed.',
+  },
+  '--address': {
+    required: false,
+    dest: 'address',
+    help: 'Address to receive voting rewards.',
+  },
+  '--address-hwsfile': {
+    required: false,
+    dest: 'addressHwSigningFileData',
+    action: 'append',
+    type: (path: string) => parseHwSigningFile(path),
+    default: [],
+    help: 'Input filepath of an address hardware wallet signing file.',
   },
   '--out-file': {
     required: true,
@@ -336,7 +381,7 @@ export const parserConfig: ParserConfig = {
       '--payment-address': {
         required: true,
         dest: 'paymentAddress',
-        help: 'Address to receive voting rewards.',
+        help: 'Address to receive voting rewards (in bech32).',
       },
       '--nonce': {
         required: true,
@@ -365,5 +410,8 @@ export const parserConfig: ParserConfig = {
       },
       ...derivationTypeArg,
     },
+  },
+  message: {
+    sign: msgSigningArgs,
   },
 }
