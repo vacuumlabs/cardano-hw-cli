@@ -152,11 +152,13 @@ const msgSigningArgs = {
   '_mutually-exclusive-group-required-message': {
     '--message': {
       dest: 'messageHex',
+      metavar: 'MESSAGE_ASCII',
       type: (msg: string) => encodeAsciiToHex(msg),
       help: 'Message in ASCII.',
     },
     '--message-hex': {
       dest: 'messageHex',
+      metavar: 'MESSAGE_HEX',
       help: 'Message in hex.',
     },
   },
@@ -172,10 +174,16 @@ const msgSigningArgs = {
     action: 'store_true',
     help: 'If present, the message will be hashed; otherwise it will not be hashed.',
   },
+  '--prefer-hex': {
+    required: false,
+    dest: 'preferHexDisplay',
+    action: 'store_true',
+    help: 'If present, the message will be shown in hex even if it is valid ASCII.',
+  },
   '--address': {
     required: false,
     dest: 'address',
-    help: 'Address to receive voting rewards.',
+    help: 'Address for the COSE header (if not given, signing key hash is used).',
   },
   '--address-hwsfile': {
     required: false,
@@ -190,6 +198,7 @@ const msgSigningArgs = {
     dest: 'outFile',
     help: 'Output filepath.',
   },
+  ...derivationTypeArg,
 }
 
 // If you want to define a group of mutually exclusive CLI arguments (eg. see address.show below),

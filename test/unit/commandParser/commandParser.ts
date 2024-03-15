@@ -8,6 +8,7 @@ import {
 } from '../../../src/basicTypes'
 import {cardanoEraToSignedType, NETWORKS} from '../../../src/constants'
 import {CommandType, HwSigningType} from '../../../src/command-parser/argTypes'
+import {encodeAsciiToHex} from '../../../src/command-parser/parsers'
 
 const resFolder = 'test/unit/commandParser/res/'
 const prefix = (filename: string) => `${resFolder}${filename}`
@@ -515,9 +516,11 @@ it('Should parse message signing 1', () => {
         '584066610efd336e1137c525937b76511fbcf2a0e6bcf0d340a67bcb39bc870d85e8e977e956d29810dbfbda9c8ea667585982454e401c68578623d4b86bc7eb7b58',
     },
     hashPayload: false,
+    preferHexDisplay: false,
     address: undefined,
     addressHwSigningFileData: [],
     outFile: prefix('msg.out'),
+    derivationType: undefined,
   }
   assert.deepStrictEqual(parsedArgs, expectedResult)
 })
@@ -531,6 +534,7 @@ it('Should parse message signing 2', () => {
     '--signing-path-hwsfile',
     prefix('stake.hwsfile'),
     '--hashed',
+    '--prefer-hex',
     '--address',
     'addr1qxq0nckg3ekgzuqg7w5p9mvgnd9ym28qh5grlph8xd2z92sj922xhxkn6twlq2wn4q50q352annk3903tj00h45mgfmsl3s9zt',
     '--address-hwsfile',
@@ -550,6 +554,7 @@ it('Should parse message signing 2', () => {
         '584066610efd336e1137c525937b76511fbcf2a0e6bcf0d340a67bcb39bc870d85e8e977e956d29810dbfbda9c8ea667585982454e401c68578623d4b86bc7eb7b58',
     },
     hashPayload: true,
+    preferHexDisplay: true,
     address:
       'addr1qxq0nckg3ekgzuqg7w5p9mvgnd9ym28qh5grlph8xd2z92sj922xhxkn6twlq2wn4q50q352annk3903tj00h45mgfmsl3s9zt',
     addressHwSigningFileData: [
@@ -561,6 +566,15 @@ it('Should parse message signing 2', () => {
       },
     ],
     outFile: prefix('msg.out'),
+    derivationType: undefined,
   }
   assert.deepStrictEqual(parsedArgs, expectedResult)
+})
+
+describe('Testing command parser utils', () => {
+  it('encodeAsciiToHex', () => {
+    const msg = 'a\x03\x11'
+    const expectedResult = '610311'
+    assert.deepStrictEqual(encodeAsciiToHex(msg), expectedResult)
+  })
 })

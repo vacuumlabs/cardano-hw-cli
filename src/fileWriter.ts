@@ -1,4 +1,3 @@
-import {ParsedSignMessageArguments} from './command-parser/argTypes'
 import {SignedMessageData} from './signMessage/signMessage'
 import {
   BIP32Path,

@@ -3,7 +3,7 @@ import TransportNodeHid from '@ledgerhq/hw-transport-node-hid-noevents'
 import {
   CryptoProvider,
   NativeScriptDisplayFormat,
-  SigningParameters,
+  TxSigningParameters,
 } from './crypto-providers/cryptoProvider'
 import {
   constructHwSigningKeyOutput,
@@ -135,7 +135,7 @@ const CommandExecutor = async () => {
     const tx = InteropLib.decodeTx(txCbor)
 
     const {era} = args.txFileData
-    const signingParameters: SigningParameters = {
+    const signingParameters: TxSigningParameters = {
       signingMode: determineSigningMode(tx.body, args.hwSigningFileData),
       tx,
       txBodyHashHex: getTxBodyHash(tx.body),
@@ -255,7 +255,11 @@ const CommandExecutor = async () => {
     const signedMessageData = await cryptoProvider.signMessage(args)
     writeOutputData(
       args.outFile,
-      constructSignedMessageOutput(args.messageHex, args.hashPayload, signedMessageData),
+      constructSignedMessageOutput(
+        args.messageHex,
+        args.hashPayload,
+        signedMessageData,
+      ),
     )
   }
 

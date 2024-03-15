@@ -37,7 +37,13 @@ import {SigningMode} from './cryptoProvider'
 import {HwSigningData, HwSigningType} from '../command-parser/argTypes'
 
 const cardanoCrypto = require('cardano-crypto.js')
-const {AddressTypes, base58, bech32, blake2b} = require('cardano-crypto.js')
+const {
+  BaseAddressTypes,
+  AddressTypes,
+  base58,
+  bech32,
+  blake2b,
+} = require('cardano-crypto.js')
 
 export type _AddressParameters = {
   address: Buffer
@@ -373,6 +379,7 @@ const _packBaseAddress = (
     cardanoCrypto.getPubKeyBlake2b224Hash(paymentPubKey),
     cardanoCrypto.getPubKeyBlake2b224Hash(stakePubKey),
     networkId,
+    BaseAddressTypes.BASE,
   )
   return {
     address,
@@ -394,6 +401,7 @@ const _packBaseAddressKeyScript = (
     cardanoCrypto.getPubKeyBlake2b224Hash(paymentPubKey),
     stakeHash,
     networkId,
+    BaseAddressTypes.KEY_SCRIPT,
   )
   return {
     address,
@@ -438,6 +446,20 @@ const _packRewardAddress = (
   }
 }
 
+export const paymentHashFromAddress = (addressBytes: Buffer): Buffer => {
+  if (addressBytes.length < 1 + KEY_HASH_LENGTH) {
+    throw Error('Wrong address length, likely a bug in hw-cli')
+  }
+  return addressBytes.subarray(1)
+}
+
+export const stakeHashFromBaseAddress = (addressBytes: Buffer): Buffer => {
+  if (addressBytes.length !== 1 + 2 * KEY_HASH_LENGTH) {
+    throw Error('Wrong address length, likely a bug in hw-cli')
+  }
+  return addressBytes.subarray(1 + KEY_HASH_LENGTH)
+}
+
 /*
  * Turns binary address into address parameters. Useful for nicer UI:
  * HW wallets can show key derivation paths etc.
@@ -456,12 +478,15 @@ const getAddressParameters = (
   const addressType = getAddressType(address)
   const findMatchingAddress = (
     packedAddresses: (_AddressParameters | null)[],
-  ) =>
-    (
-      packedAddresses.filter(
-        (packedAddress) => packedAddress,
-      ) as _AddressParameters[]
-    ).find((packedAddress) => address.equals(packedAddress.address)) || null
+  ) => {
+    return (
+      (
+        packedAddresses.filter(
+          (packedAddress) => packedAddress,
+        ) as _AddressParameters[]
+      ).find((packedAddress) => address.equals(packedAddress.address)) || null
+    )
+  }
 
   try {
     switch (addressType) {
@@ -486,7 +511,7 @@ const getAddressParameters = (
         )
 
       case AddressType.BASE_PAYMENT_KEY_STAKE_SCRIPT: {
-        const stakeHash = address.subarray(1 + KEY_HASH_LENGTH)
+        const stakeHash = stakeHashFromBaseAddress(address)
         return findMatchingAddress(
           paymentSigningFiles.map((paymentSigningFile) =>
             _packBaseAddressKeyScript(
@@ -518,6 +543,9 @@ const getAddressParameters = (
         return null
     }
   } catch (e) {
+    // for debugging purposes
+    // eslint-disable-next-line no-console
+    console.log(e)
     return null
   }
 }
@@ -586,13 +614,13 @@ const rewardAccountToStakeCredential = (address: RewardAccount): Credential => {
     case AddressType.REWARD_KEY: {
       return {
         type: CredentialType.KEY_HASH,
-        keyHash: address.subarray(1) as KeyHash,
+        keyHash: paymentHashFromAddress(address) as KeyHash,
       }
     }
     case AddressType.REWARD_SCRIPT: {
       return {
         type: CredentialType.SCRIPT_HASH,
-        scriptHash: address.subarray(1) as ScriptHash,
+        scriptHash: paymentHashFromAddress(address) as ScriptHash,
       }
     }
     default:

@@ -43,7 +43,7 @@
     "@trezor/connect": "https://github.com/vacuumlabs/trezor-suite/releases/download/cardano-conway-rc1/trezor-connect-conway-rc1.tgz",
     "argparse": "^2.0.1",
     "bignumber": "^1.1.0",
-    "cardano-crypto.js": "^5.3.6-rc.6",
+    "cardano-crypto.js": "^6.1.2",
     "cardano-hw-interop-lib": "^3.0.1",
     "cbor": "^8.1.0",
     "lodash": "^4.17.21",
