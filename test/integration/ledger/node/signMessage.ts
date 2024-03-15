@@ -33,6 +33,7 @@ const msgTests: {[testName: string]: TestData} = {
           '584066610efd336e1137c525937b76511fbcf2a0e6bcf0d340a67bcb39bc870d85e8e977e956d29810dbfbda9c8ea667585982454e401c68578623d4b86bc7eb7b58',
       } as HwSigningData,
       hashPayload: false,
+      preferHexDisplay: false,
       outFile: 'msg.out',
     },
     expectedResult: {
@@ -55,6 +56,7 @@ const msgTests: {[testName: string]: TestData} = {
           '584066610efd336e1137c525937b76511fbcf2a0e6bcf0d340a67bcb39bc870d85e8e977e956d29810dbfbda9c8ea667585982454e401c68578623d4b86bc7eb7b58',
       } as HwSigningData,
       hashPayload: true,
+      preferHexDisplay: false,
       address:
         'addr_test1qq2vzmtlgvjrhkq50rngh8d482zj3l20kyrc6kx4ffl3zfqayfawlf9hwv2fzuygt2km5v92kvf8e3s3mk7ynxw77cwq2glhm4' as HumanAddress,
       addressHwSigningFileData: [
@@ -91,12 +93,7 @@ async function testMessageSigning(
 ) {
   const {expectedResult, args} = msgTestData
   const result = await cryptoProvider.signMessage(args)
-  assert.deepStrictEqual(result.signatureHex, expectedResult.signatureHex)
-  assert.deepStrictEqual(
-    result.signingPublicKeyHex,
-    expectedResult.signingPublicKeyHex,
-  )
-  assert.deepStrictEqual(result.addressFieldHex, expectedResult.addressFieldHex)
+  assert.deepStrictEqual(result, expectedResult)
 }
 
 describe('Ledger sign message', () => {

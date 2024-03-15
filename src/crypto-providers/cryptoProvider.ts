@@ -34,7 +34,7 @@ export enum SigningMode {
   PLUTUS_TRANSACTION,
 }
 
-export type SigningParameters = {
+export type TxSigningParameters = {
   signingMode: SigningMode
   tx: Transaction
   txBodyHashHex: string
@@ -53,7 +53,7 @@ export type CryptoProvider = {
   getVersion: () => Promise<string>
   showAddress: (args: ParsedShowAddressArguments) => Promise<void>
   witnessTx: (
-    params: SigningParameters,
+    params: TxSigningParameters,
     changeOutputFiles: HwSigningData[],
   ) => Promise<TxWitnesses>
   getXPubKeys: (

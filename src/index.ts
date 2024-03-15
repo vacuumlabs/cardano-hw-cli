@@ -59,6 +59,9 @@ const executeCommand = async (): Promise<ExitCode> => {
     case CommandType.CIP36_REGISTRATION_METADATA:
       await commandExecutor.createCIP36RegistrationMetadata(parsedArgs)
       break
+    case CommandType.SIGN_MESSAGE:
+      await commandExecutor.createSignedMessage(parsedArgs)
+      break
     default:
       throw Error(Errors.UndefinedCommandError)
   }

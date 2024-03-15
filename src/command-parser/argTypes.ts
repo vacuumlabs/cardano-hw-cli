@@ -151,9 +151,11 @@ export type ParsedSignMessageArguments = {
   messageHex: HexString
   hwSigningFileData: HwSigningData
   hashPayload: boolean
+  preferHexDisplay: boolean
   address?: HumanAddress
   addressHwSigningFileData?: HwSigningData[]
   outFile: string
+  derivationType?: DerivationType
 }
 
 export type ParsedArguments =

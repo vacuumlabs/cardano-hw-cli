@@ -36,6 +36,7 @@ import {
   Network,
   CVoteDelegation,
   AddressType,
+  ProtocolMagics,
 } from '../basicTypes'
 import {
   HwSigningData,
@@ -46,7 +47,7 @@ import {partition} from '../util'
 import {
   CryptoProvider,
   SigningMode,
-  SigningParameters,
+  TxSigningParameters,
   NativeScriptDisplayFormat,
 } from './cryptoProvider'
 import {
@@ -65,9 +66,8 @@ import {
   classifyPath,
   PathTypes,
   _AddressParameters,
+  stakeHashFromBaseAddress,
 } from './util'
-import {PROTOCOL_MAGICS} from '@trezor/connect/lib/constants/cardano'
-import {KEY_HASH_LENGTH} from 'cardano-hw-interop-lib'
 
 const {bech32} = require('cardano-crypto.js')
 
@@ -1111,7 +1111,7 @@ export const LedgerCryptoProvider: (
   }
 
   const ledgerSignTx = async (
-    params: SigningParameters,
+    params: TxSigningParameters,
     changeOutputFiles: HwSigningData[],
   ): Promise<LedgerTypes.Witness[]> => {
     const {signingMode, tx, txBodyHashHex, hwSigningFileData, network} = params
@@ -1210,7 +1210,7 @@ export const LedgerCryptoProvider: (
   }
 
   const witnessTx = async (
-    params: SigningParameters,
+    params: TxSigningParameters,
     changeOutputFiles: HwSigningData[],
   ): Promise<TxWitnesses> => {
     try {
@@ -1396,7 +1396,7 @@ export const LedgerCryptoProvider: (
     const network: Network = {
       // eslint-disable-next-line no-bitwise
       networkId: addressBytes[0] & 0b00001111,
-      protocolMagic: PROTOCOL_MAGICS.mainnet, // irrelevant, Byron addresses not used here
+      protocolMagic: ProtocolMagics.MAINNET, // irrelevant, Byron addresses not used here
     }
     if (
       args.addressHwSigningFileData == null ||
@@ -1440,9 +1440,8 @@ export const LedgerCryptoProvider: (
             type: LedgerTypes.AddressType.BASE_PAYMENT_KEY_STAKE_SCRIPT,
             params: {
               spendingPath: addressParams.paymentPath,
-              stakingScriptHashHex: addressBytes
-                .subarray(1 + KEY_HASH_LENGTH)
-                .toString('hex'),
+              stakingScriptHashHex:
+                stakeHashFromBaseAddress(addressBytes).toString('hex'),
             },
           },
           network,
@@ -1484,34 +1483,35 @@ export const LedgerCryptoProvider: (
   const signMessage = async (
     args: ParsedSignMessageArguments,
   ): Promise<SignedMessageData> => {
+    const commonLedgerArgs = {
+      messageHex: args.messageHex,
+      signingPath: args.hwSigningFileData.path,
+      hashPayload: args.hashPayload,
+      preferHexDisplay: args.preferHexDisplay,
+    }
+    let ledgerArgs: MessageData
+    if (args.address !== undefined) {
+      const [address, network] = prepareAddressFieldData(args)
+      ledgerArgs = {
+        ...commonLedgerArgs,
+        addressFieldType: LedgerTypes.MessageAddressFieldType.ADDRESS,
+        address,
+        network,
+      }
+    } else {
+      ledgerArgs = {
+        ...commonLedgerArgs,
+        addressFieldType: LedgerTypes.MessageAddressFieldType.KEY_HASH,
+      }
+    }
     try {
-      const commonLedgerArgs = {
-        messageHex: args.messageHex,
-        signingPath: args.hwSigningFileData.path,
-        hashPayload: args.hashPayload,
-      }
-      let ledgerArgs: MessageData
-      if (args.address !== undefined) {
-        const [address, network] = prepareAddressFieldData(args)
-        ledgerArgs = {
-          ...commonLedgerArgs,
-          addressFieldType: LedgerTypes.MessageAddressFieldType.ADDRESS,
-          address,
-          network,
-        }
-      } else {
-        ledgerArgs = {
-          ...commonLedgerArgs,
-          addressFieldType: LedgerTypes.MessageAddressFieldType.KEY_HASH,
-        }
-      }
       const response = await ledger.signMessage(ledgerArgs)
 
       return {
         signatureHex: response.signatureHex,
         signingPublicKeyHex: response.signingPublicKeyHex,
         addressFieldHex: response.addressFieldHex,
-      }
+      } as SignedMessageData
     } catch (err) {
       throw Error(failedMsg(err))
     }

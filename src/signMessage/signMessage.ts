@@ -1,4 +1,4 @@
-import { HexString } from "../basicTypes"
+import {HexString} from '../basicTypes'
 
 export type SignedMessageData = {
   signatureHex: HexString
