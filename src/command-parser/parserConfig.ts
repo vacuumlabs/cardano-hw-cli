@@ -15,6 +15,7 @@ import {
   parseVotePubKeyBech32,
   parseVotePubFileHw,
   parseVotePubFileCli,
+  encodeAsciiToHex,
 } from './parsers'
 
 export type ParserConfig = {[key: string]: ParserConfig | object}
@@ -129,15 +130,9 @@ const opCertSigningArgs = {
     type: (kesPeriod: string) => BigInt(kesPeriod),
     help: 'KES period.',
   },
-  '_mutually-exclusive-group-required-operational-certificate-issue-counter': {
-    '--operational-certificate-issue-counter': {
-      dest: 'issueCounterFile',
-      help: 'Input filepath of the issue counter file. This option is DEPRECATED. Please use --operational-certificate-issue-counter-file instead.',
-    },
-    '--operational-certificate-issue-counter-file': {
-      dest: 'issueCounterFile',
-      help: 'Input filepath of the issue counter file.',
-    },
+  '--operational-certificate-issue-counter-file': {
+    dest: 'issueCounterFile',
+    help: 'Input filepath of the issue counter file.',
   },
   '--hw-signing-file': {
     required: true,
@@ -151,6 +146,59 @@ const opCertSigningArgs = {
     dest: 'outFile',
     help: 'Output filepath.',
   },
+}
+
+const msgSigningArgs = {
+  '_mutually-exclusive-group-required-message': {
+    '--message': {
+      dest: 'messageHex',
+      metavar: 'MESSAGE_ASCII',
+      type: (msg: string) => encodeAsciiToHex(msg),
+      help: 'Message in ASCII.',
+    },
+    '--message-hex': {
+      dest: 'messageHex',
+      metavar: 'MESSAGE_HEX',
+      help: 'Message in hex.',
+    },
+  },
+  '--signing-path-hwsfile': {
+    required: true,
+    dest: 'hwSigningFileData',
+    type: (path: string) => parseHwSigningFile(path),
+    help: 'Input filepath of the hardware wallet signing file describing the key to be used to sign the message.',
+  },
+  '--hashed': {
+    required: false,
+    dest: 'hashPayload',
+    action: 'store_true',
+    help: 'If present, the message will be hashed; otherwise it will not be hashed.',
+  },
+  '--prefer-hex': {
+    required: false,
+    dest: 'preferHexDisplay',
+    action: 'store_true',
+    help: 'If present, the message will be shown in hex even if it is valid ASCII.',
+  },
+  '--address': {
+    required: false,
+    dest: 'address',
+    help: 'Address for the COSE header (if not given, signing key hash is used).',
+  },
+  '--address-hwsfile': {
+    required: false,
+    dest: 'addressHwSigningFileData',
+    action: 'append',
+    type: (path: string) => parseHwSigningFile(path),
+    default: [],
+    help: 'Input filepath of an address hardware wallet signing file.',
+  },
+  '--out-file': {
+    required: true,
+    dest: 'outFile',
+    help: 'Output filepath.',
+  },
+  ...derivationTypeArg,
 }
 
 // If you want to define a group of mutually exclusive CLI arguments (eg. see address.show below),
@@ -342,7 +390,7 @@ export const parserConfig: ParserConfig = {
       '--payment-address': {
         required: true,
         dest: 'paymentAddress',
-        help: 'Address to receive voting rewards.',
+        help: 'Address to receive voting rewards (in bech32).',
       },
       '--nonce': {
         required: true,
@@ -371,5 +419,8 @@ export const parserConfig: ParserConfig = {
       },
       ...derivationTypeArg,
     },
+  },
+  message: {
+    sign: msgSigningArgs,
   },
 }

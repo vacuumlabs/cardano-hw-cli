@@ -9,7 +9,7 @@ import {
 import {
   CryptoProvider,
   SigningMode,
-  SigningParameters,
+  TxSigningParameters,
   NativeScriptDisplayFormat,
 } from './cryptoProvider'
 import {
@@ -53,7 +53,9 @@ import {parseBIP32Path} from '../command-parser/parsers'
 import {
   ParsedShowAddressArguments,
   HwSigningData,
+  ParsedSignMessageArguments,
 } from '../command-parser/argTypes'
+import {SignedMessageData} from '../signMessage/signMessage'
 
 const {bech32} = require('cardano-crypto.js')
 
@@ -711,7 +713,7 @@ export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
   }
 
   const trezorSignTx = async (
-    params: SigningParameters,
+    params: TxSigningParameters,
     changeOutputFiles: HwSigningData[],
   ): Promise<TrezorTypes.CardanoSignedTxWitness[]> => {
     const {
@@ -822,7 +824,7 @@ export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
   }
 
   const witnessTx = async (
-    params: SigningParameters,
+    params: TxSigningParameters,
     changeOutputFiles: HwSigningData[],
   ): Promise<TxWitnesses> => {
     const trezorWitnesses = await trezorSignTx(params, changeOutputFiles)
@@ -970,7 +972,36 @@ export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     _signingFile: HwSigningData[],
     // eslint-disable-next-line require-await
   ): Promise<SignedOpCertCborHex> => {
-    // TODO is this the right way to deal with this?
+    throw Error(Errors.UnsupportedCryptoProviderCall)
+  }
+
+  const signMessage = async (
+    _args: ParsedSignMessageArguments, // TODO remove the underscore
+  ): Promise<SignedMessageData> => {
+    /* TODO
+    const request: TrezorTypes.CardanoSignMessage = {
+      signingPath: args.hwSigningFileData.path,
+      hashPayload: args.hashPayload,
+      payload: args.messageHex,
+      preferHexDisplay: args.preferHexDisplay,
+      networkId: Type.Optional(Type.Number()),
+      protocolMagic: Type.Optional(Type.Number()),
+      addressParameters: Type.Optional(CardanoAddressParameters),
+      derivationType: derivationTypeToTrezorType(args.derivationType),
+    }
+
+    const response = await TrezorConnect.cardanoSignMessage(request)
+
+    if (!response.success) {
+      throw Error(response.payload.error)
+    }
+
+    return {
+      addressFieldHex: response.headers.protected.address,
+      signatureHex: response.signature,
+      signingPublicKeyHex: response.pubKey,
+    }
+    */
     throw Error(Errors.UnsupportedCryptoProviderCall)
   }
 
@@ -1069,6 +1100,7 @@ export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     getXPubKeys,
     signOperationalCertificate,
     signCIP36RegistrationMetaData,
+    signMessage,
     deriveNativeScriptHash,
   }
 }

@@ -8,6 +8,7 @@ import {
 } from '../../../src/basicTypes'
 import {cardanoEraToSignedType, NETWORKS} from '../../../src/constants'
 import {CommandType, HwSigningType} from '../../../src/command-parser/argTypes'
+import {encodeAsciiToHex} from '../../../src/command-parser/parsers'
 
 const resFolder = 'test/unit/commandParser/res/'
 const prefix = (filename: string) => `${resFolder}${filename}`
@@ -109,7 +110,8 @@ describe('Command parser', () => {
       hwSigningFileData: {
         type: HwSigningType.Payment,
         path: [2147485500, 2147485463, 2147483648, 0, 0],
-        cborXPubKeyHex: '5880e0d9c2e5b...7277e7db',
+        cborXPubKeyHex:
+          '58400d94fa4489745249e9cd999c907f2692e0e5c7ac868a960312ed5d480c59f2dc231adc1ee85703f714abe70c6d95f027e76ee947f361cbb72a155ac8cad6d23f',
       },
       verificationKeyFile: 'test/unit/commandParser/res/payment.vkey',
     }
@@ -146,7 +148,8 @@ describe('Command parser', () => {
         {
           type: 0,
           path: [2147485500, 2147485463, 2147483648, 0, 0],
-          cborXPubKeyHex: '5880e0d9c2e5b...7277e7db',
+          cborXPubKeyHex:
+            '58400d94fa4489745249e9cd999c907f2692e0e5c7ac868a960312ed5d480c59f2dc231adc1ee85703f714abe70c6d95f027e76ee947f361cbb72a155ac8cad6d23f',
         },
       ],
       outFiles: ['test/unit/commandParser/res/witness.out'],
@@ -187,7 +190,8 @@ describe('Command parser', () => {
         {
           type: 0,
           path: [2147485500, 2147485463, 2147483648, 0, 0],
-          cborXPubKeyHex: '5880e0d9c2e5b...7277e7db',
+          cborXPubKeyHex:
+            '58400d94fa4489745249e9cd999c907f2692e0e5c7ac868a960312ed5d480c59f2dc231adc1ee85703f714abe70c6d95f027e76ee947f361cbb72a155ac8cad6d23f',
         },
       ],
       outFiles: ['test/unit/commandParser/res/tx.signed'],
@@ -195,7 +199,8 @@ describe('Command parser', () => {
         {
           type: 0,
           path: [2147485500, 2147485463, 2147483648, 0, 0],
-          cborXPubKeyHex: '5880e0d9c2e5b...7277e7db',
+          cborXPubKeyHex:
+            '58400d94fa4489745249e9cd999c907f2692e0e5c7ac868a960312ed5d480c59f2dc231adc1ee85703f714abe70c6d95f027e76ee947f361cbb72a155ac8cad6d23f',
         },
       ],
       derivationType: undefined,
@@ -295,7 +300,8 @@ describe('Command parser', () => {
         {
           type: 0,
           path: [2147485500, 2147485463, 2147483648, 0, 0],
-          cborXPubKeyHex: '5880e0d9c2e5b...7277e7db',
+          cborXPubKeyHex:
+            '58400d94fa4489745249e9cd999c907f2692e0e5c7ac868a960312ed5d480c59f2dc231adc1ee85703f714abe70c6d95f027e76ee947f361cbb72a155ac8cad6d23f',
         },
         {
           type: 1,
@@ -449,4 +455,126 @@ describe('Command parser', () => {
   })
 })
 
-// TODO add something for op certs (node ...)
+it('Should parse operational certificate', () => {
+  const args = pad([
+    'node',
+    'issue-op-cert',
+    '--kes-period',
+    '165564',
+    '--kes-verification-key-file',
+    prefix('kes.vkey'),
+    '--operational-certificate-issue-counter-file',
+    prefix('cold.counter'),
+    '--hw-signing-file',
+    prefix('cold.hwsfile'),
+    '--out-file',
+    prefix('opcert.out'),
+  ])
+  const {parsedArgs} = parse(args)
+
+  const expectedResult = {
+    command: CommandType.SIGN_OPERATIONAL_CERTIFICATE,
+    hwSigningFileData: [
+      {
+        type: 5,
+        path: [2147485501, 2147485463, 2147483648, 2147483648],
+        cborXPubKeyHex:
+          '58403d7e84dca8b4bc322401a2cc814af7c84d2992a22f99554fe340d7df7910768d1e2a47754207da3069f90241fbf3b8742c367e9028e5f3f85ae3660330b4f5b7',
+      },
+    ],
+    kesPeriod: 165564n,
+    kesVKey: Buffer.from(
+      'dd90f3ddc4efefeb376dbad809b0f8e35eb5f656a5ceb57afe917f8d99dcd859',
+      'hex',
+    ),
+    issueCounterFile: prefix('cold.counter'),
+    outFile: prefix('opcert.out'),
+  }
+  assert.deepStrictEqual(parsedArgs, expectedResult)
+})
+
+it('Should parse message signing 1', () => {
+  const args = pad([
+    'message',
+    'sign',
+    '--message',
+    'hello world',
+    '--signing-path-hwsfile',
+    prefix('stake.hwsfile'),
+    '--out-file',
+    prefix('msg.out'),
+  ])
+  const {parsedArgs} = parse(args)
+
+  const expectedResult = {
+    command: CommandType.SIGN_MESSAGE,
+    messageHex: '68656c6c6f20776f726c64',
+    hwSigningFileData: {
+      type: 1,
+      path: [2147485500, 2147485463, 2147483648, 2, 0],
+      cborXPubKeyHex:
+        '584066610efd336e1137c525937b76511fbcf2a0e6bcf0d340a67bcb39bc870d85e8e977e956d29810dbfbda9c8ea667585982454e401c68578623d4b86bc7eb7b58',
+    },
+    hashPayload: false,
+    preferHexDisplay: false,
+    address: undefined,
+    addressHwSigningFileData: [],
+    outFile: prefix('msg.out'),
+    derivationType: undefined,
+  }
+  assert.deepStrictEqual(parsedArgs, expectedResult)
+})
+
+it('Should parse message signing 2', () => {
+  const args = pad([
+    'message',
+    'sign',
+    '--message-hex',
+    '68656c6c6f20776f726c64',
+    '--signing-path-hwsfile',
+    prefix('stake.hwsfile'),
+    '--hashed',
+    '--prefer-hex',
+    '--address',
+    'addr1qxq0nckg3ekgzuqg7w5p9mvgnd9ym28qh5grlph8xd2z92sj922xhxkn6twlq2wn4q50q352annk3903tj00h45mgfmsl3s9zt',
+    '--address-hwsfile',
+    prefix('payment.hwsfile'),
+    '--out-file',
+    prefix('msg.out'),
+  ])
+  const {parsedArgs} = parse(args)
+
+  const expectedResult = {
+    command: CommandType.SIGN_MESSAGE,
+    messageHex: '68656c6c6f20776f726c64',
+    hwSigningFileData: {
+      type: 1,
+      path: [2147485500, 2147485463, 2147483648, 2, 0],
+      cborXPubKeyHex:
+        '584066610efd336e1137c525937b76511fbcf2a0e6bcf0d340a67bcb39bc870d85e8e977e956d29810dbfbda9c8ea667585982454e401c68578623d4b86bc7eb7b58',
+    },
+    hashPayload: true,
+    preferHexDisplay: true,
+    address:
+      'addr1qxq0nckg3ekgzuqg7w5p9mvgnd9ym28qh5grlph8xd2z92sj922xhxkn6twlq2wn4q50q352annk3903tj00h45mgfmsl3s9zt',
+    addressHwSigningFileData: [
+      {
+        cborXPubKeyHex:
+          '58400d94fa4489745249e9cd999c907f2692e0e5c7ac868a960312ed5d480c59f2dc231adc1ee85703f714abe70c6d95f027e76ee947f361cbb72a155ac8cad6d23f',
+        path: [2147485500, 2147485463, 2147483648, 0, 0],
+        type: 0,
+      },
+    ],
+    outFile: prefix('msg.out'),
+    derivationType: undefined,
+  }
+  assert.deepStrictEqual(parsedArgs, expectedResult)
+})
+
+describe('Testing command parser utils', () => {
+  it('encodeAsciiToHex', () => {
+    const msg = 'a\x03\x11'
+    const expectedResult = '610311'
+    assert.deepStrictEqual(encodeAsciiToHex(msg), expectedResult)
+  })
+})

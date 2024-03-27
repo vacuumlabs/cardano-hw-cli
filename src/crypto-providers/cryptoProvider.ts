@@ -17,11 +17,14 @@ import {
   NativeScript,
   Network,
   CVoteDelegation,
+  HumanAddress,
 } from '../basicTypes'
 import {
   ParsedShowAddressArguments,
   HwSigningData,
+  ParsedSignMessageArguments,
 } from '../command-parser/argTypes'
+import {SignedMessageData} from '../signMessage/signMessage'
 
 export enum SigningMode {
   ORDINARY_TRANSACTION,
@@ -31,7 +34,7 @@ export enum SigningMode {
   PLUTUS_TRANSACTION,
 }
 
-export type SigningParameters = {
+export type TxSigningParameters = {
   signingMode: SigningMode
   tx: Transaction
   txBodyHashHex: string
@@ -50,7 +53,7 @@ export type CryptoProvider = {
   getVersion: () => Promise<string>
   showAddress: (args: ParsedShowAddressArguments) => Promise<void>
   witnessTx: (
-    params: SigningParameters,
+    params: TxSigningParameters,
     changeOutputFiles: HwSigningData[],
   ) => Promise<TxWitnesses>
   getXPubKeys: (
@@ -66,13 +69,14 @@ export type CryptoProvider = {
   signCIP36RegistrationMetaData: (
     delegations: CVoteDelegation[],
     hwStakeSigningFile: HwSigningData, // describes stake_credential
-    paymentAddressBech32: string,
+    paymentAddressBech32: HumanAddress,
     nonce: bigint,
     votingPurpose: bigint,
     network: Network,
     paymentAddressSigningFiles: HwSigningData[],
     derivationType?: DerivationType,
   ) => Promise<CIP36RegistrationMetaDataCborHex>
+  signMessage: (args: ParsedSignMessageArguments) => Promise<SignedMessageData>
   deriveNativeScriptHash: (
     nativeScript: NativeScript,
     signingFiles: HwSigningData[],

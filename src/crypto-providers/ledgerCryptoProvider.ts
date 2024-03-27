@@ -3,6 +3,8 @@ import Ledger, * as LedgerTypes from '@cardano-foundation/ledgerjs-hw-app-cardan
 import type Transport from '@ledgerhq/hw-transport'
 import {
   CIP36VoteDelegationType,
+  DeviceOwnedAddress,
+  MessageData,
   TxOutputDestination,
 } from '@cardano-foundation/ledgerjs-hw-app-cardano'
 import {parseBIP32Path} from '../command-parser/parsers'
@@ -14,6 +16,7 @@ import {
   OpCertSigned,
   SignedOpCertCborHex,
 } from '../opCert/opCert'
+import {SignedMessageData} from '../signMessage/signMessage'
 import {
   TxByronWitnessData,
   TxShelleyWitnessData,
@@ -32,16 +35,19 @@ import {
   NativeScriptType,
   Network,
   CVoteDelegation,
+  AddressType,
+  ProtocolMagics,
 } from '../basicTypes'
 import {
   HwSigningData,
   ParsedShowAddressArguments,
+  ParsedSignMessageArguments,
 } from '../command-parser/argTypes'
 import {partition} from '../util'
 import {
   CryptoProvider,
   SigningMode,
-  SigningParameters,
+  TxSigningParameters,
   NativeScriptDisplayFormat,
 } from './cryptoProvider'
 import {
@@ -60,6 +66,7 @@ import {
   classifyPath,
   PathTypes,
   _AddressParameters,
+  stakeHashFromBaseAddress,
 } from './util'
 
 const {bech32} = require('cardano-crypto.js')
@@ -1104,7 +1111,7 @@ export const LedgerCryptoProvider: (
   }
 
   const ledgerSignTx = async (
-    params: SigningParameters,
+    params: TxSigningParameters,
     changeOutputFiles: HwSigningData[],
   ): Promise<LedgerTypes.Witness[]> => {
     const {signingMode, tx, txBodyHashHex, hwSigningFileData, network} = params
@@ -1203,7 +1210,7 @@ export const LedgerCryptoProvider: (
   }
 
   const witnessTx = async (
-    params: SigningParameters,
+    params: TxSigningParameters,
     changeOutputFiles: HwSigningData[],
   ): Promise<TxWitnesses> => {
     try {
@@ -1382,6 +1389,134 @@ export const LedgerCryptoProvider: (
     }
   }
 
+  const prepareAddressFieldData = (
+    args: ParsedSignMessageArguments,
+  ): [DeviceOwnedAddress, Network] => {
+    const addressBytes = bech32.decode(args.address).data
+    const network: Network = {
+      // eslint-disable-next-line no-bitwise
+      networkId: addressBytes[0] & 0b00001111,
+      protocolMagic: ProtocolMagics.MAINNET, // irrelevant, Byron addresses not used here
+    }
+    if (
+      args.addressHwSigningFileData == null ||
+      args.addressHwSigningFileData.length === 0
+    ) {
+      throw Error(Errors.InvalidMessageAddressSigningFilesError)
+    }
+    const addressParams = getAddressParameters(
+      args.addressHwSigningFileData,
+      addressBytes,
+      network,
+    )
+    if (addressParams == null) {
+      throw Error(Errors.InvalidMessageAddressError)
+    }
+    switch (addressParams.addressType) {
+      case AddressType.BASE_PAYMENT_KEY_STAKE_KEY:
+        if (
+          addressParams.paymentPath == null ||
+          addressParams.stakePath == null
+        ) {
+          throw Error(Errors.InvalidMessageAddressError)
+        }
+        return [
+          {
+            type: LedgerTypes.AddressType.BASE_PAYMENT_KEY_STAKE_KEY,
+            params: {
+              spendingPath: addressParams.paymentPath,
+              stakingPath: addressParams.stakePath,
+            },
+          },
+          network,
+        ]
+
+      case AddressType.BASE_PAYMENT_KEY_STAKE_SCRIPT:
+        if (addressParams.paymentPath == null) {
+          throw Error(Errors.InvalidMessageAddressError)
+        }
+        return [
+          {
+            type: LedgerTypes.AddressType.BASE_PAYMENT_KEY_STAKE_SCRIPT,
+            params: {
+              spendingPath: addressParams.paymentPath,
+              stakingScriptHashHex:
+                stakeHashFromBaseAddress(addressBytes).toString('hex'),
+            },
+          },
+          network,
+        ]
+
+      case AddressType.REWARD_KEY:
+        if (addressParams.stakePath == null) {
+          throw Error(Errors.InvalidMessageAddressError)
+        }
+        return [
+          {
+            type: LedgerTypes.AddressType.REWARD_KEY,
+            params: {
+              stakingPath: addressParams.stakePath,
+            },
+          },
+          network,
+        ]
+
+      case AddressType.ENTERPRISE_KEY:
+        if (addressParams.paymentPath == null) {
+          throw Error(Errors.InvalidMessageAddressError)
+        }
+        return [
+          {
+            type: LedgerTypes.AddressType.ENTERPRISE_KEY,
+            params: {
+              spendingPath: addressParams.paymentPath,
+            },
+          },
+          network,
+        ]
+
+      default:
+        throw Error(Errors.InvalidMessageAddressTypeError)
+    }
+  }
+
+  const signMessage = async (
+    args: ParsedSignMessageArguments,
+  ): Promise<SignedMessageData> => {
+    const commonLedgerArgs = {
+      messageHex: args.messageHex,
+      signingPath: args.hwSigningFileData.path,
+      hashPayload: args.hashPayload,
+      preferHexDisplay: args.preferHexDisplay,
+    }
+    let ledgerArgs: MessageData
+    if (args.address !== undefined) {
+      const [address, network] = prepareAddressFieldData(args)
+      ledgerArgs = {
+        ...commonLedgerArgs,
+        addressFieldType: LedgerTypes.MessageAddressFieldType.ADDRESS,
+        address,
+        network,
+      }
+    } else {
+      ledgerArgs = {
+        ...commonLedgerArgs,
+        addressFieldType: LedgerTypes.MessageAddressFieldType.KEY_HASH,
+      }
+    }
+    try {
+      const response = await ledger.signMessage(ledgerArgs)
+
+      return {
+        signatureHex: response.signatureHex,
+        signingPublicKeyHex: response.signingPublicKeyHex,
+        addressFieldHex: response.addressFieldHex,
+      } as SignedMessageData
+    } catch (err) {
+      throw Error(failedMsg(err))
+    }
+  }
+
   const nativeScriptToLedgerTypes = (
     nativeScript: NativeScript,
     signingFiles: HwSigningData[],
@@ -1490,6 +1625,7 @@ export const LedgerCryptoProvider: (
     getXPubKeys,
     signOperationalCertificate,
     signCIP36RegistrationMetaData,
+    signMessage,
     deriveNativeScriptHash,
   }
 }

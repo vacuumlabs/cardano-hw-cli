@@ -6,7 +6,7 @@ import {
 } from 'cardano-hw-interop-lib'
 import {Errors} from '../errors'
 import {HwSigningData} from '../command-parser/argTypes'
-import {SigningMode, SigningParameters} from './cryptoProvider'
+import {SigningMode, TxSigningParameters} from './cryptoProvider'
 import {filterSigningFiles} from './util'
 
 const _countWitnessableItemsForOrdinaryMode = (body: TransactionBody) => {
@@ -247,7 +247,7 @@ const validateNetworkId = (
   }
 }
 
-const validateWitnessing = (params: SigningParameters): void => {
+const validateWitnessing = (params: TxSigningParameters): void => {
   // verifies whether signing parameters correspond to each other
   const {body} = params.tx
   const {hwSigningFileData} = params

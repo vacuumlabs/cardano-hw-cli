@@ -3,7 +3,7 @@ import TransportNodeHid from '@ledgerhq/hw-transport-node-hid-noevents'
 import {
   CryptoProvider,
   NativeScriptDisplayFormat,
-  SigningParameters,
+  TxSigningParameters,
 } from './crypto-providers/cryptoProvider'
 import {
   constructHwSigningKeyOutput,
@@ -14,6 +14,7 @@ import {
   writeCbor,
   writeOutputData,
   WitnessOutput,
+  constructSignedMessageOutput,
 } from './fileWriter'
 import {
   ParsedShowAddressArguments,
@@ -24,6 +25,7 @@ import {
   ParsedOpCertArguments,
   ParsedNodeKeyGenArguments,
   ParsedCIP36RegistrationMetadataArguments,
+  ParsedSignMessageArguments,
 } from './command-parser/argTypes'
 import {LedgerCryptoProvider} from './crypto-providers/ledgerCryptoProvider'
 import {TrezorCryptoProvider} from './crypto-providers/trezorCryptoProvider'
@@ -133,7 +135,7 @@ const CommandExecutor = async () => {
     const tx = InteropLib.decodeTx(txCbor)
 
     const {era} = args.txFileData
-    const signingParameters: SigningParameters = {
+    const signingParameters: TxSigningParameters = {
       signingMode: determineSigningMode(tx.body, args.hwSigningFileData),
       tx,
       txBodyHashHex: getTxBodyHash(tx.body),
@@ -249,6 +251,18 @@ const CommandExecutor = async () => {
     )
   }
 
+  const createSignedMessage = async (args: ParsedSignMessageArguments) => {
+    const signedMessageData = await cryptoProvider.signMessage(args)
+    writeOutputData(
+      args.outFile,
+      constructSignedMessageOutput(
+        args.messageHex,
+        args.hashPayload,
+        signedMessageData,
+      ),
+    )
+  }
+
   const createCIP36RegistrationMetadata = async (
     args: ParsedCIP36RegistrationMetadataArguments,
   ) => {
@@ -310,6 +324,7 @@ const CommandExecutor = async () => {
     createNodeSigningKeyFiles,
     createSignedOperationalCertificate,
     createCIP36RegistrationMetadata,
+    createSignedMessage,
   }
 }
 
