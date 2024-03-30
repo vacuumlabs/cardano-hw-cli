@@ -450,7 +450,7 @@ export const paymentHashFromAddress = (addressBytes: Buffer): Buffer => {
   if (addressBytes.length < 1 + KEY_HASH_LENGTH) {
     throw Error('Wrong address length, likely a bug in hw-cli')
   }
-  return addressBytes.subarray(1)
+  return addressBytes.subarray(1, 1 + KEY_HASH_LENGTH)
 }
 
 export const stakeHashFromBaseAddress = (addressBytes: Buffer): Buffer => {
