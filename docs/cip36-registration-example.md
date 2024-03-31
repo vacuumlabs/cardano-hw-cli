@@ -1,10 +1,12 @@
-# Requirements
+# CIP-36 registration example
+
+## Requirements
 
 CIP-36 support:
 * on Ledger, Cardano app version 6.0.2 and above
 * on Trezor, firmware 2.5.3 and above
 
-# Create CIP36 vote keys
+## Create CIP36 vote keys
 
 You may want to keep your vote keys stored on a Ledger Nano hardware device (the key derivation schema is described in [CIP-36](https://cips.cardano.org/cips/cip36/)). Consequently, you will have to sign all voting on the HW device storing the keys. For Trezor, this is not supported.
 
@@ -16,7 +18,7 @@ tar -xf jormungandr-0.9.3-x86_64-unknown-linux-gnu-generic.tar.gz
 ./jcli key to-public < catalyst-vote.skey > catalyst-vote.pkey
 ```
 
-# Create CIP36 registration metadata
+## Create CIP36 registration metadata
 
 Generate hardware wallet signing files and verification key files with `cardano-hw-cli`:
 ```
@@ -75,7 +77,7 @@ cardano-hw-cli vote registration-metadata \
 
 Note: The registration auxiliary data are formatted according to [CIP-36](https://cips.cardano.org/cips/cip36/).
 
-# Create and submit transaction
+## Create and submit transaction
 Create raw transaction with `cardano-cli`, if you don't know how to create simple transaction, check https://github.com/vacuumlabs/cardano-hw-cli/blob/develop/docs/transaction-example.md
 ```
 cardano-cli transaction build-raw \

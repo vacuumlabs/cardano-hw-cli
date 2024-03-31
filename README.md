@@ -99,6 +99,20 @@ cardano-hw-cli vote registration-metadata
 
 see [registration example](docs/cip36-registration-example.md)
 
+## Message signing
+```
+--message MESSAGE_ASCII | --message-hex MESSAGE_HEX   Message to sign.
+--signing-path-hwsfile FILE                           Input filepath of the hardware wallet signing file describing the key to be used to sign the message.
+--hashed                                              If present, the message will be hashed; otherwise it will not be hashed.
+--prefer-hex                                          If present, the message will be shown in hex even if it is valid ASCII.
+--address ADDRESS                                     Address for the COSE header (if not given, signing key hash is used).
+--address-hwsfile FILE                                Input filepath of an address hardware wallet signing file.
+--out-file FILE                                       Output filepath.
+--derivation-type TYPE                                Derivation type - currently applies only to Trezor. Options: LEDGER, ICARUS or ICARUS_TREZOR (default).
+```
+
+see [message signing example](docs/message-signing.md)
+
 ## Policy id generation
 ```
 cardano-hw-cli transaction policyid
@@ -156,9 +170,9 @@ yarn dev ...
 ```
 
 # Building from source
-Install node version v14.17.6
+Install node version v18.7.0
 ```
-nvm i v14.17.6
+nvm i v18.7.0
 ```
 
 Install yarn:
@@ -175,6 +189,7 @@ To target specific artifact, run one of following commands:
 ```
 yarn build-linux-deb
 yarn build-linux-tar
+yarn build-linux-tar-arm64
 yarn build-windows
 yarn build-macos
 ```
