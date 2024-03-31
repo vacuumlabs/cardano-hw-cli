@@ -69,7 +69,7 @@ import {
   stakeHashFromBaseAddress,
 } from './util'
 
-const {bech32} = require('cardano-crypto.js')
+const {bech32, getShelleyAddressNetworkId} = require('cardano-crypto.js')
 
 const failedMsg = (e: unknown): string => `The requested operation failed. \
 Check that your Ledger device is connected, unlocked and with Cardano app running.
@@ -1392,10 +1392,9 @@ export const LedgerCryptoProvider: (
   const prepareAddressFieldData = (
     args: ParsedSignMessageArguments,
   ): [DeviceOwnedAddress, Network] => {
-    const addressBytes = bech32.decode(args.address).data
+    const addressBytes = bech32.decode(args.address).data as Buffer
     const network: Network = {
-      // eslint-disable-next-line no-bitwise
-      networkId: addressBytes[0] & 0b00001111,
+      networkId: getShelleyAddressNetworkId(addressBytes),
       protocolMagic: ProtocolMagics.MAINNET, // irrelevant, Byron addresses not used here
     }
     if (
