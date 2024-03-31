@@ -2,12 +2,12 @@
 import assert from 'assert'
 import {LedgerCryptoProvider} from '../../../../src/crypto-providers/ledgerCryptoProvider'
 
+import {signingFiles} from './signingFiles'
 import {getTransport} from './speculos'
 import {CryptoProvider} from '../../../../src/crypto-providers/cryptoProvider'
 import {
   CommandType,
   HwSigningData,
-  HwSigningType,
   ParsedSignMessageArguments,
 } from '../../../../src/command-parser/argTypes'
 import {HexString, HumanAddress} from '../../../../src/basicTypes'
@@ -26,12 +26,7 @@ const msgTests: {[testName: string]: TestData} = {
     args: {
       command: CommandType.SIGN_MESSAGE,
       messageHex: '68656c6c6f20776f726c64' as HexString,
-      hwSigningFileData: {
-        type: 1,
-        path: [2147485500, 2147485463, 2147483648, 2, 0],
-        cborXPubKeyHex:
-          '584066610efd336e1137c525937b76511fbcf2a0e6bcf0d340a67bcb39bc870d85e8e977e956d29810dbfbda9c8ea667585982454e401c68578623d4b86bc7eb7b58',
-      } as HwSigningData,
+      hwSigningFileData: signingFiles.stake0 as HwSigningData,
       hashPayload: false,
       preferHexDisplay: false,
       outFile: 'msg.out',
@@ -49,29 +44,14 @@ const msgTests: {[testName: string]: TestData} = {
     args: {
       command: CommandType.SIGN_MESSAGE,
       messageHex: '68656c6c6f20776f726c64' as HexString,
-      hwSigningFileData: {
-        type: HwSigningType.Payment,
-        path: [2147485500, 2147485463, 2147483648, 0, 0],
-        cborXPubKeyHex:
-          '584066610efd336e1137c525937b76511fbcf2a0e6bcf0d340a67bcb39bc870d85e8e977e956d29810dbfbda9c8ea667585982454e401c68578623d4b86bc7eb7b58',
-      } as HwSigningData,
+      hwSigningFileData: signingFiles.payment0 as HwSigningData,
       hashPayload: true,
       preferHexDisplay: false,
       address:
         'addr_test1qq2vzmtlgvjrhkq50rngh8d482zj3l20kyrc6kx4ffl3zfqayfawlf9hwv2fzuygt2km5v92kvf8e3s3mk7ynxw77cwq2glhm4' as HumanAddress,
       addressHwSigningFileData: [
-        {
-          cborXPubKeyHex:
-            '5840cd2b047d1a803eee059769cffb3dfd0a4b9327e55bc78aa962d9bd4f720db0b2914ba07fb381f23c5c09bce26587bdf359aab7ea8f4192adbf93a38fd893ccea',
-          path: [2147485500, 2147485463, 2147483648, 0, 0],
-          type: HwSigningType.Payment,
-        } as HwSigningData,
-        {
-          cborXPubKeyHex:
-            '584066610efd336e1137c525937b76511fbcf2a0e6bcf0d340a67bcb39bc870d85e8e977e956d29810dbfbda9c8ea667585982454e401c68578623d4b86bc7eb7b58',
-          path: [2147485500, 2147485463, 2147483648, 2, 0],
-          type: HwSigningType.Stake,
-        } as HwSigningData,
+        signingFiles.payment0 as HwSigningData,
+        signingFiles.stake0 as HwSigningData,
       ],
       outFile: 'msg.out',
     },
@@ -88,7 +68,6 @@ const msgTests: {[testName: string]: TestData} = {
 
 async function testMessageSigning(
   cryptoProvider: CryptoProvider,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   msgTestData: TestData,
 ) {
   const {expectedResult, args} = msgTestData
