@@ -171,3 +171,4 @@ export type ParsedArguments =
   | ParsedNodeKeyGenArguments
   | ParsedOpCertArguments
   | ParsedCIP36RegistrationMetadataArguments
+  | ParsedSignMessageArguments
