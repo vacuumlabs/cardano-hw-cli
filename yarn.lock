@@ -274,9 +274,9 @@
     "@babel/helper-validator-identifier" "^7.22.20"
     to-fast-properties "^2.0.0"
 
-"@cardano-foundation/ledgerjs-hw-app-cardano@./cardano-foundation-ledgerjs-hw-app-cardano-v7.1.1.tgz":
+"@cardano-foundation/ledgerjs-hw-app-cardano@https://github.com/vacuumlabs/ledgerjs-cardano-shelley/releases/download/v7.1.1/cardano-foundation-ledgerjs-hw-app-cardano-v7.1.1.tgz":
   version "7.1.1"
-  resolved "./cardano-foundation-ledgerjs-hw-app-cardano-v7.1.1.tgz#37ebea38817a738efd1ec9fc8745671b5bb95612"
+  resolved "https://github.com/vacuumlabs/ledgerjs-cardano-shelley/releases/download/v7.1.1/cardano-foundation-ledgerjs-hw-app-cardano-v7.1.1.tgz#489a4c202de35696248d22fa647b4df40a5b310b"
   dependencies:
     "@ledgerhq/hw-transport" "^6.27.10"
     base-x "^3.0.5"
