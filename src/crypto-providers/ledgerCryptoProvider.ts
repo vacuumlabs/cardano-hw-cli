@@ -67,6 +67,7 @@ import {
   PathTypes,
   _AddressParameters,
   stakeHashFromBaseAddress,
+  verifyIntendedPubKeySignatureMatch,
 } from './util'
 
 const {bech32, getShelleyAddressNetworkId} = require('cardano-crypto.js')
@@ -1047,6 +1048,7 @@ export const LedgerCryptoProvider: (
   const createWitnesses = (
     ledgerWitnesses: LedgerTypes.Witness[],
     signingFiles: HwSigningData[],
+    txBodyHashHex: string,
   ): TxWitnesses => {
     const getSigningFileDataByPath = (path: BIP32Path): HwSigningData => {
       const hwSigningData = signingFiles.find((signingFile) =>
@@ -1056,8 +1058,14 @@ export const LedgerCryptoProvider: (
       throw Error(Errors.MissingHwSigningDataAtPathError)
     }
     const witnessesWithKeys = ledgerWitnesses.map((witness) => {
+      const signingFile = getSigningFileDataByPath(witness.path as BIP32Path)
       const {pubKey, chainCode} = splitXPubKeyCborHex(
-        getSigningFileDataByPath(witness.path as BIP32Path).cborXPubKeyHex,
+        signingFile.cborXPubKeyHex,
+      )
+      verifyIntendedPubKeySignatureMatch(
+        txBodyHashHex,
+        signingFile,
+        witness.witnessSignatureHex,
       )
       return {
         path: witness.path as BIP32Path,
@@ -1213,12 +1221,17 @@ export const LedgerCryptoProvider: (
     params: TxSigningParameters,
     changeOutputFiles: HwSigningData[],
   ): Promise<TxWitnesses> => {
+    let ledgerWitnesses: LedgerTypes.Witness[]
     try {
-      const ledgerWitnesses = await ledgerSignTx(params, changeOutputFiles)
-      return createWitnesses(ledgerWitnesses, params.hwSigningFileData)
+      ledgerWitnesses = await ledgerSignTx(params, changeOutputFiles)
     } catch (err) {
       throw Error(failedMsg(err))
     }
+    return createWitnesses(
+      ledgerWitnesses,
+      params.hwSigningFileData,
+      params.txBodyHashHex,
+    )
   }
 
   const prepareCVoteDelegations = (
@@ -1503,17 +1516,32 @@ export const LedgerCryptoProvider: (
         addressFieldType: LedgerTypes.MessageAddressFieldType.KEY_HASH,
       }
     }
-    try {
-      const response = await ledger.signMessage(ledgerArgs)
 
-      return {
-        signatureHex: response.signatureHex,
-        signingPublicKeyHex: response.signingPublicKeyHex,
-        addressFieldHex: response.addressFieldHex,
-      } as SignedMessageData
+    let response: LedgerTypes.SignMessageResponse
+    try {
+      response = await ledger.signMessage(ledgerArgs)
     } catch (err) {
       throw Error(failedMsg(err))
     }
+
+    if (args.address !== undefined) {
+      const address = bech32.decode(args.address).data as Buffer
+      if (address.toString('hex') !== response.addressFieldHex) {
+        throw Error(Errors.MessageAddressMismatchError)
+      }
+    }
+    const pubKey = splitXPubKeyCborHex(
+      args.hwSigningFileData.cborXPubKeyHex,
+    ).pubKey
+    if (pubKey.toString('hex') !== response.signingPublicKeyHex) {
+      throw Error(Errors.SigningPubKeyMismatchError)
+    }
+
+    return {
+      signatureHex: response.signatureHex,
+      signingPublicKeyHex: response.signingPublicKeyHex,
+      addressFieldHex: response.addressFieldHex,
+    } as SignedMessageData
   }
 
   const nativeScriptToLedgerTypes = (

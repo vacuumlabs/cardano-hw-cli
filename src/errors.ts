@@ -18,6 +18,7 @@ export const enum Errors {
   InvalidNodeKeyGenInputsError = 'Invalid node key-gen inputs',
   InvalidDerivationTypeError = 'Invalid derivation type',
   TxSerializationMismatchError = 'Tx serialization mismatch',
+  SigningPubKeyMismatchError = 'Signing public key mismatch: likely because an incorrect signing file was used',
   MetadataSerializationMismatchError = 'Metadata serialization mismatch',
   MissingHwSigningDataAtPathError = 'Can not find hw signing data by path',
   MissingHwSigningDataAtXPubKeyError = 'Can not find hw signing data by extended public key',
@@ -76,4 +77,5 @@ export const enum Errors {
   InvalidMessageAddressError = 'Cannot derive address parameters in message signing: likely because address signing files are missing',
   InvalidMessageAddressTypeError = 'Invalid or unsupported address type in message signing',
   InvalidMessageAddressSigningFilesError = 'Missing address signing files in message signing',
+  MessageAddressMismatchError = 'Message address mismatch: likely because incorrect address signing files were used',
 }

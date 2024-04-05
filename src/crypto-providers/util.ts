@@ -43,6 +43,7 @@ const {
   base58,
   bech32,
   blake2b,
+  verify,
 } = require('cardano-crypto.js')
 
 export type _AddressParameters = {
@@ -705,6 +706,25 @@ const validateCIP36RegistrationAddressType = (addressType: number): void => {
 const getTxBodyHash = (txBody: TransactionBody): string =>
   blake2b(encodeTxBody(txBody), 32).toString('hex')
 
+const verifySignature = (
+  message: Buffer,
+  pubKey: Buffer,
+  signature: Buffer,
+): boolean => verify(message, pubKey, signature)
+
+const verifyIntendedPubKeySignatureMatch = (
+  messageHex: string,
+  hwSigningFile: HwSigningData,
+  signatureHex: string,
+): void => {
+  const hash = Buffer.from(messageHex, 'hex')
+  const pubKey = splitXPubKeyCborHex(hwSigningFile.cborXPubKeyHex).pubKey
+  const signature = Buffer.from(signatureHex, 'hex')
+  if (!verifySignature(hash, pubKey, signature)) {
+    throw Error(Errors.SigningPubKeyMismatchError)
+  }
+}
+
 export {
   PathTypes,
   classifyPath,
@@ -730,4 +750,5 @@ export {
   hasMultisigSigningFile,
   determineSigningMode,
   getTxBodyHash,
+  verifyIntendedPubKeySignatureMatch,
 }

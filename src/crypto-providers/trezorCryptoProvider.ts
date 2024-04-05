@@ -44,6 +44,7 @@ import {
   areAddressParamsAllowed,
   _AddressParameters,
   stakeHashFromBaseAddress,
+  verifyIntendedPubKeySignatureMatch,
 } from './util'
 import {Errors} from '../errors'
 import {partition} from '../util'
@@ -652,6 +653,7 @@ export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
   const createWitnesses = (
     trezorWitnesses: TrezorTypes.CardanoSignedTxWitness[],
     signingFiles: HwSigningData[],
+    txBodyHashHex: string,
   ): TxWitnesses => {
     const getSigningFileDataByXPubKey = (pubKey: PubKeyHex): HwSigningData => {
       const hwSigningData = signingFiles.find(
@@ -667,6 +669,11 @@ export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     const transformedWitnesses = trezorWitnesses.map((witness) => {
       const signingFile = getSigningFileDataByXPubKey(
         witness.pubKey as PubKeyHex,
+      )
+      verifyIntendedPubKeySignatureMatch(
+        txBodyHashHex,
+        signingFile,
+        witness.signature,
       )
       return {
         ...witness,
@@ -845,7 +852,11 @@ export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     changeOutputFiles: HwSigningData[],
   ): Promise<TxWitnesses> => {
     const trezorWitnesses = await trezorSignTx(params, changeOutputFiles)
-    return createWitnesses(trezorWitnesses, params.hwSigningFileData)
+    return createWitnesses(
+      trezorWitnesses,
+      params.hwSigningFileData,
+      params.txBodyHashHex,
+    )
   }
 
   const prepareVoteDelegations = (
@@ -1098,6 +1109,21 @@ export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     if (!response.success) {
       throw Error(response.payload.error)
     }
+
+    if (args.address !== undefined) {
+      const addressCli = bech32.decode(args.address).data as Buffer
+      const addressFieldHex = response.payload.headers.protected.address
+      if (addressCli.toString('hex') !== addressFieldHex) {
+        throw Error(Errors.MessageAddressMismatchError)
+      }
+    }
+    const pubKey = splitXPubKeyCborHex(
+      args.hwSigningFileData.cborXPubKeyHex,
+    ).pubKey
+    if (pubKey.toString('hex') !== response.payload.pubKey) {
+      throw Error(Errors.SigningPubKeyMismatchError)
+    }
+
     return {
       addressFieldHex: response.payload.headers.protected.address as HexString,
       signatureHex: response.payload.signature as HexString,
