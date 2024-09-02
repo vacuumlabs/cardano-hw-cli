@@ -6,7 +6,7 @@ This example demonstrates how to sign a message. See [CIP-8](https://github.com/
 
 Message signing support:
 <!-- TODO update versions -->
-* on Ledger, Cardano app version TBD and above
+* on Ledger, Cardano app version 7.1.3 and above
 * on Trezor, firmware TBD and above
 
 ## Sign a message
@@ -23,8 +23,11 @@ cardano-hw-cli message sign \
   --out-file msg.out
 ```
 
-You can use `--message` or `--message-hex` to specify the message to sign in ASCII or hex format, respectively. If you add `--prefer-hex`, the message will be shown in hex on HW wallet screen even if it is valid ASCII.
+You can use `--message` or `--message-hex` to specify the message to sign in ASCII or hex format, respectively. If you add `--prefer-hex`, the message will be shown in hex on HW wallet screen even if it is valid ASCII. 
+Have in mind that there is a max size (in bytes) for the message. E.g., on a Ledger nano X, the message can at most be 198 bytes long. 
 
 If you add `--hashed`, the message will be hashed before signing.
+
+The option `--derivation-type` is optional and may be used in the case of choosing which root key generation method was used. Options: `LEDGER`, `ICARUS` or `ICARUS_TREZOR` (default)
 
 If successful, the command should save output data to the `msg.out` file.
