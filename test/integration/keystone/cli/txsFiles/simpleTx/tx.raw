@@ -1,0 +1,5 @@
+{
+    "type": "Unwitnessed Tx ShelleyEra",
+    "description": "Ledger Cddl Format",
+    "cborHex": "83a40081825820941a33cf9d39bba4102c4eff8bd54efd72cf93e65a023a4475ba48a58fc0de000001818258390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c1a002b2b4b021a00029b75031a00a8474ca0f6"
+}

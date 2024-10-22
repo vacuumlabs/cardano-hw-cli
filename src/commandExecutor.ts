@@ -1,5 +1,6 @@
 import * as InteropLib from 'cardano-hw-interop-lib'
 import TransportNodeHid from '@ledgerhq/hw-transport-node-hid-noevents'
+import { TransportNodeUSB } from '@keystonehq/hw-transport-nodeusb';
 import {
   CryptoProvider,
   NativeScriptDisplayFormat,
@@ -43,7 +44,10 @@ import {parseOpCertIssueCounterFile} from './command-parser/parsers'
 import {CIP36_VOTING_PURPOSE_CATALYST} from './constants'
 import {validateWitnessing} from './crypto-providers/witnessingValidation'
 import {validateTxBeforeWitnessing} from './transaction/transactionValidation'
-import {Cbor, CVoteDelegation} from './basicTypes'
+import {Cbor, CborHex, CVoteDelegation, XPubKeyHex} from './basicTypes'
+import { KeystoneCryptoProvider } from './crypto-providers/keystoneCryptoProvider'
+import { TxWitnesses } from './transaction/txTypes';
+import { SignedMessageData } from './signMessage/signMessage';
 
 const promiseTimeout = <T>(promise: Promise<T>, ms: number): Promise<T> => {
   const timeout: Promise<T> = new Promise((resolve, reject) => {
