@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 import * as InteropLib from 'cardano-hw-interop-lib'
 import {  TransportHID } from '@keystonehq/hw-transport-usb';
 import {Errors} from '../errors'
@@ -12,15 +13,19 @@ import {
   BIP32Path,
   CVoteDelegation,
   HexString,
+  NativeScript,
+  NativeScriptHashKeyHex,
   Network,
   XPubKeyHex,
 } from '../basicTypes'
 import {
   HwSigningData,
+  ParsedShowAddressArguments,
   ParsedSignMessageArguments,
 } from '../command-parser/argTypes'
 import {
   CryptoProvider,
+  NativeScriptDisplayFormat,
   TxSigningParameters,
 } from './cryptoProvider'
 import Cardano from './keystoneUtils'
@@ -36,6 +41,8 @@ const {bech32,blake2b} = require('cardano-crypto.js')
 const failedMsg = (e: unknown): string => `The requested operation failed. \
 Check that your Keystone device is connected.
 Details: ${e}`
+
+const WALLET_NAME = "cardano_cli_wallet"
 export const KeystoneCryptoProvider: (
   transport: TransportHID,
   // eslint-disable-next-line require-await
@@ -50,6 +57,23 @@ export const KeystoneCryptoProvider: (
       throw Error(failedMsg(err))
     }
   }
+
+  const showAddress = async ({
+    paymentPath,
+    paymentScriptHash,
+    stakingPath,
+    stakingScriptHash,
+    address,
+  }: ParsedShowAddressArguments): Promise<void> => {
+    console.log('showAddress function parameters:');
+    console.log('paymentPath:', JSON.stringify(paymentPath, null, 2));
+    console.log('paymentScriptHash:', paymentScriptHash);
+    console.log('stakingPath:', JSON.stringify(stakingPath, null, 2));
+    console.log('stakingScriptHash:', stakingScriptHash);
+    console.log('address:', address);
+    throw Error(Errors.Keystone3ProShowAddress)
+  }
+
 
   function bip32PathToString(path: BIP32Path): string {
     return `m/${  path.map((element, index) => {
@@ -74,7 +98,6 @@ export const KeystoneCryptoProvider: (
             throw Error(Errors.InternalInvalidTypeError)
         }
         const xPubKeyHex = xPubKey.publicKey + xPubKey.chainCode;
-        console.log("========",xPubKeyHex)
         if (!isXPubKeyHex(xPubKeyHex)) {
             throw Error(Errors.InternalInvalidTypeError)
         }
@@ -189,8 +212,7 @@ export const KeystoneCryptoProvider: (
     const stakePubHex = extractStakePubKeyFromHwSigningData(hwStakeSigningFile)
 
     const cardanoCatalystVotingRequest = {
-        // todo requestId is hardcoded
-        requestId: '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d',
+        requestId: uuid(),
         path: bip32PathToString(hwStakeSigningFile.path),
         delegations: keystoneDelegations,
         stakePub: stakePubHex,
@@ -198,7 +220,7 @@ export const KeystoneCryptoProvider: (
         nonce: Number(nonce),
         voting_purpose: Number(votingPurpose),
         xfp: walletMFP,
-        origin: 'cardano-wallet',
+        origin: WALLET_NAME
     }
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -259,7 +281,7 @@ export const KeystoneCryptoProvider: (
         preferHexDisplay: args.preferHexDisplay,
         xpub: pubKey.toString('hex'),
         path: bip32PathToString(hwSigningFileData.path),
-        origin: "cardano-wallet",
+        origin: WALLET_NAME,
         signingPath: bip32PathToString(hwSigningFileData.path),
     }
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -292,12 +314,25 @@ export const KeystoneCryptoProvider: (
   }
   
   
+  const deriveNativeScriptHash = async (
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    nativeScript: NativeScript,
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    signingFiles: HwSigningData[],
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    displayFormat: NativeScriptDisplayFormat,
+  ): Promise<NativeScriptHashKeyHex> => {
+    throw Error(Errors.Keystone3ProUnsupportedThisCommand)
+}
+
   return {
+    showAddress,
     getVersion,
     witnessTx,
     getXPubKeys,
     signCIP36RegistrationMetaData,
     signOperationalCertificate,
     signMessage,
+    deriveNativeScriptHash
   }
 }

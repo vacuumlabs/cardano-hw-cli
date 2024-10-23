@@ -44,10 +44,8 @@ import {parseOpCertIssueCounterFile} from './command-parser/parsers'
 import {CIP36_VOTING_PURPOSE_CATALYST} from './constants'
 import {validateWitnessing} from './crypto-providers/witnessingValidation'
 import {validateTxBeforeWitnessing} from './transaction/transactionValidation'
-import {Cbor, CborHex, CVoteDelegation, XPubKeyHex} from './basicTypes'
+import {Cbor, CVoteDelegation} from './basicTypes'
 import { KeystoneCryptoProvider } from './crypto-providers/keystoneCryptoProvider'
-import { TxWitnesses } from './transaction/txTypes';
-import { SignedMessageData } from './signMessage/signMessage';
 
 const promiseTimeout = <T>(promise: Promise<T>, ms: number): Promise<T> => {
   const timeout: Promise<T> = new Promise((resolve, reject) => {
@@ -66,7 +64,8 @@ const getCryptoProvider = async (): Promise<CryptoProvider> => {
   // if you want to test with speculos, you can use this temporarily:
   // LedgerCryptoProvider(await require('@ledgerhq/hw-transport-node-speculos').default.open({apduPort: 9999}))
   const trezorPromise = async () => await TrezorCryptoProvider()
-  const cryptoProviderPromise = Promise.any([ledgerPromise(), trezorPromise()])
+  const keystonePromise = async () => await KeystoneCryptoProvider(await TransportNodeUSB.connect())
+  const cryptoProviderPromise = Promise.any([ledgerPromise(), trezorPromise(), keystonePromise()])
 
   try {
     return await promiseTimeout(cryptoProviderPromise, 5000)
