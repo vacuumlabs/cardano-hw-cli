@@ -76,7 +76,7 @@ async function testMessageSigning(
   assert.deepStrictEqual(result, expectedResult)
 }
 
-describe('Ledger sign message', () => {
+describe('Keystone sign message', () => {
   let cryptoProvider: CryptoProvider
   // eslint-disable-next-line prefer-arrow-callback
   before(async function () {
