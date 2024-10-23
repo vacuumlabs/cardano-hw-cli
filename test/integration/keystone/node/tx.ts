@@ -12,8 +12,8 @@ import {validateTxBeforeWitnessing} from '../../../../src/transaction/transactio
 import {signingFiles} from './signingFiles'
 import {CardanoEra} from '../../../../src/basicTypes'
 import {CryptoProvider} from '../../../../src/crypto-providers/cryptoProvider'
-import { TransportNodeUSB } from '@keystonehq/hw-transport-nodeusb'
-import { KeystoneCryptoProvider } from '../../../../src/crypto-providers/keystoneCryptoProvider'
+import {TransportNodeUSB} from '@keystonehq/hw-transport-nodeusb'
+import {KeystoneCryptoProvider} from '../../../../src/crypto-providers/keystoneCryptoProvider'
 
 // Note for future readers (Dec 2022): The tests in this file were created in the cardano-cli's
 // internal raw tx format. When we removed support for this format in favor of the CDDL-compliant
@@ -1689,14 +1689,14 @@ async function testTxWitnessing(
     changeOutputFiles,
   )
 
-//   for (let i = 0; i < witnesses.shelleyWitnesses.length; i++) {
-//     console.log(witnesses.shelleyWitnesses[i].data[0].toString('hex'))
-//     console.log(transaction.witnesses.shelleyWitnesses[i].data[0].toString('hex'))
-//     console.log('\n')
-//     console.log(witnesses.shelleyWitnesses[i].data[1].toString('hex'))
-//     console.log(transaction.witnesses.shelleyWitnesses[i].data[1].toString('hex'))
-//     console.log('\n')
-//   }
+  //   for (let i = 0; i < witnesses.shelleyWitnesses.length; i++) {
+  //     console.log(witnesses.shelleyWitnesses[i].data[0].toString('hex'))
+  //     console.log(transaction.witnesses.shelleyWitnesses[i].data[0].toString('hex'))
+  //     console.log('\n')
+  //     console.log(witnesses.shelleyWitnesses[i].data[1].toString('hex'))
+  //     console.log(transaction.witnesses.shelleyWitnesses[i].data[1].toString('hex'))
+  //     console.log('\n')
+  //   }
 
   assert.deepStrictEqual(witnesses, transaction.witnesses)
 }
@@ -1706,8 +1706,11 @@ describe('Keystone tx witnessing', () => {
   // eslint-disable-next-line prefer-arrow-callback
   before(async function () {
     this.timeout(10000)
-    cryptoProvider =await KeystoneCryptoProvider(await TransportNodeUSB.connect({
-        timeout: 100000}))
+    cryptoProvider = await KeystoneCryptoProvider(
+      await TransportNodeUSB.connect({
+        timeout: 100000,
+      }),
+    )
   })
   const txs = Object.entries(transactions)
 

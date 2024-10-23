@@ -5,8 +5,8 @@ import {NETWORKS} from '../../../../src/constants'
 import {signingFiles} from './signingFiles'
 import {addresses} from './addresses'
 import {CryptoProvider} from '../../../../src/crypto-providers/cryptoProvider'
-import { TransportNodeUSB } from '@keystonehq/hw-transport-nodeusb'
-import { KeystoneCryptoProvider } from '../../../../src/crypto-providers/keystoneCryptoProvider'
+import {TransportNodeUSB} from '@keystonehq/hw-transport-nodeusb'
+import {KeystoneCryptoProvider} from '../../../../src/crypto-providers/keystoneCryptoProvider'
 
 const cip36Registrations = {
   withTestnetBaseAddress0: {
@@ -127,8 +127,11 @@ describe('Keystone sign CIP36 registration metadata', () => {
   // eslint-disable-next-line prefer-arrow-callback
   before(async function () {
     this.timeout(10000)
-    cryptoProvider = await KeystoneCryptoProvider(await TransportNodeUSB.connect({
-        timeout: 100000}))
+    cryptoProvider = await KeystoneCryptoProvider(
+      await TransportNodeUSB.connect({
+        timeout: 100000,
+      }),
+    )
   })
   const cip36RegistrationsToSign = Object.entries(cip36Registrations)
 

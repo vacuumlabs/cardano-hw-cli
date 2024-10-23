@@ -9,8 +9,8 @@ import {
   ParsedSignMessageArguments,
 } from '../../../../src/command-parser/argTypes'
 import {HexString, HumanAddress} from '../../../../src/basicTypes'
-import { KeystoneCryptoProvider } from '../../../../src/crypto-providers/keystoneCryptoProvider'
-import { TransportNodeUSB } from '@keystonehq/hw-transport-nodeusb'
+import {KeystoneCryptoProvider} from '../../../../src/crypto-providers/keystoneCryptoProvider'
+import {TransportNodeUSB} from '@keystonehq/hw-transport-nodeusb'
 
 type TestData = {
   args: ParsedSignMessageArguments
@@ -64,7 +64,6 @@ const msgTests: {[testName: string]: TestData} = {
         '0014c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c',
     },
   },
-
 }
 
 async function testMessageSigning(
@@ -81,8 +80,11 @@ describe('Keystone sign message', () => {
   // eslint-disable-next-line prefer-arrow-callback
   before(async function () {
     this.timeout(10000)
-    cryptoProvider = await KeystoneCryptoProvider(await TransportNodeUSB.connect({
-        timeout: 100000}))
+    cryptoProvider = await KeystoneCryptoProvider(
+      await TransportNodeUSB.connect({
+        timeout: 100000,
+      }),
+    )
   })
   const messagesToSign = Object.entries(msgTests)
 

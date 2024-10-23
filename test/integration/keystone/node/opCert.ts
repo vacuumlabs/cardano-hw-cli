@@ -5,8 +5,8 @@ import {CryptoProvider} from '../../../../src/crypto-providers/cryptoProvider'
 
 import {signingFiles} from './signingFiles'
 import {getTransport} from './speculos'
-import { KeystoneCryptoProvider } from '../../../../src/crypto-providers/keystoneCryptoProvider'
-import { TransportNodeUSB } from '@keystonehq/hw-transport-nodeusb'
+import {KeystoneCryptoProvider} from '../../../../src/crypto-providers/keystoneCryptoProvider'
+import {TransportNodeUSB} from '@keystonehq/hw-transport-nodeusb'
 
 const opCerts = {
   opcert1: {
@@ -44,8 +44,11 @@ describe('Ledger operational certificate', () => {
   // eslint-disable-next-line prefer-arrow-callback
   before(async function () {
     this.timeout(10000)
-    cryptoProvider =await KeystoneCryptoProvider(await TransportNodeUSB.connect({
-        timeout: 100000}))
+    cryptoProvider = await KeystoneCryptoProvider(
+      await TransportNodeUSB.connect({
+        timeout: 100000,
+      }),
+    )
   })
   const opCertsToSign = Object.entries(opCerts)
   opCertsToSign.forEach(([opCertTestName, opCert]) =>
