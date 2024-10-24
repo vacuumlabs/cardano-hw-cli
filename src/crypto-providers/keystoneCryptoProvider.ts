@@ -51,7 +51,7 @@ import {
 } from '../opCert/opCert'
 import {SignedMessageData} from '../signMessage/signMessage'
 import {CardanoSignCip8MessageData} from '@keystonehq/keystone-sdk/dist/types/props'
-import {uuid} from 'uuidv4'
+import {v4 as uuidv4} from 'uuid'
 import * as cardanoSerialization from '@emurgo/cardano-serialization-lib-nodejs'
 import {MessageAddressFieldType} from '@keystonehq/bc-ur-registry-cardano'
 const {bech32, blake2b} = require('cardano-crypto.js')
@@ -236,7 +236,7 @@ export const KeystoneCryptoProvider: (
     const stakePubHex = extractStakePubKeyFromHwSigningData(hwStakeSigningFile)
 
     const cardanoCatalystVotingRequest = {
-      requestId: uuid(),
+      requestId: uuidv4(),
       path: bip32PathToString(hwStakeSigningFile.path),
       delegations: keystoneDelegations,
       stakePub: stakePubHex,
@@ -300,7 +300,7 @@ export const KeystoneCryptoProvider: (
     const {hwSigningFileData} = args
     const {pubKey} = splitXPubKeyCborHex(hwSigningFileData.cborXPubKeyHex)
     const cardanoSignCip8DataRequest = {
-      requestId: uuid(),
+      requestId: uuidv4(),
       xfp: walletMFP,
       messageHex: args.messageHex,
       hashPayload: args.hashPayload,
