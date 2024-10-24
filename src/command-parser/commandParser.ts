@@ -48,7 +48,8 @@ export const parse = (
   inputArgs: string[],
 ): {parser: ArgumentParser; parsedArgs: ParsedArguments} => {
   const parser = new ArgumentParser({
-    description: 'Command line tool for ledger/trezor transaction signing',
+    description:
+      'Command line tool for ledger/trezor/keystone transaction signing',
     prog: 'cardano-hw-cli',
   })
   initParser(parser, parserConfig)
