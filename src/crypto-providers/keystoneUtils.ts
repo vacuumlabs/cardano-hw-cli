@@ -142,6 +142,19 @@ export default class Cardano {
           'ADA_CIP_1853',
         )
         schemas.push(kds)
+      } else if (
+        classifyPath(keypath) === PathTypes.PATH_WALLET_ACCOUNT_MULTISIG ||
+        classifyPath(keypath) === PathTypes.PATH_WALLET_SPENDING_KEY_MULTISIG ||
+        classifyPath(keypath) === PathTypes.PATH_WALLET_STAKING_KEY_MULTISIG
+      ) {
+        // ADA_CIP_1854
+        const kds = new KeyDerivationSchema(
+          pathToKeypath(path),
+          curve,
+          algo,
+          'ADA_CIP_1854',
+        )
+        schemas.push(kds)
       } else {
         const kds = new KeyDerivationSchema(
           pathToKeypath(path),

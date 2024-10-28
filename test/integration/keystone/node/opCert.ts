@@ -1,10 +1,8 @@
 /* eslint-disable max-len */
 import assert from 'assert'
-import {LedgerCryptoProvider} from '../../../../src/crypto-providers/ledgerCryptoProvider'
 import {CryptoProvider} from '../../../../src/crypto-providers/cryptoProvider'
 
 import {signingFiles} from './signingFiles'
-import {getTransport} from './speculos'
 import {KeystoneCryptoProvider} from '../../../../src/crypto-providers/keystoneCryptoProvider'
 import {TransportNodeUSB} from '@keystonehq/hw-transport-nodeusb'
 
@@ -39,7 +37,7 @@ async function testOpCertSigning(cryptoProvider: CryptoProvider, opCert: any) {
   assert.deepStrictEqual(signedOpCertCborHex, opCert.signedOpCertCborHex)
 }
 
-describe('Ledger operational certificate', () => {
+describe('Keystone operational certificate', () => {
   let cryptoProvider: CryptoProvider
   // eslint-disable-next-line prefer-arrow-callback
   before(async function () {
