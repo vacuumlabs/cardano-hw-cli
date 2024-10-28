@@ -30,7 +30,7 @@ import {
   NativeScriptDisplayFormat,
   TxSigningParameters,
 } from './cryptoProvider'
-import Cardano from './keystoneUtils'
+import Cardano, {bip32PathToString} from './keystoneUtils'
 import {
   classifyPath,
   encodeAddress,
@@ -92,18 +92,6 @@ export const KeystoneCryptoProvider: (
     console.log('stakingScriptHash:', stakingScriptHash)
     console.log('address:', address)
     throw Error(Errors.Keystone3ProShowAddress)
-  }
-
-  function bip32PathToString(path: BIP32Path): string {
-    return `m/${path
-      .map((element, index) => {
-        // add ' for first three elements
-        if (index < 3) {
-          return `${element - 2147483648}'`
-        }
-        return element.toString()
-      })
-      .join('/')}`
   }
 
   const getXPubKeys = async (paths: BIP32Path[]): Promise<XPubKeyHex[]> => {

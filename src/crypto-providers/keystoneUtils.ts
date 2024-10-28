@@ -20,7 +20,10 @@ import KeystoneSDK, {
   CardanoSignCip8MessageData,
   CardanoSignDataRequestProps,
 } from '@keystonehq/keystone-sdk'
-const pathToKeypath = (path: string): CryptoKeypath => {
+import {BIP32Path} from 'basicTypes'
+import {classifyPath, PathTypes} from './util'
+
+export const pathToKeypath = (path: string): CryptoKeypath => {
   const paths = path.replace(/[m|M]\//, '').split('/')
   const pathComponents = paths.map((path) => {
     const index = parseInt(path.replace("'", ''), 10)
@@ -48,6 +51,36 @@ const parseResponoseUR = (urPlayload: string): UR => {
 export type Witness = {
   pubKey: string
   witnessSignatureHex: string
+}
+
+export const bip32PathToString = (path: BIP32Path): string => {
+  return `m/${path
+    .map((element) => {
+      // add ' for first three elements
+      if (element >= 2147483648) {
+        return `${element - 2147483648}'`
+      }
+      return element.toString()
+    })
+    .join('/')}`
+}
+
+const pathStringToBip32Path = (pathString: string): BIP32Path => {
+  // remove  m/ and split by /
+  const pathElements = pathString.replace('m/', '').split('/')
+  // if pathElement is content ' then trim ' and add HARDENED_THRESHOLD
+  const HARDENED_THRESHOLD = 2147483648
+  const bip32Path: number[] = []
+  pathElements.forEach((element) => {
+    if (element.includes("'")) {
+      bip32Path.push(
+        parseInt(element.replace("'", ''), 10) + HARDENED_THRESHOLD,
+      )
+    } else {
+      bip32Path.push(parseInt(element, 10))
+    }
+  })
+  return bip32Path as BIP32Path
 }
 
 export default class Cardano {
@@ -98,13 +131,26 @@ export default class Cardano {
     const algo = DerivationAlgorithm.bip32ed25519
     const schemas = []
     for (const path of paths) {
-      const kds = new KeyDerivationSchema(
-        pathToKeypath(path),
-        curve,
-        algo,
-        'ADA',
-      )
-      schemas.push(kds)
+      // classify path
+      const keypath = pathStringToBip32Path(path)
+      if (classifyPath(keypath) === PathTypes.PATH_POOL_COLD_KEY) {
+        //  { path: "m/1853'/1815'/0'/x'", curve: Curve.ed25519, algo: DerivationAlgorithm.bip32ed25519, chainType: 'ADA_CIP_1853', },
+        const kds = new KeyDerivationSchema(
+          pathToKeypath(path),
+          curve,
+          algo,
+          'ADA_CIP_1853',
+        )
+        schemas.push(kds)
+      } else {
+        const kds = new KeyDerivationSchema(
+          pathToKeypath(path),
+          curve,
+          algo,
+          'ADA',
+        )
+        schemas.push(kds)
+      }
     }
     const keyDerivation = new KeyDerivation(schemas)
     const hardwareCall = new QRHardwareCall(
