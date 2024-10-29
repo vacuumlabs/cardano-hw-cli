@@ -13,6 +13,8 @@ import {
 import {UR, UREncoder, URDecoder} from '@ngraveio/bc-ur'
 import {Actions, TransportHID} from '@keystonehq/hw-transport-usb'
 import {throwTransportError, Status} from '@keystonehq/hw-transport-error'
+import CardanoSerializationLib from '@emurgo/cardano-serialization-lib-nodejs'
+import bech32 from 'bech32'
 import KeystoneSDK, {
   CardanoCatalystRequestProps,
   CardanoSignCip8MessageData,
@@ -27,6 +29,12 @@ const pathToKeypath = (path: string): CryptoKeypath => {
   })
   return new CryptoKeypath(pathComponents)
 }
+
+const decodeBech32PublicKey = (bech32Pubkey: string) => {
+  const decoded = bech32.decode(bech32Pubkey)
+  return Buffer.from(bech32.fromWords(decoded.words))
+}
+
 const parseResponoseUR = (urPlayload: string): UR => {
   const decoder = new URDecoder()
   decoder.receivePart(urPlayload)
@@ -35,6 +43,11 @@ const parseResponoseUR = (urPlayload: string): UR => {
   }
   const resultUR = decoder.resultUR()
   return resultUR
+}
+
+export type Witness = {
+  pubKey: string
+  witnessSignatureHex: string
 }
 
 export default class Cardano {
@@ -146,7 +159,7 @@ export default class Cardano {
     signData: Buffer
     utxos: any
     extraSigners: any
-  }): Promise<{signature: Buffer}> {
+  }): Promise<Witness[]> {
     const requestId = '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d'
     const origin = 'cardano-cli-wallet'
     this.precheck()
@@ -164,11 +177,16 @@ export default class Cardano {
     // parse signature
     const cardanoSignResult = keystoneSDK.cardano.parseSignature(resultUR)
     const witnessSet = cardanoSignResult.witnessSet
-    // split 32 bytes
-    const signature = witnessSet.slice(-128)
-    return {
-      signature: Buffer.from(signature, 'hex'),
-    }
+    const witnessSetObj =
+      CardanoSerializationLib.TransactionWitnessSet.from_hex(
+        witnessSet,
+      ).to_js_value()
+    const vkeywitnesses = witnessSetObj.vkeys
+    const result = vkeywitnesses?.map((witness) => ({
+      pubKey: decodeBech32PublicKey(witness.vkey).toString('hex'),
+      witnessSignatureHex: witness.signature,
+    }))
+    return result || []
   }
 
   async signCardanoCatalystRequest(

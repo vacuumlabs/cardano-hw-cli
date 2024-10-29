@@ -17,6 +17,7 @@ import {
   NativeScriptHashKeyHex,
   NativeScriptType,
   Network,
+  XPubKeyCborHex,
   XPubKeyHex,
 } from '../basicTypes'
 import {
@@ -37,6 +38,7 @@ import {
   extractStakePubKeyFromHwSigningData,
   formatCIP36RegistrationMetaData,
   PathTypes,
+  hwSigningFileToPubKeyHash,
   splitXPubKeyCborHex,
 } from './util'
 import {
@@ -130,45 +132,6 @@ export const KeystoneCryptoProvider: (
     }
   }
 
-  const createWitnesses = (
-    keystoneSignatureHex: string,
-    signingFiles: HwSigningData[],
-  ): TxWitnesses => {
-    const witnessesWithKeys = signingFiles.map((signingFile) => {
-      const {pubKey, chainCode} = splitXPubKeyCborHex(
-        signingFile.cborXPubKeyHex,
-      )
-      return {
-        path: signingFile.path,
-        signature: Buffer.from(keystoneSignatureHex, 'hex'),
-        pubKey,
-        chainCode,
-      }
-    })
-    const [byronWitnesses, shelleyWitnesses] = partition(
-      witnessesWithKeys,
-      (witness) =>
-        classifyPath(witness.path) === PathTypes.PATH_WALLET_SPENDING_KEY_BYRON,
-    )
-
-    return {
-      byronWitnesses: byronWitnesses.map((witness) => ({
-        key: TxWitnessKeys.BYRON,
-        data: TxByronWitnessData(
-          witness.pubKey,
-          witness.signature,
-          witness.chainCode,
-          {},
-        ),
-        path: witness.path,
-      })),
-      shelleyWitnesses: shelleyWitnesses.map((witness) => ({
-        key: TxWitnessKeys.SHELLEY,
-        data: TxShelleyWitnessData(witness.pubKey, witness.signature),
-        path: witness.path,
-      })),
-    }
-  }
   const witnessTx = async (
     params: TxSigningParameters,
     _changeOutputFiles: HwSigningData[],
@@ -195,17 +158,57 @@ export const KeystoneCryptoProvider: (
       })
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       keystone = new Cardano(transport, walletMFP)
-      // eslint-disable-next-line no-undef
+      const extraSigners = hwSigningFileData.map((signingFile) => ({
+        keyHash: hwSigningFileToPubKeyHash(signingFile),
+        xfp: walletMFP,
+        keyPath: bip32PathToString(signingFile.path),
+      }))
       const witnesses = await keystone.signCardanoTransaction({
         signData: InteropLib.encodeTx(tx),
         utxos,
-        extraSigners: [],
+        extraSigners,
       })
-
-      return createWitnesses(
-        witnesses.signature.toString('hex'),
-        hwSigningFileData,
+      const witnessesWithKeys = witnesses.map((witness) => {
+        // find signingFile by pubKey
+        const result = hwSigningFileData.find(
+          (signingFile) =>
+            splitXPubKeyCborHex(signingFile.cborXPubKeyHex).pubKey.toString(
+              'hex',
+            ) === witness.pubKey,
+        )
+        const {pubKey, chainCode} = splitXPubKeyCborHex(
+          result?.cborXPubKeyHex as XPubKeyCborHex,
+        )
+        return {
+          path: result?.path as BIP32Path,
+          signature: Buffer.from(witness.witnessSignatureHex, 'hex'),
+          pubKey,
+          chainCode,
+        }
+      })
+      const [byronWitnesses, shelleyWitnesses] = partition(
+        witnessesWithKeys,
+        (witness) =>
+          classifyPath(witness.path) ===
+          PathTypes.PATH_WALLET_SPENDING_KEY_BYRON,
       )
+      return {
+        byronWitnesses: byronWitnesses.map((witness) => ({
+          key: TxWitnessKeys.BYRON,
+          data: TxByronWitnessData(
+            witness.pubKey,
+            witness.signature,
+            witness.chainCode,
+            {},
+          ),
+          path: witness.path,
+        })),
+        shelleyWitnesses: shelleyWitnesses.map((witness) => ({
+          key: TxWitnessKeys.SHELLEY,
+          data: TxShelleyWitnessData(witness.pubKey, witness.signature),
+          path: witness.path,
+        })),
+      }
     } catch (err) {
       throw Error(failedMsg(err))
     }

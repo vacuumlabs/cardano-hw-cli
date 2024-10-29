@@ -751,4 +751,5 @@ export {
   determineSigningMode,
   getTxBodyHash,
   verifyIntendedPubKeySignatureMatch,
+  hwSigningFileToPubKeyHash,
 }
