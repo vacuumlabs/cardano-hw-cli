@@ -40,6 +40,7 @@ import {
   PathTypes,
   hwSigningFileToPubKeyHash,
   splitXPubKeyCborHex,
+  pathEquals,
 } from './util'
 import {
   TxByronWitnessData,
@@ -141,6 +142,27 @@ export const KeystoneCryptoProvider: (
       const {tx, hwSigningFileData} = params
       const hdPaths: string[] = []
       hwSigningFileData.forEach((data) => {
+        // Keystone Hardware Wallet Limitations:
+        // Currently unsupported address types:
+        // - Byron addresses (paths starting with 44'/1815'/*)
+        // - Multisig addresses (paths starting with 1854'/1815'/*)
+        // - Minting addresses (paths starting with 1855'/1815'/*)
+        if (
+          classifyPath(data.path) === PathTypes.PATH_WALLET_SPENDING_KEY_BYRON
+        ) {
+          throw Error(Errors.Keystone3ProUnsupportedThisPath)
+        }
+
+        if (
+          classifyPath(data.path) === PathTypes.PATH_WALLET_ACCOUNT_MULTISIG ||
+          classifyPath(data.path) ===
+            PathTypes.PATH_WALLET_STAKING_KEY_MULTISIG ||
+          classifyPath(data.path) ===
+            PathTypes.PATH_WALLET_SPENDING_KEY_MULTISIG
+        ) {
+          throw Error(Errors.Keystone3ProUnsupportedMultisig)
+        }
+
         hdPaths.push(bip32PathToString(data.path))
       })
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -168,19 +190,31 @@ export const KeystoneCryptoProvider: (
         utxos,
         extraSigners,
       })
+      const getSigningFileDataByPath = (path: BIP32Path): HwSigningData => {
+        const hwSigningData = hwSigningFileData.find((signingFile) =>
+          pathEquals(signingFile.path, path),
+        )
+        if (hwSigningData) return hwSigningData
+        throw Error(Errors.MissingHwSigningDataAtPathError)
+      }
       const witnessesWithKeys = witnesses.map((witness) => {
-        // find signingFile by pubKey
-        const result = hwSigningFileData.find(
+        // get witness path from signingFileData
+        const signingFile = hwSigningFileData.find(
           (signingFile) =>
+            witness.pubKey ===
             splitXPubKeyCborHex(signingFile.cborXPubKeyHex).pubKey.toString(
               'hex',
-            ) === witness.pubKey,
+            ),
         )
+        if (!signingFile) {
+          throw Error(Errors.MissingHwSigningDataAtPathError)
+        }
         const {pubKey, chainCode} = splitXPubKeyCborHex(
-          result?.cborXPubKeyHex as XPubKeyCborHex,
+          getSigningFileDataByPath(signingFile.path as BIP32Path)
+            .cborXPubKeyHex,
         )
         return {
-          path: result?.path as BIP32Path,
+          path: signingFile.path as BIP32Path,
           signature: Buffer.from(witness.witnessSignatureHex, 'hex'),
           pubKey,
           chainCode,
@@ -210,7 +244,7 @@ export const KeystoneCryptoProvider: (
         })),
       }
     } catch (err) {
-      throw Error(failedMsg(err))
+      throw err
     }
   }
 

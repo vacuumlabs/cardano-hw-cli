@@ -47,6 +47,8 @@ export const enum Errors {
   UnsupportedCryptoProviderCall = 'The call is not supported by the chosen crypto provider',
   Keystone3ProShowAddress = 'Please open Keystone3Pro, go to the receive page, switch to the path you want, and check if your Cardano address corresponds to the correct payment address and staking address.',
   Keystone3ProUnsupportedThisCommand = 'In the current version, Keystone 3 Pro temporarily does not support this command. It will be supported in the next version.',
+  Keystone3ProUnsupportedThisPath = 'In the current version, Keystone 3 Pro does not support this path. It will be supported in the next version.',
+  Keystone3ProUnsupportedMultisig = 'In the current version, Keystone 3 Pro does not support multisig paths. It will be supported in the next version.',
   MissingAuxiliaryDataSupplement = 'Missing auxiliary data supplement in response.',
   MissingCIP36RegistrationSignature = 'Missing CIP36 voting signature',
   InternalInvalidTypeError = 'Internal invalid type error',
