@@ -41,15 +41,18 @@ import {
   hwSigningFileToPubKeyHash,
   splitXPubKeyCborHex,
   pathEquals,
+  findSigningPathForKey,
+  findSigningXpubForKey,
 } from './util'
 import {
   TxByronWitnessData,
   TxShelleyWitnessData,
 } from '../transaction/transaction'
-import {encodeCbor, partition} from '../util'
+import {decodeCbor, encodeCbor, partition} from '../util'
 import {
   KesVKey,
   OpCertIssueCounter,
+  OpCertSigned,
   SignedOpCertCborHex,
 } from '../opCert/opCert'
 import {SignedMessageData} from '../signMessage/signMessage'
@@ -57,6 +60,8 @@ import {CardanoSignCip8MessageData} from '@keystonehq/keystone-sdk/dist/types/pr
 import {v4 as uuidv4} from 'uuid'
 import * as cardanoSerialization from '@emurgo/cardano-serialization-lib-nodejs'
 import {MessageAddressFieldType} from '@keystonehq/bc-ur-registry-cardano'
+import {uint64_to_buf} from '@cardano-foundation/ledgerjs-hw-app-cardano/dist/utils/serialize'
+import {Uint64_str} from '@cardano-foundation/ledgerjs-hw-app-cardano/dist/types/internal'
 const {bech32, blake2b} = require('cardano-crypto.js')
 const failedMsg = (e: unknown): string => `The requested operation failed. \
 Check that your Keystone device is connected.
@@ -308,13 +313,47 @@ export const KeystoneCryptoProvider: (
   }
 
   const signOperationalCertificate = async (
-    _kesVKey: KesVKey,
-    _kesPeriod: bigint,
-    _issueCounter: OpCertIssueCounter,
-    _signingFile: HwSigningData[],
-    // eslint-disable-next-line require-await
+    kesVKey: KesVKey,
+    kesPeriod: bigint,
+    issueCounter: OpCertIssueCounter,
+    signingFiles: HwSigningData[],
   ): Promise<SignedOpCertCborHex> => {
-    throw Error(Errors.UnsupportedCryptoProviderCall)
+    const poolColdKeyPath = findSigningPathForKey(
+      issueCounter.poolColdKey,
+      signingFiles,
+    )
+    const xpubCbor = findSigningXpubForKey(
+      issueCounter.poolColdKey,
+      signingFiles,
+    )
+    if (!xpubCbor) {
+      throw Error(Errors.MissingHwSigningDataAtPoolColdKeyError)
+    }
+    try {
+      // fin xpub by cold key
+      // op_cert_hash = Buffer.concat([kesPublicKeyHex,issueCounter,kesPeriod)
+      // op_cert_hash length must be 48
+      const opCertMessage = Buffer.concat([
+        Buffer.from(kesVKey.toString('hex'), 'hex'),
+        uint64_to_buf(BigInt(issueCounter.counter).toString() as Uint64_str),
+        uint64_to_buf(BigInt(kesPeriod).toString() as Uint64_str),
+      ]).toString('hex')
+      // sgin cardano transaction
+      const {walletMFP} = await keystone.getDeviceInfo()
+      keystone = new Cardano(transport, walletMFP)
+
+      const response = await keystone.signCardanoDataTransaction({
+        requestId: uuidv4(),
+        xfp: walletMFP,
+        xpub: decodeCbor(xpubCbor),
+        payload: opCertMessage,
+        path: bip32PathToString(poolColdKeyPath as BIP32Path),
+        origin: WALLET_NAME,
+      })
+      return OpCertSigned(kesVKey, kesPeriod, issueCounter, response.signature)
+    } catch (err) {
+      throw Error(failedMsg(err))
+    }
   }
 
   // https://github.com/input-output-hk/cardano-js-sdk/blob/master/packages/key-management/src/cip8/cip30signData.ts#L52

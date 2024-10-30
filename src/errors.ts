@@ -22,6 +22,7 @@ export const enum Errors {
   MetadataSerializationMismatchError = 'Metadata serialization mismatch',
   MissingHwSigningDataAtPathError = 'Can not find hw signing data by path',
   MissingHwSigningDataAtXPubKeyError = 'Can not find hw signing data by extended public key',
+  MissingHwSigningDataAtPoolColdKeyError = 'Can not find hw signing data by pool cold key',
   UndefinedCommandError = 'command undefined',
   TooManyPaymentFilesWithPoolRegError = 'Unexpected payment hardware signing file with pool registration certificate found',
   MissingPaymentSigningFileError = 'Missing payment hardware signing file',

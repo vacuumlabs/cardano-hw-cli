@@ -260,6 +260,15 @@ const findSigningPathForKey = (
   )
   return signingFile?.path
 }
+const findSigningXpubForKey = (
+  keyHash: Buffer,
+  signingFiles: HwSigningData[],
+): XPubKeyCborHex | undefined => {
+  const signingFile = signingFiles.find((file) =>
+    keyHash.equals(hwSigningFileToPubKey(file)),
+  )
+  return signingFile?.cborXPubKeyHex
+}
 
 const findSigningPathForKeyHash = (
   keyHash: Buffer,
@@ -734,6 +743,7 @@ export {
   filterSigningFiles,
   findSigningPathForKeyHash,
   findSigningPathForKey,
+  findSigningXpubForKey,
   extractStakePubKeyFromHwSigningData,
   encodeAddress,
   getAddressParameters,
