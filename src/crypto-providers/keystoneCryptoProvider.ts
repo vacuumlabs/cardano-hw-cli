@@ -17,7 +17,6 @@ import {
   NativeScriptHashKeyHex,
   NativeScriptType,
   Network,
-  XPubKeyCborHex,
   XPubKeyHex,
 } from '../basicTypes'
 import {
