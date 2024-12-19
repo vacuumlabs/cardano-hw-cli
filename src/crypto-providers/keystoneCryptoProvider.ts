@@ -58,7 +58,7 @@ import {SignedMessageData} from '../signMessage/signMessage'
 import {CardanoSignCip8MessageData} from '@keystonehq/keystone-sdk/dist/types/props'
 import {v4 as uuidv4} from 'uuid'
 import * as cardanoSerialization from '@emurgo/cardano-serialization-lib-nodejs'
-import {MessageAddressFieldType} from '@keystonehq/bc-ur-registry-cardano'
+import {CardanoCertKeyData, CardanoUtxoData, MessageAddressFieldType} from '@keystonehq/bc-ur-registry-cardano'
 import {uint64_to_buf} from '@cardano-foundation/ledgerjs-hw-app-cardano/dist/utils/serialize'
 import {Uint64_str} from '@cardano-foundation/ledgerjs-hw-app-cardano/dist/types/internal'
 const {bech32, blake2b} = require('cardano-crypto.js')
@@ -158,25 +158,17 @@ export const KeystoneCryptoProvider: (
         hdPaths.push(bip32PathToString(data.path))
       })
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const utxos: any[] = []
-      const outputs = tx.body.outputs
-      tx.body.inputs.items.forEach((input, index) => {
-        utxos.push({
-          transactionHash: input.transactionId.toString('hex'),
-          index: input.index,
-          amount: outputs[index].amount.coin.toString(),
-          xfp: walletMFP,
-          hdPath: hdPaths[index],
-          address: encodeAddress(outputs[index].address),
-        })
-      })
+      const utxos: CardanoUtxoData[] = []
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       keystone = new Cardano(transport, walletMFP)
-      const extraSigners = hwSigningFileData.map((signingFile) => ({
-        keyHash: hwSigningFileToPubKeyHash(signingFile),
-        xfp: walletMFP,
-        keyPath: bip32PathToString(signingFile.path),
-      }))
+      const extraSigners: CardanoCertKeyData[] = hwSigningFileData.map(
+        (signingFile) => ({
+          keyHash: hwSigningFileToPubKeyHash(signingFile).toString('hex'),
+          xfp: walletMFP,
+          keyPath: bip32PathToString(signingFile.path),
+        }),
+      )
+      // get signdata hash 
       const witnesses = await keystone.signCardanoTransaction({
         signData: InteropLib.encodeTx(tx),
         utxos,

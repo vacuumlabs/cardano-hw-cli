@@ -22,6 +22,7 @@ import KeystoneSDK, {
 } from '@keystonehq/keystone-sdk'
 import {BIP32Path} from 'basicTypes'
 import {classifyPath, PathTypes} from './util'
+import { CardanoCertKeyData, CardanoUtxoData } from '@keystonehq/bc-ur-registry-cardano'
 
 export const pathToKeypath = (path: string): CryptoKeypath => {
   const paths = path.replace(/[m|M]\//, '').split('/')
@@ -216,8 +217,8 @@ export default class Cardano {
   }: // eslint-disable-next-line @typescript-eslint/no-explicit-any
   {
     signData: Buffer
-    utxos: any
-    extraSigners: any
+    utxos: CardanoUtxoData[]
+    extraSigners: CardanoCertKeyData[]
   }): Promise<Witness[]> {
     const requestId = '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d'
     const origin = 'cardano-cli-wallet'
