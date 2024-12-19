@@ -5,9 +5,9 @@ This example demonstrates how to sign a message. See [CIP-8](https://github.com/
 ## Requirements
 
 Message signing support:
-<!-- TODO update versions -->
-* on Ledger, Cardano app version TBD and above
-* on Trezor, firmware TBD and above
+* on Ledger, Cardano app version 7.1.0 and above
+* on Trezor, message signing is not supported yet
+<!-- TODO update this when available on Trezor -->
 
 ## Sign a message
 
