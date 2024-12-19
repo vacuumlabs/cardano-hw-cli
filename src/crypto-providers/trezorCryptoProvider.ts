@@ -359,31 +359,30 @@ export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     }
   }
 
-  // TODO uncomment when official Connect build is released
-  // const prepareDRep = (dRep: TxTypes.DRep): TrezorTypes.CardanoDRep => {
-  //   switch (dRep.type) {
-  //     case TxTypes.DRepType.KEY_HASH:
-  //       return {
-  //         type: TrezorEnums.CardanoDRepType.KEY_HASH,
-  //         keyHash: dRep.keyHash.toString('hex'),
-  //       }
-  //     case TxTypes.DRepType.SCRIPT_HASH:
-  //       return {
-  //         type: TrezorEnums.CardanoDRepType.SCRIPT_HASH,
-  //         scriptHash: dRep.scriptHash.toString('hex'),
-  //       }
-  //     case TxTypes.DRepType.ABSTAIN:
-  //       return {
-  //         type: TrezorEnums.CardanoDRepType.ABSTAIN,
-  //       }
-  //     case TxTypes.DRepType.NO_CONFIDENCE:
-  //       return {
-  //         type: TrezorEnums.CardanoDRepType.NO_CONFIDENCE,
-  //       }
-  //     default:
-  //       throw Error(Errors.Unreachable)
-  //   }
-  // }
+  const prepareDRep = (dRep: TxTypes.DRep): TrezorTypes.CardanoDRep => {
+    switch (dRep.type) {
+      case TxTypes.DRepType.KEY_HASH:
+        return {
+          type: TrezorEnums.CardanoDRepType.KEY_HASH,
+          keyHash: dRep.keyHash.toString('hex'),
+        }
+      case TxTypes.DRepType.SCRIPT_HASH:
+        return {
+          type: TrezorEnums.CardanoDRepType.SCRIPT_HASH,
+          scriptHash: dRep.scriptHash.toString('hex'),
+        }
+      case TxTypes.DRepType.ABSTAIN:
+        return {
+          type: TrezorEnums.CardanoDRepType.ABSTAIN,
+        }
+      case TxTypes.DRepType.NO_CONFIDENCE:
+        return {
+          type: TrezorEnums.CardanoDRepType.NO_CONFIDENCE,
+        }
+      default:
+        throw Error(Errors.Unreachable)
+    }
+  }
 
   const prepareStakeKeyRegistrationCert = (
     cert: TxTypes.StakeRegistrationCertificate,
@@ -394,16 +393,15 @@ export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     ...prepareCredential(cert.stakeCredential, stakeSigningFiles, signingMode),
   })
 
-  // TODO uncomment when official Connect build is released
-  // const prepareStakeKeyRegistrationConwayCert = (
-  //   cert: TxTypes.StakeRegistrationConwayCertificate,
-  //   stakeSigningFiles: HwSigningData[],
-  //   signingMode: SigningMode,
-  // ): TrezorTypes.CardanoCertificate => ({
-  //   type: TrezorEnums.CardanoCertificateType.STAKE_REGISTRATION_CONWAY,
-  //   ...prepareCredential(cert.stakeCredential, stakeSigningFiles, signingMode),
-  //   deposit: `${cert.deposit}`,
-  // })
+  const prepareStakeKeyRegistrationConwayCert = (
+    cert: TxTypes.StakeRegistrationConwayCertificate,
+    stakeSigningFiles: HwSigningData[],
+    signingMode: SigningMode,
+  ): TrezorTypes.CardanoCertificate => ({
+    type: TrezorEnums.CardanoCertificateType.STAKE_REGISTRATION_CONWAY,
+    ...prepareCredential(cert.stakeCredential, stakeSigningFiles, signingMode),
+    deposit: `${cert.deposit}`,
+  })
 
   const prepareStakeKeyDeregistrationCert = (
     cert: TxTypes.StakeDeregistrationCertificate,
@@ -414,16 +412,15 @@ export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     ...prepareCredential(cert.stakeCredential, stakeSigningFiles, signingMode),
   })
 
-  // TODO uncomment when official Connect build is released
-  // const prepareStakeKeyDeregistrationConwayCert = (
-  //   cert: TxTypes.StakeDeregistrationConwayCertificate,
-  //   stakeSigningFiles: HwSigningData[],
-  //   signingMode: SigningMode,
-  // ): TrezorTypes.CardanoCertificate => ({
-  //   type: TrezorEnums.CardanoCertificateType.STAKE_DEREGISTRATION_CONWAY,
-  //   ...prepareCredential(cert.stakeCredential, stakeSigningFiles, signingMode),
-  //   deposit: `${cert.deposit}`,
-  // })
+  const prepareStakeKeyDeregistrationConwayCert = (
+    cert: TxTypes.StakeDeregistrationConwayCertificate,
+    stakeSigningFiles: HwSigningData[],
+    signingMode: SigningMode,
+  ): TrezorTypes.CardanoCertificate => ({
+    type: TrezorEnums.CardanoCertificateType.STAKE_DEREGISTRATION_CONWAY,
+    ...prepareCredential(cert.stakeCredential, stakeSigningFiles, signingMode),
+    deposit: `${cert.deposit}`,
+  })
 
   const prepareDelegationCert = (
     cert: TxTypes.StakeDelegationCertificate,
@@ -435,16 +432,15 @@ export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     pool: cert.poolKeyHash.toString('hex'),
   })
 
-  // TODO uncomment when official Connect build is released
-  // const prepareVoteDelegationCert = (
-  //   cert: TxTypes.VoteDelegationCertificate,
-  //   signingFiles: HwSigningData[],
-  //   signingMode: SigningMode,
-  // ): TrezorTypes.CardanoCertificate => ({
-  //   type: TrezorEnums.CardanoCertificateType.VOTE_DELEGATION,
-  //   ...prepareCredential(cert.stakeCredential, signingFiles, signingMode),
-  //   dRep: prepareDRep(cert.dRep),
-  // })
+  const prepareVoteDelegationCert = (
+    cert: TxTypes.VoteDelegationCertificate,
+    signingFiles: HwSigningData[],
+    signingMode: SigningMode,
+  ): TrezorTypes.CardanoCertificate => ({
+    type: TrezorEnums.CardanoCertificateType.VOTE_DELEGATION,
+    ...prepareCredential(cert.stakeCredential, signingFiles, signingMode),
+    dRep: prepareDRep(cert.dRep),
+  })
 
   const preparePoolOwners = (
     owners: Buffer[],
@@ -530,39 +526,36 @@ export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
           stakeSigningFiles,
           signingMode,
         )
-      // TODO uncomment when official Connect build is released
-      // case TxTypes.CertificateType.STAKE_REGISTRATION_CONWAY:
-      //   return prepareStakeKeyRegistrationConwayCert(
-      //     certificate,
-      //     stakeSigningFiles,
-      //     signingMode,
-      //   )
+      case TxTypes.CertificateType.STAKE_REGISTRATION_CONWAY:
+        return prepareStakeKeyRegistrationConwayCert(
+          certificate,
+          stakeSigningFiles,
+          signingMode,
+        )
       case TxTypes.CertificateType.STAKE_DEREGISTRATION:
         return prepareStakeKeyDeregistrationCert(
           certificate,
           stakeSigningFiles,
           signingMode,
         )
-      // TODO uncomment when official Connect build is released
-      // case TxTypes.CertificateType.STAKE_DEREGISTRATION_CONWAY:
-      //   return prepareStakeKeyDeregistrationConwayCert(
-      //     certificate,
-      //     stakeSigningFiles,
-      //     signingMode,
-      //   )
+      case TxTypes.CertificateType.STAKE_DEREGISTRATION_CONWAY:
+        return prepareStakeKeyDeregistrationConwayCert(
+          certificate,
+          stakeSigningFiles,
+          signingMode,
+        )
       case TxTypes.CertificateType.STAKE_DELEGATION:
         return prepareDelegationCert(
           certificate,
           stakeSigningFiles,
           signingMode,
         )
-      // TODO uncomment when official Connect build is released
-      // case TxTypes.CertificateType.VOTE_DELEGATION:
-      //   return prepareVoteDelegationCert(
-      //     certificate,
-      //     stakeSigningFiles,
-      //     signingMode,
-      //   )
+      case TxTypes.CertificateType.VOTE_DELEGATION:
+        return prepareVoteDelegationCert(
+          certificate,
+          stakeSigningFiles,
+          signingMode,
+        )
       case TxTypes.CertificateType.POOL_REGISTRATION:
         return prepareStakePoolRegistrationCert(certificate, stakeSigningFiles)
 
@@ -801,13 +794,7 @@ export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
 
     // the tags are either used everywhere or nowhere,
     // so we can just look at the inputs
-    // TODO uncomment when official Connect build is released
-    // const tagCborSets = tx.body.inputs.hasTag
-    if (tx.body.inputs.hasTag) {
-      throw Error(
-        'Tagged CBOR sets are not supported for Trezor in this release.',
-      )
-    }
+    const tagCborSets = tx.body.inputs.hasTag
 
     const request: TrezorTypes.CardanoSignTransaction = {
       signingMode: signingModeToTrezorType(signingMode),
@@ -831,8 +818,7 @@ export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
       totalCollateral,
       referenceInputs,
       derivationType: derivationTypeToTrezorType(derivationType),
-      // TODO uncomment when official Connect build is released
-      // tagCborSets,
+      tagCborSets,
     }
 
     const response = await TrezorConnect.cardanoSignTransaction(request)
@@ -1003,7 +989,7 @@ export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     throw Error(Errors.UnsupportedCryptoProviderCall)
   }
 
-  const prepareAddressFieldData = (
+  const prepareAddressFieldData = (  // eslint-disable-line @typescript-eslint/no-unused-vars
     args: ParsedSignMessageArguments,
   ): [TrezorTypes.CardanoAddressParameters, Network] => {
     const addressBytes = bech32.decode(args.address).data as Buffer
@@ -1086,49 +1072,51 @@ export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
   }
 
   const signMessage = async (
-    args: ParsedSignMessageArguments,
-  ): Promise<SignedMessageData> => {
-    let request: TrezorTypes.CardanoSignMessage = {
-      signingPath: args.hwSigningFileData.path,
-      hashPayload: args.hashPayload,
-      payload: args.messageHex,
-      preferHexDisplay: args.preferHexDisplay,
-      derivationType: derivationTypeToTrezorType(args.derivationType),
-    }
-    if (args.address !== undefined) {
-      const [addressFieldData, network] = prepareAddressFieldData(args)
-      request = {
-        ...request,
-        addressParameters: addressFieldData,
-        networkId: network.networkId,
-        protocolMagic: network.protocolMagic,
-      }
-    }
+    args: ParsedSignMessageArguments, // eslint-disable-line @typescript-eslint/no-unused-vars
+  ): Promise<SignedMessageData> => {  // eslint-disable-line require-await
+    // TODO uncomment when message signing is merged in Trezor Connect
+    throw Error(Errors.UnsupportedCryptoProviderCall)
+    // let request: TrezorTypes.CardanoSignMessage = {
+    //   signingPath: args.hwSigningFileData.path,
+    //   hashPayload: args.hashPayload,
+    //   payload: args.messageHex,
+    //   preferHexDisplay: args.preferHexDisplay,
+    //   derivationType: derivationTypeToTrezorType(args.derivationType),
+    // }
+    // if (args.address !== undefined) {
+    //   const [addressFieldData, network] = prepareAddressFieldData(args)
+    //   request = {
+    //     ...request,
+    //     addressParameters: addressFieldData,
+    //     networkId: network.networkId,
+    //     protocolMagic: network.protocolMagic,
+    //   }
+    // }
 
-    const response = await TrezorConnect.cardanoSignMessage(request)
-    if (!response.success) {
-      throw Error(response.payload.error)
-    }
+    // const response = await TrezorConnect.cardanoSignMessage(request)
+    // if (!response.success) {
+    //   throw Error(response.payload.error)
+    // }
 
-    if (args.address !== undefined) {
-      const addressCli = bech32.decode(args.address).data as Buffer
-      const addressFieldHex = response.payload.headers.protected.address
-      if (addressCli.toString('hex') !== addressFieldHex) {
-        throw Error(Errors.MessageAddressMismatchError)
-      }
-    }
-    const pubKey = splitXPubKeyCborHex(
-      args.hwSigningFileData.cborXPubKeyHex,
-    ).pubKey
-    if (pubKey.toString('hex') !== response.payload.pubKey) {
-      throw Error(Errors.SigningPubKeyMismatchError)
-    }
+    // if (args.address !== undefined) {
+    //   const addressCli = bech32.decode(args.address).data as Buffer
+    //   const addressFieldHex = response.payload.headers.protected.address
+    //   if (addressCli.toString('hex') !== addressFieldHex) {
+    //     throw Error(Errors.MessageAddressMismatchError)
+    //   }
+    // }
+    // const pubKey = splitXPubKeyCborHex(
+    //   args.hwSigningFileData.cborXPubKeyHex,
+    // ).pubKey
+    // if (pubKey.toString('hex') !== response.payload.pubKey) {
+    //   throw Error(Errors.SigningPubKeyMismatchError)
+    // }
 
-    return {
-      addressFieldHex: response.payload.headers.protected.address as HexString,
-      signatureHex: response.payload.signature as HexString,
-      signingPublicKeyHex: response.payload.pubKey as HexString,
-    }
+    // return {
+    //   addressFieldHex: response.payload.headers.protected.address as HexString,
+    //   signatureHex: response.payload.signature as HexString,
+    //   signingPublicKeyHex: response.payload.pubKey as HexString,
+    // }
   }
 
   const nativeScriptToTrezorTypes = (

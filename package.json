@@ -40,7 +40,7 @@
     "@emurgo/cardano-serialization-lib-nodejs": "^8.0.0",
     "@ledgerhq/hw-transport": "^6.27.10",
     "@ledgerhq/hw-transport-node-hid-noevents": "^6.24.1",
-    "@trezor/connect": "https://github.com/vacuumlabs/trezor-suite/releases/download/cardano-message-signing-rc2/trezor-connect-message-signing-rc2.tgz",
+    "@trezor/connect": "9.4.5",
     "argparse": "^2.0.1",
     "bignumber": "^1.1.0",
     "cardano-crypto.js": "^6.1.2",
@@ -82,8 +82,6 @@
   },
   "resolutions": {
     "//": "This is a workaround for pkg (otherwise, it prints an error when building)",
-    "node-abi": "^3.24.0",
-    "@trezor/protobuf": "https://github.com/vacuumlabs/trezor-suite/releases/download/cardano-message-signing-rc2/trezor-protobuf-message-signing-rc2.tgz",
-    "@trezor/transport": "https://github.com/vacuumlabs/trezor-suite/releases/download/cardano-message-signing-rc2/trezor-transport-message-signing-rc2.tgz"
+    "node-abi": "^3.24.0"
   }
 }
