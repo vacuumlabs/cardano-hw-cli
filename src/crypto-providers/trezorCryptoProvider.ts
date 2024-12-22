@@ -989,7 +989,8 @@ export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     throw Error(Errors.UnsupportedCryptoProviderCall)
   }
 
-  const prepareAddressFieldData = (  // eslint-disable-line @typescript-eslint/no-unused-vars
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const prepareAddressFieldData = (
     args: ParsedSignMessageArguments,
   ): [TrezorTypes.CardanoAddressParameters, Network] => {
     const addressBytes = bech32.decode(args.address).data as Buffer
@@ -1072,8 +1073,10 @@ export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
   }
 
   const signMessage = async (
-    args: ParsedSignMessageArguments, // eslint-disable-line @typescript-eslint/no-unused-vars
-  ): Promise<SignedMessageData> => {  // eslint-disable-line require-await
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars,
+    args: ParsedSignMessageArguments,
+    // eslint-disable-next-line require-await
+  ): Promise<SignedMessageData> => {
     // TODO uncomment when message signing is merged in Trezor Connect
     throw Error(Errors.UnsupportedCryptoProviderCall)
     // let request: TrezorTypes.CardanoSignMessage = {
