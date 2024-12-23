@@ -125,66 +125,6 @@ const signingFiles = {
     cborXPubKeyHex:
       '584066e283c52a7f05ca79db5483380597c0bb01abfb5bd8af27d5ed2487875d3b82f99653db092154b8299299c8b50c4411d1e18d2e5b0c22b17ce73128bfb92c99',
   },
-  multisigPayment0: {
-    type: HwSigningType.MultiSig,
-    path: [
-      1854 + HARDENED_THRESHOLD,
-      1815 + HARDENED_THRESHOLD,
-      0 + HARDENED_THRESHOLD,
-      0,
-      0,
-    ],
-    cborXPubKeyHex:
-      '58400fa60d5831ee0be1f221ff93ba0a4fdeca5a5866e47569607b04e287fc9b5ec057fccd2e6071fbcab281598c6e2e53515d2e3ca762566237583d76915a401d09',
-  },
-  multisigPayment1: {
-    type: HwSigningType.MultiSig,
-    path: [
-      1854 + HARDENED_THRESHOLD,
-      1815 + HARDENED_THRESHOLD,
-      0 + HARDENED_THRESHOLD,
-      0,
-      1,
-    ],
-    cborXPubKeyHex:
-      '58402573f7cde2d182ebbcd63dc0940fd53064824e716a6d0238fa3780bac2933e2ed4d08a5a5162943a5813669803b6c7a1e5bfcbf384a6e6e1e47e49b396db5357',
-  },
-  multisigPayment2: {
-    type: HwSigningType.MultiSig,
-    path: [
-      1854 + HARDENED_THRESHOLD,
-      1815 + HARDENED_THRESHOLD,
-      0 + HARDENED_THRESHOLD,
-      0,
-      2,
-    ],
-    cborXPubKeyHex:
-      '5840d6718e4553626239ef7470b9287340490fe71d084039f21f5b10c84e29bf3e81482616f6d22b1b065e11a78c06cac9b22c404122f56203dfda7b82b7f94b9360',
-  },
-  multisigStake0: {
-    type: HwSigningType.MultiSig,
-    path: [
-      1854 + HARDENED_THRESHOLD,
-      1815 + HARDENED_THRESHOLD,
-      0 + HARDENED_THRESHOLD,
-      2,
-      0,
-    ],
-    cborXPubKeyHex:
-      '584091e2647a4db84e47c895160b1f534d72c24c5eaf0aefb5f72dbfdea9913d96c695709e03201f165004c65f95b52cdfa026c9c884e8d9241d0d73090ac73cf705',
-  },
-  multisigStake1: {
-    type: HwSigningType.MultiSig,
-    path: [
-      1854 + HARDENED_THRESHOLD,
-      1815 + HARDENED_THRESHOLD,
-      0 + HARDENED_THRESHOLD,
-      2,
-      1,
-    ],
-    cborXPubKeyHex:
-      '5840b58d0c958e7e76f7cac5f3e696285ce955750967972af13ba7427cd91808a560da16c6745d6bf4f61b709e268abb3028fba0dbff2518563af21defbfb7a28e5b',
-  },
   mint0: {
     type: HwSigningType.Mint,
     path: [

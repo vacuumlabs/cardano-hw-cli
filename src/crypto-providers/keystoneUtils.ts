@@ -14,7 +14,7 @@ import {UR, UREncoder, URDecoder} from '@ngraveio/bc-ur'
 import {Actions, TransportHID} from '@keystonehq/hw-transport-usb'
 import {throwTransportError, Status} from '@keystonehq/hw-transport-error'
 import CardanoSerializationLib from '@emurgo/cardano-serialization-lib-nodejs'
-import bech32 from 'bech32'
+import bech32 from 'cardano-crypto.js'
 import KeystoneSDK, {
   CardanoCatalystRequestProps,
   CardanoSignCip8MessageData,
