@@ -22,8 +22,7 @@ const transactions = {
     hwSigningFiles: [signingFiles.payment0],
     network: 'MAINNET',
     witnesses: {
-      byronWitnesses: [
-      ],
+      byronWitnesses: [],
       shelleyWitnesses: [
         {
           key: 0,

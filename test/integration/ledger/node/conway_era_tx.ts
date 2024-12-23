@@ -20,8 +20,7 @@ const transactions = {
     hwSigningFiles: [signingFiles.stake0],
     network: 'MAINNET',
     witnesses: {
-      byronWitnesses: [
-      ],
+      byronWitnesses: [],
       shelleyWitnesses: [
         {
           key: 0,
@@ -72,16 +71,16 @@ async function testTxWitnessing(
 }
 
 describe('Ledger tx witnessing', () => {
-    let cryptoProvider: CryptoProvider
-    // eslint-disable-next-line prefer-arrow-callback
-    before(async function () {
-      this.timeout(10000)
-      cryptoProvider = await LedgerCryptoProvider(await getTransport())
-    })
-    const txs = Object.entries(transactions)
-  
-    txs.forEach(([txType, tx]) =>
-      it(`Should witness tx ${txType}`, async () =>
-        await testTxWitnessing(cryptoProvider, tx)).timeout(100000),
-    )
+  let cryptoProvider: CryptoProvider
+  // eslint-disable-next-line prefer-arrow-callback
+  before(async function () {
+    this.timeout(10000)
+    cryptoProvider = await LedgerCryptoProvider(await getTransport())
   })
+  const txs = Object.entries(transactions)
+
+  txs.forEach(([txType, tx]) =>
+    it(`Should witness tx ${txType}`, async () =>
+      await testTxWitnessing(cryptoProvider, tx)).timeout(100000),
+  )
+})

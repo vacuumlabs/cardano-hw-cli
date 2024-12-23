@@ -22,7 +22,10 @@ import KeystoneSDK, {
 } from '@keystonehq/keystone-sdk'
 import {BIP32Path} from 'basicTypes'
 import {classifyPath, PathTypes} from './util'
-import { CardanoCertKeyData, CardanoUtxoData } from '@keystonehq/bc-ur-registry-cardano'
+import {
+  CardanoCertKeyData,
+  CardanoUtxoData,
+} from '@keystonehq/bc-ur-registry-cardano'
 
 export const pathToKeypath = (path: string): CryptoKeypath => {
   const paths = path.replace(/[m|M]\//, '').split('/')

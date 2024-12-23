@@ -58,7 +58,11 @@ import {SignedMessageData} from '../signMessage/signMessage'
 import {CardanoSignCip8MessageData} from '@keystonehq/keystone-sdk/dist/types/props'
 import {v4 as uuidv4} from 'uuid'
 import * as cardanoSerialization from '@emurgo/cardano-serialization-lib-nodejs'
-import {CardanoCertKeyData, CardanoUtxoData, MessageAddressFieldType} from '@keystonehq/bc-ur-registry-cardano'
+import {
+  CardanoCertKeyData,
+  CardanoUtxoData,
+  MessageAddressFieldType,
+} from '@keystonehq/bc-ur-registry-cardano'
 import {uint64_to_buf} from '@cardano-foundation/ledgerjs-hw-app-cardano/dist/utils/serialize'
 import {Uint64_str} from '@cardano-foundation/ledgerjs-hw-app-cardano/dist/types/internal'
 const {bech32, blake2b} = require('cardano-crypto.js')
@@ -168,7 +172,7 @@ export const KeystoneCryptoProvider: (
           keyPath: bip32PathToString(signingFile.path),
         }),
       )
-      // get signdata hash 
+      // get signdata hash
       const witnesses = await keystone.signCardanoTransaction({
         signData: InteropLib.encodeTx(tx),
         utxos,
