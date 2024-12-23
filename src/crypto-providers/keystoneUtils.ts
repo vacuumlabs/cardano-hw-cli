@@ -26,6 +26,7 @@ import {
   CardanoCertKeyData,
   CardanoUtxoData,
 } from '@keystonehq/bc-ur-registry-cardano'
+import { uuid } from '@keystonehq/keystone-sdk/dist/utils'
 
 export const pathToKeypath = (path: string): CryptoKeypath => {
   const paths = path.replace(/[m|M]\//, '').split('/')
@@ -223,7 +224,7 @@ export default class Cardano {
     utxos: CardanoUtxoData[]
     extraSigners: CardanoCertKeyData[]
   }): Promise<Witness[]> {
-    const requestId = '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d'
+    const requestId = uuid.v4()
     const origin = 'cardano-cli-wallet'
     this.precheck()
     const keystoneSDK = new KeystoneSDK()
