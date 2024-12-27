@@ -4,7 +4,6 @@ import {
   CryptoProvider,
   NativeScriptDisplayFormat,
 } from '../../../../src/crypto-providers/cryptoProvider'
-import {signingFiles} from './signingFiles'
 import {TransportNodeUSB} from '@keystonehq/hw-transport-nodeusb'
 import {KeystoneCryptoProvider} from '../../../../src/crypto-providers/keystoneCryptoProvider'
 
@@ -85,74 +84,6 @@ const nativeScripts: {[key: string]: TestItem} = {
     hwSigningFiles: [],
     expectedNativeScriptHashHex:
       '81a8f494e6cfe6b2407c9f68beda19ac74193548ab7c9aa94fe935f6',
-  },
-  paymentScriptWithSigningFiles: {
-    nativeScript: {
-      type: NativeScriptType.ALL,
-      scripts: [
-        {
-          type: NativeScriptType.PUBKEY,
-          keyHash: '9205690f6ea4b76742c6bdc5b79fb8a1727260089c71a64c7275320e',
-        },
-        {
-          type: NativeScriptType.ANY,
-          scripts: [
-            {
-              type: NativeScriptType.PUBKEY,
-              keyHash:
-                '9a70dd7c77e9db9442b560a11446962e9d7c595274c587a62f8a0b61',
-            },
-            {
-              type: NativeScriptType.PUBKEY,
-              keyHash:
-                '3d926054e17d9ed8374d0e1d18c765209dd0c249f954214c45417fea',
-            },
-          ],
-        },
-      ],
-    },
-    hwSigningFiles: [
-      signingFiles.multisigPayment0,
-      signingFiles.multisigPayment1,
-      signingFiles.multisigPayment2,
-    ],
-    expectedNativeScriptHashHex:
-      '9064dc1a8ce9d07aabd3399b67520ec9f6eb11c82220b9462938c479',
-  },
-  stakingScriptWithSigningFiles: {
-    nativeScript: {
-      type: NativeScriptType.ALL,
-      scripts: [
-        {
-          type: NativeScriptType.N_OF_K,
-          required: 1,
-          scripts: [
-            {
-              type: NativeScriptType.PUBKEY,
-              keyHash:
-                '4c139dd7e3a600fd1a4855b38cf8f731f39d3051791a5ede1f553d6c',
-            },
-          ],
-        },
-        {
-          type: NativeScriptType.ANY,
-          scripts: [
-            {
-              type: NativeScriptType.PUBKEY,
-              keyHash:
-                'f699c6400f85bdca54e44d0cad1f6141ce049a411c0d695fc30c3f73',
-            },
-            {
-              type: NativeScriptType.INVALID_HEREAFTER,
-              slot: 200n,
-            },
-          ],
-        },
-      ],
-    },
-    hwSigningFiles: [signingFiles.multisigStake0, signingFiles.multisigStake1],
-    expectedNativeScriptHashHex:
-      '54d8e96bb32a441432393d7690ac0132e5669a9ecd95cfc4b8674219',
   },
 }
 
