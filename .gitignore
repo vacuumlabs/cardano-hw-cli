@@ -4,3 +4,4 @@
 !/build/dependencies
 .vscode
 .idea
+.DS_Store
