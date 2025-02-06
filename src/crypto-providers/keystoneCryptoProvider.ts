@@ -69,7 +69,7 @@ const failedMsg = (e: unknown): string => `The requested operation failed. \
 Check that your Keystone device is connected.
 Details: ${e}`
 
-const WALLET_NAME = 'cardano_cli_wallet'
+const WALLET_NAME = 'cardano_hw_cli_wallet'
 export const KeystoneCryptoProvider: (
   transport: TransportHID,
   // eslint-disable-next-line require-await
