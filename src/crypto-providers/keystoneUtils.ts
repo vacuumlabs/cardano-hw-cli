@@ -226,7 +226,7 @@ export default class Cardano {
     extraSigners: CardanoCertKeyData[]
   }): Promise<Witness[]> {
     const requestId = uuid.v4()
-    const origin = 'cardano-cli-wallet'
+    const origin = 'cardano-hw-cli-wallet'
     this.precheck()
     const keystoneSDK = new KeystoneSDK()
     const ur = keystoneSDK.cardano.generateSignRequest({
