@@ -14,14 +14,14 @@ import {UR, UREncoder, URDecoder} from '@ngraveio/bc-ur'
 import {Actions, TransportHID} from '@keystonehq/hw-transport-usb'
 import {throwTransportError, Status} from '@keystonehq/hw-transport-error'
 import CardanoSerializationLib from '@emurgo/cardano-serialization-lib-nodejs'
-// @ts-ignore
+// @ts-expect-error cardano-crypto.js is not typed
 import bech32 from 'cardano-crypto.js'
 import KeystoneSDK, {
   CardanoCatalystRequestProps,
   CardanoSignCip8MessageData,
   CardanoSignDataRequestProps,
 } from '@keystonehq/keystone-sdk'
-import {BIP32Path} from 'basicTypes'
+import {BIP32Path} from '../basicTypes'
 import {classifyPath, PathTypes} from './util'
 import {
   CardanoCertKeyData,
@@ -44,9 +44,9 @@ const decodeBech32PublicKey = (bech32Pubkey: string) => {
   return Buffer.from(bech32.fromWords(decoded.words))
 }
 
-const parseResponoseUR = (urPlayload: string): UR => {
+const parseResponseUR = (urPayload: string): UR => {
   const decoder = new URDecoder()
-  decoder.receivePart(urPlayload)
+  decoder.receivePart(urPayload)
   if (!decoder.isComplete()) {
     throwTransportError(Status.ERR_UR_INCOMPLETE)
   }
@@ -183,7 +183,7 @@ export default class Cardano {
 
     const response = await this.sendToDevice(Actions.CMD_RESOLVE_UR, encodedUR)
     // eslint-disable-next-line @typescript-eslint/no-use-before-define
-    const resultUR = parseResponoseUR(response.payload)
+    const resultUR = parseResponseUR(response.payload)
 
     const account = CryptoMultiAccounts.fromCBOR(resultUR.cbor)
 
@@ -207,7 +207,7 @@ export default class Cardano {
     const ur = keystoneSDK.cardano.generateSignDataRequest(props)
     const encodedUR = new UREncoder(ur, Infinity).nextPart().toUpperCase()
     const response = await this.sendToDevice(Actions.CMD_RESOLVE_UR, encodedUR)
-    const resultUR = parseResponoseUR(response.payload)
+    const resultUR = parseResponseUR(response.payload)
     // parse signature
     const signature = keystoneSDK.cardano.parseSignDataSignature(resultUR)
     return {
@@ -238,7 +238,7 @@ export default class Cardano {
     })
     const encodedUR = new UREncoder(ur, Infinity).nextPart().toUpperCase()
     const response = await this.sendToDevice(Actions.CMD_RESOLVE_UR, encodedUR)
-    const resultUR = parseResponoseUR(response.payload)
+    const resultUR = parseResponseUR(response.payload)
     // parse signature
     const cardanoSignResult = keystoneSDK.cardano.parseSignature(resultUR)
     const witnessSet = cardanoSignResult.witnessSet
@@ -261,7 +261,7 @@ export default class Cardano {
     const ur = keystoneSDK.cardano.generateCatalystRequest(props)
     const encodedUR = new UREncoder(ur, Infinity).nextPart().toUpperCase()
     const response = await this.sendToDevice(Actions.CMD_RESOLVE_UR, encodedUR)
-    const resultUR = parseResponoseUR(response.payload)
+    const resultUR = parseResponseUR(response.payload)
     // parse signature
     const signature = keystoneSDK.cardano.parseCatalystSignature(resultUR)
     return {
@@ -277,7 +277,7 @@ export default class Cardano {
     const ur = keystoneSDK.cardano.generateSignCip8DataRequest(props)
     const encodedUR = new UREncoder(ur, Infinity).nextPart().toUpperCase()
     const response = await this.sendToDevice(Actions.CMD_RESOLVE_UR, encodedUR)
-    const resultUR = parseResponoseUR(response.payload)
+    const resultUR = parseResponseUR(response.payload)
     const result = keystoneSDK.cardano.parseSignCip8DataSignature(resultUR)
     return {
       signature: result.signature,

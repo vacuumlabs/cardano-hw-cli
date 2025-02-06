@@ -47,6 +47,7 @@
     "@keystonehq/keystone-sdk": "^0.8.1",
     "@ledgerhq/hw-transport": "^6.27.10",
     "@ledgerhq/hw-transport-node-hid-noevents": "^6.24.1",
+    "@ngraveio/bc-ur": "^1.1.13",
     "@trezor/connect": "9.4.5",
     "argparse": "^2.0.1",
     "bignumber": "^1.1.0",

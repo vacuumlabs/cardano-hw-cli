@@ -32,7 +32,6 @@ import {
 import Cardano, {bip32PathToString} from './keystoneUtils'
 import {
   classifyPath,
-  encodeAddress,
   encodeCIP36RegistrationMetaData,
   extractStakePubKeyFromHwSigningData,
   formatCIP36RegistrationMetaData,
