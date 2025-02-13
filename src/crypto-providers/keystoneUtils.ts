@@ -27,7 +27,7 @@ import {
   CardanoCertKeyData,
   CardanoUtxoData,
 } from '@keystonehq/bc-ur-registry-cardano'
-import { uuid } from '@keystonehq/keystone-sdk/dist/utils'
+import {uuid} from '@keystonehq/keystone-sdk/dist/utils'
 
 export const pathToKeypath = (path: string): CryptoKeypath => {
   const paths = path.replace(/[m|M]\//, '').split('/')
@@ -116,7 +116,7 @@ export default class Cardano {
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private async sendToDevice(actions: Actions, data: any): Promise<any> {
+  private sendToDevice(actions: Actions, data: any): Promise<any> {
     return this.transport.send(actions, data)
   }
 

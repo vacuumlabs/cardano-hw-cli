@@ -91,7 +91,8 @@ export const KeystoneCryptoProvider: (
     stakingPath,
     stakingScriptHash,
     address,
-  }: ParsedShowAddressArguments): Promise<void> => {
+  }: // eslint-disable-next-line require-await
+  ParsedShowAddressArguments): Promise<void> => {
     console.log('showAddress function parameters:')
     console.log('paymentPath:', JSON.stringify(paymentPath, null, 2))
     console.log('paymentScriptHash:', paymentScriptHash)
@@ -463,6 +464,7 @@ export const KeystoneCryptoProvider: (
     nativeScript: NativeScript,
     _signingFiles: HwSigningData[],
     _displayFormat: NativeScriptDisplayFormat,
+    // eslint-disable-next-line require-await
   ): Promise<NativeScriptHashKeyHex> => {
     try {
       const ledgerNativeScript =

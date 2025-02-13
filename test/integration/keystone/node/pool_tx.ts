@@ -1,3 +1,4 @@
+/* eslint-disable no-console */
 /* eslint-disable max-len */
 import assert from 'assert'
 import {decodeTx} from 'cardano-hw-interop-lib'
