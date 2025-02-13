@@ -1,3 +1,5 @@
+/* NOTE: Support for Keystone is developed and maintained by the Keystone team. https://keyst.one/ */
+
 /* eslint-disable no-console */
 import * as InteropLib from 'cardano-hw-interop-lib'
 import {TransportHID} from '@keystonehq/hw-transport-usb'

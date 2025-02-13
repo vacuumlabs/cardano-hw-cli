@@ -4,6 +4,11 @@ Cardano HW CLI tool for signing transaction
 
 The command-line interface is based on the official [Cardano-CLI tool](https://docs.cardano.org/projects/cardano-node/en/latest/reference/cardano-node-cli-reference.html).
 
+The tool supports:
+- [Trezor](https://trezor.io/)
+- [Ledger](https://www.ledger.com/)
+- [Keystone](https://keyst.one/) - NOTE: support for Keystone is developed and maintained by the Keystone team
+
 # Installation
 Check:
 - releases https://github.com/vacuumlabs/cardano-hw-cli/releases
