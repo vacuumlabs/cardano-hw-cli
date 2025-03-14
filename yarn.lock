@@ -2032,10 +2032,10 @@ cardano-crypto.js@^6.1.2:
     borc "^2.1.1"
     pbkdf2 "^3.0.17"
 
-cardano-hw-interop-lib@^3.0.1:
-  version "3.0.1"
-  resolved "https://registry.yarnpkg.com/cardano-hw-interop-lib/-/cardano-hw-interop-lib-3.0.1.tgz#cb9c1aafb9a7dd8197a6dd560480c0a471894d1d"
-  integrity sha512-whFS8ZsMIjpcPWp3IiOZfxLZfqcSRlrkrnouEzFbCafxdUqc9rE817t7tdbsCm3GFvAL9sl+MWf/D3A9ehStVA==
+cardano-hw-interop-lib@^3.0.2:
+  version "3.0.2"
+  resolved "https://registry.yarnpkg.com/cardano-hw-interop-lib/-/cardano-hw-interop-lib-3.0.2.tgz#ee64d9bff3892ad5672213385c45aa5274417490"
+  integrity sha512-qook1S3KjaHNxHTF5jx7n2Qz4zfyI/dB0zmMK9t7tmc+TCMJRkr05RYw9Tw2zByR6NV9Y/bcsitYy3YhMtG3CA==
   dependencies:
     blake2b "^2.1.4"
     cbor "^9.0.1"
