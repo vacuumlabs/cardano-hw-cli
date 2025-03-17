@@ -50,6 +50,7 @@
     "@ngraveio/bc-ur": "^1.1.13",
     "@trezor/connect": "9.4.5",
     "argparse": "^2.0.1",
+    "bech32": "^2.0.0",
     "bignumber": "^1.1.0",
     "cardano-crypto.js": "^6.1.2",
     "cardano-hw-interop-lib": "^3.0.2",
