@@ -91,6 +91,7 @@ export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     TrezorConnect.manifest({
       email: 'adalite@vacuumlabs.com',
       appUrl: 'https://github.com/vacuumlabs/cardano-hw-cli',
+      appName: 'Cardano HW CLI',
     })
 
     TrezorConnect.on(TrezorTypes.UI_EVENT, (event) => {
