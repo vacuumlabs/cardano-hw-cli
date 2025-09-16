@@ -83,4 +83,5 @@ export const enum Errors {
   InvalidMessageAddressTypeError = 'Invalid or unsupported address type in message signing',
   InvalidMessageAddressSigningFilesError = 'Missing address signing files in message signing',
   MessageAddressMismatchError = 'Message address mismatch: likely because incorrect address signing files were used',
+  TrezorMessageHashPayloadUnsupported = 'Trezor does not support the `--hashed` option in message signing',
 }

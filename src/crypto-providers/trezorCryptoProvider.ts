@@ -990,7 +990,6 @@ export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     throw Error(Errors.UnsupportedCryptoProviderCall)
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const prepareAddressFieldData = (
     args: ParsedSignMessageArguments,
   ): [TrezorTypes.CardanoAddressParameters, Network] => {
@@ -1074,53 +1073,52 @@ export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
   }
 
   const signMessage = async (
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars,
     args: ParsedSignMessageArguments,
-    // eslint-disable-next-line require-await
   ): Promise<SignedMessageData> => {
-    // TODO uncomment when message signing is merged in Trezor Connect
-    throw Error(Errors.UnsupportedCryptoProviderCall)
-    // let request: TrezorTypes.CardanoSignMessage = {
-    //   signingPath: args.hwSigningFileData.path,
-    //   hashPayload: args.hashPayload,
-    //   payload: args.messageHex,
-    //   preferHexDisplay: args.preferHexDisplay,
-    //   derivationType: derivationTypeToTrezorType(args.derivationType),
-    // }
-    // if (args.address !== undefined) {
-    //   const [addressFieldData, network] = prepareAddressFieldData(args)
-    //   request = {
-    //     ...request,
-    //     addressParameters: addressFieldData,
-    //     networkId: network.networkId,
-    //     protocolMagic: network.protocolMagic,
-    //   }
-    // }
+    if (args.hashPayload) {
+      throw Error(Errors.TrezorMessageHashPayloadUnsupported)
+    }
+    
+    let request: TrezorTypes.CardanoSignMessage = {
+      path: args.hwSigningFileData.path,
+      payload: args.messageHex,
+      preferHexDisplay: args.preferHexDisplay,
+      derivationType: derivationTypeToTrezorType(args.derivationType),
+    }
+    if (args.address !== undefined) {
+      const [addressFieldData, network] = prepareAddressFieldData(args)
+      request = {
+        ...request,
+        addressParameters: addressFieldData,
+        networkId: network.networkId,
+        protocolMagic: network.protocolMagic,
+      }
+    }
 
-    // const response = await TrezorConnect.cardanoSignMessage(request)
-    // if (!response.success) {
-    //   throw Error(response.payload.error)
-    // }
+    const response = await TrezorConnect.cardanoSignMessage(request)
+    if (!response.success) {
+      throw Error(response.payload.error)
+    }
 
-    // if (args.address !== undefined) {
-    //   const addressCli = bech32.decode(args.address).data as Buffer
-    //   const addressFieldHex = response.payload.headers.protected.address
-    //   if (addressCli.toString('hex') !== addressFieldHex) {
-    //     throw Error(Errors.MessageAddressMismatchError)
-    //   }
-    // }
-    // const pubKey = splitXPubKeyCborHex(
-    //   args.hwSigningFileData.cborXPubKeyHex,
-    // ).pubKey
-    // if (pubKey.toString('hex') !== response.payload.pubKey) {
-    //   throw Error(Errors.SigningPubKeyMismatchError)
-    // }
+    if (args.address !== undefined) {
+      const addressCli = bech32.decode(args.address).data as Buffer
+      const addressFieldHex = response.payload.headers.protected.address
+      if (addressCli.toString('hex') !== addressFieldHex) {
+        throw Error(Errors.MessageAddressMismatchError)
+      }
+    }
+    const pubKey = splitXPubKeyCborHex(
+      args.hwSigningFileData.cborXPubKeyHex,
+    ).pubKey
+    if (pubKey.toString('hex') !== response.payload.pubKey) {
+      throw Error(Errors.SigningPubKeyMismatchError)
+    }
 
-    // return {
-    //   addressFieldHex: response.payload.headers.protected.address as HexString,
-    //   signatureHex: response.payload.signature as HexString,
-    //   signingPublicKeyHex: response.payload.pubKey as HexString,
-    // }
+    return {
+      addressFieldHex: response.payload.headers.protected.address as HexString,
+      signatureHex: response.payload.signature as HexString,
+      signingPublicKeyHex: response.payload.pubKey as HexString,
+    }
   }
 
   const nativeScriptToTrezorTypes = (

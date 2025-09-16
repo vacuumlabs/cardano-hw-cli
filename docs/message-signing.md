@@ -6,8 +6,7 @@ This example demonstrates how to sign a message. See [CIP-8](https://github.com/
 
 Message signing support:
 * on Ledger, Cardano app version 7.1.0 and above
-* on Trezor, message signing is not supported yet
-<!-- TODO update this when available on Trezor -->
+* on Trezor, FW version 2.9.1 and above
 
 ## Sign a message
 
@@ -25,6 +24,6 @@ cardano-hw-cli message sign \
 
 You can use `--message` or `--message-hex` to specify the message to sign in ASCII or hex format, respectively. If you add `--prefer-hex`, the message will be shown in hex on HW wallet screen even if it is valid ASCII.
 
-If you add `--hashed`, the message will be hashed before signing.
+If you add `--hashed`, the message will be hashed before signing. _Note: This is not supported on Trezor as of now._
 
 If successful, the command should save output data to the `msg.out` file.
