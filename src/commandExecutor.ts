@@ -66,14 +66,25 @@ const getCryptoProvider = async (): Promise<CryptoProvider> => {
   const trezorPromise = async () => await TrezorCryptoProvider()
   const keystonePromise = async () =>
     await KeystoneCryptoProvider(await TransportNodeUSB.connect())
-  const cryptoProviderPromise = Promise.any([
-    ledgerPromise(),
-    trezorPromise(),
-    keystonePromise(),
-  ])
 
   try {
-    return await promiseTimeout(cryptoProviderPromise, 5000)
+    const results = await promiseTimeout(
+      Promise.allSettled([
+        ledgerPromise(),
+        trezorPromise(),
+        keystonePromise(),
+      ]),
+      5000
+    )
+
+    // Find the first successful result
+    const successfulResult = results.find(result => result.status === 'fulfilled')
+    if (successfulResult && successfulResult.status === 'fulfilled') {
+      return successfulResult.value
+    }
+
+    // If no successful connection found, throw error
+    throw Error(Errors.HwTransportNotFoundError)
   } catch (e) {
     throw Error(Errors.HwTransportNotFoundError)
   }
