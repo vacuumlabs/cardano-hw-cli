@@ -22,7 +22,7 @@
     "build-windows": "./scripts/build-common.sh && ./scripts/build-windows.sh",
     "build-macos": "./scripts/build-common.sh && ./scripts/build-macos.sh",
     "build-js": "tsc -p src/tsconfig.json",
-    "dev": "yarn build-js && node dist/index.js",
+    "dev": "yarn build-js && node --no-warnings=ExperimentalWarning dist/index.js",
     "lint": "eslint src/ test/ --max-warnings=0 --ext .ts,.js",
     "prettier:check": "prettier --check .",
     "prettier": "prettier --write .",
