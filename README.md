@@ -164,6 +164,8 @@ Install dependencies:
 yarn install
 ```
 
+_Note: Temporarily you might need to add `--ignore-engines` to `yarn install` command because of old Node version._
+
 Run unit test
 ```
 yarn test-unit

@@ -4,7 +4,8 @@ cd ${0%/*}
 cd ..
 
 yarn clean
-yarn install
+# --ignore-engines needed because of old node version, can be removed after node update
+yarn install --ignore-engines
 yarn build-js
 
 # Update commit hash in package.json
