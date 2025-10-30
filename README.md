@@ -177,6 +177,9 @@ yarn dev ...
 ```
 
 # Building from source
+
+__NOTE: Building on apple silicon breaks the `HID.node` compatibility for some reason. I.e. building currently only works properly on Linux (and maybe Windows - not tested).__
+
 Install node version v18.7.0
 ```
 nvm i v18.7.0
