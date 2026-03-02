@@ -4,6 +4,7 @@ import {partition} from '../util'
 import {
   ParsedTransactionValidateArguments,
   ParsedTransactionTransformArguments,
+  ProtocolParameters,
 } from '../command-parser/argTypes'
 import {constructTxFileOutput, writeOutputData} from '../fileWriter'
 import {containsVKeyWitnesses} from './transaction'
@@ -72,6 +73,24 @@ const validateTx = (args: ParsedTransactionValidateArguments): ExitCode => {
   return ExitCode.Success
 }
 
+const extractCostModels = (
+  protocolParams: ProtocolParameters,
+): InteropLib.CostModels => {
+  const costModels: InteropLib.CostModels = new Map()
+  for (const [key, values] of Object.entries(protocolParams.costModels)) {
+    if (!InteropLib.PLUTUS_LANGUAGES.find(({name}) => name === key)) {
+      throw Error(`Unknown Plutus version in cost models: ${key}`)
+    }
+    if (!Array.isArray(values) || !values.every((v) => typeof v === 'number')) {
+      throw Error(
+        `Invalid cost model values for ${key}: expected an array of numbers.`,
+      )
+    }
+    costModels.set(key as InteropLib.CostModelLanguageName, values as number[])
+  }
+  return costModels
+}
+
 const transformTx = (args: ParsedTransactionTransformArguments): void => {
   const {containsUnfixable, containsFixable} = checkValidationErrors(
     args.txFileData.cborHex,
@@ -83,7 +102,17 @@ const transformTx = (args: ParsedTransactionTransformArguments): void => {
     throw Error(Errors.TxContainsUnfixableErrors)
   }
   const txCbor = Buffer.from(args.txFileData.cborHex, 'hex')
-  const transformedTx = InteropLib.transformTx(InteropLib.decodeTx(txCbor))
+  const costModels = args.protocolParamsData
+    ? extractCostModels(args.protocolParamsData)
+    : undefined
+  const usedCostModelLanguages = args.usedCostModelLanguages?.length
+    ? (args.usedCostModelLanguages as InteropLib.CostModelLanguageName[])
+    : undefined
+  const transformedTx = InteropLib.transformTx(
+    InteropLib.decodeTx(txCbor),
+    costModels,
+    usedCostModelLanguages,
+  )
   if (containsFixable) {
     if (containsVKeyWitnesses(transformedTx)) {
       throw Error(Errors.CannotTransformSignedTx)
@@ -104,6 +133,7 @@ const transformTx = (args: ParsedTransactionTransformArguments): void => {
 
 export {
   checkValidationErrors,
+  extractCostModels,
   validateTxBeforeWitnessing,
   validateTx,
   transformTx,

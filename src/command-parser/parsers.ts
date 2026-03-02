@@ -34,7 +34,12 @@ import {
   splitXPubKeyCborHex,
 } from '../crypto-providers/util'
 import {getHwSigningFileType} from '../fileWriter'
-import {HwSigningData, HwSigningType, TxFileData} from './argTypes'
+import {
+  HwSigningData,
+  HwSigningType,
+  ProtocolParameters,
+  TxFileData,
+} from './argTypes'
 
 const {bech32} = require('cardano-crypto.js')
 const rw = require('rw')
@@ -399,4 +404,15 @@ export const encodeAsciiToHex = (msg: string): string => {
     throw Error(Errors.InvalidMessageError)
   }
   return Buffer.from(msg, 'ascii').toString('hex')
+}
+
+export const parseProtocolParamsFile = (path: string): ProtocolParameters => {
+  const data = JSON.parse(rw.readFileSync(path, 'utf8'))
+  const costModels = data.costModels
+  if (!costModels || typeof costModels !== 'object') {
+    throw Error(
+      'Invalid protocol params file: expected a protocol parameters JSON with a "costModels" field.',
+    )
+  }
+  return {costModels}
 }

@@ -16,6 +16,7 @@ import {
   parseVotePubFileHw,
   parseVotePubFileCli,
   encodeAsciiToHex,
+  parseProtocolParamsFile,
 } from './parsers'
 
 export type ParserConfig = {[key: string]: ParserConfig | object}
@@ -319,6 +320,19 @@ export const parserConfig: ParserConfig = {
         required: true,
         dest: 'outFile',
         help: 'Output filepath.',
+      },
+      '--protocol-params-file': {
+        required: false,
+        dest: 'protocolParamsData',
+        type: (path: string) => parseProtocolParamsFile(path),
+        help: 'Path to a protocol parameters JSON file (from cardano-cli query protocol-parameters). Required for transactions with Plutus scripts.',
+      },
+      '--used-cost-model-languages': {
+        required: false,
+        action: 'append',
+        default: [],
+        dest: 'usedCostModelLanguages',
+        help: 'Plutus language versions used in the transaction (e.g. PlutusV1 PlutusV2 PlutusV3). Required for reference-script-only transactions where language versions cannot be inferred from the witness set.',
       },
     },
   },

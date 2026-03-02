@@ -109,10 +109,16 @@ export type ParsedTransactionValidateArguments = {
   txFileData: TxFileData
 }
 
+export type ProtocolParameters = {
+  costModels: Record<string, number[]>
+}
+
 export type ParsedTransactionTransformArguments = {
   command: CommandType.TRANSFORM_TRANSACTION
   txFileData: TxFileData
   outFile: string
+  protocolParamsData?: ProtocolParameters
+  usedCostModelLanguages?: string[]
 }
 
 export type ParsedOpCertArguments = {

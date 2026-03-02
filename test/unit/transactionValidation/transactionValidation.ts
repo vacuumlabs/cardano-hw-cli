@@ -93,7 +93,7 @@ function testValidate(tx: Tx) {
 function testTransform(tx: Tx) {
   const txCbor = Buffer.from(tx.txCborHex, 'hex')
   const transformedTxCbor = InteropLib.encodeTx(
-    InteropLib.transformTx(InteropLib.decodeTx(txCbor)),
+    InteropLib.transformTx(InteropLib.decodeTx(txCbor), undefined),
   )
   assert.deepStrictEqual(
     transformedTxCbor.toString('hex'),
