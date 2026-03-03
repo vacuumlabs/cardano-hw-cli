@@ -451,6 +451,80 @@ describe('Command parser', () => {
       },
       outFile: 'test/unit/commandParser/res/fixed.signed',
       protocolParamsData: undefined,
+      usedCostModelLanguages: [],
+    }
+    assert.deepStrictEqual(parsedArgs, expectedResult)
+  })
+
+  it('Should parse transform transaction with protocol params and used cost model languages', () => {
+    const args = pad([
+      'transaction',
+      'transform',
+      '--tx-file',
+      prefix('tx.signed'),
+      '--out-file',
+      prefix('fixed.signed'),
+      '--protocol-params-file',
+      prefix('networkParams.json'),
+      '--used-cost-model-languages',
+      'PlutusV1',
+      '--used-cost-model-languages',
+      'PlutusV2',
+    ])
+    const {parsedArgs} = parse(args)
+    const expectedResult = {
+      command: CommandType.TRANSFORM_TRANSACTION,
+      txFileData: {
+        envelopeType: cardanoEraToSignedType[CardanoEra.SHELLEY],
+        era: CardanoEra.SHELLEY,
+        description: '',
+        // eslint-disable-next-line max-len
+        cborHex:
+          '83a40081825820941a33cf9d39bba4102c4eff8bd54efd72cf93e65a023a4475ba48a58fc0de000001818258390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c1a002b2b4b021a00029b75031a00a8474ca10081825820cd2b047d1a803eee059769cffb3dfd0a4b9327e55bc78aa962d9bd4f720db0b2584093cbb49246dffb2cb2ca2c18e75039bdb4f80730bb9478045c4b8ef5494145a71bd59a478df4ec0dd22e78c9fc919918f4404115fafb10fa4f218b269d3e220af6',
+      },
+      outFile: 'test/unit/commandParser/res/fixed.signed',
+      protocolParamsData: {
+        costModels: {
+          // eslint-disable-next-line max-len
+          PlutusV1: [
+            205665, 812, 1, 1, 1000, 571, 0, 1, 1000, 24177, 4, 1, 1000, 32,
+            117366, 10475, 4, 23000, 100, 23000, 100, 23000, 100, 23000, 100,
+            23000, 100, 23000, 100, 100, 100, 23000, 100, 19537, 32, 175354, 32,
+            46417, 4, 221973, 511, 0, 1, 89141, 32, 497525, 14068, 4, 2, 196500,
+            453240, 220, 0, 1, 1, 1000, 28662, 4, 2, 245000, 216773, 62, 1,
+            1060367, 12586, 1, 208512, 421, 1, 187000, 1000, 52998, 1, 80436,
+            32, 43249, 32, 1000, 32, 80556, 1, 57667, 4, 1000, 10, 197145, 156,
+            1, 197145, 156, 1, 204924, 473, 1, 208896, 511, 1, 52467, 32, 64832,
+            32, 65493, 32, 22558, 32, 16563, 32, 76511, 32, 196500, 453240, 220,
+            0, 1, 1, 69522, 11687, 0, 1, 60091, 32, 196500, 453240, 220, 0, 1,
+            1, 196500, 453240, 220, 0, 1, 1, 1159724, 392670, 0, 2, 806990,
+            30482, 4, 1927926, 82523, 4, 265318, 0, 4, 0, 85931, 32, 205665,
+            812, 1, 1, 41182, 32, 212342, 32, 31220, 32, 32696, 32, 43357, 32,
+            32247, 32, 38314, 32, 20000000000, 20000000000, 9462713, 1021, 10,
+            20000000000, 0, 20000000000,
+          ],
+          // eslint-disable-next-line max-len
+          PlutusV2: [
+            205665, 812, 1, 1, 1000, 571, 0, 1, 1000, 24177, 4, 1, 1000, 32,
+            117366, 10475, 4, 23000, 100, 23000, 100, 23000, 100, 23000, 100,
+            23000, 100, 23000, 100, 100, 100, 23000, 100, 19537, 32, 175354, 32,
+            46417, 4, 221973, 511, 0, 1, 89141, 32, 497525, 14068, 4, 2, 196500,
+            453240, 220, 0, 1, 1, 1000, 28662, 4, 2, 245000, 216773, 62, 1,
+            1060367, 12586, 1, 208512, 421, 1, 187000, 1000, 52998, 1, 80436,
+            32, 43249, 32, 1000, 32, 80556, 1, 57667, 4, 1000, 10, 197145, 156,
+            1, 197145, 156, 1, 204924, 473, 1, 208896, 511, 1, 52467, 32, 64832,
+            32, 65493, 32, 22558, 32, 16563, 32, 76511, 32, 196500, 453240, 220,
+            0, 1, 1, 69522, 11687, 0, 1, 60091, 32, 196500, 453240, 220, 0, 1,
+            1, 196500, 453240, 220, 0, 1, 1, 1159724, 392670, 0, 2, 806990,
+            30482, 4, 1927926, 82523, 4, 265318, 0, 4, 0, 85931, 32, 205665,
+            812, 1, 1, 41182, 32, 212342, 32, 31220, 32, 32696, 32, 43357, 32,
+            32247, 32, 38314, 32, 20000000000, 20000000000, 9462713, 1021, 10,
+            20000000000, 0, 20000000000, 33852, 32, 68246, 32, 72362, 32, 7243,
+            32, 7391, 32, 11546, 32, 85848, 123203,
+          ],
+        },
+      },
+      usedCostModelLanguages: ['PlutusV1', 'PlutusV2'],
     }
     assert.deepStrictEqual(parsedArgs, expectedResult)
   })
