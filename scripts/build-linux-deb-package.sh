@@ -26,7 +26,7 @@ mkdir ./build/linux/deb/${PACKAGE}_${VERSION}/usr/share/cardano-hw-cli
 mkdir ./build/linux/deb/${PACKAGE}_${VERSION}/DEBIAN
 
 # Build executable
-yarn pkg ./dist/index.js -o ./build/linux/deb/cardano-hw-cli -c package.json -t node18-linux-x64 --options "no-warnings=ExperimentalWarning"
+yarn pkg ./dist/index.js -o ./build/linux/deb/cardano-hw-cli -c package.json -t node20-linux-x64 --options "no-warnings=ExperimentalWarning"
 
 # Copy files to package structure
 cp -R ./build/dependencies/linux/* ./build/linux/deb/${PACKAGE}_${VERSION}/usr/share/cardano-hw-cli

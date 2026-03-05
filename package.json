@@ -65,10 +65,11 @@
     "@types/argparse": "^2.0.10",
     "@types/lodash": "^4.17.20",
     "@types/mocha": "^10.0.0",
-    "@types/node": "^18.12.0",
+    "@types/node": "^20.0.0",
     "@types/uuid": "^10.0.0",
     "@typescript-eslint/eslint-plugin": "^8.44.0",
     "@typescript-eslint/parser": "^8.44.0",
+    "@yao-pkg/pkg": "^6.1.0",
     "cspell": "^9.2.1",
     "eslint": "^9.35.0",
     "eslint-config-prettier": "^8.5.0",
@@ -77,7 +78,6 @@
     "eslint-plugin-mocha": "^10.1.0",
     "eslint-plugin-simple-import-sort": "^7.0.0",
     "mocha": "^11.7.2",
-    "pkg": "^5.8.1",
     "prettier": "^2.6.2",
     "ts-node": "^10.9.1",
     "typescript": "^4.9.4"
@@ -89,7 +89,7 @@
     ]
   },
   "engines": {
-    "node": "18.7.0",
+    "node": ">=20.0.0",
     "npm": ">=6.x",
     "yarn": "^4.13.0"
   },

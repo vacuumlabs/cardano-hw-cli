@@ -149,9 +149,9 @@ cardano-hw-cli device version
 - [Public keys bulk export](docs/public-keys-bulk-export-example.md)
 
 # Running from source
-Install node version v14.17.6
+Install node version v20 (LTS)
 ```
-nvm i v14.17.6
+nvm i 20
 ```
 
 Install yarn:
@@ -163,8 +163,6 @@ Install dependencies:
 ```
 yarn install
 ```
-
-_Note: Temporarily you might need to add `--ignore-engines` to `yarn install` command because of old Node version._
 
 Run unit test
 ```
@@ -178,11 +176,11 @@ yarn dev ...
 
 # Building from source
 
-__NOTE: Building on apple silicon breaks the `HID.node` compatibility for some reason. I.e. building currently only works properly on Linux (and maybe Windows - not tested).__
+__NOTE: The pre-compiled `HID.node` binaries in `build/dependencies/` must match the target Node version and architecture. After updating Node, these may need to be rebuilt for each target platform.__
 
-Install node version v18.7.0
+Install node version v20 (LTS)
 ```
-nvm i v18.7.0
+nvm i 20
 ```
 
 Install yarn:
