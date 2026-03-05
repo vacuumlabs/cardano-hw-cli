@@ -1078,7 +1078,7 @@ export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     if (args.hashPayload) {
       throw Error(Errors.TrezorMessageHashPayloadUnsupported)
     }
-    
+
     let request: TrezorTypes.CardanoSignMessage = {
       path: args.hwSigningFileData.path,
       payload: args.messageHex,
