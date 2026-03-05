@@ -8,7 +8,8 @@ cd ..
 ./scripts/build-linux-x64-tar-gz.sh
 ./scripts/build-linux-arm64-tar-gz.sh
 ./scripts/build-windows.sh
-./scripts/build-macos.sh
+./scripts/build-macos-x64.sh
+./scripts/build-macos-arm64.sh
 
 rm -R build/release 2> /dev/null
 mkdir build/release

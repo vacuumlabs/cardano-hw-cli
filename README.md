@@ -199,5 +199,6 @@ yarn build-linux-deb
 yarn build-linux-tar
 yarn build-linux-tar-arm64
 yarn build-windows
-yarn build-macos
+yarn build-macos-x64
+yarn build-macos-arm64
 ```
