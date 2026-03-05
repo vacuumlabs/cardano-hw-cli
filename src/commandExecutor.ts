@@ -67,15 +67,16 @@ const getCryptoProvider = async (): Promise<CryptoProvider> => {
   const keystonePromise = async () =>
     await KeystoneCryptoProvider(await TransportNodeUSB.connect())
   try {
-    const results = await
-      Promise.allSettled([
-        promiseTimeout(ledgerPromise(), 5000),
-        promiseTimeout(trezorPromise(), 5000),
-        promiseTimeout(keystonePromise(), 5000),
-      ])
+    const results = await Promise.allSettled([
+      promiseTimeout(ledgerPromise(), 5000),
+      promiseTimeout(trezorPromise(), 5000),
+      promiseTimeout(keystonePromise(), 5000),
+    ])
 
     // Find the first successful result
-    const successfulResult = results.find(result => result.status === 'fulfilled')
+    const successfulResult = results.find(
+      (result) => result.status === 'fulfilled',
+    )
     if (successfulResult && successfulResult.status === 'fulfilled') {
       return successfulResult.value
     }

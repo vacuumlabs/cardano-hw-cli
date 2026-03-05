@@ -22,6 +22,7 @@
     "argparse",
     "bech",
     "Benc",
+    "bitcoinonly",
     "cardano",
     "cbor",
     "chsh",

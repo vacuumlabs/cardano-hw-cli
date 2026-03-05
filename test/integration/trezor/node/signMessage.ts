@@ -38,7 +38,7 @@ const msgTests: {[testName: string]: TestData} = {
       addressFieldHex:
         '122a946b9ad3d2ddf029d3a828f0468aece76895f15c9efbd69b4277',
     },
-  }
+  },
 }
 
 async function testMessageSigning(
