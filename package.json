@@ -24,7 +24,7 @@
     "build-macos-arm64": "./scripts/build-common.sh && ./scripts/build-macos-arm64.sh",
     "build-js": "tsc -p src/tsconfig.json",
     "dev": "yarn build-js && node --no-warnings=ExperimentalWarning dist/index.js",
-    "lint": "eslint src/ test/ --max-warnings=0 --ext .ts,.js",
+    "lint": "ESLINT_USE_FLAT_CONFIG=false eslint src/ test/ --max-warnings=0 --ext .ts,.js",
     "prettier:check": "prettier --check .",
     "prettier": "prettier --write .",
     "spell:check": "yarn cspell lint --gitignore '**' 2>/dev/null",
