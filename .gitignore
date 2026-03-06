@@ -5,3 +5,4 @@
 .vscode
 .idea
 .DS_Store
+.yarn/install-state.gz
