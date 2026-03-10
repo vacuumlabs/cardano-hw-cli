@@ -1,9 +1,12 @@
-const fs = require('fs');
-const path = require('path');
+const fs = require('fs')
+const path = require('path')
 
 // Fix 1: @trezor/connect beta version missing firmware module
-const firmwarePath = path.join(__dirname, '../node_modules/@trezor/connect-common/files/firmware');
-const firmwareIndexPath = path.join(firmwarePath, 'index.js');
+const firmwarePath = path.join(
+  __dirname,
+  '../node_modules/@trezor/connect-common/files/firmware',
+)
+const firmwareIndexPath = path.join(firmwarePath, 'index.js')
 
 // Only create the firmware fix if the file doesn't exist
 if (!fs.existsSync(firmwareIndexPath)) {
@@ -41,33 +44,36 @@ deviceModels.forEach(deviceModel => {
   });
 });
 
-module.exports = { firmwareAssets };`;
+module.exports = { firmwareAssets };`
 
   try {
-    fs.writeFileSync(firmwareIndexPath, indexContent);
-    console.log('✓ Fixed @trezor/connect-common firmware module');
+    fs.writeFileSync(firmwareIndexPath, indexContent)
+    console.log('✓ Fixed @trezor/connect-common firmware module')
   } catch (error) {
-    console.warn('⚠ Could not create firmware index.js:', error.message);
+    console.warn('⚠ Could not create firmware index.js:', error.message)
   }
 }
 
 // Fix 2: @trezor/connect beta version trying to import .ts files instead of .js
-const methodPath = path.join(__dirname, '../node_modules/@trezor/connect/lib/core/method.js');
+const methodPath = path.join(
+  __dirname,
+  '../node_modules/@trezor/connect/lib/core/method.js',
+)
 
 if (fs.existsSync(methodPath)) {
   try {
-    let methodContent = fs.readFileSync(methodPath, 'utf8');
+    let methodContent = fs.readFileSync(methodPath, 'utf8')
 
     // Replace .ts extension with .js in the dynamic import
-    const original = `\`../api/\${methodModule}/api/index.ts\``;
-    const fixed = `\`../api/\${methodModule}/api/index.js\``;
+    const original = `\`../api/\${methodModule}/api/index.ts\``
+    const fixed = `\`../api/\${methodModule}/api/index.js\``
 
     if (methodContent.includes(original)) {
-      methodContent = methodContent.replace(original, fixed);
-      fs.writeFileSync(methodPath, methodContent);
-      console.log('✓ Fixed @trezor/connect method.js TypeScript import');
+      methodContent = methodContent.replace(original, fixed)
+      fs.writeFileSync(methodPath, methodContent)
+      console.log('✓ Fixed @trezor/connect method.js TypeScript import')
     }
   } catch (error) {
-    console.warn('⚠ Could not fix method.js:', error.message);
+    console.warn('⚠ Could not fix method.js:', error.message)
   }
 }
