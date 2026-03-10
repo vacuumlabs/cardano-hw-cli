@@ -11,7 +11,7 @@ commands:
       - run: node --version
       - run: sudo apt-get -y update
       - run: sudo apt-get -y install libudev-dev libusb-1.0-0-dev
-      - run: corepack enable
+      - run: sudo corepack enable
       - run: yarn install
 
 jobs:
