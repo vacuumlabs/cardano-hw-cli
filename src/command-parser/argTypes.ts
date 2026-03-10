@@ -61,14 +61,15 @@ export type ParsedDeviceVersionArguments = {
   command: CommandType.DEVICE_VERSION
 }
 
-// exactly one of paymentPath vs. paymentScriptHash and stakingPath vs. stakingScriptHash
-// should be present (the result of parse() complies with this)
+// For base addresses: exactly one of paymentPath vs. paymentScriptHash AND one of stakingPath vs. stakingScriptHash
+// For enterprise addresses: exactly one of paymentPath vs. paymentScriptHash (no staking credentials)
+// For reward addresses: exactly one of stakingPath vs. stakingScriptHash (no payment credentials)
 export type ParsedShowAddressArguments = {
   command: CommandType.SHOW_ADDRESS
-  paymentPath: BIP32Path
-  paymentScriptHash: string
-  stakingPath: BIP32Path
-  stakingScriptHash: string
+  paymentPath?: BIP32Path
+  paymentScriptHash?: string
+  stakingPath?: BIP32Path
+  stakingScriptHash?: string
   address: HumanAddress
   derivationType?: DerivationType
 }

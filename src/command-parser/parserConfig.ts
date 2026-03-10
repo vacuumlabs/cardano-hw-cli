@@ -241,7 +241,7 @@ export const parserConfig: ParserConfig = {
 
     'show': {
       // hw-specific subpath
-      '_mutually-exclusive-group-required-payment': {
+      '_mutually-exclusive-group-payment': {
         '--payment-path': {
           dest: 'paymentPath',
           type: (path: string) => parseBIP32Path(path),
@@ -253,7 +253,7 @@ export const parserConfig: ParserConfig = {
           help: 'Payment derivation script hash in hex format.',
         },
       },
-      '_mutually-exclusive-group-required-staking': {
+      '_mutually-exclusive-group-staking': {
         '--staking-path': {
           dest: 'stakingPath',
           type: (path: string) => parseBIP32Path(path),

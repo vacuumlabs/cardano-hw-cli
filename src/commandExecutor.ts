@@ -38,13 +38,14 @@ import {
   determineSigningMode,
   getTxBodyHash,
   pathEquals,
+  getAddressAttributes,
 } from './crypto-providers/util'
 import {Errors} from './errors'
 import {parseOpCertIssueCounterFile} from './command-parser/parsers'
 import {CIP36_VOTING_PURPOSE_CATALYST} from './constants'
 import {validateWitnessing} from './crypto-providers/witnessingValidation'
 import {validateTxBeforeWitnessing} from './transaction/transactionValidation'
-import {Cbor, CVoteDelegation} from './basicTypes'
+import {AddressType, Cbor, CVoteDelegation} from './basicTypes'
 import {KeystoneCryptoProvider} from './crypto-providers/keystoneCryptoProvider'
 
 const promiseTimeout = <T>(promise: Promise<T>, ms: number): Promise<T> => {
@@ -95,7 +96,46 @@ const CommandExecutor = async () => {
     // eslint-disable-next-line no-console
     console.log(await cryptoProvider.getVersion())
 
+  const validateShowAddressArgs = (args: ParsedShowAddressArguments): void => {
+    const hasPaymentCredential =
+      args.paymentPath != null || args.paymentScriptHash != null
+    const hasStakingCredential =
+      args.stakingPath != null || args.stakingScriptHash != null
+
+    if (!hasPaymentCredential && !hasStakingCredential) {
+      throw Error(Errors.InvalidAddressParametersProvidedError)
+    }
+
+    const {addressType} = getAddressAttributes(args.address)
+
+    switch (addressType) {
+      case AddressType.BASE_PAYMENT_KEY_STAKE_KEY:
+      case AddressType.BASE_PAYMENT_SCRIPT_STAKE_KEY:
+      case AddressType.BASE_PAYMENT_KEY_STAKE_SCRIPT:
+      case AddressType.BASE_PAYMENT_SCRIPT_STAKE_SCRIPT:
+        if (!hasPaymentCredential || !hasStakingCredential) {
+          throw Error(Errors.InvalidAddressParametersProvidedError)
+        }
+        break
+      case AddressType.ENTERPRISE_KEY:
+      case AddressType.ENTERPRISE_SCRIPT:
+        if (!hasPaymentCredential || hasStakingCredential) {
+          throw Error(Errors.InvalidAddressParametersProvidedError)
+        }
+        break
+      case AddressType.REWARD_KEY:
+      case AddressType.REWARD_SCRIPT:
+        if (!hasStakingCredential || hasPaymentCredential) {
+          throw Error(Errors.InvalidAddressParametersProvidedError)
+        }
+        break
+      default:
+        throw Error(Errors.InvalidAddressParametersProvidedError)
+    }
+  }
+
   const showAddress = async (args: ParsedShowAddressArguments) => {
+    validateShowAddressArgs(args)
     // eslint-disable-next-line no-console
     console.log(`address: ${args.address}`)
     return await cryptoProvider.showAddress(args)

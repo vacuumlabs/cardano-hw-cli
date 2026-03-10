@@ -42,6 +42,50 @@ describe('Command parser', () => {
     assert.deepStrictEqual(parsedArgs, expectedResult)
   })
 
+  it('Should parse address show command for enterprise address (payment-path only)', () => {
+    const args = pad([
+      'address',
+      'show',
+      '--payment-path',
+      '1852H/1815H/0H/0/0',
+      '--address-file',
+      prefix('enterprise.addr'),
+    ])
+    const {parsedArgs} = parse(args)
+    const expectedResult = {
+      command: CommandType.SHOW_ADDRESS,
+      paymentPath: [2147485500, 2147485463, 2147483648, 0, 0],
+      paymentScriptHash: undefined,
+      stakingPath: undefined,
+      stakingScriptHash: undefined,
+      address: 'addr1vxq0nckg3ekgzuqg7w5p9mvgnd9ym28qh5grlph8xd2z92su77c6m',
+      derivationType: undefined,
+    }
+    assert.deepStrictEqual(parsedArgs, expectedResult)
+  })
+
+  it('Should parse address show command for reward address (staking-path only)', () => {
+    const args = pad([
+      'address',
+      'show',
+      '--staking-path',
+      '1852H/1815H/0H/2/0',
+      '--address-file',
+      prefix('reward.addr'),
+    ])
+    const {parsedArgs} = parse(args)
+    const expectedResult = {
+      command: CommandType.SHOW_ADDRESS,
+      paymentPath: undefined,
+      paymentScriptHash: undefined,
+      stakingPath: [2147485500, 2147485463, 2147483648, 2, 0],
+      stakingScriptHash: undefined,
+      address: 'stake1uyfz49rtntfa9h0s98f6s28sg69weemgjhc4e8hm66d5yacalmqha',
+      derivationType: undefined,
+    }
+    assert.deepStrictEqual(parsedArgs, expectedResult)
+  })
+
   it('Should parse address show command with a derivation type set', () => {
     const args = pad([
       'shelley',

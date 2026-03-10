@@ -91,6 +91,68 @@ export const LedgerCryptoProvider: (
     }
   }
 
+  const buildSpendingParams = (
+    paymentPath?: BIP32Path,
+    paymentScriptHash?: string,
+  ) => {
+    if (paymentPath != null) return {spendingPath: paymentPath}
+    if (paymentScriptHash != null)
+      return {spendingScriptHashHex: paymentScriptHash}
+    throw Error(Errors.InvalidAddressParametersProvidedError)
+  }
+
+  const buildStakingParams = (
+    stakingPath?: BIP32Path,
+    stakingScriptHash?: string,
+  ) => {
+    if (stakingPath != null) return {stakingPath}
+    if (stakingScriptHash != null)
+      return {stakingScriptHashHex: stakingScriptHash}
+    throw Error(Errors.InvalidAddressParametersProvidedError)
+  }
+
+  const buildDeviceOwnedAddress = ({
+    paymentPath,
+    paymentScriptHash,
+    stakingPath,
+    stakingScriptHash,
+    addressType,
+  }: {
+    paymentPath?: BIP32Path
+    paymentScriptHash?: string
+    stakingPath?: BIP32Path
+    stakingScriptHash?: string
+    addressType: number
+  }): DeviceOwnedAddress => {
+    switch (addressType) {
+      case AddressType.BASE_PAYMENT_KEY_STAKE_KEY:
+      case AddressType.BASE_PAYMENT_SCRIPT_STAKE_KEY:
+      case AddressType.BASE_PAYMENT_KEY_STAKE_SCRIPT:
+      case AddressType.BASE_PAYMENT_SCRIPT_STAKE_SCRIPT:
+        return {
+          type: addressType,
+          params: {
+            ...buildSpendingParams(paymentPath, paymentScriptHash),
+            ...buildStakingParams(stakingPath, stakingScriptHash),
+          },
+        }
+      case AddressType.ENTERPRISE_KEY:
+      case AddressType.ENTERPRISE_SCRIPT:
+        return {
+          type: addressType,
+          params: buildSpendingParams(paymentPath, paymentScriptHash),
+        }
+      case AddressType.REWARD_KEY:
+      case AddressType.REWARD_SCRIPT:
+        return {
+          type: addressType,
+          params: buildStakingParams(stakingPath, stakingScriptHash),
+        }
+      default:
+        throw Error(Errors.InvalidAddressParametersProvidedError)
+    }
+  }
+
   const showAddress = async ({
     paymentPath,
     paymentScriptHash,
@@ -106,15 +168,13 @@ export const LedgerCryptoProvider: (
           protocolMagic,
           networkId,
         },
-        address: {
-          type: addressType,
-          params: {
-            spendingPath: paymentPath,
-            spendingScriptHashHex: paymentScriptHash,
-            stakingPath,
-            stakingScriptHashHex: stakingScriptHash,
-          },
-        },
+        address: buildDeviceOwnedAddress({
+          paymentPath,
+          paymentScriptHash,
+          stakingPath,
+          stakingScriptHash,
+          addressType,
+        }),
       })
     } catch (err) {
       throw Error(failedMsg(err))
