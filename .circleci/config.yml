@@ -11,15 +11,15 @@ commands:
       - run: node --version
       - run: sudo apt-get -y update
       - run: sudo apt-get -y install libudev-dev libusb-1.0-0-dev
-      # --ignore-engines needed because of old node version, can be removed after node update
-      - run: yarn install --ignore-engines
+      - run: corepack enable
+      - run: yarn install
 
 jobs:
   audit:
     <<: *defaults
     steps:
       - setup
-      - run: yarn audit
+      - run: yarn npm audit
 
   lint:
     <<: *defaults
