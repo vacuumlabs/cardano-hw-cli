@@ -15,7 +15,7 @@ mkdir ./build/macos/archive-arm64
 mkdir ./build/macos/archive-arm64/cardano-hw-cli
 
 # Build executable
-yarn pkg ./dist/index.js -o ./build/macos/archive-arm64/cardano-hw-cli/cardano-hw-cli -c package.json -t node20-macos-arm64 --options "no-warnings=ExperimentalWarning"
+yarn pkg ./dist/index.js -o ./build/macos/archive-arm64/cardano-hw-cli/cardano-hw-cli -c package.json -t node22-macos-arm64 --options "no-warnings=ExperimentalWarning"
 
 # Copy dependencies
 cp -R ./build/dependencies/macos-arm64/* ./build/macos/archive-arm64/cardano-hw-cli/
