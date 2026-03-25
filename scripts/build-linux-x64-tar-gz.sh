@@ -14,7 +14,7 @@ mkdir ./build/linux/archive-x64
 mkdir ./build/linux/archive-x64/cardano-hw-cli
 
 # Build executable
-yarn pkg ./dist/index.js -o ./build/linux/archive-x64/cardano-hw-cli/cardano-hw-cli -c package.json -t node20-linux-x64 --options "no-warnings=ExperimentalWarning"
+yarn pkg ./dist/index.js -o ./build/linux/archive-x64/cardano-hw-cli/cardano-hw-cli -c package.json -t node22-linux-x64 --options "no-warnings=ExperimentalWarning"
 
 # Copy dependencies
 cp -R ./build/dependencies/linux/* ./build/linux/archive-x64/cardano-hw-cli/
