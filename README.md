@@ -63,6 +63,8 @@ Tries to non-destructively transform the tx file, so that it complies with [rest
 cardano-hw-cli transaction transform
 --tx-file FILE                         Input filepath of the tx. Use --cddl-format when building transactions with cardano-cli.
 --out-file FILE                        Output filepath of the tx.
+--protocol-params-file FILE            (optional) Path to a protocol parameters JSON file (from `cardano-cli query protocol-parameters`). Required for transactions with Plutus scripts so that the script integrity hash can be recomputed correctly.
+--used-cost-model-languages LANGUAGE   (optional) Plutus language versions used in the transaction (e.g. `PlutusV1`, `PlutusV2`, `PlutusV3`). Can be specified multiple times. Required for reference-script-only transactions where language versions cannot be inferred from the witness set.
 ```
 
 ## Show address on device

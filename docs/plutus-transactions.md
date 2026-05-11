@@ -130,10 +130,22 @@ At this point, the Plutus script is present in the transaction witness set - now
 
 ### Transforming the transaction
 HW wallets expect the transaction CBOR to be in *canonical* format (see CIP-0021). Unfortunately, cardano-cli sometimes produces tx files not compliant with CIP-0021. Use the following command to fix the formatting issues.
+
+For transactions with Plutus scripts, pass `--protocol-params-file` so the script integrity hash can be recomputed against the current cost models:
 ```
 cardano-hw-cli transaction transform \
 --tx-file tx.raw \
---out-file tx.transformed
+--out-file tx.transformed \
+--protocol-params-file protocol.json
+```
+
+If the transaction only references scripts (i.e. the Plutus scripts live in reference inputs and are not present in the witness set), also list the language versions used so the correct cost models can be selected:
+```
+cardano-hw-cli transaction transform \
+--tx-file tx.raw \
+--out-file tx.transformed \
+--protocol-params-file protocol.json \
+--used-cost-model-languages PlutusV2
 ```
 
 ### Signing the transaction
