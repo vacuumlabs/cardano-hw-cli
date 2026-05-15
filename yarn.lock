@@ -2754,13 +2754,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/uuid@npm:^10.0.0":
-  version: 10.0.0
-  resolution: "@types/uuid@npm:10.0.0"
-  checksum: 10c0/9a1404bf287164481cb9b97f6bb638f78f955be57c40c6513b7655160beb29df6f84c915aaf4089a1559c216557dc4d2f79b48d978742d3ae10b937420ddac60
-  languageName: node
-  linkType: hard
-
 "@types/w3c-web-usb@npm:^1.0.6":
   version: 1.0.10
   resolution: "@types/w3c-web-usb@npm:1.0.10"
@@ -3712,7 +3705,6 @@ __metadata:
     "@types/lodash": "npm:^4.17.20"
     "@types/mocha": "npm:^10.0.0"
     "@types/node": "npm:^22.0.0"
-    "@types/uuid": "npm:^10.0.0"
     "@typescript-eslint/eslint-plugin": "npm:^8.44.0"
     "@typescript-eslint/parser": "npm:^8.44.0"
     "@yao-pkg/pkg": "npm:^6.1.0"
@@ -3729,13 +3721,13 @@ __metadata:
     eslint-plugin-import: "npm:^2.25.4"
     eslint-plugin-mocha: "npm:^10.1.0"
     eslint-plugin-simple-import-sort: "npm:^7.0.0"
-    lodash: "npm:^4.17.23"
+    lodash: "npm:^4.18.1"
     mocha: "npm:^11.7.2"
     prettier: "npm:^2.6.2"
     rw: "npm:1.3.3"
     ts-node: "npm:^10.9.1"
     typescript: "npm:^4.9.4"
-    uuid: "npm:^10.0.0"
+    uuid: "npm:^11.1.1"
   languageName: unknown
   linkType: soft
 
@@ -6142,10 +6134,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lodash@npm:^4.17.23":
-  version: 4.17.23
-  resolution: "lodash@npm:4.17.23"
-  checksum: 10c0/1264a90469f5bb95d4739c43eb6277d15b6d9e186df4ac68c3620443160fc669e2f14c11e7d8b2ccf078b81d06147c01a8ccced9aab9f9f63d50dcf8cace6bf6
+"lodash@npm:^4.18.1":
+  version: 4.18.1
+  resolution: "lodash@npm:4.18.1"
+  checksum: 10c0/757228fc68805c59789e82185135cf85f05d0b2d3d54631d680ca79ec21944ec8314d4533639a14b8bcfbd97a517e78960933041a5af17ecb693ec6eecb99a27
   languageName: node
   linkType: hard
 
@@ -8128,12 +8120,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"uuid@npm:^10.0.0":
-  version: 10.0.0
-  resolution: "uuid@npm:10.0.0"
+"uuid@npm:^11.1.1":
+  version: 11.1.1
+  resolution: "uuid@npm:11.1.1"
   bin:
-    uuid: dist/bin/uuid
-  checksum: 10c0/eab18c27fe4ab9fb9709a5d5f40119b45f2ec8314f8d4cf12ce27e4c6f4ffa4a6321dc7db6c515068fa373c075b49691ba969f0010bf37f44c37ca40cd6bf7fe
+    uuid: dist/esm/bin/uuid
+  checksum: 10c0/9e3af58eba872ece5a5e76f4773a94fc78a0ef2c2444c38dbe6b42f41dadf76c01850fd783604f27986f6195e6286aef064d45987d401b2a33127b98ddf7c0c5
   languageName: node
   linkType: hard
 
