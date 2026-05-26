@@ -43,6 +43,7 @@ cardano-hw-cli transaction witness
 --mainnet | --testnet-magic NATURAL    Use the mainnet magic id or specify testnet magic id.
 --out-file FILE                        Output filepath of the witness (one or more witness files can be specified).
 --derivation-type TYPE                 Derivation type - currently applies only to Trezor. Options: LEDGER, ICARUS or ICARUS_TREZOR (default).
+--unrestricted                         Sign in unrestricted mode (Ledger app v8 with expert mode enabled on the device); relaxes client-side checks and lets the device show all transaction elements for the expert user to review. Must not contain a pool registration certificate. Not supported by Trezor or Keystone.
 ```
 
 ## Validate transaction
