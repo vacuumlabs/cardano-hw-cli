@@ -301,7 +301,15 @@ const hasMultisigSigningFile = (signingFiles: HwSigningData[]): boolean =>
 const determineSigningMode = (
   txBody: TransactionBody,
   signingFiles: HwSigningData[],
+  unrestricted?: boolean,
 ): SigningMode => {
+  // Unrestricted mode (Ledger app v8 + expert mode) relaxes client-side constraints and must be
+  // requested explicitly by the user (via --unrestricted); it is never auto-inferred from the tx
+  // contents. When requested, it takes precedence over every other mode.
+  if (unrestricted) {
+    return SigningMode.UNRESTRICTED_TRANSACTION
+  }
+
   const poolRegistrationCert = txBody.certificates?.items.find(
     (cert) => cert.type === CertificateType.POOL_REGISTRATION,
   ) as PoolRegistrationCertificate | undefined
@@ -561,9 +569,11 @@ const getAddressParameters = (
 }
 
 const areAddressParamsAllowed = (signingMode: SigningMode): boolean =>
-  [SigningMode.ORDINARY_TRANSACTION, SigningMode.PLUTUS_TRANSACTION].includes(
-    signingMode,
-  )
+  [
+    SigningMode.ORDINARY_TRANSACTION,
+    SigningMode.PLUTUS_TRANSACTION,
+    SigningMode.UNRESTRICTED_TRANSACTION,
+  ].includes(signingMode)
 
 const getAddressAttributes = (
   addressStr: HumanAddress,

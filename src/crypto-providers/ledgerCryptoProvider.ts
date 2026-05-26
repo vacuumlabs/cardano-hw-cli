@@ -368,6 +368,7 @@ export const LedgerCryptoProvider: (
         }
         const allowKeyHash =
           signingMode === SigningMode.PLUTUS_TRANSACTION ||
+          signingMode === SigningMode.UNRESTRICTED_TRANSACTION ||
           (allowKeyHashInOrdinary &&
             signingMode === SigningMode.ORDINARY_TRANSACTION)
         if (allowKeyHash) {
@@ -1173,6 +1174,8 @@ export const LedgerCryptoProvider: (
         return LedgerTypes.TransactionSigningMode.MULTISIG_TRANSACTION
       case SigningMode.PLUTUS_TRANSACTION:
         return LedgerTypes.TransactionSigningMode.PLUTUS_TRANSACTION
+      case SigningMode.UNRESTRICTED_TRANSACTION:
+        return LedgerTypes.TransactionSigningMode.UNRESTRICTED_TRANSACTION
       default:
         throw Error(Errors.Unreachable)
     }

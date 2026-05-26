@@ -32,6 +32,10 @@ export enum SigningMode {
   POOL_REGISTRATION_AS_OPERATOR,
   MULTISIG_TRANSACTION,
   PLUTUS_TRANSACTION,
+  // Ledger app v8 + expert mode only. Relaxes client-side constraints; the device shows all
+  // transaction elements for the expert user to review. Must be requested explicitly via
+  // --unrestricted; it is never auto-inferred. Not supported by Trezor or Keystone.
+  UNRESTRICTED_TRANSACTION,
 }
 
 export type TxSigningParameters = {

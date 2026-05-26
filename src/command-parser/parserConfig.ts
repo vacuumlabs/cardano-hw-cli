@@ -115,6 +115,12 @@ const txSigningArgs = {
     default: [],
     help: 'Input filepath of change output file.',
   },
+  '--unrestricted': {
+    required: false,
+    dest: 'unrestricted',
+    action: 'store_true',
+    help: 'Sign in unrestricted mode (Ledger app v8 with expert mode enabled on the device). Relaxes client-side checks; the device shows all transaction elements for the expert user to review. Not supported by Trezor or Keystone.',
+  },
   ...derivationTypeArg,
 }
 

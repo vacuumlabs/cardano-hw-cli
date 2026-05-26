@@ -195,7 +195,11 @@ const CommandExecutor = async () => {
 
     const {era} = args.txFileData
     const signingParameters: TxSigningParameters = {
-      signingMode: determineSigningMode(tx.body, args.hwSigningFileData),
+      signingMode: determineSigningMode(
+        tx.body,
+        args.hwSigningFileData,
+        args.unrestricted,
+      ),
       tx,
       txBodyHashHex: getTxBodyHash(tx.body),
       hwSigningFileData: args.hwSigningFileData,
