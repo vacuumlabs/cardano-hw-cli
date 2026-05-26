@@ -7,7 +7,11 @@ import {
   NativeScriptType,
 } from '../../../src/basicTypes'
 import {cardanoEraToSignedType, NETWORKS} from '../../../src/constants'
-import {CommandType, HwSigningType} from '../../../src/command-parser/argTypes'
+import {
+  CommandType,
+  HwSigningType,
+  ParsedTransactionWitnessArguments,
+} from '../../../src/command-parser/argTypes'
 import {encodeAsciiToHex} from '../../../src/command-parser/parsers'
 
 const resFolder = 'test/unit/commandParser/res/'
@@ -252,6 +256,28 @@ describe('Command parser', () => {
       unrestricted: false,
     }
     assert.deepStrictEqual(parsedArgs, expectedResult)
+  })
+
+  it('Should parse witness transaction with --unrestricted', () => {
+    const args = pad([
+      'shelley',
+      'transaction',
+      'witness',
+      '--tx-file',
+      prefix('tx.raw'),
+      '--hw-signing-file',
+      prefix('payment.hwsfile'),
+      '--mainnet',
+      '--out-file',
+      prefix('witness.out'),
+      '--unrestricted',
+    ])
+    const {parsedArgs} = parse(args)
+    assert.strictEqual(parsedArgs.command, CommandType.WITNESS_TRANSACTION)
+    assert.strictEqual(
+      (parsedArgs as ParsedTransactionWitnessArguments).unrestricted,
+      true,
+    )
   })
 
   it('Should parse CIP36 registration', () => {
