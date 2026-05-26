@@ -83,6 +83,9 @@
     "typescript": "^4.9.4"
   },
   "pkg": {
+    "scripts": [
+      "node_modules/@ledgerhq/devices/lib/**/*.js"
+    ],
     "assets": [
       "package.json",
       "node_modules/usb/prebuilds/**/*"
