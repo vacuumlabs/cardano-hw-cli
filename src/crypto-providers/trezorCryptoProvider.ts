@@ -718,6 +718,8 @@ export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
         return TrezorEnums.CardanoTxSigningMode.MULTISIG_TRANSACTION
       case SigningMode.PLUTUS_TRANSACTION:
         return TrezorEnums.CardanoTxSigningMode.PLUTUS_TRANSACTION
+      case SigningMode.UNRESTRICTED_TRANSACTION:
+        throw Error(Errors.TrezorUnrestrictedTransactionNotSupported)
       default:
         throw Error(Errors.Unreachable)
     }

@@ -103,6 +103,7 @@ export type ParsedTransactionWitnessArguments = {
   outFiles: string[]
   changeOutputKeyFileData: HwSigningData[]
   derivationType?: DerivationType
+  unrestricted: boolean
 }
 
 export type ParsedTransactionValidateArguments = {

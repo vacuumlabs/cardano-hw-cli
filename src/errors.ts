@@ -84,4 +84,7 @@ export const enum Errors {
   InvalidMessageAddressSigningFilesError = 'Missing address signing files in message signing',
   MessageAddressMismatchError = 'Message address mismatch: likely because incorrect address signing files were used',
   TrezorMessageHashPayloadUnsupported = 'Trezor does not support the `--hashed` option in message signing',
+  TrezorUnrestrictedTransactionNotSupported = 'Trezor does not support unrestricted transaction signing mode',
+  KeystoneUnrestrictedTransactionNotSupported = 'Keystone does not support unrestricted transaction signing mode',
+  PoolRegistrationCertificateNotAllowedInUnrestrictedMode = 'Pool registration certificate is not allowed in unrestricted transaction signing mode; use a pool registration signing mode instead',
 }

@@ -247,6 +247,19 @@ const validateNetworkId = (
   }
 }
 
+// Unrestricted mode (Ledger app v8 + expert mode) intentionally relaxes the per-mode structural
+// checks: the device shows every transaction element and trusts the expert user to review them.
+// The only invariant the Ledger app keeps is that a pool registration certificate must not be
+// present (those have their own dedicated signing modes), so that is all we enforce here.
+const validateUnrestrictedWitnesses = (body: TransactionBody): void => {
+  const hasPoolRegistrationCert = body.certificates?.items.some(
+    (cert) => cert.type === CertificateType.POOL_REGISTRATION,
+  )
+  if (hasPoolRegistrationCert) {
+    throw Error(Errors.PoolRegistrationCertificateNotAllowedInUnrestrictedMode)
+  }
+}
+
 const validateWitnessing = (params: TxSigningParameters): void => {
   // verifies whether signing parameters correspond to each other
   const {body} = params.tx
@@ -273,6 +286,10 @@ const validateWitnessing = (params: TxSigningParameters): void => {
 
     case SigningMode.PLUTUS_TRANSACTION:
       validatePlutusWitnesses(body, hwSigningFileData)
+      break
+
+    case SigningMode.UNRESTRICTED_TRANSACTION:
+      validateUnrestrictedWitnesses(body)
       break
 
     default:

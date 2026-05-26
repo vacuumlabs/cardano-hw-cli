@@ -199,6 +199,7 @@ describe('Command parser', () => {
       outFiles: ['test/unit/commandParser/res/witness.out'],
       changeOutputKeyFileData: [],
       derivationType: undefined,
+      unrestricted: false,
     }
     assert.deepStrictEqual(parsedArgs, expectedResult)
   })
@@ -248,6 +249,7 @@ describe('Command parser', () => {
         },
       ],
       derivationType: undefined,
+      unrestricted: false,
     }
     assert.deepStrictEqual(parsedArgs, expectedResult)
   })
