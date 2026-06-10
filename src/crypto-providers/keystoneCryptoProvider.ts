@@ -29,7 +29,6 @@ import {
 import {
   CryptoProvider,
   NativeScriptDisplayFormat,
-  SigningMode,
   TxSigningParameters,
 } from './cryptoProvider'
 import Cardano, {bip32PathToString} from './keystoneUtils'
@@ -78,6 +77,9 @@ export const KeystoneCryptoProvider: (
   // eslint-disable-next-line require-await
 ) => Promise<CryptoProvider> = async (transport) => {
   let keystone = new Cardano(transport)
+
+  const supportsUnrestrictedTransaction = (): Promise<boolean> =>
+    Promise.resolve(false)
 
   const getVersion = async (): Promise<string> => {
     try {
@@ -137,9 +139,6 @@ export const KeystoneCryptoProvider: (
     _changeOutputFiles: HwSigningData[],
   ): Promise<TxWitnesses> => {
     try {
-      if (params.signingMode === SigningMode.UNRESTRICTED_TRANSACTION) {
-        throw Error(Errors.KeystoneUnrestrictedTransactionNotSupported)
-      }
       const {walletMFP} = await keystone.getDeviceInfo()
       const {tx, hwSigningFileData} = params
       const hdPaths: string[] = []
@@ -486,6 +485,7 @@ export const KeystoneCryptoProvider: (
   return {
     showAddress,
     getVersion,
+    supportsUnrestrictedTransaction,
     witnessTx,
     getXPubKeys,
     signCIP36RegistrationMetaData,

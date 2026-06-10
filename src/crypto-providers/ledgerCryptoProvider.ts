@@ -82,6 +82,15 @@ export const LedgerCryptoProvider: (
 ) => Promise<CryptoProvider> = async (transport) => {
   const ledger = new Ledger(transport)
 
+  const supportsUnrestrictedTransaction = async (): Promise<boolean> => {
+    try {
+      return (await ledger.getVersion()).compatibility
+        .supportsUnrestrictedTransaction
+    } catch (err) {
+      throw Error(failedMsg(err))
+    }
+  }
+
   const getVersion = async (): Promise<string> => {
     try {
       const {major, minor, patch} = (await ledger.getVersion()).version
@@ -368,7 +377,7 @@ export const LedgerCryptoProvider: (
         }
         const allowKeyHash =
           signingMode === SigningMode.PLUTUS_TRANSACTION ||
-          signingMode === SigningMode.UNRESTRICTED_TRANSACTION ||
+          signingMode === SigningMode.UNRESTRICTED ||
           (allowKeyHashInOrdinary &&
             signingMode === SigningMode.ORDINARY_TRANSACTION)
         if (allowKeyHash) {
@@ -1174,7 +1183,7 @@ export const LedgerCryptoProvider: (
         return LedgerTypes.TransactionSigningMode.MULTISIG_TRANSACTION
       case SigningMode.PLUTUS_TRANSACTION:
         return LedgerTypes.TransactionSigningMode.PLUTUS_TRANSACTION
-      case SigningMode.UNRESTRICTED_TRANSACTION:
+      case SigningMode.UNRESTRICTED:
         return LedgerTypes.TransactionSigningMode.UNRESTRICTED_TRANSACTION
       default:
         throw Error(Errors.Unreachable)
@@ -1710,6 +1719,7 @@ export const LedgerCryptoProvider: (
 
   return {
     getVersion,
+    supportsUnrestrictedTransaction,
     showAddress,
     witnessTx,
     getXPubKeys,

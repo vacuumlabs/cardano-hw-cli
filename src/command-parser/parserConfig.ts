@@ -115,11 +115,11 @@ const txSigningArgs = {
     default: [],
     help: 'Input filepath of change output file.',
   },
-  '--unrestricted': {
+  '--allow-unrestricted-mode': {
     required: false,
-    dest: 'unrestricted',
+    dest: 'allowUnrestrictedMode',
     action: 'store_true',
-    help: 'Sign in unrestricted mode (Ledger app v8 with expert mode enabled on the device). Relaxes client-side checks; the device shows all transaction elements for the expert user to review. Not supported by Trezor or Keystone.',
+    help: 'Permit hw-cli to use unrestricted signing mode for transactions that require it (Ledger app v8 or newer with expert mode enabled on the device). Without this flag, hw-cli refuses to sign such transactions. In unrestricted mode the device shows all transaction elements for the expert user to review.',
   },
   ...derivationTypeArg,
 }

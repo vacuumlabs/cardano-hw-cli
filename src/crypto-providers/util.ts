@@ -6,10 +6,12 @@ import {
   TransactionBody,
   encodeTxBody,
   CertificateType,
+  Certificate,
   PoolRegistrationCertificate,
   KeyHash,
   ScriptHash,
   KEY_HASH_LENGTH,
+  VoterType,
 } from 'cardano-hw-interop-lib'
 import {HARDENED_THRESHOLD} from '../constants'
 import {Errors} from '../errors'
@@ -298,26 +300,150 @@ const hasMultisigSigningFile = (signingFiles: HwSigningData[]): boolean =>
     (signingFile) => signingFile.type === HwSigningType.MultiSig,
   )
 
+// Pulls every credential field a non-unrestricted signing mode validates on a certificate (i.e.
+// the credentials whose form — KEY_PATH, KEY_HASH or SCRIPT_HASH — the lib checks per mode).
+// hotCredential on AUTHORIZE_COMMITTEE_HOT is intentionally skipped: only the cold credential
+// authorizes the cert and the lib's per-mode rules do not constrain the hot one.
+const collectCertCredentials = (cert: Certificate): Credential[] => {
+  const credentials: Credential[] = []
+  if ('stakeCredential' in cert) credentials.push(cert.stakeCredential)
+  if ('dRepCredential' in cert) credentials.push(cert.dRepCredential)
+  if ('coldCredential' in cert) credentials.push(cert.coldCredential)
+  return credentials
+}
+
+export const paymentHashFromAddress = (addressBytes: Buffer): Buffer => {
+  if (addressBytes.length < 1 + KEY_HASH_LENGTH) {
+    throw Error('Wrong address length, likely a bug in hw-cli')
+  }
+  return addressBytes.subarray(1, 1 + KEY_HASH_LENGTH)
+}
+
+const rewardAccountToStakeCredential = (address: RewardAccount): Credential => {
+  const type = getAddressType(address)
+  switch (type) {
+    case AddressType.REWARD_KEY: {
+      return {
+        type: CredentialType.KEY_HASH,
+        keyHash: paymentHashFromAddress(address) as KeyHash,
+      }
+    }
+    case AddressType.REWARD_SCRIPT: {
+      return {
+        type: CredentialType.SCRIPT_HASH,
+        scriptHash: paymentHashFromAddress(address) as ScriptHash,
+      }
+    }
+    default:
+      throw Error(Errors.InvalidAddressError)
+  }
+}
+
+// The form in which hw-cli presents a credential to the device: a key hash with a matching
+// signing file is lifted to a derivation path (see prepareCredential in ledgerCryptoProvider).
+enum CredentialForm {
+  KEY_PATH,
+  KEY_HASH,
+  SCRIPT_HASH,
+}
+
+// Collects the form of every credential whose form the signing modes constrain: certificate
+// stake/cold/dRep credentials, withdrawal stake credentials and voters.
+const collectCredentialForms = (
+  txBody: TransactionBody,
+  signingFiles: HwSigningData[],
+): CredentialForm[] => {
+  const signingKeyHashes = new Set(
+    signingFiles.map((f) => hwSigningFileToPubKeyHash(f).toString('hex')),
+  )
+  const keyHashForm = (keyHash: KeyHash): CredentialForm =>
+    signingKeyHashes.has(keyHash.toString('hex'))
+      ? CredentialForm.KEY_PATH
+      : CredentialForm.KEY_HASH
+  const credentialForm = (credential: Credential): CredentialForm =>
+    credential.type === CredentialType.SCRIPT_HASH
+      ? CredentialForm.SCRIPT_HASH
+      : keyHashForm(credential.keyHash)
+
+  const certForms = (txBody.certificates?.items ?? []).flatMap((cert) =>
+    collectCertCredentials(cert).map(credentialForm),
+  )
+
+  const withdrawalForms = (txBody.withdrawals ?? []).map((withdrawal) =>
+    credentialForm(rewardAccountToStakeCredential(withdrawal.rewardAccount)),
+  )
+
+  const voterForms = (txBody.votingProcedures ?? []).map(({voter}) =>
+    voter.type === VoterType.COMMITTEE_SCRIPT ||
+    voter.type === VoterType.DREP_SCRIPT
+      ? CredentialForm.SCRIPT_HASH
+      : // COMMITTEE_KEY, DREP_KEY, STAKE_POOL — all key-based, all carry `hash: KeyHash`.
+        keyHashForm(voter.hash),
+  )
+
+  return [...certForms, ...withdrawalForms, ...voterForms]
+}
+
+// Transaction body fields rejected by both the ORDINARY and MULTISIG signing modes.
+const hasPlutusOnlyFields = (txBody: TransactionBody): boolean =>
+  txBody.collateralInputs != null ||
+  txBody.collateralReturnOutput != null ||
+  txBody.totalCollateral != null ||
+  txBody.referenceInputs != null
+
+// canSignWith*Mode mirror the per-signing-mode tx-body rejection rules of the Ledger app
+// (ledgerjs `parsing/transaction.ts`), each clause annotated with the rule it mirrors.
+
+const canSignWithOrdinaryMode = (
+  txBody: TransactionBody,
+  signingFiles: HwSigningData[],
+): boolean =>
+  // SIGN_MODE_ORDINARY__POOL_REGISTRATION_NOT_ALLOWED
+  !txBody.certificates?.items.some(
+    (cert) => cert.type === CertificateType.POOL_REGISTRATION,
+  ) &&
+  // SIGN_MODE_ORDINARY__CERTIFICATE_*_ONLY_AS_PATH, __WITHDRAWAL_ONLY_AS_PATH,
+  // __VOTER_ONLY_AS_PATH
+  collectCredentialForms(txBody, signingFiles).every(
+    (form) => form === CredentialForm.KEY_PATH,
+  ) &&
+  // SIGN_MODE_ORDINARY__COLLATERAL_INPUTS_NOT_ALLOWED, __COLLATERAL_OUTPUT_NOT_ALLOWED,
+  // __TOTAL_COLLATERAL_NOT_ALLOWED, __REFERENCE_INPUTS_NOT_ALLOWED
+  !hasPlutusOnlyFields(txBody)
+
+// SIGN_MODE_MULTISIG__DEVICE_OWNED_ADDRESS_NOT_ALLOWED needs no clause: hw-cli sends outputs
+// as third-party addresses in MULTISIG mode (see areAddressParamsAllowed).
+const canSignWithMultisigMode = (
+  txBody: TransactionBody,
+  signingFiles: HwSigningData[],
+): boolean =>
+  // SIGN_MODE_MULTISIG__POOL_REGISTRATION_NOT_ALLOWED, __POOL_RETIREMENT_NOT_ALLOWED
+  !txBody.certificates?.items.some(
+    (cert) =>
+      cert.type === CertificateType.POOL_REGISTRATION ||
+      cert.type === CertificateType.POOL_RETIREMENT,
+  ) &&
+  // SIGN_MODE_MULTISIG__CERTIFICATE_CREDENTIAL_ONLY_AS_SCRIPT, __WITHDRAWAL_ONLY_AS_SCRIPT,
+  // __VOTER_ONLY_AS_SCRIPT — a path-resolvable key hash violates these too (it would be sent
+  // as a key path).
+  collectCredentialForms(txBody, signingFiles).every(
+    (form) => form === CredentialForm.SCRIPT_HASH,
+  ) &&
+  // SIGN_MODE_MULTISIG__COLLATERAL_INPUTS_NOT_ALLOWED, __COLLATERAL_OUTPUT_NOT_ALLOWED,
+  // __TOTAL_COLLATERAL_NOT_ALLOWED, __REFERENCE_INPUTS_NOT_ALLOWED
+  !hasPlutusOnlyFields(txBody)
+
 const determineSigningMode = (
   txBody: TransactionBody,
   signingFiles: HwSigningData[],
-  unrestricted?: boolean,
 ): SigningMode => {
-  // Unrestricted mode (Ledger app v8 + expert mode) relaxes client-side constraints and must be
-  // requested explicitly by the user (via --unrestricted); it is never auto-inferred from the tx
-  // contents. When requested, it takes precedence over every other mode.
-  if (unrestricted) {
-    return SigningMode.UNRESTRICTED_TRANSACTION
-  }
-
   const poolRegistrationCert = txBody.certificates?.items.find(
     (cert) => cert.type === CertificateType.POOL_REGISTRATION,
   ) as PoolRegistrationCertificate | undefined
 
-  // If txBody contains pool registration certificate, we must use one of the POOL_REGISTRATION
-  // signing modes. If the user provides e.g. multisig signing files at the same time (which
-  // indicates that a mistake happened at some point), this attempt is refused by
-  // witnessingValidation.ts.
+  // A pool registration cert requires one of the POOL_REGISTRATION signing modes — never
+  // unrestricted mode, which rejects pool registration certs, too. Txs these modes cannot sign
+  // are not signable at all; per-mode validation reports the violated rule.
   if (poolRegistrationCert) {
     const poolKeyPath = findSigningPathForKeyHash(
       poolRegistrationCert.poolParams.operator,
@@ -329,18 +455,25 @@ const determineSigningMode = (
       : SigningMode.POOL_REGISTRATION_AS_OWNER
   }
 
-  // Collaterals are allowed only in the PLUTUS signing mode. Note that we have to consider PLUTUS
-  // signing mode before MULTISIG, because multisig signing files are allowed in PLUTUS signing
-  // mode, too.
-  if (txBody.collateralInputs) {
+  // Plutus-only fields point to the PLUTUS signing mode, which accepts any tx without a pool
+  // registration cert. PLUTUS has to be considered before MULTISIG, because multisig signing
+  // files are allowed in PLUTUS signing mode, too.
+  if (hasPlutusOnlyFields(txBody)) {
     return SigningMode.PLUTUS_TRANSACTION
   }
 
-  // If we got here, the tx should be a valid ORDINARY or MULTISIG tx. We cannot distinguish these
-  // two only by the txBody contents, so we need to make the decision based on signing files.
-  return hasMultisigSigningFile(signingFiles)
-    ? SigningMode.MULTISIG_TRANSACTION
-    : SigningMode.ORDINARY_TRANSACTION
+  // ORDINARY and MULTISIG cannot be distinguished by the txBody contents alone, so we decide
+  // based on signing files. Txs the decided mode cannot sign fall back to unrestricted mode;
+  // the caller (commandExecutor) asserts that the user authorized it via
+  // --allow-unrestricted-mode and that the device supports it.
+  if (hasMultisigSigningFile(signingFiles)) {
+    return canSignWithMultisigMode(txBody, signingFiles)
+      ? SigningMode.MULTISIG_TRANSACTION
+      : SigningMode.UNRESTRICTED
+  }
+  return canSignWithOrdinaryMode(txBody, signingFiles)
+    ? SigningMode.ORDINARY_TRANSACTION
+    : SigningMode.UNRESTRICTED
 }
 
 const validateKeyGenInputs = (
@@ -464,13 +597,6 @@ const _packRewardAddress = (
   }
 }
 
-export const paymentHashFromAddress = (addressBytes: Buffer): Buffer => {
-  if (addressBytes.length < 1 + KEY_HASH_LENGTH) {
-    throw Error('Wrong address length, likely a bug in hw-cli')
-  }
-  return addressBytes.subarray(1, 1 + KEY_HASH_LENGTH)
-}
-
 export const stakeHashFromBaseAddress = (addressBytes: Buffer): Buffer => {
   if (addressBytes.length !== 1 + 2 * KEY_HASH_LENGTH) {
     throw Error('Wrong address length, likely a bug in hw-cli')
@@ -572,7 +698,7 @@ const areAddressParamsAllowed = (signingMode: SigningMode): boolean =>
   [
     SigningMode.ORDINARY_TRANSACTION,
     SigningMode.PLUTUS_TRANSACTION,
-    SigningMode.UNRESTRICTED_TRANSACTION,
+    SigningMode.UNRESTRICTED,
   ].includes(signingMode)
 
 const getAddressAttributes = (
@@ -626,26 +752,6 @@ const ipv6ToString = (ipv6: Buffer | null | undefined): string | undefined => {
     .toString('hex')
     .match(/.{1,4}/g)
   return ipv6LE ? ipv6LE.join(':') : undefined
-}
-
-const rewardAccountToStakeCredential = (address: RewardAccount): Credential => {
-  const type = getAddressType(address)
-  switch (type) {
-    case AddressType.REWARD_KEY: {
-      return {
-        type: CredentialType.KEY_HASH,
-        keyHash: paymentHashFromAddress(address) as KeyHash,
-      }
-    }
-    case AddressType.REWARD_SCRIPT: {
-      return {
-        type: CredentialType.SCRIPT_HASH,
-        scriptHash: paymentHashFromAddress(address) as ScriptHash,
-      }
-    }
-    default:
-      throw Error(Errors.InvalidAddressError)
-  }
 }
 
 const formatCIP36RegistrationMetaData = (

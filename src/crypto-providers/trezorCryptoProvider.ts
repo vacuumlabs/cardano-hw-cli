@@ -72,6 +72,9 @@ type _TrezorDestination =
     }
 
 export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
+  const supportsUnrestrictedTransaction = (): Promise<boolean> =>
+    Promise.resolve(false)
+
   const getVersion = async (): Promise<string> => {
     const {payload: features} = await TrezorConnect.getFeatures()
     const isSuccessful = (value: unknown): value is TrezorTypes.Features =>
@@ -718,8 +721,6 @@ export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
         return TrezorEnums.CardanoTxSigningMode.MULTISIG_TRANSACTION
       case SigningMode.PLUTUS_TRANSACTION:
         return TrezorEnums.CardanoTxSigningMode.PLUTUS_TRANSACTION
-      case SigningMode.UNRESTRICTED_TRANSACTION:
-        throw Error(Errors.TrezorUnrestrictedTransactionNotSupported)
       default:
         throw Error(Errors.Unreachable)
     }
@@ -1213,6 +1214,7 @@ export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
 
   return {
     getVersion,
+    supportsUnrestrictedTransaction,
     showAddress,
     witnessTx,
     getXPubKeys,
