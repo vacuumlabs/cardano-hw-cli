@@ -379,7 +379,8 @@ export const LedgerCryptoProvider: (
           signingMode === SigningMode.PLUTUS_TRANSACTION ||
           signingMode === SigningMode.UNRESTRICTED ||
           (allowKeyHashInOrdinary &&
-            signingMode === SigningMode.ORDINARY_TRANSACTION)
+            (signingMode === SigningMode.ORDINARY_TRANSACTION ||
+              signingMode === SigningMode.MULTISIG_TRANSACTION))
         if (allowKeyHash) {
           return {
             type: LedgerTypes.CredentialParamsType.KEY_HASH,
