@@ -3682,12 +3682,12 @@ __metadata:
   linkType: soft
 
 "cardano-hw-interop-lib@npm:^3.0.2":
-  version: 3.0.2
-  resolution: "cardano-hw-interop-lib@npm:3.0.2"
+  version: 3.1.0
+  resolution: "cardano-hw-interop-lib@npm:3.1.0"
   dependencies:
     blake2b: "npm:^2.1.4"
     cbor: "npm:^9.0.1"
-  checksum: 10c0/6ea9d184d9013acebc519865e864dfecac8c2dd32a9a753ace1733faa5e56daf80daea8165cce53c5605261a7aadefa2f7fb43ebaa35d14a9697a4e6cf739dba
+  checksum: 10c0/42299e79e9d995f667db5ec0e4d3d0550c8f6f1f2cb72483799fb184d8191df41ea709290c4b26cfc93efbc467cd6af333b526bf3faec9b970bac00d7328b5ac
   languageName: node
   linkType: hard
 
