@@ -216,6 +216,27 @@ describe('determineSigningMode', () => {
     )
   })
 
+  it('infers MULTISIG_TRANSACTION for a committee hot authorization with a third-party hot key', () => {
+    // The hot credential is the cert's subject, not its authorizer — no signing mode constrains
+    // its form, so it must not force unrestricted mode.
+    const body = bodyWithCertificates([
+      {
+        type: CertificateType.AUTHORIZE_COMMITTEE_HOT as const,
+        coldCredential: stakeDeregistrationWithScriptHash.stakeCredential,
+        hotCredential: {
+          type: CredentialType.KEY_HASH as const,
+          keyHash: keyHashBuf(
+            'deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef',
+          ),
+        },
+      },
+    ])
+    assert.strictEqual(
+      determineSigningMode(body, [multisigSigningFile]),
+      SigningMode.MULTISIG_TRANSACTION,
+    )
+  })
+
   it('auto-applies UNRESTRICTED for pool retirement in a multisig tx', () => {
     const body = bodyWithCertificates([
       stakeDeregistrationWithScriptHash,
