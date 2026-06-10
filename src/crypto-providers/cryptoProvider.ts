@@ -32,10 +32,7 @@ export enum SigningMode {
   POOL_REGISTRATION_AS_OPERATOR,
   MULTISIG_TRANSACTION,
   PLUTUS_TRANSACTION,
-  // Ledger app v8 + expert mode only. Relaxes client-side constraints; the device shows all
-  // transaction elements for the expert user to review. Must be requested explicitly via
-  // --unrestricted; it is never auto-inferred. Not supported by Trezor or Keystone.
-  UNRESTRICTED_TRANSACTION,
+  UNRESTRICTED,
 }
 
 export type TxSigningParameters = {
@@ -55,6 +52,9 @@ export enum NativeScriptDisplayFormat {
 
 export type CryptoProvider = {
   getVersion: () => Promise<string>
+  // Whether the connected device/app can sign in unrestricted mode (Ledger app v8+ with expert
+  // mode enabled).
+  supportsUnrestrictedTransaction: () => Promise<boolean>
   showAddress: (args: ParsedShowAddressArguments) => Promise<void>
   witnessTx: (
     params: TxSigningParameters,

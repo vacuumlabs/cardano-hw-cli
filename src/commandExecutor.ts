@@ -4,6 +4,7 @@ import {TransportNodeUSB} from '@keystonehq/hw-transport-nodeusb'
 import {
   CryptoProvider,
   NativeScriptDisplayFormat,
+  SigningMode,
   TxSigningParameters,
 } from './crypto-providers/cryptoProvider'
 import {
@@ -194,12 +195,20 @@ const CommandExecutor = async () => {
     const tx = InteropLib.decodeTx(txCbor)
 
     const {era} = args.txFileData
+    const signingMode = determineSigningMode(tx.body, args.hwSigningFileData)
+    // Unrestricted mode is auto-applied when the tx requires it. Refuse to sign unless the user
+    // explicitly authorized it via --allow-unrestricted-mode, and verify the connected device/app
+    // can actually honor it.
+    if (signingMode === SigningMode.UNRESTRICTED) {
+      if (!args.allowUnrestrictedMode) {
+        throw Error(Errors.UnrestrictedModeRequiredError)
+      }
+      if (!(await cryptoProvider.supportsUnrestrictedTransaction())) {
+        throw Error(Errors.UnrestrictedModeUnsupportedByDeviceError)
+      }
+    }
     const signingParameters: TxSigningParameters = {
-      signingMode: determineSigningMode(
-        tx.body,
-        args.hwSigningFileData,
-        args.unrestricted,
-      ),
+      signingMode,
       tx,
       txBodyHashHex: getTxBodyHash(tx.body),
       hwSigningFileData: args.hwSigningFileData,

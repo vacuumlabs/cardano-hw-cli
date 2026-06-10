@@ -203,7 +203,7 @@ describe('Command parser', () => {
       outFiles: ['test/unit/commandParser/res/witness.out'],
       changeOutputKeyFileData: [],
       derivationType: undefined,
-      unrestricted: false,
+      allowUnrestrictedMode: false,
     }
     assert.deepStrictEqual(parsedArgs, expectedResult)
   })
@@ -253,12 +253,12 @@ describe('Command parser', () => {
         },
       ],
       derivationType: undefined,
-      unrestricted: false,
+      allowUnrestrictedMode: false,
     }
     assert.deepStrictEqual(parsedArgs, expectedResult)
   })
 
-  it('Should parse witness transaction with --unrestricted', () => {
+  it('Should parse witness transaction with --allow-unrestricted-mode', () => {
     const args = pad([
       'shelley',
       'transaction',
@@ -270,12 +270,12 @@ describe('Command parser', () => {
       '--mainnet',
       '--out-file',
       prefix('witness.out'),
-      '--unrestricted',
+      '--allow-unrestricted-mode',
     ])
     const {parsedArgs} = parse(args)
     assert.strictEqual(parsedArgs.command, CommandType.WITNESS_TRANSACTION)
     assert.strictEqual(
-      (parsedArgs as ParsedTransactionWitnessArguments).unrestricted,
+      (parsedArgs as ParsedTransactionWitnessArguments).allowUnrestrictedMode,
       true,
     )
   })

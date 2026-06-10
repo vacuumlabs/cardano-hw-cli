@@ -288,7 +288,7 @@ const validateWitnessing = (params: TxSigningParameters): void => {
       validatePlutusWitnesses(body, hwSigningFileData)
       break
 
-    case SigningMode.UNRESTRICTED_TRANSACTION:
+    case SigningMode.UNRESTRICTED:
       validateUnrestrictedWitnesses(body)
       break
 
