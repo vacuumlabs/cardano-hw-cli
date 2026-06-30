@@ -180,6 +180,8 @@ yarn dev ...
 
 __NOTE: The pre-compiled `HID.node` binaries in `build/dependencies/` must match the target Node version and architecture. After updating Node, these may need to be rebuilt for each target platform.__
 
+macOS `.tar.gz` artifacts must be built **on macOS** (`yarn build-macos-all` or `yarn build-macos-arm64`). CI builds the **native** architecture only (arm64 on Apple Silicon runners). Build `yarn build-macos-x64` on an Intel Mac for the x64 tarball. `pkg` ad-hoc signs the main executable; the build scripts sign `HID.node` separately. Linux cross-compiled macOS pkg binaries fail at runtime (`UNEXPECTED-20`). Do not re-sign release binaries with `codesign --deep` — it corrupts the embedded pkg snapshot.
+
 Install node version v20 (LTS)
 ```
 nvm i 20
@@ -201,6 +203,7 @@ yarn build-linux-deb
 yarn build-linux-tar
 yarn build-linux-tar-arm64
 yarn build-windows
+yarn build-macos-all
 yarn build-macos-x64
 yarn build-macos-arm64
 ```

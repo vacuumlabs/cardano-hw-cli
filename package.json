@@ -16,6 +16,8 @@
   },
   "scripts": {
     "build": "./scripts/build-all.sh",
+    "build-linux-all": "./scripts/build-linux-all.sh",
+    "build-macos-all": "./scripts/build-macos-all.sh",
     "build-linux-deb": "./scripts/build-common.sh && ./scripts/build-linux-deb-package.sh",
     "build-linux-tar": "./scripts/build-common.sh && ./scripts/build-linux-x64-tar-gz.sh",
     "build-linux-tar-arm64": "./scripts/build-common.sh && ./scripts/build-linux-arm64-tar-gz.sh",
@@ -29,7 +31,7 @@
     "prettier": "prettier --write .",
     "spell:check": "yarn cspell lint --gitignore '**' 2>/dev/null",
     "test-unit": "mocha -r ts-node/register 'test/unit/**/*.ts'",
-    "test-bin": "yarn build && ./build/linux/archive-x64/cardano-hw-cli/cardano-hw-cli --help",
+    "test-bin": "yarn build-linux-all && ./build/linux/archive-x64/cardano-hw-cli/cardano-hw-cli --help",
     "test-integration-ledger": "mocha -r ts-node/register 'test/integration/ledger/node/**/*.ts' --exit",
     "test-integration-ledger-speculos": "LEDGER_TRANSPORT=speculos yarn test-integration-ledger",
     "test-integration-trezor": "mocha -r ts-node/register 'test/integration/trezor/node/**/*.ts' --exit",

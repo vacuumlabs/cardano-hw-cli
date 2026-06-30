@@ -16,6 +16,24 @@ commands:
       - run: sudo corepack enable
       - run: yarn install
 
+  setup_macos:
+    steps:
+      - checkout
+      - run:
+          name: Set up Node and Yarn
+          command: |
+            set -ex
+            brew install node@22
+            echo 'export PATH="/opt/homebrew/opt/node@22/bin:$PATH"' >> "$BASH_ENV"
+            node --version
+            corepack enable
+            yarn --version
+      - run:
+          name: Install dependencies
+          command: |
+            set -ex
+            yarn install
+
 jobs:
   audit:
     <<: *defaults
@@ -38,6 +56,28 @@ jobs:
       - run: yarn build-js
       - run: yarn test-unit
       - run: yarn test-bin
+      - store_artifacts:
+          path: build/release
+          destination: release-binaries
+
+  build_macos_artifacts:
+    macos:
+      xcode: "16.4.0"
+    resource_class: m4pro.medium
+    environment:
+      HOMEBREW_NO_AUTO_UPDATE: 1
+    steps:
+      - setup_macos
+      - run:
+          name: Build macOS artifacts
+          no_output_timeout: 45m
+          command: |
+            set -ex
+            ./scripts/build-macos-all.sh
+            ls -la build/release/
+      - store_artifacts:
+          path: build/release
+          destination: macos-release-binaries
 
 workflows:
   version: 2
@@ -46,3 +86,4 @@ workflows:
       - audit
       - lint
       - build_and_test
+      - build_macos_artifacts

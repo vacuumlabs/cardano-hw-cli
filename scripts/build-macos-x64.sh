@@ -1,24 +1,31 @@
 #!/bin/bash
-# This script can be run from linux and executable should be runnable on macos
+# Build macOS x64 artifacts. Must run on an Intel Mac (pkg cannot build x64 on Apple Silicon).
+
+set -euo pipefail
 
 cd ${0%/*}
 cd ..
 
 CARDANO_HW_CLI_PACKAGE_VERSION=$(cat package.json | grep version | head -1 | awk -F: '{ print $2 }' | sed 's/[", ]//g')
 
+ARTIFACT_DIR=./build/macos/archive-x64/cardano-hw-cli
+
 # Remove old build
-rm -R ./build/macos/archive-x64 2> /dev/null
+rm -rf ./build/macos/archive-x64
 
 # Prepare directories
-mkdir ./build/macos 2> /dev/null
-mkdir ./build/macos/archive-x64
-mkdir ./build/macos/archive-x64/cardano-hw-cli
+mkdir -p ./build/macos/archive-x64
+mkdir -p "${ARTIFACT_DIR}"
 
-# Build executable
-yarn pkg ./dist/index.js -o ./build/macos/archive-x64/cardano-hw-cli/cardano-hw-cli -c package.json -t node22-macos-x64 --options "no-warnings=ExperimentalWarning"
+# pkg ad-hoc signs the main executable on macOS by default
+yarn pkg ./dist/index.js -o "${ARTIFACT_DIR}/cardano-hw-cli" -c package.json -t node22-macos-x64 --options "no-warnings=ExperimentalWarning"
 
-# Copy dependencies
-cp -R ./build/dependencies/macos-x64/* ./build/macos/archive-x64/cardano-hw-cli/
+# Copy native deps (pkg does not sign bundled .node files)
+cp -R ./build/dependencies/macos-x64/* "${ARTIFACT_DIR}/"
+
+if [[ -f "${ARTIFACT_DIR}/HID.node" ]]; then
+  codesign -s - --force "${ARTIFACT_DIR}/HID.node"
+fi
 
 # Archive
 cd ./build/macos/archive-x64
