@@ -31,7 +31,7 @@ import {
   NativeScriptDisplayFormat,
   TxSigningParameters,
 } from './cryptoProvider'
-import Cardano, {bip32PathToString} from './keystoneUtils'
+import Cardano, {bip32PathToString, WALLET_NAME} from './keystoneUtils'
 import {
   classifyPath,
   encodeCIP36RegistrationMetaData,
@@ -56,7 +56,6 @@ import {
   SignedOpCertCborHex,
 } from '../opCert/opCert'
 import {SignedMessageData} from '../signMessage/signMessage'
-import {CardanoSignCip8MessageData} from '@keystonehq/keystone-sdk/dist/types/props'
 import {v4 as uuidv4} from 'uuid'
 import * as cardanoSerialization from '@emurgo/cardano-serialization-lib-nodejs'
 import {
@@ -71,7 +70,6 @@ const failedMsg = (e: unknown): string => `The requested operation failed. \
 Check that your Keystone device is connected.
 Details: ${e}`
 
-const WALLET_NAME = 'cardano_hw_cli_wallet'
 export const KeystoneCryptoProvider: (
   transport: TransportHID,
   // eslint-disable-next-line require-await
@@ -360,39 +358,42 @@ export const KeystoneCryptoProvider: (
   const signMessage = async (
     args: ParsedSignMessageArguments,
   ): Promise<SignedMessageData> => {
+    // The Keystone CIP-8 request format has no field for the message display
+    // preference, so --prefer-hex is a no-op here. Warn instead of failing, as
+    // the device controls the message display format.
+    if (args.preferHexDisplay) {
+      // eslint-disable-next-line no-console
+      console.log(
+        'Warning! The --prefer-hex option has no effect on Keystone 3 Pro; the device controls the message display format.',
+      )
+    }
     const {walletMFP} = await keystone.getDeviceInfo()
     const {hwSigningFileData} = args
     const {pubKey} = splitXPubKeyCborHex(hwSigningFileData.cborXPubKeyHex)
-    const cardanoSignCip8DataRequest = {
+    const signingPath = bip32PathToString(hwSigningFileData.path)
+    const signMessageRequest = {
       requestId: uuidv4(),
       xfp: walletMFP,
       messageHex: args.messageHex,
       hashPayload: args.hashPayload,
-      preferHexDisplay: args.preferHexDisplay,
       xpub: pubKey.toString('hex'),
-      path: bip32PathToString(hwSigningFileData.path),
+      path: signingPath,
       origin: WALLET_NAME,
-      signingPath: bip32PathToString(hwSigningFileData.path),
-    }
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    let keystoneArgs: CardanoSignCip8MessageData
-    if (args.address !== undefined) {
-      keystoneArgs = {
-        ...cardanoSignCip8DataRequest,
-        addressFieldType: MessageAddressFieldType.ADDRESS,
-        address: args.address,
-      }
-    } else {
-      keystoneArgs = {
-        ...cardanoSignCip8DataRequest,
-        addressFieldType: MessageAddressFieldType.KEY_HASH,
-      }
     }
 
     try {
       keystone = new Cardano(transport, walletMFP)
       const response = await keystone.signCardanoCip8DataTransaction(
-        keystoneArgs,
+        args.address !== undefined
+          ? {
+              ...signMessageRequest,
+              addressFieldType: MessageAddressFieldType.ADDRESS,
+              address: args.address,
+            }
+          : {
+              ...signMessageRequest,
+              addressFieldType: MessageAddressFieldType.KEY_HASH,
+            },
       )
       return {
         signatureHex: response.signature,

@@ -11,7 +11,13 @@ import {
   QRHardwareCallType,
   CryptoMultiAccounts,
 } from '@keystonehq/bc-ur-registry'
-import {CardanoCertKeyData, CardanoUtxoData} from '@keystonehq/bc-ur-registry-cardano'
+import {
+  CardanoCertKeyData,
+  CardanoUtxoData,
+  CardanoSignCip8DataRequest,
+  CardanoSignCip8DataSignature,
+  MessageAddressFieldType,
+} from '@keystonehq/bc-ur-registry-cardano'
 import {UR, UREncoder, URDecoder} from '@ngraveio/bc-ur'
 import {Actions, TransportHID} from '@keystonehq/hw-transport-usb'
 import {throwTransportError, Status} from '@keystonehq/hw-transport-error'
@@ -19,13 +25,14 @@ import CardanoSerializationLib from '@emurgo/cardano-serialization-lib-nodejs'
 import {bech32} from 'bech32'
 import KeystoneSDK, {
   CardanoCatalystRequestProps,
-  CardanoSignCip8MessageData,
   CardanoSignDataRequestProps,
 } from '@keystonehq/keystone-sdk'
 import {BIP32Path} from '../basicTypes'
 import {HARDENED_THRESHOLD} from '../constants'
 import {classifyPath, PathTypes} from './util'
 import {uuid} from '@keystonehq/keystone-sdk/dist/utils'
+
+export const WALLET_NAME = 'cardano_hw_cli_wallet'
 
 export const pathToKeypath = (
   path: string,
@@ -267,7 +274,7 @@ export default class Cardano {
     const hardwareCall = new QRHardwareCall(
       QRHardwareCallType.KeyDerivation,
       keyDerivation,
-      'Keystone USB SDK',
+      WALLET_NAME,
     )
     const ur = hardwareCall.toUR()
     const encodedUR = new UREncoder(ur, Infinity).nextPart().toUpperCase()
@@ -343,7 +350,6 @@ export default class Cardano {
     extraSigners: CardanoCertKeyData[]
   }): Promise<Witness[]> {
     const requestId = uuid.v4()
-    const origin = 'cardano-hw-cli-wallet'
     this.precheck()
     const keystoneSDK = new KeystoneSDK()
     const ur = keystoneSDK.cardano.generateSignRequest({
@@ -351,7 +357,7 @@ export default class Cardano {
       utxos,
       extraSigners,
       requestId,
-      origin,
+      origin: WALLET_NAME,
     })
     const encodedUR = new UREncoder(ur, Infinity).nextPart().toUpperCase()
     const response = await this.sendToDevice(Actions.CMD_RESOLVE_UR, encodedUR)
@@ -386,20 +392,40 @@ export default class Cardano {
     }
   }
 
-  async signCardanoCip8DataTransaction(
-    props: CardanoSignCip8MessageData,
-  ): Promise<{signature: string; publicKey: string; addressFieldHex: string}> {
+  async signCardanoCip8DataTransaction(props: {
+    requestId: string
+    path: string
+    xfp: string
+    xpub: string
+    messageHex: string
+    hashPayload: boolean
+    addressFieldType: MessageAddressFieldType
+    address?: string
+    origin?: string
+  }): Promise<{signature: string; publicKey: string; addressFieldHex: string}> {
     this.precheck()
-    const keystoneSDK = new KeystoneSDK()
-    const ur = keystoneSDK.cardano.generateSignCip8DataRequest(props)
-    const encodedUR = new UREncoder(ur, Infinity).nextPart().toUpperCase()
+    const signDataRequest =
+      CardanoSignCip8DataRequest.constructCardanoSignCip8DataRequest(
+        props.messageHex,
+        props.path,
+        props.xfp,
+        props.xpub,
+        props.hashPayload,
+        props.addressFieldType,
+        props.address,
+        props.requestId,
+        props.origin,
+      )
+    const encodedUR = new UREncoder(signDataRequest.toUR(), Infinity)
+      .nextPart()
+      .toUpperCase()
     const response = await this.sendToDevice(Actions.CMD_RESOLVE_UR, encodedUR)
     const resultUR = parseResponseUR(response.payload)
-    const result = keystoneSDK.cardano.parseSignCip8DataSignature(resultUR)
+    const signDataResult = CardanoSignCip8DataSignature.fromCBOR(resultUR.cbor)
     return {
-      signature: result.signature,
-      publicKey: result.publicKey,
-      addressFieldHex: result.addressField,
+      signature: signDataResult.getSignature().toString('hex'),
+      publicKey: signDataResult.getPublicKey().toString('hex'),
+      addressFieldHex: signDataResult.getAddressField().toString('hex'),
     }
   }
 }
