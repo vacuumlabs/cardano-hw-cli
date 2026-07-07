@@ -29,6 +29,7 @@ import KeystoneSDK, {
 } from '@keystonehq/keystone-sdk'
 import {BIP32Path} from '../basicTypes'
 import {HARDENED_THRESHOLD} from '../constants'
+import {needsShelleyLocalDerivation} from './keystoneShelleyDerivation'
 import {classifyPath, PathTypes} from './util'
 import {uuid} from '@keystonehq/keystone-sdk/dist/utils'
 
@@ -104,25 +105,6 @@ const pathStringToBip32Path = (pathString: string): BIP32Path => {
     }
   })
   return bip32Path as BIP32Path
-}
-
-const needsShelleyLocalDerivation = (
-  pathType: PathTypes,
-  path: BIP32Path,
-): boolean => {
-  if (path.length !== 5) {
-    return false
-  }
-  switch (pathType) {
-    case PathTypes.PATH_WALLET_SPENDING_KEY_SHELLEY:
-    case PathTypes.PATH_WALLET_STAKING_KEY:
-    case PathTypes.PATH_DREP_KEY:
-    case PathTypes.PATH_COMMITTEE_COLD_KEY:
-    case PathTypes.PATH_COMMITTEE_HOT_KEY:
-      return true
-    default:
-      return false
-  }
 }
 
 const deriveChildXpubNonHardened = (
