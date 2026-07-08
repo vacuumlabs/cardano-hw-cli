@@ -345,7 +345,7 @@ export const KeystoneCryptoProvider: (
         uint64_to_buf(BigInt(issueCounter.counter).toString() as Uint64_str),
         uint64_to_buf(BigInt(kesPeriod).toString() as Uint64_str),
       ]).toString('hex')
-      // sgin cardano transaction
+      // sign cardano transaction
       const {walletMFP} = await keystone.getDeviceInfo()
       keystone = new Cardano(transport, walletMFP)
 

@@ -185,9 +185,51 @@ export default class Cardano {
     }
   }
 
+  // Device status codes returned when a command is refused because the Keystone
+  // UI is not on a screen that allows it (e.g. the "Connecting with wallet"
+  // screen) or is momentarily busy. These are pre-execution rejections, so it
+  // is safe to retry them once the device returns to an allowed screen.
+  private static readonly RETRYABLE_DEVICE_PAGE_CODES: ReadonlySet<number> =
+    new Set<number>([
+      Status.PRS_PARSING_DISALLOWED, // 6 - "... just allowed on specific pages"
+      Status.PRS_EXPORT_ADDRESS_DISALLOWED,
+      Status.PRS_EXPORT_ADDRESS_BUSY,
+    ])
+
+  private static readonly SEND_RETRY_DELAY_MS = 1500
+
+  private static readonly SEND_MAX_ATTEMPTS = 80 // ~2 minutes at 1.5s spacing
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private sendToDevice(actions: Actions, data: any): Promise<any> {
-    return this.transport.send(actions, data)
+  private async sendToDevice(actions: Actions, data: any): Promise<any> {
+    let warned = false
+    for (let attempt = 1; ; attempt += 1) {
+      try {
+        // eslint-disable-next-line no-await-in-loop
+        return await this.transport.send(actions, data)
+      } catch (err) {
+        const code = (err as {transportErrorCode?: number})?.transportErrorCode
+        const isRetryable =
+          code !== undefined && Cardano.RETRYABLE_DEVICE_PAGE_CODES.has(code)
+        if (!isRetryable || attempt >= Cardano.SEND_MAX_ATTEMPTS) {
+          throw err
+        }
+        if (!warned) {
+          // eslint-disable-next-line no-console
+          console.error(
+            'Waiting for Keystone: this operation is only allowed from the home ' +
+              'screen. Please unlock the device and dismiss the "Connecting with ' +
+              'wallet" screen (tap the back/close button) — it will continue ' +
+              'automatically.',
+          )
+          warned = true
+        }
+        // eslint-disable-next-line no-await-in-loop
+        await new Promise((resolve) =>
+          setTimeout(resolve, Cardano.SEND_RETRY_DELAY_MS),
+        )
+      }
+    }
   }
 
   private async checkDeviceLockStatus(): Promise<boolean> {
