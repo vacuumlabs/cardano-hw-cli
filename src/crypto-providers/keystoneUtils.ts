@@ -21,9 +21,6 @@ import {
   CardanoSignature,
   CardanoSignDataRequest,
   CardanoSignDataSignature,
-  CardanoCatalystRequest,
-  CardanoCatalystSignature,
-  CardanoCatalystRawDelegationsProps,
   MessageAddressFieldType,
 } from '@keystonehq/bc-ur-registry-cardano'
 import {UR, UREncoder, URDecoder} from '@ngraveio/bc-ur'
@@ -49,18 +46,6 @@ export type CardanoSignDataRequestParams = {
   xfp: string
   xpub: string | Buffer
   payload: string
-  origin?: string
-}
-
-export type CardanoCatalystRequestParams = {
-  requestId: string
-  path: string
-  xfp: string
-  delegations: CardanoCatalystRawDelegationsProps
-  stakePub: string
-  paymentAddress: string
-  nonce: number
-  voting_purpose: number
   origin?: string
 }
 
@@ -479,33 +464,6 @@ export default class Cardano {
       witnessSignatureHex: witness.signature,
     }))
     return result || []
-  }
-
-  async signCardanoCatalystRequest(
-    props: CardanoCatalystRequestParams,
-  ): Promise<{signature: Buffer}> {
-    this.precheck()
-    const catalystRequest =
-      CardanoCatalystRequest.constructCardanoCatalystRequest(
-        props.delegations,
-        props.stakePub,
-        props.paymentAddress,
-        props.nonce,
-        props.voting_purpose,
-        props.path,
-        props.xfp,
-        props.requestId,
-        props.origin,
-      )
-    const encodedUR = new UREncoder(catalystRequest.toUR(), Infinity)
-      .nextPart()
-      .toUpperCase()
-    const response = await this.sendToDevice(Actions.CMD_RESOLVE_UR, encodedUR)
-    const resultUR = parseResponseUR(response.payload)
-    const signature = CardanoCatalystSignature.fromCBOR(resultUR.cbor)
-    return {
-      signature: signature.getSignature(),
-    }
   }
 
   async signCardanoCip8DataTransaction(props: {

@@ -6,7 +6,6 @@ import {TransportHID} from '@keystonehq/hw-transport-usb'
 import {Errors} from '../errors'
 import {isChainCodeHex, isPubKeyHex, isXPubKeyHex} from '../guards'
 import {
-  CIP36RegistrationAuxiliaryData,
   CIP36RegistrationMetaDataCborHex,
   TxWitnesses,
   TxWitnessKeys,
@@ -14,7 +13,6 @@ import {
 import {
   BIP32Path,
   CVoteDelegation,
-  HexString,
   NativeScript,
   NativeScriptHashKeyHex,
   NativeScriptType,
@@ -34,9 +32,6 @@ import {
 import Cardano, {bip32PathToString, WALLET_NAME} from './keystoneUtils'
 import {
   classifyPath,
-  encodeCIP36RegistrationMetaData,
-  extractStakePubKeyFromHwSigningData,
-  formatCIP36RegistrationMetaData,
   PathTypes,
   hwSigningFileToPubKeyHash,
   splitXPubKeyCborHex,
@@ -49,7 +44,7 @@ import {
   TxByronWitnessData,
   TxShelleyWitnessData,
 } from '../transaction/transaction'
-import {decodeCbor, encodeCbor, partition} from '../util'
+import {decodeCbor, partition} from '../util'
 import {
   KesVKey,
   OpCertIssueCounter,
@@ -66,7 +61,6 @@ import {
 } from '@keystonehq/bc-ur-registry-cardano'
 import {uint64_to_buf} from '@cardano-foundation/ledgerjs-hw-app-cardano/dist/utils/serialize'
 import {Uint64_str} from '@cardano-foundation/ledgerjs-hw-app-cardano/dist/types/internal'
-const {bech32, blake2b} = require('cardano-crypto.js')
 const failedMsg = (e: unknown): string => `The requested operation failed. \
 Check that your Keystone device is connected.
 Details: ${e}`
@@ -249,74 +243,16 @@ export const KeystoneCryptoProvider: (
   }
 
   const signCIP36RegistrationMetaData = async (
-    delegations: CVoteDelegation[],
-    hwStakeSigningFile: HwSigningData,
-    paymentAddressBech32: string,
-    nonce: bigint,
-    votingPurpose: bigint,
+    _delegations: CVoteDelegation[],
+    _hwStakeSigningFile: HwSigningData,
+    _paymentAddressBech32: string,
+    _nonce: bigint,
+    _votingPurpose: bigint,
     _network: Network,
     _paymentAddressSigningFiles: HwSigningData[],
+    // eslint-disable-next-line require-await
   ): Promise<CIP36RegistrationMetaDataCborHex> => {
-    const serializedDelegations: [Buffer, bigint][] = delegations.map(
-      ({votePublicKey, voteWeight}) => [
-        Buffer.from(votePublicKey, 'hex'),
-        voteWeight,
-      ],
-    )
-    const {walletMFP} = await keystone.getDeviceInfo()
-    const keystoneDelegations = delegations.map((delegation) => ({
-      pubKey: delegation.votePublicKey,
-      weight: Number(delegation.voteWeight),
-    }))
-    const {data: address}: {data: Buffer} = bech32.decode(paymentAddressBech32)
-
-    const stakePubHex = extractStakePubKeyFromHwSigningData(hwStakeSigningFile)
-
-    const cardanoCatalystVotingRequest = {
-      requestId: uuidv4(),
-      path: bip32PathToString(hwStakeSigningFile.path),
-      delegations: keystoneDelegations,
-      stakePub: stakePubHex,
-      paymentAddress: address.toString('hex'),
-      nonce: Number(nonce),
-      voting_purpose: Number(votingPurpose),
-      xfp: walletMFP,
-      origin: WALLET_NAME,
-    }
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    keystone = new Cardano(transport, walletMFP)
-    const result = await keystone.signCardanoCatalystRequest(
-      cardanoCatalystVotingRequest,
-    )
-    try {
-      const metadata = formatCIP36RegistrationMetaData(
-        serializedDelegations,
-        Buffer.from(stakePubHex, 'hex'),
-        address,
-        nonce,
-        votingPurpose,
-        result.signature,
-      )
-      // we serialize the entire (Mary-era formatted) auxiliary data only to check that its hash
-      // matches the hash computed by the HW wallet
-      const auxiliaryData: CIP36RegistrationAuxiliaryData = [metadata, []]
-      const auxiliaryDataCbor = encodeCbor(auxiliaryData)
-      const auxiliaryDataHashHex = blake2b(auxiliaryDataCbor, 32).toString(
-        'hex',
-      )
-      return encodeCIP36RegistrationMetaData(
-        delegations,
-        hwStakeSigningFile,
-        address,
-        nonce,
-        votingPurpose,
-        auxiliaryDataHashHex,
-        result.signature.toString('hex') as HexString,
-      )
-    } catch (err) {
-      throw Error(failedMsg(err))
-    }
+    throw Error(Errors.Keystone3ProUnsupportedThisCommand)
   }
 
   const signOperationalCertificate = async (

@@ -122,7 +122,7 @@ async function testCIP36RegistrationMetaDataSigning(
   )
 }
 
-describe('Keystone sign CIP36 registration metadata', () => {
+describe.skip('Keystone sign CIP36 registration metadata', () => {
   let cryptoProvider: CryptoProvider
   // eslint-disable-next-line prefer-arrow-callback
   before(async function () {
