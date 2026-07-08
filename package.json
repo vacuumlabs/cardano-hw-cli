@@ -1,7 +1,7 @@
 {
   "name": "cardano-hw-cli",
-  "version": "1.20.0-beta.1",
-  "commit": "b2aa9b26f4f5536a90302c90a4830d5dd7d03310",
+  "version": "1.20.0-beta.2",
+  "commit": "871a188bacea0ac91469a791ed07479aee73b9b3",
   "description": "Cardano CLI tool for hardware wallets",
   "author": "Vacuumlabs",
   "homepage": "https://github.com/vacuumlabs/cardano-hw-cli#readme",
