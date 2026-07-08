@@ -48,7 +48,6 @@
     "@keystonehq/hw-transport-error": "^0.0.2",
     "@keystonehq/hw-transport-nodeusb": "^0.1.1",
     "@keystonehq/hw-transport-usb": "^0.1.1",
-    "@keystonehq/keystone-sdk": "^0.12.3",
     "@ledgerhq/hw-transport": "^6.31.2",
     "@ledgerhq/hw-transport-node-hid-noevents": "^6.35.2",
     "@ngraveio/bc-ur": "^1.1.13",

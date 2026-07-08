@@ -5,7 +5,6 @@ import {
   MessageAddressFieldType,
 } from '@keystonehq/bc-ur-registry-cardano'
 import {WALLET_NAME} from '../../../src/crypto-providers/keystoneUtils'
-import KeystoneSDK from '@keystonehq/keystone-sdk'
 
 describe('Keystone sign message request', () => {
   it('Should build CIP-30 style address signing requests', () => {
@@ -19,7 +18,7 @@ describe('Keystone sign message request', () => {
       'addr_test1qq2vzmtlgvjrhkq50rngh8d482zj3l20kyrc6kx4ffl3zfqayfawlf9hwv2fzuygt2km5v92kvf8e3s3mk7ynxw77cwq2glhm4'
     const origin = WALLET_NAME
 
-    const directRequest =
+    const request =
       CardanoSignCip8DataRequest.constructCardanoSignCip8DataRequest(
         messageHex,
         path,
@@ -32,27 +31,9 @@ describe('Keystone sign message request', () => {
         origin,
       )
 
-    const keystoneSDK = new KeystoneSDK()
-    const sdkRequest = keystoneSDK.cardano.generateSignCip8DataRequest({
-      requestId,
-      path,
-      xfp,
-      xpub,
-      messageHex,
-      signingPath: path,
-      hashPayload: false,
-      addressFieldType: MessageAddressFieldType.ADDRESS,
-      address,
-      origin,
-    })
-
-    assert.strictEqual(
-      Buffer.compare(directRequest.toUR().cbor, sdkRequest.cbor),
-      0,
-    )
-    assert.strictEqual(directRequest.getOrigin(), origin)
-    assert.strictEqual(directRequest.getDerivationPath(), "1852'/1815'/0'/0/0")
-    assert.strictEqual(directRequest.getXpub().toString('hex'), xpub)
+    assert.strictEqual(request.getOrigin(), origin)
+    assert.strictEqual(request.getDerivationPath(), "1852'/1815'/0'/0/0")
+    assert.strictEqual(request.getXpub().toString('hex'), xpub)
   })
 
   it('Should build key-hash signing requests without an address', () => {

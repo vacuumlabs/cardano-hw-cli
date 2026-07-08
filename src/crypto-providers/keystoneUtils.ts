@@ -16,6 +16,14 @@ import {
   CardanoUtxoData,
   CardanoSignCip8DataRequest,
   CardanoSignCip8DataSignature,
+  CardanoSignRequest,
+  CardanoSignTxHashRequest,
+  CardanoSignature,
+  CardanoSignDataRequest,
+  CardanoSignDataSignature,
+  CardanoCatalystRequest,
+  CardanoCatalystSignature,
+  CardanoCatalystRawDelegationsProps,
   MessageAddressFieldType,
 } from '@keystonehq/bc-ur-registry-cardano'
 import {UR, UREncoder, URDecoder} from '@ngraveio/bc-ur'
@@ -23,17 +31,41 @@ import {Actions, TransportHID} from '@keystonehq/hw-transport-usb'
 import {throwTransportError, Status} from '@keystonehq/hw-transport-error'
 import CardanoSerializationLib from '@emurgo/cardano-serialization-lib-nodejs'
 import {bech32} from 'bech32'
-import KeystoneSDK, {
-  CardanoCatalystRequestProps,
-  CardanoSignDataRequestProps,
-} from '@keystonehq/keystone-sdk'
+import {v4 as uuidv4} from 'uuid'
 import {BIP32Path} from '../basicTypes'
 import {HARDENED_THRESHOLD} from '../constants'
 import {needsShelleyLocalDerivation} from './keystoneShelleyDerivation'
 import {classifyPath, PathTypes} from './util'
-import {uuid} from '@keystonehq/keystone-sdk/dist/utils'
+
+const {blake2b} = require('cardano-crypto.js')
 
 export const WALLET_NAME = 'cardano_hw_cli_wallet'
+
+const MAX_CARDANO_SIGN_DATA_SIZE = 2048
+
+export type CardanoSignDataRequestParams = {
+  requestId: string
+  path: string
+  xfp: string
+  xpub: string | Buffer
+  payload: string
+  origin?: string
+}
+
+export type CardanoCatalystRequestParams = {
+  requestId: string
+  path: string
+  xfp: string
+  delegations: CardanoCatalystRawDelegationsProps
+  stakePub: string
+  paymentAddress: string
+  nonce: number
+  voting_purpose: number
+  origin?: string
+}
+
+const toHexPubKey = (xpub: string | Buffer): string =>
+  Buffer.isBuffer(xpub) ? xpub.toString('hex') : xpub
 
 export const pathToKeypath = (
   path: string,
@@ -57,6 +89,47 @@ export const pathToKeypath = (
     return new CryptoKeypath(pathComponents, sourceFingerprint)
   }
   return new CryptoKeypath(pathComponents)
+}
+
+const buildCardanoSignRequest = ({
+  signData,
+  utxos,
+  extraSigners,
+  requestId,
+  origin,
+}: {
+  signData: Buffer
+  utxos: CardanoUtxoData[]
+  extraSigners: CardanoCertKeyData[]
+  requestId: string
+  origin?: string
+}) => {
+  if (signData.length >= MAX_CARDANO_SIGN_DATA_SIZE) {
+    const txHash = blake2b(signData, 32).toString('hex')
+    const paths = [
+      ...utxos.map((utxo) => pathToKeypath(utxo.hdPath, utxo.xfp)),
+      ...extraSigners.map((signer) =>
+        pathToKeypath(signer.keyPath, signer.xfp),
+      ),
+    ]
+    const addresses = utxos.map((utxo) => utxo.address)
+    return CardanoSignTxHashRequest.constructCardanoSignTxHashRequest(
+      txHash,
+      paths as unknown as Parameters<
+        typeof CardanoSignTxHashRequest.constructCardanoSignTxHashRequest
+      >[1],
+      addresses,
+      requestId,
+      origin,
+    )
+  }
+  return CardanoSignRequest.constructCardanoSignRequest(
+    signData,
+    utxos,
+    extraSigners,
+    requestId,
+    origin,
+  )
 }
 
 const decodeBech32PublicKey = (bech32Pubkey: string) => {
@@ -348,18 +421,26 @@ export default class Cardano {
   }
 
   async signCardanoDataTransaction(
-    props: CardanoSignDataRequestProps,
+    props: CardanoSignDataRequestParams,
   ): Promise<{signature: Buffer}> {
     this.precheck()
-    const keystoneSDK = new KeystoneSDK()
-    const ur = keystoneSDK.cardano.generateSignDataRequest(props)
-    const encodedUR = new UREncoder(ur, Infinity).nextPart().toUpperCase()
+    const signDataRequest =
+      CardanoSignDataRequest.constructCardanoSignDataRequest(
+        props.payload,
+        props.path,
+        props.xfp,
+        toHexPubKey(props.xpub),
+        props.requestId,
+        props.origin,
+      )
+    const encodedUR = new UREncoder(signDataRequest.toUR(), Infinity)
+      .nextPart()
+      .toUpperCase()
     const response = await this.sendToDevice(Actions.CMD_RESOLVE_UR, encodedUR)
     const resultUR = parseResponseUR(response.payload)
-    // parse signature
-    const signature = keystoneSDK.cardano.parseSignDataSignature(resultUR)
+    const signature = CardanoSignDataSignature.fromCBOR(resultUR.cbor)
     return {
-      signature: Buffer.from(signature.signature, 'hex'),
+      signature: signature.getSignature(),
     }
   }
 
@@ -367,28 +448,27 @@ export default class Cardano {
     signData,
     utxos,
     extraSigners,
-  }: // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  {
+  }: {
     signData: Buffer
     utxos: CardanoUtxoData[]
     extraSigners: CardanoCertKeyData[]
   }): Promise<Witness[]> {
-    const requestId = uuid.v4()
+    const requestId = uuidv4()
     this.precheck()
-    const keystoneSDK = new KeystoneSDK()
-    const ur = keystoneSDK.cardano.generateSignRequest({
+    const signRequest = buildCardanoSignRequest({
       signData,
       utxos,
       extraSigners,
       requestId,
       origin: WALLET_NAME,
     })
-    const encodedUR = new UREncoder(ur, Infinity).nextPart().toUpperCase()
+    const encodedUR = new UREncoder(signRequest.toUR(), Infinity)
+      .nextPart()
+      .toUpperCase()
     const response = await this.sendToDevice(Actions.CMD_RESOLVE_UR, encodedUR)
     const resultUR = parseResponseUR(response.payload)
-    // parse signature
-    const cardanoSignResult = keystoneSDK.cardano.parseSignature(resultUR)
-    const witnessSet = cardanoSignResult.witnessSet
+    const cardanoSignature = CardanoSignature.fromCBOR(resultUR.cbor)
+    const witnessSet = cardanoSignature.getWitnessSet().toString('hex')
     const witnessSetObj =
       CardanoSerializationLib.TransactionWitnessSet.from_hex(
         witnessSet,
@@ -402,17 +482,29 @@ export default class Cardano {
   }
 
   async signCardanoCatalystRequest(
-    props: CardanoCatalystRequestProps,
+    props: CardanoCatalystRequestParams,
   ): Promise<{signature: Buffer}> {
-    const keystoneSDK = new KeystoneSDK()
-    const ur = keystoneSDK.cardano.generateCatalystRequest(props)
-    const encodedUR = new UREncoder(ur, Infinity).nextPart().toUpperCase()
+    this.precheck()
+    const catalystRequest =
+      CardanoCatalystRequest.constructCardanoCatalystRequest(
+        props.delegations,
+        props.stakePub,
+        props.paymentAddress,
+        props.nonce,
+        props.voting_purpose,
+        props.path,
+        props.xfp,
+        props.requestId,
+        props.origin,
+      )
+    const encodedUR = new UREncoder(catalystRequest.toUR(), Infinity)
+      .nextPart()
+      .toUpperCase()
     const response = await this.sendToDevice(Actions.CMD_RESOLVE_UR, encodedUR)
     const resultUR = parseResponseUR(response.payload)
-    // parse signature
-    const signature = keystoneSDK.cardano.parseCatalystSignature(resultUR)
+    const signature = CardanoCatalystSignature.fromCBOR(resultUR.cbor)
     return {
-      signature: Buffer.from(signature.signature, 'hex'),
+      signature: signature.getSignature(),
     }
   }
 
