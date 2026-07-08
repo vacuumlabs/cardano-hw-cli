@@ -43,6 +43,7 @@ import {
   pathEquals,
   findSigningPathForKey,
   findSigningXpubForKey,
+  verifyIntendedPubKeySignatureMatch,
 } from './util'
 import {
   TxByronWitnessData,
@@ -175,7 +176,6 @@ export const KeystoneCryptoProvider: (
           keyPath: bip32PathToString(signingFile.path),
         }),
       )
-      // get signdata hash
       const witnesses = await keystone.signCardanoTransaction({
         signData: InteropLib.encodeTx(tx),
         utxos,
@@ -200,6 +200,15 @@ export const KeystoneCryptoProvider: (
         if (!signingFile) {
           throw Error(Errors.MissingHwSigningDataAtPathError)
         }
+        // Ensure the signature returned by the device actually signs the tx body
+        // we intended to sign. Without this, a signature over different/incomplete
+        // data could be appended to the original tx and only rejected later at
+        // submission time. (Ledger and Trezor perform the equivalent check.)
+        verifyIntendedPubKeySignatureMatch(
+          params.txBodyHashHex,
+          signingFile,
+          witness.witnessSignatureHex,
+        )
         const {pubKey, chainCode} = splitXPubKeyCborHex(
           getSigningFileDataByPath(signingFile.path as BIP32Path)
             .cborXPubKeyHex,

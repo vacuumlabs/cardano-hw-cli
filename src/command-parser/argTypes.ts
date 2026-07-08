@@ -11,7 +11,6 @@ import {
   XPubKeyCborHex,
   HexString,
 } from '../basicTypes'
-
 export enum CommandType {
   APP_VERSION = 'version',
   DEVICE_VERSION = 'device.version',
