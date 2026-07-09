@@ -198,7 +198,9 @@ const CommandExecutor = async () => {
   }
 
   const createTxWitnesses = async (args: ParsedTransactionWitnessArguments) => {
-    validateTxBeforeWitnessing(args.txFileData.cborHex)
+    validateTxBeforeWitnessing(args.txFileData.cborHex, {
+      allowUnrestrictedMode: args.allowUnrestrictedMode,
+    })
     const txCbor = Buffer.from(args.txFileData.cborHex, 'hex')
     const tx = InteropLib.decodeTx(txCbor)
 

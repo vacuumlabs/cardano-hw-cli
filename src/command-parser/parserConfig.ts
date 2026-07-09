@@ -81,6 +81,15 @@ const nodeKeyGenArgs = {
   },
 }
 
+const allowUnrestrictedModeArg = {
+  '--allow-unrestricted-mode': {
+    required: false,
+    dest: 'allowUnrestrictedMode',
+    action: 'store_true',
+    help: 'Permit hw-cli to use unrestricted signing mode for transactions that require it (Ledger app v8 or newer with expert mode enabled on the device), and to silently ignore a fixed set of unfixable CIP-21 validation issues (pool-registration combination rules and certain voting-procedure rules). Default: false — without this flag, hw-cli refuses to sign such transactions. In unrestricted mode the device shows all transaction elements for the expert user to review.',
+  },
+}
+
 const txSigningArgs = {
   '--mainnet': {
     nargs: '?',
@@ -115,12 +124,7 @@ const txSigningArgs = {
     default: [],
     help: 'Input filepath of change output file.',
   },
-  '--allow-unrestricted-mode': {
-    required: false,
-    dest: 'allowUnrestrictedMode',
-    action: 'store_true',
-    help: 'Permit hw-cli to use unrestricted signing mode for transactions that require it (Ledger app v8 or newer with expert mode enabled on the device). Default: false — without this flag, hw-cli refuses to sign such transactions. In unrestricted mode the device shows all transaction elements for the expert user to review.',
-  },
+  ...allowUnrestrictedModeArg,
   ...derivationTypeArg,
 }
 
@@ -314,6 +318,7 @@ export const parserConfig: ParserConfig = {
         type: (path: string) => parseTxFile(path),
         help: 'Input filepath of the tx. Use --cddl-format when building transactions with cardano-cli.',
       },
+      ...allowUnrestrictedModeArg,
     },
     transform: {
       '--tx-file': {
@@ -327,6 +332,7 @@ export const parserConfig: ParserConfig = {
         dest: 'outFile',
         help: 'Output filepath.',
       },
+      ...allowUnrestrictedModeArg,
       '--protocol-params-file': {
         required: false,
         dest: 'protocolParamsData',

@@ -43,7 +43,7 @@ cardano-hw-cli transaction witness
 --mainnet | --testnet-magic NATURAL    Use the mainnet magic id or specify testnet magic id.
 --out-file FILE                        Output filepath of the witness (one or more witness files can be specified).
 --derivation-type TYPE                 Derivation type - currently applies only to Trezor. Options: LEDGER, ICARUS or ICARUS_TREZOR (default).
---allow-unrestricted-mode              Permit hw-cli to use unrestricted signing mode for transactions that require it (Ledger app v8 or newer with expert mode enabled on the device). Default: false — without this flag, hw-cli refuses to sign such transactions. In unrestricted mode the device shows all transaction elements for the expert user to review; the tx must not contain a pool registration certificate.
+--allow-unrestricted-mode              Permit unrestricted signing mode (Ledger app v8 + expert mode) and silently ignore specific unfixable CIP-21 issues (pool-registration combination rules and certain voting-procedure rules). Default: false.
 ```
 
 ## Validate transaction
@@ -51,12 +51,13 @@ Verifies whether the tx file complies with [restrictions](https://github.com/car
 ```
 cardano-hw-cli transaction validate
 --tx-file FILE                         Input filepath of the tx. Use --cddl-format when building transactions with cardano-cli.
+--allow-unrestricted-mode              Silently ignore specific unfixable CIP-21 issues (pool-registration combination rules and certain voting-procedure rules); exit code 0 if no other issues remain.
 ```
 Exit code meaning:
-- `0` transaction complies with all restrictions
+- `0` transaction complies with all restrictions, or only has permitted unfixable issues silenced by `--allow-unrestricted-mode`
 - `1` an error occurred (e.g. the transaction could not be parsed)
-- `2` transaction contains validation errors that cannot be fixed automatically (e.g. too many tx inputs)
-- `3` transaction contains validation errors that can be fixed by running `transaction transform` (e.g. non-canonical CBOR)
+- `2` transaction contains validation issues that cannot be fixed automatically (e.g. too many tx inputs)
+- `3` transaction contains validation issues that can be fixed by running `transaction transform` (e.g. non-canonical CBOR)
 
 ## Transform transaction
 Tries to non-destructively transform the tx file, so that it complies with [restrictions](https://github.com/cardano-foundation/CIPs/blob/master/CIP-0021/README.md) imposed by hardware wallets.
@@ -66,6 +67,7 @@ cardano-hw-cli transaction transform
 --out-file FILE                        Output filepath of the tx.
 --protocol-params-file FILE            (optional) Path to a protocol parameters JSON file (from `cardano-cli query protocol-parameters`). Required for transactions with Plutus scripts so that the script integrity hash can be recomputed correctly.
 --used-cost-model-languages LANGUAGE   (optional) Plutus language versions used in the transaction (e.g. `PlutusV1`, `PlutusV2`, `PlutusV3`). Can be specified multiple times. Required for reference-script-only transactions where language versions cannot be inferred from the witness set.
+--allow-unrestricted-mode              Silently ignore specific unfixable CIP-21 issues (pool-registration combination rules and certain voting-procedure rules).
 ```
 
 ## Show address on device
