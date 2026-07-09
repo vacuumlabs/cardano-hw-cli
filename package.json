@@ -89,7 +89,10 @@
     ],
     "assets": [
       "package.json",
-      "node_modules/usb/prebuilds/**/*"
+      "node_modules/usb/prebuilds/**/*",
+      "node_modules/@ledgerhq/devices/lib/**/*",
+      "node_modules/node-hid/build/HID.node",
+      "node_modules/node-hid/build/HID_hidraw.node"
     ]
   },
   "engines": {

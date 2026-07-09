@@ -14,6 +14,7 @@ mkdir ./build/linux/archive-arm64
 mkdir ./build/linux/archive-arm64/cardano-hw-cli
 
 # Build executable
+./scripts/prepare-pkg-native-deps.sh
 yarn pkg ./dist/index.js -o ./build/linux/archive-arm64/cardano-hw-cli/cardano-hw-cli -c package.json -t node22-linux-arm64 --options "no-warnings=ExperimentalWarning"
 
 # Copy dependencies

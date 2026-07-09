@@ -14,6 +14,7 @@ mkdir ./build/windows
 mkdir ./build/windows/cardano-hw-cli
 
 # Build executable
+./scripts/prepare-pkg-native-deps.sh
 yarn pkg ./dist/index.js -o ./build/windows/cardano-hw-cli/cardano-hw-cli -c package.json -t node22-win-x64 --options "no-warnings=ExperimentalWarning"
 
 # Copy dependencies

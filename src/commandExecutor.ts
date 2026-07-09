@@ -60,9 +60,17 @@ const promiseTimeout = <T>(promise: Promise<T>, ms: number): Promise<T> => {
   return Promise.race([promise, timeout])
 }
 
+const openLedgerTransport = async () => {
+  const paths = await TransportNodeHid.list()
+  if (paths.length === 0) {
+    throw new Error('NoDeviceFound')
+  }
+  return TransportNodeHid.open(paths[0])
+}
+
 const getCryptoProvider = async (): Promise<CryptoProvider> => {
   const ledgerPromise = async () =>
-    LedgerCryptoProvider(await TransportNodeHid.create())
+    LedgerCryptoProvider(await openLedgerTransport())
   // if you want to test with speculos, you can use this temporarily:
   // LedgerCryptoProvider(await require('@ledgerhq/hw-transport-node-speculos').default.open({apduPort: 9999}))
   const trezorPromise = async () => await TrezorCryptoProvider()

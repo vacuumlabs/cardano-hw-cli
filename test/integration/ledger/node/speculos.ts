@@ -8,9 +8,14 @@ function shouldUseSpeculos() {
 }
 
 async function getTransport() {
-  return shouldUseSpeculos()
-    ? await SpeculosTransport.open({apduPort: 9999})
-    : await TransportNodeHid.create()
+  if (shouldUseSpeculos()) {
+    return SpeculosTransport.open({apduPort: 9999})
+  }
+  const paths = await TransportNodeHid.list()
+  if (paths.length === 0) {
+    throw new Error('NoDeviceFound')
+  }
+  return TransportNodeHid.open(paths[0])
 }
 
 export {shouldUseSpeculos, getTransport}
