@@ -489,6 +489,7 @@ describe('Command parser', () => {
     const {parsedArgs} = parse(args)
     const expectedResult = {
       command: CommandType.VALIDATE_TRANSACTION,
+      allowUnrestrictedMode: false,
       txFileData: {
         envelopeType: cardanoEraToSignedType[CardanoEra.SHELLEY],
         era: CardanoEra.SHELLEY,
@@ -513,6 +514,7 @@ describe('Command parser', () => {
     const {parsedArgs} = parse(args)
     const expectedResult = {
       command: CommandType.TRANSFORM_TRANSACTION,
+      allowUnrestrictedMode: false,
       txFileData: {
         envelopeType: cardanoEraToSignedType[CardanoEra.SHELLEY],
         era: CardanoEra.SHELLEY,
@@ -546,6 +548,7 @@ describe('Command parser', () => {
     const {parsedArgs} = parse(args)
     const expectedResult = {
       command: CommandType.TRANSFORM_TRANSACTION,
+      allowUnrestrictedMode: false,
       txFileData: {
         envelopeType: cardanoEraToSignedType[CardanoEra.SHELLEY],
         era: CardanoEra.SHELLEY,

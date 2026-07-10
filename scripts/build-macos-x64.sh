@@ -18,6 +18,7 @@ mkdir -p ./build/macos/archive-x64
 mkdir -p "${ARTIFACT_DIR}"
 
 # pkg ad-hoc signs the main executable on macOS by default
+./scripts/prepare-pkg-native-deps.sh
 yarn pkg ./dist/index.js -o "${ARTIFACT_DIR}/cardano-hw-cli" -c package.json -t node22-macos-x64 --options "no-warnings=ExperimentalWarning"
 
 # Copy native deps (pkg does not sign bundled .node files)

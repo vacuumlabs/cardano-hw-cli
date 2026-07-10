@@ -6,3 +6,4 @@ cd ..
 yarn clean
 yarn install
 yarn build-js
+./scripts/prepare-pkg-native-deps.sh

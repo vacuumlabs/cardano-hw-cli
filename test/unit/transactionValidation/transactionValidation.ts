@@ -1,8 +1,15 @@
 /* eslint-disable max-len */
 import assert from 'assert'
 import * as InteropLib from 'cardano-hw-interop-lib'
-import {checkValidationErrors} from '../../../src/transaction/transactionValidation'
-import {CborHex} from '../../../src/basicTypes'
+import {
+  checkValidationErrors,
+  isPermittedUnfixableIssue,
+  validateTx,
+  validateTxBeforeWitnessing,
+} from '../../../src/transaction/transactionValidation'
+import {CborHex, CardanoEra} from '../../../src/basicTypes'
+import {Errors, ExitCode} from '../../../src/errors'
+import {CommandType} from '../../../src/command-parser/argTypes'
 
 interface Tx {
   txCborHex: string
@@ -112,5 +119,143 @@ describe('Validate and transform', () => {
     Object.entries(transactions).forEach(([name, tx]) =>
       it(`Should transform tx ${name}`, () => testTransform(tx)),
     )
+  })
+
+  describe('validateTxBeforeWitnessing', () => {
+    const votingProcedureIssue: InteropLib.ValidationError = {
+      fixable: false,
+      reason:
+        'There must be exactly one voting procedure per voter' as InteropLib.ValidationError['reason'],
+      position: 'transaction_body.voting_procedures[0].votes',
+    }
+
+    it('rejects a tx with unfixable CIP-21 issues', () => {
+      assert.throws(
+        () =>
+          validateTxBeforeWitnessing(
+            transactions.unfixableUnsupportedItem.txCborHex as CborHex,
+          ),
+        {message: Errors.TxContainsUnfixableErrors},
+      )
+    })
+
+    it('still rejects non-permitted unfixable CIP-21 issues when unrestricted mode is enabled', () => {
+      assert.throws(
+        () =>
+          validateTxBeforeWitnessing(
+            transactions.unfixableUnsupportedItem.txCborHex as CborHex,
+            {allowUnrestrictedMode: true},
+          ),
+        {message: Errors.TxContainsUnfixableErrors},
+      )
+    })
+
+    it('allows permitted unfixable CIP-21 issues when unrestricted mode is enabled', () => {
+      const result = checkValidationErrors(
+        '00' as CborHex,
+        () => [votingProcedureIssue],
+        {
+          printIssues: false,
+          permitListedUnfixableIssues: true,
+        },
+      )
+      assert.strictEqual(result.containsUnfixable, false)
+      assert.strictEqual(result.containsFixable, false)
+    })
+
+    it('does not log permitted unfixable CIP-21 issues in unrestricted mode', () => {
+      /* eslint-disable no-console -- stub console.warn to assert permitted issues stay silent */
+      const warnings: string[] = []
+      const originalWarn = console.warn
+      console.warn = (...args: unknown[]) => {
+        warnings.push(args.map(String).join(' '))
+      }
+      try {
+        checkValidationErrors('00' as CborHex, () => [votingProcedureIssue], {
+          printIssues: true,
+          permitListedUnfixableIssues: true,
+        })
+      } finally {
+        console.warn = originalWarn
+      }
+      /* eslint-enable no-console */
+      assert.strictEqual(warnings.length, 0)
+    })
+
+    it('still rejects fixable CIP-21 issues when unrestricted mode is enabled', () => {
+      assert.throws(
+        () =>
+          validateTxBeforeWitnessing(
+            transactions.fixableWrongOrder.txCborHex as CborHex,
+            {allowUnrestrictedMode: true},
+          ),
+        {message: Errors.TxContainsFixableErrors},
+      )
+    })
+  })
+
+  describe('isPermittedUnfixableIssue', () => {
+    it('recognizes voting-procedure and pool-registration combination issues', () => {
+      assert.strictEqual(
+        isPermittedUnfixableIssue({
+          fixable: false,
+          reason:
+            'There must be exactly one voting procedure per voter' as InteropLib.ValidationError['reason'],
+          position: 'transaction_body.voting_procedures[0].votes',
+        }),
+        true,
+      )
+      assert.strictEqual(
+        isPermittedUnfixableIssue({
+          fixable: false,
+          reason:
+            'If a transaction contains a pool registration certificate, then it must not contain voting procedures' as InteropLib.ValidationError['reason'],
+          position: 'transaction_body.voting_procedures',
+        }),
+        true,
+      )
+      assert.strictEqual(
+        isPermittedUnfixableIssue({
+          fixable: false,
+          reason:
+            'The transaction body entry update must not be included' as InteropLib.ValidationError['reason'],
+          position: 'transaction_body.update',
+        }),
+        false,
+      )
+    })
+  })
+
+  describe('validateTx', () => {
+    it('returns exit code 2 for unfixable CIP-21 issues by default', () => {
+      assert.strictEqual(
+        validateTx({
+          command: CommandType.VALIDATE_TRANSACTION,
+          txFileData: {
+            cborHex: transactions.unfixableUnsupportedItem.txCborHex as CborHex,
+            envelopeType: 'Tx ConwayEra',
+            description: '',
+            era: CardanoEra.CONWAY,
+          },
+        }),
+        ExitCode.UnfixableValidationErrorsFound,
+      )
+    })
+
+    it('returns exit code 2 for non-permitted unfixable issues even with unrestricted mode', () => {
+      assert.strictEqual(
+        validateTx({
+          command: CommandType.VALIDATE_TRANSACTION,
+          allowUnrestrictedMode: true,
+          txFileData: {
+            cborHex: transactions.unfixableUnsupportedItem.txCborHex as CborHex,
+            envelopeType: 'Tx ConwayEra',
+            description: '',
+            era: CardanoEra.CONWAY,
+          },
+        }),
+        ExitCode.UnfixableValidationErrorsFound,
+      )
+    })
   })
 })

@@ -10,47 +10,136 @@ import {constructTxFileOutput, writeOutputData} from '../fileWriter'
 import {containsVKeyWitnesses} from './transaction'
 import {CborHex} from '../basicTypes'
 
+/** Unfixable CIP-21 issues permitted when --allow-unrestricted-mode is set (silent, not logged). */
+const UNRESTRICTED_MODE_PERMITTED_UNFIXABLE_ISSUES = new Set<string>([
+  'If a transaction contains a pool registration certificate, then it must not contain any other certificate',
+  'If a transaction contains a pool registration certificate, then it must not contain any withdrawal',
+  'If a transaction contains a pool registration certificate, then it must not contain mint entry',
+  'If a transaction contains a pool registration certificate, then it must not contain datums and reference scripts in outputs',
+  'If a transaction contains a pool registration certificate, then it must not contain script data hash',
+  'If a transaction contains a pool registration certificate, then it must not contain collateral inputs',
+  'If a transaction contains a pool registration certificate, then it must not contain required signers',
+  'If a transaction contains a pool registration certificate, then it must not contain collateral return output',
+  'If a transaction contains a pool registration certificate, then it must not contain total collateral',
+  'If a transaction contains a pool registration certificate, then it must not contain reference inputs',
+  'If a transaction contains a pool registration certificate, then it must not contain voting procedures',
+  'If a transaction contains a pool registration certificate, then it must not contain treasury value entry',
+  'If a transaction contains a pool registration certificate, then it must not contain treasury donation entry',
+  'Only a single voter is allowed in voting procedures',
+  'There must be exactly one voting procedure per voter',
+])
+
+const isPermittedUnfixableIssue = (
+  issue: InteropLib.ValidationError,
+): boolean => UNRESTRICTED_MODE_PERMITTED_UNFIXABLE_ISSUES.has(issue.reason)
+
+const splitUnfixableIssues = (
+  unfixableIssues: InteropLib.ValidationError[],
+  permitListedUnfixableIssues: boolean,
+): {
+  permittedUnfixableIssues: InteropLib.ValidationError[]
+  blockingUnfixableIssues: InteropLib.ValidationError[]
+} => {
+  if (!permitListedUnfixableIssues) {
+    return {
+      permittedUnfixableIssues: [],
+      blockingUnfixableIssues: unfixableIssues,
+    }
+  }
+  const permittedUnfixableIssues: InteropLib.ValidationError[] = []
+  const blockingUnfixableIssues: InteropLib.ValidationError[] = []
+  for (const issue of unfixableIssues) {
+    if (isPermittedUnfixableIssue(issue)) {
+      permittedUnfixableIssues.push(issue)
+    } else {
+      blockingUnfixableIssues.push(issue)
+    }
+  }
+  return {permittedUnfixableIssues, blockingUnfixableIssues}
+}
+
+type CheckValidationErrorsOptions = {
+  printIssues?: boolean
+  printSuccessMessage?: boolean
+  /** When set, listed unfixable CIP-21 issues are ignored silently. */
+  permitListedUnfixableIssues?: boolean
+}
+
 const checkValidationErrors = (
   cborHex: CborHex,
   validator: (txCbor: Buffer) => InteropLib.ValidationError[],
-  printErrors: boolean,
-  printSuccessMessage: boolean,
+  printIssuesOrOptions: boolean | CheckValidationErrorsOptions = true,
+  printSuccessMessage = false,
 ): {containsUnfixable: boolean; containsFixable: boolean} => {
+  const options: CheckValidationErrorsOptions =
+    typeof printIssuesOrOptions === 'boolean'
+      ? {
+          printIssues: printIssuesOrOptions,
+          printSuccessMessage,
+        }
+      : printIssuesOrOptions
+  const {
+    printIssues = true,
+    printSuccessMessage: printSuccess = false,
+    permitListedUnfixableIssues = false,
+  } = options
+
   const cbor = Buffer.from(cborHex, 'hex')
   const validationErrors = validator(cbor)
-  const [fixableErrors, unfixableErrors] = partition(
+  const [fixableIssues, unfixableIssues] = partition(
     validationErrors,
     (e) => e.fixable,
   )
-  const errorGroups = [
-    {title: 'unfixable', errors: unfixableErrors},
-    {title: 'fixable', errors: fixableErrors},
+  const {blockingUnfixableIssues} = splitUnfixableIssues(
+    unfixableIssues,
+    permitListedUnfixableIssues,
+  )
+
+  const issueGroups = [
+    {
+      header: 'The transaction contains following unfixable issues:',
+      issues: blockingUnfixableIssues,
+    },
+    {
+      header: 'The transaction contains following fixable issues:',
+      issues: fixableIssues,
+    },
   ]
-  errorGroups.forEach(({title, errors}) => {
-    if (errors.length > 0 && printErrors) {
+  issueGroups.forEach(({header, issues}) => {
+    if (issues.length > 0 && printIssues) {
       // eslint-disable-next-line no-console
-      console.log(`The transaction contains following ${title} errors:`)
+      console.warn(header)
       // eslint-disable-next-line no-console
-      errors.forEach((e) => console.log(`- ${e.reason} (${e.position})`))
+      issues.forEach((e) => console.warn(`- ${e.reason} (${e.position})`))
     }
   })
 
-  if (validationErrors.length === 0 && printSuccessMessage) {
+  if (validationErrors.length === 0 && printSuccess) {
     // eslint-disable-next-line no-console
     console.log('The transaction CBOR is valid and canonical.')
   }
   return {
-    containsUnfixable: unfixableErrors.length > 0,
-    containsFixable: fixableErrors.length > 0,
+    containsUnfixable: blockingUnfixableIssues.length > 0,
+    containsFixable: fixableIssues.length > 0,
   }
 }
 
-const validateTxBeforeWitnessing = (txCborHex: CborHex): void => {
+type ValidateTxBeforeWitnessingOptions = {
+  allowUnrestrictedMode?: boolean
+}
+
+const validateTxBeforeWitnessing = (
+  txCborHex: CborHex,
+  options?: ValidateTxBeforeWitnessingOptions,
+): void => {
+  const allowUnrestrictedMode = options?.allowUnrestrictedMode ?? false
   const {containsUnfixable, containsFixable} = checkValidationErrors(
     txCborHex,
     InteropLib.validateTx,
-    true,
-    false,
+    {
+      printIssues: true,
+      permitListedUnfixableIssues: allowUnrestrictedMode,
+    },
   )
 
   if (containsUnfixable) {
@@ -62,13 +151,19 @@ const validateTxBeforeWitnessing = (txCborHex: CborHex): void => {
 }
 
 const validateTx = (args: ParsedTransactionValidateArguments): ExitCode => {
+  const allowUnrestrictedMode = args.allowUnrestrictedMode ?? false
   const {containsUnfixable, containsFixable} = checkValidationErrors(
     args.txFileData.cborHex,
     InteropLib.validateTx,
-    true,
-    true,
+    {
+      printIssues: true,
+      printSuccessMessage: true,
+      permitListedUnfixableIssues: allowUnrestrictedMode,
+    },
   )
-  if (containsUnfixable) return ExitCode.UnfixableValidationErrorsFound
+  if (containsUnfixable) {
+    return ExitCode.UnfixableValidationErrorsFound
+  }
   if (containsFixable) return ExitCode.FixableValidationErrorsFound
   return ExitCode.Success
 }
@@ -92,11 +187,15 @@ const extractCostModels = (
 }
 
 const transformTx = (args: ParsedTransactionTransformArguments): void => {
+  const allowUnrestrictedMode = args.allowUnrestrictedMode ?? false
   const {containsUnfixable, containsFixable} = checkValidationErrors(
     args.txFileData.cborHex,
     InteropLib.validateTx,
-    true,
-    true,
+    {
+      printIssues: true,
+      printSuccessMessage: true,
+      permitListedUnfixableIssues: allowUnrestrictedMode,
+    },
   )
   if (containsUnfixable) {
     throw Error(Errors.TxContainsUnfixableErrors)
@@ -134,6 +233,7 @@ const transformTx = (args: ParsedTransactionTransformArguments): void => {
 export {
   checkValidationErrors,
   extractCostModels,
+  isPermittedUnfixableIssue,
   validateTxBeforeWitnessing,
   validateTx,
   transformTx,

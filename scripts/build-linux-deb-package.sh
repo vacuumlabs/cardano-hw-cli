@@ -26,6 +26,7 @@ mkdir ./build/linux/deb/${PACKAGE}_${VERSION}/usr/share/cardano-hw-cli
 mkdir ./build/linux/deb/${PACKAGE}_${VERSION}/DEBIAN
 
 # Build executable
+./scripts/prepare-pkg-native-deps.sh
 yarn pkg ./dist/index.js -o ./build/linux/deb/cardano-hw-cli -c package.json -t node22-linux-x64 --options "no-warnings=ExperimentalWarning"
 
 # Copy files to package structure

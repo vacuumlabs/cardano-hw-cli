@@ -108,6 +108,7 @@ export type ParsedTransactionWitnessArguments = {
 export type ParsedTransactionValidateArguments = {
   command: CommandType.VALIDATE_TRANSACTION
   txFileData: TxFileData
+  allowUnrestrictedMode?: boolean
 }
 
 export type ProtocolParameters = {
@@ -120,6 +121,7 @@ export type ParsedTransactionTransformArguments = {
   outFile: string
   protocolParamsData?: ProtocolParameters
   usedCostModelLanguages?: string[]
+  allowUnrestrictedMode?: boolean
 }
 
 export type ParsedOpCertArguments = {
