@@ -60,6 +60,22 @@ jobs:
           path: build/release
           destination: release-binaries
 
+  # Builds the linux-arm64 artifact natively (arm resource class) and, most
+  # importantly, executes it: cross-built arm64 binaries used to ship with
+  # incomplete pkg snapshots that crash on startup (see issue #194), which
+  # only running the binary can catch.
+  build_and_test_linux_arm64:
+    docker:
+      - image: cimg/node:22.14
+    resource_class: arm.medium
+    steps:
+      - setup
+      - run: yarn build-linux-tar-arm64
+      - run: ./build/linux/archive-arm64/cardano-hw-cli/cardano-hw-cli version
+      - store_artifacts:
+          path: build/linux/archive-arm64
+          destination: linux-arm64-binaries
+
   build_macos_artifacts:
     macos:
       xcode: "16.4.0"
@@ -86,4 +102,5 @@ workflows:
       - audit
       - lint
       - build_and_test
+      - build_and_test_linux_arm64
       - build_macos_artifacts
