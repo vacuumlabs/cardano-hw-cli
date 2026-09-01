@@ -65,6 +65,7 @@ export const enum Errors {
   InvalidNativeScriptFile = 'Invalid native script file',
   Unreachable = 'Unreachable code reached',
   TrezorPoolRegistrationAsOperatorNotSupported = 'Trezor does not support signing pool registration certificate as operator',
+  TrezorPoolPayerNotSupported = 'Trezor does not support witnessing a pool registration or pool retirement certificate as payer',
   TrezorVotingProceduresUnsupported = 'Trezor does not support voting procedures',
   TrezorTreasuryUnsupported = 'Trezor does not support treasury item in transaction body',
   TrezorDonationUnsupported = 'Trezor does not support donation item in transaction body',

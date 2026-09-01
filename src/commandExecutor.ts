@@ -61,8 +61,13 @@ const promiseTimeout = <T>(promise: Promise<T>, ms: number): Promise<T> => {
 }
 
 const getCryptoProvider = async (): Promise<CryptoProvider> => {
+  // `TransportNodeHid.create()` is unusable with the no-events transport: its `listen()` calls
+  // `observer.next()` synchronously, while `Transport.create()` (@ledgerhq/hw-transport 6.35.2)
+  // reads its own `const sub` from inside that callback — a temporal dead zone access that throws
+  // `ReferenceError: Cannot access 'sub' before initialization` whenever a device IS found.
+  // `open()` with an empty path picks the first connected device and skips `listen()` entirely.
   const ledgerPromise = async () =>
-    LedgerCryptoProvider(await TransportNodeHid.create())
+    LedgerCryptoProvider(await TransportNodeHid.open(''))
   // if you want to test with speculos, you can use this temporarily:
   // LedgerCryptoProvider(await require('@ledgerhq/hw-transport-node-speculos').default.open({apduPort: 9999}))
   const trezorPromise = async () => await TrezorCryptoProvider()
@@ -195,7 +200,11 @@ const CommandExecutor = async () => {
     const tx = InteropLib.decodeTx(txCbor)
 
     const {era} = args.txFileData
-    const signingMode = determineSigningMode(tx.body, args.hwSigningFileData)
+    const signingMode = determineSigningMode(
+      tx.body,
+      args.hwSigningFileData,
+      await cryptoProvider.supportsPoolPayerModes(),
+    )
     // Unrestricted mode is auto-applied when the tx requires it. Refuse to sign unless the user
     // explicitly authorized it via --allow-unrestricted-mode, and verify the connected device/app
     // can actually honor it.

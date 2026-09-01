@@ -33,6 +33,8 @@ export enum SigningMode {
   MULTISIG_TRANSACTION,
   PLUTUS_TRANSACTION,
   UNRESTRICTED,
+  POOL_REGISTRATION_AS_PAYER,
+  POOL_RETIREMENT_AS_PAYER,
 }
 
 export type TxSigningParameters = {
@@ -55,6 +57,9 @@ export type CryptoProvider = {
   // Whether the connected device/app can sign in unrestricted mode (Ledger app v8+ with expert
   // mode enabled).
   supportsUnrestrictedTransaction: () => Promise<boolean>
+  // Whether the connected device/app supports the pool payer signing modes (Ledger app 8.1+).
+  // When false, hw-cli keeps its pre-payer signing mode selection.
+  supportsPoolPayerModes: () => Promise<boolean>
   showAddress: (args: ParsedShowAddressArguments) => Promise<void>
   witnessTx: (
     params: TxSigningParameters,

@@ -8,6 +8,7 @@ import {
   CertificateType,
   Certificate,
   PoolRegistrationCertificate,
+  PoolRetirementCertificate,
   KeyHash,
   ScriptHash,
   KEY_HASH_LENGTH,
@@ -391,6 +392,21 @@ const hasPlutusOnlyFields = (txBody: TransactionBody): boolean =>
   txBody.totalCollateral != null ||
   txBody.referenceInputs != null
 
+// A pool retirement certificate whose pool key hash matches no signing file can only be sent to
+// the device as a hash, which every signing mode except POOL_RETIREMENT_AS_PAYER rejects.
+const poolRetirementCertsWithoutColdKey = (
+  txBody: TransactionBody,
+  signingFiles: HwSigningData[],
+): PoolRetirementCertificate[] =>
+  (txBody.certificates?.items ?? [])
+    .filter(
+      (cert): cert is PoolRetirementCertificate =>
+        cert.type === CertificateType.POOL_RETIREMENT,
+    )
+    .filter(
+      (cert) => !findSigningPathForKeyHash(cert.poolKeyHash, signingFiles),
+    )
+
 // canSignWith*Mode mirror the per-signing-mode tx-body rejection rules of the Ledger app
 // (ledgerjs `parsing/transaction.ts`), each clause annotated with the rule it mirrors.
 
@@ -402,6 +418,8 @@ const canSignWithOrdinaryMode = (
   !txBody.certificates?.items.some(
     (cert) => cert.type === CertificateType.POOL_REGISTRATION,
   ) &&
+  // SIGN_MODE_ORDINARY__POOL_RETIREMENT_POOL_KEY_ONLY_AS_PATH
+  poolRetirementCertsWithoutColdKey(txBody, signingFiles).length === 0 &&
   // SIGN_MODE_ORDINARY__CERTIFICATE_*_ONLY_AS_PATH, __WITHDRAWAL_ONLY_AS_PATH,
   // __VOTER_ONLY_AS_PATH
   collectCredentialForms(txBody, signingFiles).every(
@@ -436,6 +454,9 @@ const canSignWithMultisigMode = (
 const determineSigningMode = (
   txBody: TransactionBody,
   signingFiles: HwSigningData[],
+  // The payer signing modes need a device that understands them. When they are unavailable we
+  // keep the pre-payer selection, so behaviour and error messages stay exactly as they were.
+  supportsPoolPayerModes = false,
 ): SigningMode => {
   const poolRegistrationCert = txBody.certificates?.items.find(
     (cert) => cert.type === CertificateType.POOL_REGISTRATION,
@@ -449,10 +470,34 @@ const determineSigningMode = (
       poolRegistrationCert.poolParams.operator,
       signingFiles,
     )
-    const isPaying = hasPaymentSigningFile(signingFiles)
-    return poolKeyPath || isPaying
-      ? SigningMode.POOL_REGISTRATION_AS_OPERATOR
-      : SigningMode.POOL_REGISTRATION_AS_OWNER
+    if (poolKeyPath) {
+      return SigningMode.POOL_REGISTRATION_AS_OPERATOR
+    }
+    if (!hasPaymentSigningFile(signingFiles)) {
+      return SigningMode.POOL_REGISTRATION_AS_OWNER
+    }
+    // Paying without the pool cold key is what the payer mode exists for. Without device support
+    // this stays POOL_REGISTRATION_AS_OPERATOR, which fails in witnessing validation with
+    // MissingPoolColdSigningFileError, exactly as it did before the payer mode existed.
+    return supportsPoolPayerModes
+      ? SigningMode.POOL_REGISTRATION_AS_PAYER
+      : SigningMode.POOL_REGISTRATION_AS_OPERATOR
+  }
+
+  // A pool retirement cert whose cold key is not among the signing files can only be witnessed in
+  // the payer mode, which accepts several retirement certs but no certificate of any other kind.
+  const retirementCertsWithoutColdKey = poolRetirementCertsWithoutColdKey(
+    txBody,
+    signingFiles,
+  )
+  if (
+    supportsPoolPayerModes &&
+    retirementCertsWithoutColdKey.length > 0 &&
+    retirementCertsWithoutColdKey.length ===
+      (txBody.certificates?.items.length ?? 0) &&
+    hasPaymentSigningFile(signingFiles)
+  ) {
+    return SigningMode.POOL_RETIREMENT_AS_PAYER
   }
 
   // Plutus-only fields point to the PLUTUS signing mode, which accepts any tx without a pool
