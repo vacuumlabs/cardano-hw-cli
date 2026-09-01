@@ -91,6 +91,18 @@ export const LedgerCryptoProvider: (
     }
   }
 
+  const supportsPoolPayerModes = async (): Promise<boolean> => {
+    try {
+      const {compatibility} = await ledger.getVersion()
+      return (
+        compatibility.supportsPoolRegistrationAsPayer &&
+        compatibility.supportsPoolRetirementAsPayer
+      )
+    } catch (err) {
+      throw Error(failedMsg(err))
+    }
+  }
+
   const getVersion = async (): Promise<string> => {
     try {
       const {major, minor, patch} = (await ledger.getVersion()).version
@@ -659,7 +671,9 @@ export const LedgerCryptoProvider: (
             path: poolKeyPath as BIP32Path,
           },
         }
+      // The payer never holds the pool cold key, so it is sent as a hash, like for an owner.
       case SigningMode.POOL_REGISTRATION_AS_OWNER:
+      case SigningMode.POOL_REGISTRATION_AS_PAYER:
         return {
           type: LedgerTypes.PoolKeyType.THIRD_PARTY,
           params: {
@@ -836,7 +850,22 @@ export const LedgerCryptoProvider: (
   const prepareStakePoolRetirementCert = (
     cert: TxTypes.PoolRetirementCertificate,
     signingFiles: HwSigningData[],
+    signingMode: SigningMode,
   ): LedgerTypes.Certificate => {
+    // The payer does not hold the pool cold key, so the certificate carries its hash instead of a
+    // derivation path; the device requires exactly this form in the payer mode.
+    if (signingMode === SigningMode.POOL_RETIREMENT_AS_PAYER) {
+      const payerParams: LedgerTypes.PoolRetirementParams = {
+        poolKeyHash: cert.poolKeyHash.toString('hex'),
+        retirementEpoch: `${cert.epoch}`,
+      }
+
+      return {
+        type: LedgerTypes.CertificateType.STAKE_POOL_RETIREMENT,
+        params: payerParams,
+      }
+    }
+
     const poolKeyPath = findSigningPathForKeyHash(
       cert.poolKeyHash,
       signingFiles,
@@ -895,7 +924,11 @@ export const LedgerCryptoProvider: (
           signingMode,
         )
       case TxTypes.CertificateType.POOL_RETIREMENT:
-        return prepareStakePoolRetirementCert(certificate, signingFiles)
+        return prepareStakePoolRetirementCert(
+          certificate,
+          signingFiles,
+          signingMode,
+        )
       case TxTypes.CertificateType.VOTE_DELEGATION:
         return prepareVoteDelegationCert(certificate, signingFiles, signingMode)
 
@@ -1180,6 +1213,10 @@ export const LedgerCryptoProvider: (
         return LedgerTypes.TransactionSigningMode.POOL_REGISTRATION_AS_OWNER
       case SigningMode.POOL_REGISTRATION_AS_OPERATOR:
         return LedgerTypes.TransactionSigningMode.POOL_REGISTRATION_AS_OPERATOR
+      case SigningMode.POOL_REGISTRATION_AS_PAYER:
+        return LedgerTypes.TransactionSigningMode.POOL_REGISTRATION_AS_PAYER
+      case SigningMode.POOL_RETIREMENT_AS_PAYER:
+        return LedgerTypes.TransactionSigningMode.POOL_RETIREMENT_AS_PAYER
       case SigningMode.MULTISIG_TRANSACTION:
         return LedgerTypes.TransactionSigningMode.MULTISIG_TRANSACTION
       case SigningMode.PLUTUS_TRANSACTION:
@@ -1721,6 +1758,7 @@ export const LedgerCryptoProvider: (
   return {
     getVersion,
     supportsUnrestrictedTransaction,
+    supportsPoolPayerModes,
     showAddress,
     witnessTx,
     getXPubKeys,
