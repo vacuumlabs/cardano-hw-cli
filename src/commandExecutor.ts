@@ -205,7 +205,11 @@ const CommandExecutor = async () => {
     const tx = InteropLib.decodeTx(txCbor)
 
     const {era} = args.txFileData
-    const signingMode = determineSigningMode(tx.body, args.hwSigningFileData)
+    const signingMode = determineSigningMode(
+      tx.body,
+      args.hwSigningFileData,
+      await cryptoProvider.supportsPoolPayerModes(),
+    )
     // Unrestricted mode is auto-applied when the tx requires it. Refuse to sign unless the user
     // explicitly authorized it via --allow-unrestricted-mode, and verify the connected device/app
     // can actually honor it.
