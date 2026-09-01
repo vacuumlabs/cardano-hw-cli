@@ -6,6 +6,7 @@ import {
   CertificateType,
   CredentialType,
   KeyHash,
+  PoolRegistrationCertificate,
   RewardAccount,
   ScriptHash,
   TransactionBody,
@@ -53,6 +54,40 @@ const multisigSigningFile: HwSigningData = {
   cborXPubKeyHex: testXPubKeyCborHex,
 }
 
+const poolColdSigningFile: HwSigningData = {
+  type: HwSigningType.PoolCold,
+  path: [2147485501, 2147485463, 2147483648, 2147483648] as BIP32Path, // 1853'/1815'/0'/0'
+  cborXPubKeyHex:
+    '58403d7e84dca8b4bc322401a2cc814af7c84d2992a22f99554fe340d7df7910768d1e2a47754207da3069f90241fbf3b8742c367e9028e5f3f85ae3660330b4f5b7' as XPubKeyCborHex,
+}
+
+const testPoolColdKeyHashHex =
+  'dbfee4665e58c8f8e9b9ff02b17f32e08a42c855476a5d867c2737b7'
+
+const stakeSigningFile: HwSigningData = {
+  type: HwSigningType.Stake,
+  path: [2147485500, 2147485463, 2147483648, 2, 0] as BIP32Path, // 1852'/1815'/0'/2/0
+  cborXPubKeyHex: testXPubKeyCborHex,
+}
+
+const byronPaymentSigningFile: HwSigningData = {
+  type: HwSigningType.Payment,
+  path: [2147483692, 2147485463, 2147483648, 0, 0] as BIP32Path, // 44'/1815'/0'/0/0
+  cborXPubKeyHex: testXPubKeyCborHex,
+}
+
+const accountSigningFile: HwSigningData = {
+  type: HwSigningType.Payment,
+  path: [2147485500, 2147485463, 2147483648] as BIP32Path, // 1852'/1815'/0'
+  cborXPubKeyHex: testXPubKeyCborHex,
+}
+
+const cip36SigningFile: HwSigningData = {
+  type: HwSigningType.CIP36Voting,
+  path: [2147485342, 2147485463, 2147483648, 0, 0] as BIP32Path, // 1694'/1815'/0'/0/0
+  cborXPubKeyHex: testXPubKeyCborHex,
+}
+
 const decode = (cborHex: string) => decodeTx(Buffer.from(cborHex, 'hex'))
 
 const keyHashBuf = (hex: string): KeyHash => Buffer.from(hex, 'hex') as KeyHash
@@ -76,13 +111,15 @@ const stakeDeregistrationWithScriptHash = {
   },
 }
 
-const poolRetirement = {
+const poolRetirementWithKeyHash = (keyHashHex: string) => ({
   type: CertificateType.POOL_RETIREMENT as const,
-  poolKeyHash: keyHashBuf(
-    '13381d918ec0283ceeff60f7f4fc21e1540e053ccf8a77307a7a32ad',
-  ),
+  poolKeyHash: keyHashBuf(keyHashHex),
   epoch: 100 as Uint,
-}
+})
+
+const poolRetirement = poolRetirementWithKeyHash(
+  '13381d918ec0283ceeff60f7f4fc21e1540e053ccf8a77307a7a32ad',
+)
 
 // 0xe1 header = key-hash reward account on mainnet, 0xf1 = script-hash (CIP-19)
 const withdrawalWithRewardAccount = (header: number, hashHex: string) => ({
@@ -110,6 +147,30 @@ const bodyWithCertificates = (certificates: Certificate[]): TransactionBody =>
       _ordered: true,
     },
   })
+
+// Rewrites the pool registration fixture's certificate to name a given operator (pool cold) key
+// hash, so that a signing file can be made to match — or deliberately not match — it.
+const poolRegistrationBodyWithOperator = (
+  operatorKeyHashHex: string,
+): TransactionBody => {
+  const {body} = decode(poolRegistrationTxCborHex)
+  const cert = body.certificates!.items[0] as PoolRegistrationCertificate
+  return {
+    ...body,
+    certificates: {
+      ...body.certificates!,
+      items: [
+        {
+          ...cert,
+          poolParams: {
+            ...cert.poolParams,
+            operator: keyHashBuf(operatorKeyHashHex),
+          },
+        },
+      ],
+    },
+  }
+}
 
 describe('determineSigningMode', () => {
   it('infers ORDINARY_TRANSACTION for an ordinary tx', () => {
@@ -290,6 +351,262 @@ describe('determineSigningMode', () => {
       ],
     })
     assert.strictEqual(determineSigningMode(body, []), SigningMode.UNRESTRICTED)
+  })
+})
+
+describe('determineSigningMode with pool payer modes', () => {
+  // The fixture's operator is a third party, i.e. no signing file can resolve it.
+  const thirdPartyPoolRegistrationBody = () =>
+    decode(poolRegistrationTxCborHex).body
+
+  it('infers POOL_REGISTRATION_AS_PAYER for a payment-only witness of a third-party pool', () => {
+    assert.strictEqual(
+      determineSigningMode(
+        thirdPartyPoolRegistrationBody(),
+        [paymentSigningFile],
+        true,
+      ),
+      SigningMode.POOL_REGISTRATION_AS_PAYER,
+    )
+  })
+
+  it('keeps POOL_REGISTRATION_AS_OPERATOR for the same tx when the device lacks payer support', () => {
+    // Pre-payer behavior: the mode is kept so witnessing validation reports the missing cold key.
+    assert.strictEqual(
+      determineSigningMode(
+        thirdPartyPoolRegistrationBody(),
+        [paymentSigningFile],
+        false,
+      ),
+      SigningMode.POOL_REGISTRATION_AS_OPERATOR,
+    )
+  })
+
+  it('infers POOL_REGISTRATION_AS_OPERATOR when the pool cold key is among the signing files', () => {
+    assert.strictEqual(
+      determineSigningMode(
+        poolRegistrationBodyWithOperator(testPoolColdKeyHashHex),
+        [paymentSigningFile, poolColdSigningFile],
+        true,
+      ),
+      SigningMode.POOL_REGISTRATION_AS_OPERATOR,
+    )
+  })
+
+  it('infers POOL_REGISTRATION_AS_OWNER when no payment file is present', () => {
+    assert.strictEqual(
+      determineSigningMode(thirdPartyPoolRegistrationBody(), [], true),
+      SigningMode.POOL_REGISTRATION_AS_OWNER,
+    )
+  })
+
+  it('infers POOL_RETIREMENT_AS_PAYER for a payment-only witness of a third-party pool', () => {
+    assert.strictEqual(
+      determineSigningMode(
+        bodyWithCertificates([poolRetirement]),
+        [paymentSigningFile],
+        true,
+      ),
+      SigningMode.POOL_RETIREMENT_AS_PAYER,
+    )
+  })
+
+  it('infers POOL_RETIREMENT_AS_PAYER for several retirement certificates at once', () => {
+    assert.strictEqual(
+      determineSigningMode(
+        bodyWithCertificates([
+          poolRetirement,
+          poolRetirementWithKeyHash(
+            'deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef',
+          ),
+        ]),
+        [paymentSigningFile],
+        true,
+      ),
+      SigningMode.POOL_RETIREMENT_AS_PAYER,
+    )
+  })
+
+  it('infers ORDINARY_TRANSACTION when the pool cold key resolves the retirement certificate', () => {
+    assert.strictEqual(
+      determineSigningMode(
+        bodyWithCertificates([
+          poolRetirementWithKeyHash(testPoolColdKeyHashHex),
+        ]),
+        [paymentSigningFile, poolColdSigningFile],
+        true,
+      ),
+      SigningMode.ORDINARY_TRANSACTION,
+    )
+  })
+
+  // Outside the payer mode, a retirement without its cold key is not signable on Ledger in any
+  // mode, and falling back to UNRESTRICTED would not help. ORDINARY keeps the pre-payer behavior:
+  // Ledger reports the missing signing file, and Keystone signs the raw tx as before.
+  it('keeps ORDINARY_TRANSACTION when a retirement certificate is combined with another', () => {
+    // The payer mode accepts retirement certificates only.
+    assert.strictEqual(
+      determineSigningMode(
+        bodyWithCertificates([
+          poolRetirement,
+          stakeDeregistrationWithKeyHash(testXPubKeyHashHex),
+        ]),
+        [paymentSigningFile],
+        true,
+      ),
+      SigningMode.ORDINARY_TRANSACTION,
+    )
+  })
+
+  it('keeps ORDINARY_TRANSACTION for a hash-form retirement when the device lacks payer support', () => {
+    assert.strictEqual(
+      determineSigningMode(
+        bodyWithCertificates([poolRetirement]),
+        [paymentSigningFile],
+        false,
+      ),
+      SigningMode.ORDINARY_TRANSACTION,
+    )
+  })
+
+  it('keeps ORDINARY_TRANSACTION for a hash-form retirement with no payment signing file', () => {
+    assert.strictEqual(
+      determineSigningMode(bodyWithCertificates([poolRetirement]), [], true),
+      SigningMode.ORDINARY_TRANSACTION,
+    )
+  })
+
+  it('keeps ORDINARY_TRANSACTION when only one of two retirements has its cold key', () => {
+    // The payer mode needs all retirement pool keys as hashes.
+    assert.strictEqual(
+      determineSigningMode(
+        bodyWithCertificates([
+          poolRetirement,
+          poolRetirementWithKeyHash(testPoolColdKeyHashHex),
+        ]),
+        [paymentSigningFile, poolColdSigningFile],
+        true,
+      ),
+      SigningMode.ORDINARY_TRANSACTION,
+    )
+  })
+})
+
+describe('validateWitnessing in pool payer modes', () => {
+  const payerParams = (
+    signingMode: SigningMode,
+    body: TransactionBody,
+    hwSigningFileData: HwSigningData[],
+  ): TxSigningParameters => ({
+    signingMode,
+    tx: {...decode(ordinaryTxCborHex), body},
+    txBodyHashHex: '',
+    hwSigningFileData,
+    network: NETWORKS.MAINNET,
+    era: CardanoEra.BABBAGE,
+  })
+
+  const registrationBody = () => decode(poolRegistrationTxCborHex).body
+  const retirementBody = () => bodyWithCertificates([poolRetirement])
+
+  it('accepts a payment-only witness of a pool registration', () => {
+    assert.doesNotThrow(() =>
+      validateWitnessing(
+        payerParams(
+          SigningMode.POOL_REGISTRATION_AS_PAYER,
+          registrationBody(),
+          [paymentSigningFile],
+        ),
+      ),
+    )
+  })
+
+  it('accepts a payment-only witness of a pool retirement', () => {
+    assert.doesNotThrow(() =>
+      validateWitnessing(
+        payerParams(SigningMode.POOL_RETIREMENT_AS_PAYER, retirementBody(), [
+          paymentSigningFile,
+        ]),
+      ),
+    )
+  })
+
+  it('accepts a Byron payment-only witness of a pool retirement', () => {
+    assert.doesNotThrow(() =>
+      validateWitnessing(
+        payerParams(SigningMode.POOL_RETIREMENT_AS_PAYER, retirementBody(), [
+          byronPaymentSigningFile,
+        ]),
+      ),
+    )
+  })
+
+  it('rejects a payer witness without a payment signing file', () => {
+    assert.throws(
+      () =>
+        validateWitnessing(
+          payerParams(
+            SigningMode.POOL_REGISTRATION_AS_PAYER,
+            registrationBody(),
+            [],
+          ),
+        ),
+      {message: Errors.MissingPaymentSigningFileError},
+    )
+  })
+
+  it('rejects a stake signing file, which the device would refuse to witness', () => {
+    assert.throws(
+      () =>
+        validateWitnessing(
+          payerParams(
+            SigningMode.POOL_REGISTRATION_AS_PAYER,
+            registrationBody(),
+            [paymentSigningFile, stakeSigningFile],
+          ),
+        ),
+      {message: Errors.TooManyStakeSigningFilesError},
+    )
+  })
+
+  it('rejects a pool cold signing file in the retirement payer mode', () => {
+    assert.throws(
+      () =>
+        validateWitnessing(
+          payerParams(SigningMode.POOL_RETIREMENT_AS_PAYER, retirementBody(), [
+            paymentSigningFile,
+            poolColdSigningFile,
+          ]),
+        ),
+      {message: Errors.TooManyPoolColdSigningFilesError},
+    )
+  })
+
+  it('rejects an account signing file, which the device would refuse to witness', () => {
+    assert.throws(
+      () =>
+        validateWitnessing(
+          payerParams(
+            SigningMode.POOL_REGISTRATION_AS_PAYER,
+            registrationBody(),
+            [paymentSigningFile, accountSigningFile],
+          ),
+        ),
+      {message: Errors.InvalidPoolPayerSigningFileError},
+    )
+  })
+
+  it('rejects a CIP-36 vote key signing file, which the device would refuse to witness', () => {
+    assert.throws(
+      () =>
+        validateWitnessing(
+          payerParams(SigningMode.POOL_RETIREMENT_AS_PAYER, retirementBody(), [
+            paymentSigningFile,
+            cip36SigningFile,
+          ]),
+        ),
+      {message: Errors.InvalidPoolPayerSigningFileError},
+    )
   })
 })
 
