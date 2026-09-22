@@ -6,8 +6,9 @@ cd ..
 ./scripts/build-common.sh
 ./scripts/build-linux-deb-package.sh
 ./scripts/build-linux-x64-tar-gz.sh
-./scripts/build-linux-arm64-tar-gz.sh
 ./scripts/build-windows.sh
+# linux-arm64 is not included here. Build it with yarn build-linux-tar-arm64
+# on Linux arm64 (that is the CI job that also runs the binary).
 
 if [[ "$(uname -s)" == "Darwin" ]]; then
   MAC_ARCH="$(uname -m)"

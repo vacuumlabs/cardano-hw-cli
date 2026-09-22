@@ -200,6 +200,8 @@ To build all artifacts for each OS run:
 yarn build
 ```
 
+`yarn build` does not produce the linux-arm64 tarball. Build that with `yarn build-linux-tar-arm64` on Linux arm64. CI does this in `build_and_test_linux_arm64` and runs the resulting binary.
+
 To target specific artifact, run one of following commands:
 ```
 yarn build-linux-deb

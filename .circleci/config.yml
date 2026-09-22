@@ -60,10 +60,9 @@ jobs:
           path: build/release
           destination: release-binaries
 
-  # Builds the linux-arm64 artifact natively (arm resource class) and, most
-  # importantly, executes it: cross-built arm64 binaries used to ship with
-  # incomplete pkg snapshots that crash on startup (see issue #194), which
-  # only running the binary can catch.
+  # The only linux-arm64 build. Runs on arm64 so pkg can emit bytecode, then
+  # executes the binary. Cross-built arm64 snapshots crash on startup
+  # (see issue #194), so the x64 job does not produce this artifact.
   build_and_test_linux_arm64:
     docker:
       - image: cimg/node:22.14
