@@ -65,12 +65,30 @@ type CheckValidationErrorsOptions = {
   permitListedUnfixableIssues?: boolean
 }
 
-const checkValidationErrors = (
+type CheckValidationErrorsResult = {
+  containsUnfixable: boolean
+  containsFixable: boolean
+}
+
+function checkValidationErrors(
+  cborHex: CborHex,
+  validator: (txCbor: Buffer) => InteropLib.ValidationError[],
+  printIssues: boolean,
+  printSuccessMessage?: boolean,
+): CheckValidationErrorsResult
+// eslint-disable-next-line no-redeclare -- TypeScript overload; base rule does not understand them
+function checkValidationErrors(
+  cborHex: CborHex,
+  validator: (txCbor: Buffer) => InteropLib.ValidationError[],
+  options?: CheckValidationErrorsOptions,
+): CheckValidationErrorsResult
+// eslint-disable-next-line no-redeclare -- implementation signature for the overloads above
+function checkValidationErrors(
   cborHex: CborHex,
   validator: (txCbor: Buffer) => InteropLib.ValidationError[],
   printIssuesOrOptions: boolean | CheckValidationErrorsOptions = true,
   printSuccessMessage = false,
-): {containsUnfixable: boolean; containsFixable: boolean} => {
+): CheckValidationErrorsResult {
   const options: CheckValidationErrorsOptions =
     typeof printIssuesOrOptions === 'boolean'
       ? {
@@ -97,11 +115,11 @@ const checkValidationErrors = (
 
   const issueGroups = [
     {
-      header: 'The transaction contains following unfixable issues:',
+      header: 'The transaction contains the following unfixable issues:',
       issues: blockingUnfixableIssues,
     },
     {
-      header: 'The transaction contains following fixable issues:',
+      header: 'The transaction contains the following fixable issues:',
       issues: fixableIssues,
     },
   ]
