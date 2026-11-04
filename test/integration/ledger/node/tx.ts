@@ -1,5 +1,6 @@
 /* eslint-disable max-len */
 import assert from 'assert'
+import type Transport from '@ledgerhq/hw-transport'
 import {decodeTx} from 'cardano-hw-interop-lib'
 import {LedgerCryptoProvider} from '../../../../src/crypto-providers/ledgerCryptoProvider'
 import {NETWORKS} from '../../../../src/constants'
@@ -12,6 +13,7 @@ import {validateTxBeforeWitnessing} from '../../../../src/transaction/transactio
 
 import {signingFiles} from './signingFiles'
 import {getTransport} from './speculos'
+import {canSetExpertMode, withExpertMode} from './expertMode'
 import {CardanoEra} from '../../../../src/basicTypes'
 import {CryptoProvider} from '../../../../src/crypto-providers/cryptoProvider'
 
@@ -268,6 +270,34 @@ const transactions = {
           ],
           path: signingFiles.stake0.path,
         },
+        {
+          key: 0,
+          data: [
+            Buffer.from(
+              'cd2b047d1a803eee059769cffb3dfd0a4b9327e55bc78aa962d9bd4f720db0b2',
+              'hex',
+            ),
+            Buffer.from(
+              '501a09efd212efd741574e63e9ff6c701746cac68ddcba3af5ef655ff1e724399adef1eb258ffdb34fd09d7b91c4b2f612bfba083b2debaa87ed93fcf4bc1f08',
+              'hex',
+            ),
+          ],
+          path: signingFiles.payment0.path,
+        },
+      ],
+    },
+  },
+
+  unrestricted_WithdrawalWithoutStakeSigningFile: {
+    // same tx as ordinary_WithWithdrawal, without the stake key signing file (UNRESTRICTED mode)
+    requiresExpertMode: true,
+    cborHex:
+      '83a50081825820bc8bf52ea894fb8e442fe3eea628be87d0c9a37baef185b70eb00a5c8a849d3b0001818258390114c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11241d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c1a00311cba021a0002c431031a00ac30b105a1581de11d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c1a000ded3aa0f6',
+    hwSigningFiles: [signingFiles.payment0],
+    network: 'MAINNET',
+    witnesses: {
+      byronWitnesses: [],
+      shelleyWitnesses: [
         {
           key: 0,
           data: [
@@ -618,6 +648,60 @@ const transactions = {
             ),
           ],
           path: signingFiles.poolCold0.path,
+        },
+      ],
+    },
+  },
+
+  poolRegistrationAsPayer: {
+    // same tx as poolRegistrationAsOperator, witnessed only by the payer
+    cborHex:
+      '83a500818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b7000181825839017cb05fce110fb999f01abb4f62bc455e217d4a51fde909fa9aea545443ac53c046cf6a42095e3c60310fa802771d0672f8fe2d1861138b090102182a030a04818a03581cdbfee4665e58c8f8e9b9ff02b17f32e08a42c855476a5d867c2737b7582007821cd344d7fd7e3ae5f2ed863218cb979ff1d59e50c4276bdc479b0d0844501b0000000ba43b74001a1443fd00d81e82031864581de1794d9b3408c9fb67b950a48a0690f070f117e9978f7fc1d120fc58ad82581c1d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c581c794d9b3408c9fb67b950a48a0690f070f117e9978f7fc1d120fc58ad848400190bb84436e44b9af68400190bb84436e44b9b500178ff2483e3a2330a34c4a5e576c2078301190bb86d616161612e626262622e636f6d82026d616161612e626262632e636f6d82782968747470733a2f2f7777772e76616375756d6c6162732e636f6d2f73616d706c6555726c2e6a736f6e5820cdb714fd722c24aeb10c93dbb0ff03bd4783441cd5ba2a8b6f373390520535bba0f6',
+    hwSigningFiles: [signingFiles.payment0],
+    network: 'MAINNET',
+    witnesses: {
+      byronWitnesses: [],
+      shelleyWitnesses: [
+        {
+          key: 0,
+          data: [
+            Buffer.from(
+              'cd2b047d1a803eee059769cffb3dfd0a4b9327e55bc78aa962d9bd4f720db0b2',
+              'hex',
+            ),
+            Buffer.from(
+              '131402749204b27fcb7dfea4ca8e2d04aef624e8e4f8d14761ed5d6578174f2ed765c7642bc061073dd734126bfa0819a26a76002459b492712da26e2a59ad0a',
+              'hex',
+            ),
+          ],
+          path: signingFiles.payment0.path,
+        },
+      ],
+    },
+  },
+
+  poolRetirementAsPayer: {
+    // same tx as ordinary_CertificatePoolRetirement, witnessed only by the payer
+    cborHex:
+      '83a500818258201af8fa0b754ff99253d983894e63a2b09cbb56c833ba18c3384210163f63dcfc00018182582b82d818582183581c9e1c71de652ec8b85fec296f0685ca3988781c94a2e1a5d89d92f45fa0001a0d0c25611a002dd2e802182a030a04818304581cdbfee4665e58c8f8e9b9ff02b17f32e08a42c855476a5d867c2737b7186da0f6',
+    hwSigningFiles: [signingFiles.payment0],
+    network: 'MAINNET',
+    witnesses: {
+      byronWitnesses: [],
+      shelleyWitnesses: [
+        {
+          key: 0,
+          data: [
+            Buffer.from(
+              'cd2b047d1a803eee059769cffb3dfd0a4b9327e55bc78aa962d9bd4f720db0b2',
+              'hex',
+            ),
+            Buffer.from(
+              'db9082cd6f6157a201fbf2083e5b0d35ea4809f1ec9e40924ac981a3ee15bd79c0fd839adef0db5545967b3054f78f5df1d09617bd0785cc89c7a6468caafb03',
+              'hex',
+            ),
+          ],
+          path: signingFiles.payment0.path,
         },
       ],
     },
@@ -1675,7 +1759,11 @@ async function testTxWitnessing(
   const tx = decodeTx(txCbor)
 
   const signingParameters = {
-    signingMode: determineSigningMode(tx.body, transaction.hwSigningFiles),
+    signingMode: determineSigningMode(
+      tx.body,
+      transaction.hwSigningFiles,
+      await cryptoProvider.supportsPoolPayerModes(),
+    ),
     tx,
     txBodyHashHex: getTxBodyHash(tx.body),
     hwSigningFileData: transaction.hwSigningFiles,
@@ -1702,16 +1790,31 @@ async function testTxWitnessing(
 }
 
 describe('Ledger tx witnessing', () => {
+  let transport: Transport
+  let expertModeSettable: boolean
   let cryptoProvider: CryptoProvider
   // eslint-disable-next-line prefer-arrow-callback
   before(async function () {
     this.timeout(10000)
-    cryptoProvider = await LedgerCryptoProvider(await getTransport())
+    transport = await getTransport()
+    expertModeSettable = await canSetExpertMode(transport)
+    cryptoProvider = await LedgerCryptoProvider(transport)
   })
   const txs = Object.entries(transactions)
 
   txs.forEach(([txType, tx]) =>
-    it(`Should witness tx ${txType}`, async () =>
-      await testTxWitnessing(cryptoProvider, tx)).timeout(100000),
+    // eslint-disable-next-line prefer-arrow-callback
+    it(`Should witness tx ${txType}`, async function () {
+      if (!('requiresExpertMode' in tx)) {
+        await testTxWitnessing(cryptoProvider, tx)
+        return
+      }
+      if (!expertModeSettable) {
+        this.skip()
+      }
+      await withExpertMode(transport, () =>
+        testTxWitnessing(cryptoProvider, tx),
+      )
+    }).timeout(100000),
   )
 })

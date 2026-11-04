@@ -75,6 +75,8 @@ export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
   const supportsUnrestrictedTransaction = (): Promise<boolean> =>
     Promise.resolve(false)
 
+  const supportsPoolPayerModes = (): Promise<boolean> => Promise.resolve(false)
+
   const getVersion = async (): Promise<string> => {
     const {payload: features} = await TrezorConnect.getFeatures()
     const isSuccessful = (value: unknown): value is TrezorTypes.Features =>
@@ -717,6 +719,9 @@ export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
         return TrezorEnums.CardanoTxSigningMode.POOL_REGISTRATION_AS_OWNER
       case SigningMode.POOL_REGISTRATION_AS_OPERATOR:
         throw Error(Errors.TrezorPoolRegistrationAsOperatorNotSupported)
+      case SigningMode.POOL_REGISTRATION_AS_PAYER:
+      case SigningMode.POOL_RETIREMENT_AS_PAYER:
+        throw Error(Errors.TrezorPoolPayerNotSupported)
       case SigningMode.MULTISIG_TRANSACTION:
         return TrezorEnums.CardanoTxSigningMode.MULTISIG_TRANSACTION
       case SigningMode.PLUTUS_TRANSACTION:
@@ -1215,6 +1220,7 @@ export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
   return {
     getVersion,
     supportsUnrestrictedTransaction,
+    supportsPoolPayerModes,
     showAddress,
     witnessTx,
     getXPubKeys,

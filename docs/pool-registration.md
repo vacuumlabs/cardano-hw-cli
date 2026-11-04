@@ -16,6 +16,10 @@ HW wallet supports signing of stake pool registration certificates when providin
 
 Currently only Ledger supports signing and creating payment/pool witnesses.
 
+### As a payer
+
+With Ledger app 8.1 or later, the payer of the deposit and fees can witness without the pool cold key, for example on a different device than the operator. Give only the payment signing file to `transaction witness`. This also applies to pool retirement transactions.
+
 ## Create pool keys
 
 These commands create stake pool keys - VRF, KES. The process is similar with the official documentation found [here](https://github.com/input-output-hk/cardano-node/blob/master/doc/stake-pool-operations/node_keys.md). All of these keys will be required for further steps and for running a block producing node, therefore keep them very secure and do not share them with anyone.

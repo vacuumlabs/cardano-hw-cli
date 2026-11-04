@@ -174,6 +174,12 @@ Run unit test
 yarn test-unit
 ```
 
+Run Ledger integration tests (device with the `abandon ... about` test mnemonic, Cardano app open; `-speculos` for Speculos on port 9999)
+```
+yarn test-integration-ledger
+yarn test-integration-ledger-speculos
+```
+
 Run application with
 ```
 yarn dev ...
