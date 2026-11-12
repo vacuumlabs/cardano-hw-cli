@@ -68,6 +68,7 @@ import {
   _AddressParameters,
   stakeHashFromBaseAddress,
   verifyIntendedPubKeySignatureMatch,
+  filterSigningFiles,
 } from './util'
 
 const {bech32, getShelleyAddressNetworkId} = require('cardano-crypto.js')
@@ -1105,6 +1106,310 @@ export const LedgerCryptoProvider: (
     }
   }
 
+  const prepareGovActionId = (
+    govActionId: TxTypes.GovActionId | null,
+  ): LedgerTypes.GovActionId | null => {
+    if (govActionId === null) {
+      return null
+    }
+    if (govActionId.index > Number.MAX_SAFE_INTEGER) {
+      throw Error(Errors.InvalidProposalProcedures)
+    }
+    return {
+      txHashHex: govActionId.transactionId.toString('hex'),
+      govActionIndex: Number(govActionId.index),
+    }
+  }
+
+  // Protocol parameter values are not parsed by cardano-hw-interop-lib, they come as decoded
+  // CBOR. Rationals (tag 30) are matched by shape because the decoder belongs to the cbor
+  // package of cardano-hw-interop-lib, so `instanceof Tagged` would not match.
+  const prepareParamUint = (value: unknown): LedgerTypes.bigint_like => {
+    if (
+      (typeof value === 'number' &&
+        Number.isSafeInteger(value) &&
+        value >= 0) ||
+      (typeof value === 'bigint' && value >= 0n)
+    ) {
+      return value
+    }
+    throw Error(Errors.InvalidProposalProcedures)
+  }
+
+  const prepareParamRatio = (value: unknown): LedgerTypes.Ratio => {
+    const {tag, value: ratio} = (value ?? {}) as {
+      tag?: unknown
+      value?: unknown
+    }
+    if (tag !== 30 || !Array.isArray(ratio) || ratio.length !== 2) {
+      throw Error(Errors.InvalidProposalProcedures)
+    }
+    return {
+      numerator: prepareParamUint(ratio[0]),
+      denominator: prepareParamUint(ratio[1]),
+    }
+  }
+
+  const prepareParamArray = (value: unknown, length: number): unknown[] => {
+    if (!Array.isArray(value) || value.length !== length) {
+      throw Error(Errors.InvalidProposalProcedures)
+    }
+    return value
+  }
+
+  const prepareProtocolParamUpdate = (
+    entries: TxTypes.ProtocolParamUpdateEntry[],
+  ): LedgerTypes.ProtocolParamUpdate => {
+    const update: LedgerTypes.ProtocolParamUpdate = {}
+    entries.forEach(({key, value}) => {
+      // keys of protocol_param_update in the Conway CDDL; cost models (18) are not supported
+      switch (Number(key)) {
+        case 0:
+          update.minFeeA = prepareParamUint(value)
+          break
+        case 1:
+          update.minFeeB = prepareParamUint(value)
+          break
+        case 2:
+          update.maxBlockBodySize = prepareParamUint(value)
+          break
+        case 3:
+          update.maxTxSize = prepareParamUint(value)
+          break
+        case 4:
+          update.maxBlockHeaderSize = prepareParamUint(value)
+          break
+        case 5:
+          update.keyDeposit = prepareParamUint(value)
+          break
+        case 6:
+          update.poolDeposit = prepareParamUint(value)
+          break
+        case 7:
+          update.maxEpoch = prepareParamUint(value)
+          break
+        case 8:
+          update.nOpt = prepareParamUint(value)
+          break
+        case 9:
+          update.poolPledgeInfluence = prepareParamRatio(value)
+          break
+        case 10:
+          update.expansionRate = prepareParamRatio(value)
+          break
+        case 11:
+          update.treasuryGrowthRate = prepareParamRatio(value)
+          break
+        case 16:
+          update.minPoolCost = prepareParamUint(value)
+          break
+        case 17:
+          update.adaPerUtxoByte = prepareParamUint(value)
+          break
+        case 19: {
+          const [memPrice, stepPrice] = prepareParamArray(value, 2)
+          update.executionUnitPrices = {
+            memPrice: prepareParamRatio(memPrice),
+            stepPrice: prepareParamRatio(stepPrice),
+          }
+          break
+        }
+        case 20:
+        case 21: {
+          const [memory, steps] = prepareParamArray(value, 2)
+          const exUnits = {
+            memory: prepareParamUint(memory),
+            steps: prepareParamUint(steps),
+          }
+          if (Number(key) === 20) {
+            update.maxTxExUnits = exUnits
+          } else {
+            update.maxBlockExUnits = exUnits
+          }
+          break
+        }
+        case 22:
+          update.maxValueSize = prepareParamUint(value)
+          break
+        case 23:
+          update.collateralPercentage = prepareParamUint(value)
+          break
+        case 24:
+          update.maxCollateralInputs = prepareParamUint(value)
+          break
+        case 25: {
+          const t = prepareParamArray(value, 5).map(prepareParamRatio)
+          update.poolVotingThresholds = {
+            motionNoConfidence: t[0],
+            committeeNormal: t[1],
+            committeeNoConfidence: t[2],
+            hardForkInitiation: t[3],
+            securityRelevantParameter: t[4],
+          }
+          break
+        }
+        case 26: {
+          const t = prepareParamArray(value, 10).map(prepareParamRatio)
+          update.drepVotingThresholds = {
+            motionNoConfidence: t[0],
+            committeeNormal: t[1],
+            committeeNoConfidence: t[2],
+            updateConstitution: t[3],
+            hardForkInitiation: t[4],
+            ppNetworkGroup: t[5],
+            ppEconomicGroup: t[6],
+            ppTechnicalGroup: t[7],
+            ppGovGroup: t[8],
+            treasuryWithdrawal: t[9],
+          }
+          break
+        }
+        case 27:
+          update.minCommitteeSize = prepareParamUint(value)
+          break
+        case 28:
+          update.committeeTermLimit = prepareParamUint(value)
+          break
+        case 29:
+          update.govActionValidityPeriod = prepareParamUint(value)
+          break
+        case 30:
+          update.govActionDeposit = prepareParamUint(value)
+          break
+        case 31:
+          update.drepDeposit = prepareParamUint(value)
+          break
+        case 32:
+          update.drepInactivityPeriod = prepareParamUint(value)
+          break
+        case 33:
+          update.minFeeRefScriptCoinsPerByte = prepareParamRatio(value)
+          break
+        default:
+          throw Error(
+            `${Errors.InvalidProposalProcedures} (protocol parameter key ${key})`,
+          )
+      }
+    })
+    return update
+  }
+
+  const prepareGovAction = (
+    govAction: TxTypes.GovAction,
+    signingFiles: HwSigningData[],
+    network: Network,
+    signingMode: SigningMode,
+  ): LedgerTypes.GovAction => {
+    // the device accepts a committee member given by path only for a committee cold key
+    const {committeeColdSigningFiles} = filterSigningFiles(signingFiles)
+    const prepareCommitteeCredential = (credential: TxTypes.Credential) =>
+      prepareCredential(
+        credential,
+        committeeColdSigningFiles,
+        signingMode,
+        true,
+      )
+
+    switch (govAction.type) {
+      case TxTypes.GovActionType.PARAMETER_CHANGE:
+        return {
+          type: LedgerTypes.GovActionType.PARAMETER_CHANGE,
+          prevActionId: prepareGovActionId(govAction.prevGovActionId),
+          protocolParamUpdate: prepareProtocolParamUpdate(
+            govAction.protocolParamUpdate,
+          ),
+          guardrailsScriptHashHex: govAction.policyHash?.toString('hex'),
+        }
+      case TxTypes.GovActionType.HARD_FORK_INITIATION:
+        if (
+          govAction.protocolVersion.major > Number.MAX_SAFE_INTEGER ||
+          govAction.protocolVersion.minor > Number.MAX_SAFE_INTEGER
+        ) {
+          throw Error(Errors.InvalidProposalProcedures)
+        }
+        return {
+          type: LedgerTypes.GovActionType.HARD_FORK_INITIATION,
+          prevActionId: prepareGovActionId(govAction.prevGovActionId),
+          protocolVersion: {
+            major: Number(govAction.protocolVersion.major),
+            minor: Number(govAction.protocolVersion.minor),
+          },
+        }
+      case TxTypes.GovActionType.TREASURY_WITHDRAWALS:
+        return {
+          type: LedgerTypes.GovActionType.TREASURY_WITHDRAWALS,
+          withdrawals: govAction.withdrawals.map((withdrawal) => ({
+            rewardAccount: prepareRewardAccount(
+              signingFiles,
+              withdrawal.rewardAccount,
+              network,
+            ),
+            amount: `${withdrawal.amount}`,
+          })),
+          guardrailsScriptHashHex: govAction.policyHash?.toString('hex'),
+        }
+      case TxTypes.GovActionType.NO_CONFIDENCE:
+        return {
+          type: LedgerTypes.GovActionType.NO_CONFIDENCE,
+          prevActionId: prepareGovActionId(govAction.prevGovActionId),
+        }
+      case TxTypes.GovActionType.UPDATE_COMMITTEE:
+        return {
+          type: LedgerTypes.GovActionType.UPDATE_COMMITTEE,
+          prevActionId: prepareGovActionId(govAction.prevGovActionId),
+          membersToRemove: govAction.membersToRemove.items.map(
+            prepareCommitteeCredential,
+          ),
+          membersToAdd: govAction.membersToAdd.map((member) => ({
+            coldCredential: prepareCommitteeCredential(member.coldCredential),
+            expirationEpoch: `${member.epoch}`,
+          })),
+          threshold: {
+            numerator: `${govAction.quorum[0]}`,
+            denominator: `${govAction.quorum[1]}`,
+          },
+        }
+      case TxTypes.GovActionType.NEW_CONSTITUTION:
+        return {
+          type: LedgerTypes.GovActionType.NEW_CONSTITUTION,
+          prevActionId: prepareGovActionId(govAction.prevGovActionId),
+          anchor: prepareAnchor(
+            govAction.constitution.anchor,
+          ) as LedgerTypes.AnchorParams,
+          guardrailsScriptHashHex:
+            govAction.constitution.scriptHash?.toString('hex'),
+        }
+      case TxTypes.GovActionType.INFO:
+        return {
+          type: LedgerTypes.GovActionType.INFO,
+        }
+      default:
+        throw Error(Errors.Unreachable)
+    }
+  }
+
+  const prepareProposalProcedure = (
+    proposal: TxTypes.ProposalProcedure,
+    signingFiles: HwSigningData[],
+    network: Network,
+    signingMode: SigningMode,
+  ): LedgerTypes.ProposalProcedure => ({
+    deposit: `${proposal.deposit}`,
+    // reward accounts are sent by path only for stake signing files, i.e. ordinary staking keys
+    rewardAccount: prepareRewardAccount(
+      signingFiles,
+      proposal.rewardAccount,
+      network,
+    ),
+    govAction: prepareGovAction(
+      proposal.govAction,
+      signingFiles,
+      network,
+      signingMode,
+    ),
+    anchor: prepareAnchor(proposal.anchor) as LedgerTypes.AnchorParams,
+  })
+
   const prepareAdditionalWitnessRequests = (
     hwSigningFileData: HwSigningData[],
   ): BIP32Path[] => {
@@ -1239,6 +1544,15 @@ export const LedgerCryptoProvider: (
     const votingProcedures = tx.body.votingProcedures?.map((vv) =>
       prepareVoterVotes(vv, hwSigningFileData),
     )
+    const proposalProcedures = tx.body.proposalProcedures?.items.map(
+      (proposal) =>
+        prepareProposalProcedure(
+          proposal,
+          hwSigningFileData,
+          network,
+          signingMode,
+        ),
+    )
     const treasury =
       tx.body.treasury !== undefined ? `${tx.body.treasury}` : undefined
     const donation =
@@ -1273,6 +1587,7 @@ export const LedgerCryptoProvider: (
           totalCollateral,
           referenceInputs,
           votingProcedures,
+          proposalProcedures,
           treasury,
           donation,
         },
