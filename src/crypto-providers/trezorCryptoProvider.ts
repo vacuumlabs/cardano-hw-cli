@@ -785,6 +785,10 @@ export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
       throw Error(Errors.TrezorVotingProceduresUnsupported)
     }
 
+    if (tx.body.proposalProcedures !== undefined) {
+      throw Error(Errors.TrezorProposalProceduresUnsupported)
+    }
+
     if (tx.body.treasury !== undefined) {
       throw Error(Errors.TrezorTreasuryUnsupported)
     }

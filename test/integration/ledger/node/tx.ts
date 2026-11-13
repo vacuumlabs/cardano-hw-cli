@@ -1350,6 +1350,90 @@ const transactions = {
     },
   },
 
+  ordinary_ConwayProposalProcedures: {
+    // hand-crafted according to the CDDL: parameter change and treasury withdrawal to an own reward
+    // account, info action with a third-party reward account
+    cborHex:
+      '83a400818258204547c077e8f3a9184438e36503f78b634eb416658c336c2d017d9912a7c493c7000181a20058390113ca2480e9651a5c504b36eda271ec171cdd404cfe349097524a48bd8bee57ce33c7c1f711bc5801986d89dd68078f5922b83812cc86f65f011b0000000253d3ae64021a0002a3891483841b000000174876e800581de11d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c8400f6a400182c0ad81e82031903e814821a00d59f801b00000002540be400181e1b000000174876e800f682782368747470733a2f2f6578616d706c652e636f6d2f70726f706f73616c2d302e6a736f6e58200000000000000000000000000000000000000000000000000000000000000000841b000000174876e800581de1ba41c59ac6e1a0e4ac304af98db801097d0bf8d2a5b28a54752426a18302a1581de11d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c1a000f4240f682782368747470733a2f2f6578616d706c652e636f6d2f70726f706f73616c2d312e6a736f6e58200101010101010101010101010101010101010101010101010101010101010101841b000000174876e800581de1ba41c59ac6e1a0e4ac304af98db801097d0bf8d2a5b28a54752426a1810682782368747470733a2f2f6578616d706c652e636f6d2f70726f706f73616c2d322e6a736f6e58200202020202020202020202020202020202020202020202020202020202020202a0f6',
+    hwSigningFiles: [signingFiles.payment0, signingFiles.stake0],
+    network: 'MAINNET',
+    witnesses: {
+      byronWitnesses: [],
+      shelleyWitnesses: [
+        {
+          key: 0,
+          data: [
+            Buffer.from(
+              'cd2b047d1a803eee059769cffb3dfd0a4b9327e55bc78aa962d9bd4f720db0b2',
+              'hex',
+            ),
+            Buffer.from(
+              'f8f9671b54bd0bd6ac2808d5d40e5d891791ed8fd6e936bb489494cdbd530c9ad8456b559e7e02dedc90c054018473a71f741514bba7a8a0f0166878a8ab990d',
+              'hex',
+            ),
+          ],
+          path: signingFiles.payment0.path,
+        },
+        {
+          key: 0,
+          data: [
+            Buffer.from(
+              '66610efd336e1137c525937b76511fbcf2a0e6bcf0d340a67bcb39bc870d85e8',
+              'hex',
+            ),
+            Buffer.from(
+              'a8d098452e0c0633b2fd1f496aa45187ba7c44af536b2ed2e16ab34d2751c7e13c57881ac292d3c830664ad651b1f7c18a565dcc50a66fbde3717ead1e4f3a0a',
+              'hex',
+            ),
+          ],
+          path: signingFiles.stake0.path,
+        },
+      ],
+    },
+  },
+
+  ordinary_ConwayProposalProceduresUpdateCommittee: {
+    // ordinary_ConwayAuthorizeCommitteeCertificate with an update committee action (own and
+    // third-party members) and a parameter change action with a guardrails script hash
+    cborHex:
+      '84a6008182582096dd368a25fd084f57351cd9486251ba10061362f0d25258efa89c9c85f8c8530001818258390074976c54afaf444f7cd499bd8519aac6592b13b22b9d5817f0da5c5203d205532089ad2f7816892e2ef42849b7b52788e41b3fd43a6e01cf1a00380b4f021a0006af62031a011b610b0481830e8200581ccf737588be6e9edeb737eb2e6d06e5cbd292bd8ee32e410c0bba1ba68200581c5aa349227e4068c85c03400396bcea13c7fd57d0ec78c604bc768fc51482841b000000174876e800581de01d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c8504f6818201581c1d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61ca28200581c5aa349227e4068c85c03400396bcea13c7fd57d0ec78c604bc768fc51901f48200581ccf737588be6e9edeb737eb2e6d06e5cbd292bd8ee32e410c0bba1ba61901f4d81e82020382782368747470733a2f2f6578616d706c652e636f6d2f70726f706f73616c2d302e6a736f6e58200000000000000000000000000000000000000000000000000000000000000000841b000000174876e800581de01d227aefa4b773149170885aadba30aab3127cc611ddbc4999def61c8400f6a100182c581cfa24fb305126805cf2164c161d852a0e7330cf988f1fe558cf7d4a6482782368747470733a2f2f6578616d706c652e636f6d2f70726f706f73616c2d302e6a736f6e58200000000000000000000000000000000000000000000000000000000000000000a0f5f6',
+    hwSigningFiles: [signingFiles.payment0, signingFiles.committeeCold],
+    network: 'TESTNET_LEGACY1',
+    witnesses: {
+      byronWitnesses: [],
+      shelleyWitnesses: [
+        {
+          key: 0,
+          data: [
+            Buffer.from(
+              'bc8c8a37d6ab41339bb073e72ce2e776cefed98d1a6d070ea5fada80dc7d6737',
+              'hex',
+            ),
+            Buffer.from(
+              'a0c3448a4174855c4be2ea130e2bf0deffec9fe500f219a118d5390fc5c7a91d8b25a86e7a81b0c29293b08013b82f67880e707b1f2eaf4339939d130f9b300f',
+              'hex',
+            ),
+          ],
+          path: signingFiles.committeeCold.path,
+        },
+        {
+          key: 0,
+          data: [
+            Buffer.from(
+              'cd2b047d1a803eee059769cffb3dfd0a4b9327e55bc78aa962d9bd4f720db0b2',
+              'hex',
+            ),
+            Buffer.from(
+              'e9570dc29c119c54b2a7bda641f1d4d10fd02cb7c935921d3c9546baa29e4f6014e072425210be3e7ca9824c8df706c37658685124c27075d8e8a72321e91407',
+              'hex',
+            ),
+          ],
+          path: signingFiles.payment0.path,
+        },
+      ],
+    },
+  },
+
   ordinary_ConwayStakeRegistrationCertificate: {
     // from Martin Lang, modified key hashes
     cborHex:
