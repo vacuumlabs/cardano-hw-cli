@@ -481,6 +481,10 @@ export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     cert: TxTypes.PoolRegistrationCertificate,
     stakeSigningFiles: HwSigningData[],
   ): TrezorTypes.CardanoCertificate => {
+    if (cert.poolParams.blsKey !== undefined) {
+      throw Error(Errors.TrezorPoolBlsKeyUnsupported)
+    }
+
     const metadata: TrezorTypes.CardanoPoolMetadata | null = cert.poolParams
       .poolMetadata
       ? {
