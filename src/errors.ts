@@ -68,6 +68,7 @@ export const enum Errors {
   TrezorVotingProceduresUnsupported = 'Trezor does not support voting procedures',
   TrezorTreasuryUnsupported = 'Trezor does not support treasury item in transaction body',
   TrezorDonationUnsupported = 'Trezor does not support donation item in transaction body',
+  TrezorRequiredSignersAsCredentialsUnsupported = 'Trezor does not support guards in the credentials encoding',
   InvalidInputError = 'Invalid input',
   InvalidCollateralInputError = 'Invalid collateral input',
   TxContainsUnfixableErrors = 'Transaction CBOR contains unfixable issues',
