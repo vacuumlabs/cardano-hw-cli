@@ -6,6 +6,7 @@ export enum CardanoEra {
   ALONZO = 'Alonzo',
   BABBAGE = 'Babbage',
   CONWAY = 'Conway',
+  DIJKSTRA = 'Dijkstra',
 }
 
 export type HexString = string & {__type: 'hex'}

@@ -52,6 +52,7 @@ export const cardanoEraToUnwitnessedType: {[key in CardanoEra]: string} = {
   [CardanoEra.ALONZO]: 'Unwitnessed Tx AlonzoEra',
   [CardanoEra.BABBAGE]: 'Unwitnessed Tx BabbageEra',
   [CardanoEra.CONWAY]: 'Unwitnessed Tx ConwayEra',
+  [CardanoEra.DIJKSTRA]: 'Unwitnessed Tx DijkstraEra',
 }
 
 export const cardanoEraToWitnessedType: {[key in CardanoEra]: string} = {
@@ -62,6 +63,7 @@ export const cardanoEraToWitnessedType: {[key in CardanoEra]: string} = {
   [CardanoEra.ALONZO]: 'Witnessed Tx AlonzoEra',
   [CardanoEra.BABBAGE]: 'Witnessed Tx BabbageEra',
   [CardanoEra.CONWAY]: 'Witnessed Tx ConwayEra',
+  [CardanoEra.DIJKSTRA]: 'Witnessed Tx DijkstraEra',
 }
 
 export const cardanoEraToSignedType: {[key in CardanoEra]: string} = {
@@ -72,6 +74,7 @@ export const cardanoEraToSignedType: {[key in CardanoEra]: string} = {
   [CardanoEra.ALONZO]: 'Tx AlonzoEra',
   [CardanoEra.BABBAGE]: 'Tx BabbageEra',
   [CardanoEra.CONWAY]: 'Tx ConwayEra',
+  [CardanoEra.DIJKSTRA]: 'Tx DijkstraEra',
 }
 
 export const txTypeToCardanoEra: {[key: string]: string} = {
@@ -88,6 +91,7 @@ export const cardanoEraToWitnessType: {[key in CardanoEra]: string} = {
   [CardanoEra.ALONZO]: 'TxWitness AlonzoEra',
   [CardanoEra.BABBAGE]: 'TxWitness BabbageEra',
   [CardanoEra.CONWAY]: 'TxWitness ConwayEra',
+  [CardanoEra.DIJKSTRA]: 'TxWitness DijkstraEra',
 }
 
 export const txEnvelopeTypes: string[] = Object.keys(txTypeToCardanoEra)

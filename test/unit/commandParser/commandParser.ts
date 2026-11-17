@@ -208,6 +208,24 @@ describe('Command parser', () => {
     assert.deepStrictEqual(parsedArgs, expectedResult)
   })
 
+  it('Should parse witness transaction in Dijkstra era', () => {
+    const args = pad([
+      'shelley',
+      'transaction',
+      'witness',
+      '--tx-file',
+      prefix('txDijkstra.raw'),
+      '--hw-signing-file',
+      prefix('payment.hwsfile'),
+      '--mainnet',
+      '--out-file',
+      prefix('witness.out'),
+    ])
+    const {parsedArgs} = parse(args)
+    assert.strictEqual(parsedArgs.txFileData.era, CardanoEra.DIJKSTRA)
+    assert.strictEqual(parsedArgs.txFileData.envelopeType, 'Tx DijkstraEra')
+  })
+
   it('Should parse witness transaction with change', () => {
     const args = pad([
       'shelley',
