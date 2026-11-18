@@ -1,4 +1,5 @@
 import fsPath from 'path'
+import {CredentialType, KeyHash, ScriptHash} from 'cardano-hw-interop-lib'
 import {
   HARDENED_THRESHOLD,
   NETWORKS,
@@ -308,6 +309,7 @@ const nativeScriptTypeMap: {[key: string]: NativeScriptType} = {
   after: NativeScriptType.INVALID_BEFORE,
   before: NativeScriptType.INVALID_HEREAFTER,
   sig: NativeScriptType.PUBKEY,
+  guard: NativeScriptType.GUARD,
 }
 
 const parseNativeScriptData = (data: unknown): NativeScript => {
@@ -377,6 +379,46 @@ const parseNativeScriptData = (data: unknown): NativeScript => {
         type,
         slot: BigInt(data.slot),
       }
+    case NativeScriptType.GUARD:
+      if (
+        !('credential' in data) ||
+        !data.credential ||
+        typeof data.credential !== 'object'
+      ) {
+        throw Error(Errors.InvalidNativeScriptFile)
+      }
+      if (
+        'keyHash' in data.credential &&
+        data.credential.keyHash &&
+        typeof data.credential.keyHash === 'string' &&
+        !('scriptHash' in data.credential)
+      ) {
+        return {
+          type,
+          credential: {
+            type: CredentialType.KEY_HASH,
+            keyHash: Buffer.from(data.credential.keyHash, 'hex') as KeyHash,
+          },
+        }
+      }
+      if (
+        'scriptHash' in data.credential &&
+        data.credential.scriptHash &&
+        typeof data.credential.scriptHash === 'string' &&
+        !('keyHash' in data.credential)
+      ) {
+        return {
+          type,
+          credential: {
+            type: CredentialType.SCRIPT_HASH,
+            scriptHash: Buffer.from(
+              data.credential.scriptHash,
+              'hex',
+            ) as ScriptHash,
+          },
+        }
+      }
+      throw Error(Errors.InvalidNativeScriptFile)
     default:
       throw Error(Errors.Unreachable)
   }

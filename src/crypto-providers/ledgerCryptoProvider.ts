@@ -1645,6 +1645,34 @@ export const LedgerCryptoProvider: (
     } as SignedMessageData
   }
 
+  const prepareNativeScriptCredential = (
+    credential: TxTypes.Credential,
+    signingFiles: HwSigningData[],
+  ): LedgerTypes.CredentialParams => {
+    switch (credential.type) {
+      case TxTypes.CredentialType.KEY_HASH: {
+        const path = findSigningPathForKeyHash(credential.keyHash, signingFiles)
+        if (path) {
+          return {
+            type: LedgerTypes.CredentialParamsType.KEY_PATH,
+            keyPath: path,
+          }
+        }
+        return {
+          type: LedgerTypes.CredentialParamsType.KEY_HASH,
+          keyHashHex: credential.keyHash.toString('hex'),
+        }
+      }
+      case TxTypes.CredentialType.SCRIPT_HASH:
+        return {
+          type: LedgerTypes.CredentialParamsType.SCRIPT_HASH,
+          scriptHashHex: credential.scriptHash.toString('hex'),
+        }
+      default:
+        throw Error(Errors.Unreachable)
+    }
+  }
+
   const nativeScriptToLedgerTypes = (
     nativeScript: NativeScript,
     signingFiles: HwSigningData[],
@@ -1710,6 +1738,16 @@ export const LedgerCryptoProvider: (
           type: LedgerTypes.NativeScriptType.INVALID_HEREAFTER,
           params: {
             slot: nativeScript.slot,
+          },
+        }
+      case NativeScriptType.GUARD:
+        return {
+          type: LedgerTypes.NativeScriptType.GUARD,
+          params: {
+            credential: prepareNativeScriptCredential(
+              nativeScript.credential,
+              signingFiles,
+            ),
           },
         }
       default:

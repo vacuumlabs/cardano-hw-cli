@@ -1188,6 +1188,8 @@ export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
           type: TrezorEnums.CardanoNativeScriptType.INVALID_HEREAFTER,
           invalidHereafter: nativeScript.slot.toString(10),
         }
+      case NativeScriptType.GUARD:
+        throw Error(Errors.TrezorGuardNativeScriptUnsupported)
       default:
         throw Error(Errors.Unreachable)
     }
