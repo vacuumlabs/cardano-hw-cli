@@ -810,6 +810,11 @@ export const LedgerCryptoProvider: (
         poolKeyPath,
       ),
       vrfKeyHashHex: cert.poolParams.vrfKeyHash.toString('hex'),
+      blsKey: cert.poolParams.blsKey && {
+        publicKeyHex: cert.poolParams.blsKey.publicKey.toString('hex'),
+        possessionProofHex:
+          cert.poolParams.blsKey.possessionProof.toString('hex'),
+      },
       pledge: `${cert.poolParams.pledge}`,
       cost: `${cert.poolParams.cost}`,
       margin,
