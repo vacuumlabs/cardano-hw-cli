@@ -623,6 +623,33 @@ const transactions = {
     },
   },
 
+  plutus_RequiredSignersAsCredentials: {
+    // 9a43aed0bfd3e308256bc093a4a47d2eb8d491e0c113ac72157c944873052c70
+    cborHex:
+      '83a600d90102818258203b40265111d8bb3c3c608d95b3a0bf83461ace32d79336579a1939b3aad1c0b700018002182a030a0ed90102838200581cfea6646c67fb467f8a5425e9c752e1e262b0420ba4b638f39514049a8200581c14c16d7f43243bd81478e68b9db53a8528fd4fb1078d58d54a7f11248201581c0241f2d196f52a92fbd2183d03b370c30b6960cfdeae364ffabac8890f01a0f6',
+    hwSigningFiles: [signingFiles.payment0],
+    network: 'MAINNET',
+    witnesses: {
+      byronWitnesses: [],
+      shelleyWitnesses: [
+        {
+          key: 0,
+          data: [
+            Buffer.from(
+              'cd2b047d1a803eee059769cffb3dfd0a4b9327e55bc78aa962d9bd4f720db0b2',
+              'hex',
+            ),
+            Buffer.from(
+              '03cfc45f99b6d215ed56365aabe8487144ff0f3e29d5b7d238a400c8be0909b628d70af8de2663eefd53f24290a5e115357986c974972af5ea0111e3eef2f204',
+              'hex',
+            ),
+          ],
+          path: signingFiles.payment0.path,
+        },
+      ],
+    },
+  },
+
   withMetaData: {
     // afcf8497561065afe1ca623823508753cc580eb575ac8f1d6cfaa18c3ceeac01
     cborHex:

@@ -1009,6 +1009,29 @@ export const LedgerCryptoProvider: (
         }
   }
 
+  const prepareRequiredSigners = (
+    requiredSigners: TxTypes.RequiredSigners,
+    signingFiles: HwSigningData[],
+  ): LedgerTypes.RequiredSigner[] => {
+    switch (requiredSigners.format) {
+      case TxTypes.RequiredSignersFormat.KEY_HASHES:
+        return requiredSigners.items.map((requiredSigner) =>
+          prepareRequiredSigner(requiredSigner, signingFiles),
+        )
+      case TxTypes.RequiredSignersFormat.CREDENTIALS:
+        return requiredSigners.items.map((credential) =>
+          credential.type === TxTypes.CredentialType.SCRIPT_HASH
+            ? {
+                type: LedgerTypes.TxRequiredSignerType.SCRIPT_HASH,
+                hashHex: credential.scriptHash.toString('hex'),
+              }
+            : prepareRequiredSigner(credential.keyHash, signingFiles),
+        )
+      default:
+        throw Error(Errors.Unreachable)
+    }
+  }
+
   const prepareVoter = (
     voter: TxTypes.Voter,
     voterPath: BIP32Path | undefined,
@@ -1218,10 +1241,14 @@ export const LedgerCryptoProvider: (
     const collateralInputs = tx.body.collateralInputs?.items.map(
       prepareCollateralInput,
     )
-    const requiredSigners = tx.body.requiredSigners?.items.map(
-      (requiredSigner) =>
-        prepareRequiredSigner(requiredSigner, hwSigningFileData),
-    )
+    const requiredSigners =
+      tx.body.requiredSigners &&
+      prepareRequiredSigners(tx.body.requiredSigners, hwSigningFileData)
+    const requiredSignersFormat =
+      tx.body.requiredSigners?.format ===
+      TxTypes.RequiredSignersFormat.CREDENTIALS
+        ? LedgerTypes.RequiredSignersFormat.CREDENTIALS
+        : LedgerTypes.RequiredSignersFormat.KEY_HASHES
     const includeNetworkId = tx.body.networkId !== undefined
     const collateralOutput = tx.body.collateralReturnOutput
       ? prepareOutput(
@@ -1268,6 +1295,7 @@ export const LedgerCryptoProvider: (
           scriptDataHashHex,
           collateralInputs,
           requiredSigners,
+          requiredSignersFormat,
           includeNetworkId,
           collateralOutput,
           totalCollateral,
@@ -1617,6 +1645,34 @@ export const LedgerCryptoProvider: (
     } as SignedMessageData
   }
 
+  const prepareNativeScriptCredential = (
+    credential: TxTypes.Credential,
+    signingFiles: HwSigningData[],
+  ): LedgerTypes.CredentialParams => {
+    switch (credential.type) {
+      case TxTypes.CredentialType.KEY_HASH: {
+        const path = findSigningPathForKeyHash(credential.keyHash, signingFiles)
+        if (path) {
+          return {
+            type: LedgerTypes.CredentialParamsType.KEY_PATH,
+            keyPath: path,
+          }
+        }
+        return {
+          type: LedgerTypes.CredentialParamsType.KEY_HASH,
+          keyHashHex: credential.keyHash.toString('hex'),
+        }
+      }
+      case TxTypes.CredentialType.SCRIPT_HASH:
+        return {
+          type: LedgerTypes.CredentialParamsType.SCRIPT_HASH,
+          scriptHashHex: credential.scriptHash.toString('hex'),
+        }
+      default:
+        throw Error(Errors.Unreachable)
+    }
+  }
+
   const nativeScriptToLedgerTypes = (
     nativeScript: NativeScript,
     signingFiles: HwSigningData[],
@@ -1682,6 +1738,16 @@ export const LedgerCryptoProvider: (
           type: LedgerTypes.NativeScriptType.INVALID_HEREAFTER,
           params: {
             slot: nativeScript.slot,
+          },
+        }
+      case NativeScriptType.GUARD:
+        return {
+          type: LedgerTypes.NativeScriptType.GUARD,
+          params: {
+            credential: prepareNativeScriptCredential(
+              nativeScript.credential,
+              signingFiles,
+            ),
           },
         }
       default:

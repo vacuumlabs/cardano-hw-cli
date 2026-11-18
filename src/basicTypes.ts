@@ -1,3 +1,5 @@
+import {Credential} from 'cardano-hw-interop-lib'
+
 export enum CardanoEra {
   BYRON = 'Byron',
   SHELLEY = 'Shelley',
@@ -89,6 +91,7 @@ export enum NativeScriptType {
   N_OF_K,
   INVALID_BEFORE,
   INVALID_HEREAFTER,
+  GUARD,
 }
 
 export type NativeScript =
@@ -108,6 +111,10 @@ export type NativeScript =
   | {
       type: NativeScriptType.INVALID_BEFORE | NativeScriptType.INVALID_HEREAFTER
       slot: bigint
+    }
+  | {
+      type: NativeScriptType.GUARD
+      credential: Credential
     }
 
 export type CVoteDelegation = {

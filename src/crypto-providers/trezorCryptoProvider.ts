@@ -636,6 +636,18 @@ export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     return path ? {keyPath: path} : {keyHash: requiredSigner.toString('hex')}
   }
 
+  const prepareRequiredSigners = (
+    requiredSigners: TxTypes.RequiredSigners,
+    signingFiles: HwSigningData[],
+  ): TrezorTypes.CardanoRequiredSigner[] => {
+    if (requiredSigners.format === TxTypes.RequiredSignersFormat.CREDENTIALS) {
+      throw Error(Errors.TrezorRequiredSignersAsCredentialsUnsupported)
+    }
+    return requiredSigners.items.map((requiredSigner) =>
+      prepareRequiredSigner(requiredSigner, signingFiles),
+    )
+  }
+
   const prepareAdditionalWitnessRequests = (
     hwSigningFileData: HwSigningData[],
   ): BIP32Path[] => {
@@ -762,10 +774,9 @@ export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     const collateralInputs = tx.body.collateralInputs?.items.map(
       prepareCollateralInput,
     )
-    const requiredSigners = tx.body.requiredSigners?.items.map(
-      (requiredSigner) =>
-        prepareRequiredSigner(requiredSigner, hwSigningFileData),
-    )
+    const requiredSigners =
+      tx.body.requiredSigners &&
+      prepareRequiredSigners(tx.body.requiredSigners, hwSigningFileData)
     const includeNetworkId = tx.body.networkId !== undefined
     const collateralReturn = tx.body.collateralReturnOutput
       ? prepareOutput(
@@ -1177,6 +1188,8 @@ export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
           type: TrezorEnums.CardanoNativeScriptType.INVALID_HEREAFTER,
           invalidHereafter: nativeScript.slot.toString(10),
         }
+      case NativeScriptType.GUARD:
+        throw Error(Errors.TrezorGuardNativeScriptUnsupported)
       default:
         throw Error(Errors.Unreachable)
     }
