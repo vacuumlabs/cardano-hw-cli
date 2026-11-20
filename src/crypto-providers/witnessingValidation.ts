@@ -190,6 +190,51 @@ const validatePoolOperatorWitnesses = (
   }
 }
 
+// The payer witnesses only the payment/fee-paying part of a pool registration or pool retirement
+// transaction. The device accepts nothing but ordinary payment key witnesses in these modes
+// (_poolPayerWitnessPolicy) and would reject the whole transaction over any other signing file,
+// so we report it here instead.
+const validatePoolPayerWitnesses = (
+  body: TransactionBody,
+  hwSigningFileData: HwSigningData[],
+) => {
+  const {
+    paymentSigningFiles,
+    stakeSigningFiles,
+    dRepSigningFiles,
+    committeeColdSigningFiles,
+    committeeHotSigningFiles,
+    poolColdSigningFiles,
+    mintSigningFiles,
+    multisigSigningFiles,
+  } = filterSigningFiles(hwSigningFileData)
+
+  if (paymentSigningFiles.length === 0) {
+    throw Error(Errors.MissingPaymentSigningFileError)
+  }
+  if (stakeSigningFiles.length > 0) {
+    throw Error(Errors.TooManyStakeSigningFilesError)
+  }
+  if (dRepSigningFiles.length > 0) {
+    throw Error(Errors.TooManyDRepSigningFilesError)
+  }
+  if (committeeColdSigningFiles.length > 0) {
+    throw Error(Errors.TooManyCommitteeColdSigningFilesError)
+  }
+  if (committeeHotSigningFiles.length > 0) {
+    throw Error(Errors.TooManyCommitteeHotSigningFilesError)
+  }
+  if (poolColdSigningFiles.length > 0) {
+    throw Error(Errors.TooManyPoolColdSigningFilesError)
+  }
+  if (mintSigningFiles.length > 0) {
+    throw Error(Errors.TooManyMintSigningFilesError)
+  }
+  if (multisigSigningFiles.length > 0) {
+    throw Error(Errors.TooManyMultisigSigningFilesError)
+  }
+}
+
 const validateMultisigWitnesses = (
   body: TransactionBody,
   hwSigningFileData: HwSigningData[],
@@ -278,6 +323,11 @@ const validateWitnessing = (params: TxSigningParameters): void => {
 
     case SigningMode.POOL_REGISTRATION_AS_OPERATOR:
       validatePoolOperatorWitnesses(body, hwSigningFileData)
+      break
+
+    case SigningMode.POOL_REGISTRATION_AS_PAYER:
+    case SigningMode.POOL_RETIREMENT_AS_PAYER:
+      validatePoolPayerWitnesses(body, hwSigningFileData)
       break
 
     case SigningMode.MULTISIG_TRANSACTION:
