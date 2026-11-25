@@ -104,14 +104,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@cardano-foundation/ledgerjs-hw-app-cardano@vacuumlabs/ledgerjs-cardano-shelley#feature/pool-payer":
-  version: 8.1.0
-  resolution: "@cardano-foundation/ledgerjs-hw-app-cardano@https://github.com/vacuumlabs/ledgerjs-cardano-shelley.git#commit=99243db2858a1e86f8ccc94c90908410c5f7389a"
+"@cardano-foundation/ledgerjs-hw-app-cardano@npm:8.2.0":
+  version: 8.2.0
+  resolution: "@cardano-foundation/ledgerjs-hw-app-cardano@npm:8.2.0"
   dependencies:
     "@ledgerhq/hw-transport": "npm:^6.31.2"
     base-x: "npm:^5.0.1"
     bech32: "npm:^2.0.0"
-  checksum: 10c0/4bc660abe76cee59c9155449ca6ac832a07954e6181d0d0224ee0e5c833faf20bd921e818ab5be9fd97eab155e909ec232bd8b46be3c5cb5c61e7f6d2020508d
+  checksum: 10c0/3e8e07d0ba1247f415aa4b1e34e34a5d892e326f8d774252fcd97af6657ce0d375f1f6988ce0b8a06dd792f429b1a6c19403704d80bd8f20296350fd4a4c75cc
   languageName: node
   linkType: hard
 
@@ -3434,7 +3434,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "cardano-hw-cli@workspace:."
   dependencies:
-    "@cardano-foundation/ledgerjs-hw-app-cardano": "npm:8.0.0-beta"
+    "@cardano-foundation/ledgerjs-hw-app-cardano": "npm:8.2.0"
     "@emurgo/cardano-serialization-lib-nodejs": "npm:^13.1.0"
     "@keystonehq/bc-ur-registry": "npm:0.8.0"
     "@keystonehq/bc-ur-registry-cardano": "npm:^0.5.0"
