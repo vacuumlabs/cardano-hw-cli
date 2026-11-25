@@ -71,6 +71,9 @@ type _TrezorDestination =
       addressParameters: TrezorTypes.CardanoAddressParameters
     }
 
+// Connect 10 throws if init() is called again in the same process
+let trezorConnectInitialized = false
+
 export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
   const supportsUnrestrictedTransaction = (): Promise<boolean> =>
     Promise.resolve(false)
@@ -138,13 +141,16 @@ export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
         })
       }
     })
-
-    // If Trezor Bridge is not running, the previous code doesn't throw an error. We need to make
-    // sure that there is a working connection to a Trezor device e.g. by getting its version.
-    await getVersion()
   }
 
-  await initTrezorConnect()
+  if (!trezorConnectInitialized) {
+    await initTrezorConnect()
+    trezorConnectInitialized = true
+  }
+
+  // If Trezor Bridge is not running, the previous code doesn't throw an error. We need to make
+  // sure that there is a working connection to a Trezor device e.g. by getting its version.
+  await getVersion()
 
   const derivationTypeToTrezorType = (
     derivationType?: DerivationType,
