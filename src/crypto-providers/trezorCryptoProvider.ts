@@ -78,43 +78,47 @@ export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
   const supportsPoolPayerModes = (): Promise<boolean> => Promise.resolve(false)
 
   const getVersion = async (): Promise<string> => {
-    const {payload: features} = await TrezorConnect.getFeatures()
-    const isSuccessful = (value: unknown): value is TrezorTypes.Features =>
-      typeof value === 'object' && value !== null && !('error' in value)
-
-    if (!isSuccessful(features)) throw Error(Errors.TrezorVersionError)
+    const response = await TrezorConnect.getFeatures()
+    if (!response.success) throw Error(Errors.TrezorVersionError)
 
     const {
       major_version: major,
       minor_version: minor,
       patch_version: patch,
-    } = features
+    } = response.payload
     return `Trezor app version ${major}.${minor}.${patch}`
   }
 
   const initTrezorConnect = async (): Promise<void> => {
-    TrezorConnect.manifest({
-      email: 'adalite@vacuumlabs.com',
-      appUrl: 'https://github.com/vacuumlabs/cardano-hw-cli',
-      appName: 'Cardano HW CLI',
+    await TrezorConnect.init({
+      manifest: {
+        email: 'adalite@vacuumlabs.com',
+        appUrl: 'https://github.com/vacuumlabs/cardano-hw-cli',
+        appName: 'Cardano HW CLI',
+      },
+      // replaces the per-call useCardanoDerivation of Connect 9
+      enabledNetworks: [{coin: 'ada'}],
     })
 
-    TrezorConnect.on(TrezorTypes.UI_EVENT, (event) => {
+    // Connect 10 sends the requests that need an answer on the UI_REQUEST channel,
+    // and the answer must carry the requestId of the request
+    TrezorConnect.on(TrezorTypes.UI_REQUEST, (event) => {
       // without this listener, the passphrase, if enabled, would be infinitely awaited
       // to be inserted in the browser, see https://github.com/trezor/connect/issues/714
-      if (event.type === TrezorTypes.UI.REQUEST_PASSPHRASE) {
+      if (event.type === TrezorTypes.UI_REQUESTS.REQUEST_PASSPHRASE) {
         if (
           event.payload.device.features?.capabilities.includes(
             'Capability_PassphraseEntry',
           )
         ) {
           TrezorConnect.uiResponse({
-            type: TrezorTypes.UI.RECEIVE_PASSPHRASE,
+            type: TrezorTypes.UI_RESPONSE.RECEIVE_PASSPHRASE,
             payload: {
               passphraseOnDevice: true,
               save: true,
               value: '',
             },
+            requestId: event.requestId,
           })
         } else {
           throw Error(Errors.TrezorPassphraseNotInsertableOnDevice)
@@ -124,12 +128,13 @@ export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
       // Connect expects an explicit confirmation that no backup was created
       // for cardanoGetPublicKey call
       if (
-        event.type === TrezorTypes.UI.REQUEST_CONFIRMATION &&
+        event.type === TrezorTypes.UI_REQUESTS.REQUEST_CONFIRMATION &&
         event.payload.view === 'no-backup'
       ) {
         TrezorConnect.uiResponse({
-          type: TrezorTypes.UI.RECEIVE_CONFIRMATION,
+          type: TrezorTypes.UI_RESPONSE.RECEIVE_CONFIRMATION,
           payload: true,
+          requestId: event.requestId,
         })
       }
     })
@@ -192,7 +197,7 @@ export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     paths: BIP32Path[],
     derivationType?: DerivationType,
   ): Promise<XPubKeyHex[]> => {
-    const {payload} = await TrezorConnect.cardanoGetPublicKey({
+    const response = await TrezorConnect.cardanoGetPublicKey({
       bundle: paths.map((path) => ({
         path,
         showOnTrezor: true,
@@ -200,15 +205,11 @@ export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
       })),
     })
 
-    const isSuccessful = (
-      value: unknown,
-    ): value is TrezorTypes.CardanoPublicKey[] =>
-      typeof value === 'object' && value !== null && !('error' in value)
-
-    if (!isSuccessful(payload)) {
+    if (!response.success) {
       throw Error(Errors.TrezorXPubKeyCancelled)
     }
-    return payload.map((result) => result.publicKey as XPubKeyHex)
+    // since Connect 10, publicKey is only the 32-byte key; the extended key is in xpub
+    return response.payload.map((result) => result.xpub as XPubKeyHex)
   }
 
   const prepareInput = (
@@ -833,7 +834,7 @@ export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
     const response = await TrezorConnect.cardanoSignTransaction(request)
 
     if (!response.success) {
-      throw Error(response.payload.error)
+      throw Error(response.error.message)
     }
     if (response.payload.hash !== txBodyHashHex) {
       throw Error(Errors.TxSerializationMismatchError)
@@ -968,7 +969,7 @@ export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
       derivationType: derivationTypeToTrezorType(derivationType),
     })
     if (!response.success) {
-      throw Error(response.payload.error)
+      throw Error(response.error.message)
     }
     if (!response.payload.auxiliaryDataSupplement)
       throw Error(Errors.MissingAuxiliaryDataSupplement)
@@ -1105,7 +1106,7 @@ export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
 
     const response = await TrezorConnect.cardanoSignMessage(request)
     if (!response.success) {
-      throw Error(response.payload.error)
+      throw Error(response.error.message)
     }
 
     if (args.address !== undefined) {
@@ -1212,7 +1213,7 @@ export const TrezorCryptoProvider: () => Promise<CryptoProvider> = async () => {
       derivationType: derivationTypeToTrezorType(derivationType),
     })
     if (!response.success) {
-      throw Error(response.payload.error)
+      throw Error(response.error.message)
     }
     return response.payload.scriptHash as NativeScriptHashKeyHex
   }
