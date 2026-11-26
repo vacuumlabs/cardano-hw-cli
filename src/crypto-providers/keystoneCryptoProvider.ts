@@ -74,6 +74,8 @@ export const KeystoneCryptoProvider: (
   const supportsUnrestrictedTransaction = (): Promise<boolean> =>
     Promise.resolve(false)
 
+  const supportsPoolPayerModes = (): Promise<boolean> => Promise.resolve(false)
+
   const getVersion = async (): Promise<string> => {
     try {
       const result = await keystone.getDeviceInfo()
@@ -432,6 +434,7 @@ export const KeystoneCryptoProvider: (
     showAddress,
     getVersion,
     supportsUnrestrictedTransaction,
+    supportsPoolPayerModes,
     witnessTx,
     getXPubKeys,
     signCIP36RegistrationMetaData,

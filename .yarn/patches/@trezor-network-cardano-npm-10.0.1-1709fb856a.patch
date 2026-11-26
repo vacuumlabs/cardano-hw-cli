@@ -1,0 +1,12 @@
+diff --git a/lib/runtime/exports.js b/lib/runtime/exports.js
+index 47c69457373f820e7a129f3a6136da0dc70a9767..00f620991165e01b9236331ad77ff62ce9944b4c 100644
+--- a/lib/runtime/exports.js
++++ b/lib/runtime/exports.js
+@@ -1,5 +1,6 @@
+ import { CoinSelectionError } from "@fivebinaries/coin-selection";
+-import * as cbor from "cbor";
++// Patched: default import, cbor.encode is undefined in Node ESM. Remove when https://github.com/trezor/trezor-suite/issues/35478 is fixed
++import cbor from "cbor";
+ export { trezorUtils, coinSelection } from "@fivebinaries/coin-selection";
+ export const asCoinSelectionError = error => {
+   if (error instanceof CoinSelectionError) {
