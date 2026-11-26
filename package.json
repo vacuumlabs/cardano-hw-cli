@@ -103,7 +103,8 @@
   "resolutions": {
     "serialize-javascript": "^7.0.3",
     "axios": "^1.13.5",
-    "diff": "^8.0.3"
+    "diff": "^8.0.3",
+    "@trezor/network-cardano@npm:10.0.1": "patch:@trezor/network-cardano@npm%3A10.0.1#~/.yarn/patches/@trezor-network-cardano-npm-10.0.1-1709fb856a.patch"
   },
   "packageManager": "yarn@4.13.0+sha512.5c20ba010c99815433e5c8453112165e673f1c7948d8d2b267f4b5e52097538658388ebc9f9580656d9b75c5cc996f990f611f99304a2197d4c56d21eea370e7"
 }

@@ -2533,6 +2533,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@trezor/network-cardano@patch:@trezor/network-cardano@npm%3A10.0.1#~/.yarn/patches/@trezor-network-cardano-npm-10.0.1-1709fb856a.patch":
+  version: 10.0.1
+  resolution: "@trezor/network-cardano@patch:@trezor/network-cardano@npm%3A10.0.1#~/.yarn/patches/@trezor-network-cardano-npm-10.0.1-1709fb856a.patch::version=10.0.1&hash=e876f8"
+  dependencies:
+    "@fivebinaries/coin-selection": "npm:3.0.0"
+    "@trezor/utils": "npm:10.0.1"
+    cbor: "npm:^10.0.12"
+  checksum: 10c0/8ab61af30b045ce8afd9d04569091ab0383f29ab19458160af06d9688dba80dd633e81e68905826aa53a0115bb8b2d1c86e9297d4570d86d5e73d79697114286
+  languageName: node
+  linkType: hard
+
 "@trezor/network-ripple@npm:10.0.1":
   version: 10.0.1
   resolution: "@trezor/network-ripple@npm:10.0.1"
